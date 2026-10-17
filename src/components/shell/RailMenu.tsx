@@ -132,9 +132,15 @@ export function DrawerRow({
           </span>
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-medium text-text-primary">{label}</span>
-            {detail && <span className="block truncate text-sm text-muted-foreground">{detail}</span>}
+            {/* The status sits under the name, not beside it: at 360 px a badge on the right cut
+                names down to a few letters ("Networking Mi…"). */}
+            {(detail || badge) && (
+              <span className="mt-0.5 flex min-w-0 items-center gap-2">
+                {badge && <span data-testid={testId ? `${testId}-status` : undefined} className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${TONE_CLASS[tone]}`}>{badge}</span>}
+                {detail && <span className="min-w-0 truncate text-sm text-muted-foreground">{detail}</span>}
+              </span>
+            )}
           </span>
-          {badge && <span data-testid={testId ? `${testId}-status` : undefined} className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${TONE_CLASS[tone]}`}>{badge}</span>}
           <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
         </Link>
       </DialogPrimitive.Close>
