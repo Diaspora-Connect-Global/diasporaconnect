@@ -13,6 +13,8 @@ import { getActiveNavKey, NAV_SECTIONS, stripLocale, type NavKey } from '@/lib/n
 import { useNotificationStore } from '@/store/useNotificationStore';
 import { AccountMenuPanel } from './AccountMenuPanel';
 import { UnreadCountsProvider } from './UnreadCountsContext';
+import { RailMenuProvider, RailMenuSlot } from '@/components/shell/RailMenu';
+import { DefaultRailMenu } from '@/components/shell/DefaultRailMenu';
 
 const SECTION_ICONS: Record<NavKey, LucideIcon> = {
   home: House,
@@ -90,8 +92,9 @@ function IconLink({
 /**
  * The authenticated app shell: top bar (logo · Home Discover Community More ·
  * search, Messages, Notifications, account) and, below `lg`, a fixed bottom bar
- * with the same four sections. There is no left sidebar and no drawer; what the
- * old sidebar held now lives on the Community and More pages.
+ * with the same four sections. There is no left sidebar; what the old sidebar held
+ * lives on the Community and More pages. Below `lg` a menu button on the left of the bar
+ * opens a drawer: the page's rails where it has them, else the standard menu (shell/RailMenu).
  */
 export default function Header({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -120,6 +123,8 @@ export default function Header({ children }: { children: React.ReactNode }) {
 
   return (
     <UnreadCountsProvider value={counts}>
+      <RailMenuProvider>
+      <DefaultRailMenu />
       <div>
         {/* `h-app-top-down` is also how specs tell the header's own controls
             apart from the page's. The content frame (`lg:max-w-[80vw]`) is the
@@ -127,6 +132,7 @@ export default function Header({ children }: { children: React.ReactNode }) {
         <header className="sticky top-0 z-50 h-app-top-down w-full border-b border-border-subtle bg-surface-default">
           <div className={`mx-auto flex h-full items-stretch gap-2 px-3 sm:px-4 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:px-0 ${wideFrame ? 'lg:max-w-[min(92vw,1400px)]' : 'lg:max-w-[80vw]'}`}>
             <div className="flex min-w-0 items-center">
+              <RailMenuSlot />
               <Link href="/home" prefetch={false} aria-label={t('logoLabel')} className={`rounded-md ${FOCUS_RING}`}>
                 <span className="flex items-center gap-2.5">
                   <Image src="/LOGO.svg" alt="" width={160} height={40} priority className="h-9 w-auto object-contain lg:h-10" />
@@ -178,6 +184,7 @@ export default function Header({ children }: { children: React.ReactNode }) {
           {sections}
         </nav>
       </div>
+      </RailMenuProvider>
     </UnreadCountsProvider>
   );
 }

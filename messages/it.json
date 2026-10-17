@@ -5302,7 +5302,7 @@
     "activity": {
       "title": "La tua attività",
       "event": "Evento a cui sei iscritto",
-      "registered": "Iscritto · {date}",
+      "registered": "Iscritto",
       "request": "Richiesta di servizio",
       "requestSubtitle": "Richiesta {number}",
       "requestStatus": {
@@ -6810,5 +6810,47 @@
       "done": "Sei uscito dall'account.",
       "failed": "Il server non è raggiungibile, ma su questo dispositivo sei uscito dall'account."
     }
+  },
+  "railMenu": {
+    "open": "Apri il menu",
+    "title": "Menu",
+    "close": "Chiudi il menu"
+  },
+  "friendsPage": {
+    "metaTitle": "Amici",
+    "title": "Amici",
+    "subtitle": "Trova persone, rispondi alle richieste e resta in contatto con i tuoi amici.",
+    "tabsLabel": "Sezioni degli amici",
+    "tabs": {
+      "discover": "Scopri",
+      "requests": "Richieste",
+      "sent": "Inviate",
+      "friends": "Amici"
+    },
+    "discoverSearchLabel": "Cerca persone",
+    "discoverSearchPlaceholder": "Cerca persone per nome…",
+    "filterLabel": "Filtra questo elenco",
+    "filterPlaceholder": "Filtra per nome…",
+    "searchButton": "Cerca",
+    "clearSearch": "Cancella la ricerca",
+    "suggestedTitle": "Suggeriti per te",
+    "resultsTitle": "Risultati per “{query}”",
+    "browseAll": "Sfoglia tutte le persone",
+    "loading": "Caricamento…",
+    "loadFailed": "Impossibile caricare questo elenco.",
+    "retry": "Riprova",
+    "loadMore": "Carica altri",
+    "requested": "Richiesta inviata",
+    "mutual": "{count, plural, one {# collegamento in comune} other {# collegamenti in comune}}",
+    "sharedOne": "In {name}",
+    "sharedMore": "In {name} e {count, plural, one {# altra} other {# altre}}",
+    "empty": {
+      "discover": "Nessun suggerimento al momento. Prova a cercare qualcuno per nome.",
+      "requests": "Nessuna richiesta di amicizia in attesa.",
+      "sent": "Non hai richieste in attesa di risposta.",
+      "friends": "Non hai ancora aggiunto amici. Scopri persone per iniziare."
+    },
+    "noMatch": "Nessuno corrisponde a “{query}”.",
+    "verified": "Verificato"
   }
 }

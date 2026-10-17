@@ -1,17 +1,33 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, Fragment, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { ChevronDown, Newspaper } from 'lucide-react';
 import { useRouter } from '@/i18n/navigation';
 import { useFeed } from '@/hooks/useFeed';
 import { usePostEngagementHandlers } from '@/hooks/usePostEngagementHandlers';
 import { FeedPostCard } from '@/components/feed/FeedPostCard';
+import type { Post as ApiPost } from '@/services/gql/types/postsFeed';
+import type { usePostEngagementHandlers as UsePostEngagementHandlers } from '@/hooks/usePostEngagementHandlers';
 import { EmptyState, ErrorState } from '@/components/feedback';
 import { Spinner } from '@/components/ui/spinner';
 import PageLoader from '@/components/custom/PageLoader';
 
-type Tab = 'forYou' | 'latest' | 'following';
+export type FeedTab = 'forYou' | 'latest' | 'following';
+type Tab = FeedTab;
+
+/** What the optional slots get to render from; all of it comes from the ONE feed this component owns. */
+export interface FeedSlotContext {
+  tab: FeedTab;
+  category: string;
+  setTab: (tab: FeedTab) => void;
+  posts: ApiPost[];
+  loading: boolean;
+  error: boolean;
+  isChronoFallback: boolean;
+  handlers: ReturnType<typeof UsePostEngagementHandlers>;
+  removePost: (postId: string) => void;
+}
 const TABS: Tab[] = ['forYou', 'latest', 'following'];
 
 /**
@@ -32,7 +48,21 @@ const CATEGORIES = [
  * The "All posts" filter narrows the feed to one category. A category feed is
  * newest-first, so picking one selects Latest; For you / Following clear it.
  */
-export function CommunityFeed({ scrollRoot }: { scrollRoot: Element | null }) {
+export interface CommunityFeedProps {
+  scrollRoot: Element | null;
+  /** Home only: open media in the page's own modal instead of the post page. */
+  onOpenMedia?: (postId: string, mediaIndex: number) => void;
+  /** Home only: rendered above the list (interests prompt, fallback nudge). */
+  renderTop?: (ctx: FeedSlotContext) => ReactNode;
+  /** Home only: replaces the default empty state when it returns a node (never while a category filter is on). */
+  renderEmpty?: (ctx: FeedSlotContext) => ReactNode;
+  /** Home only: a node spliced into the list before the post at `index`. */
+  inlineItem?: { index: number; node: ReactNode };
+  /** Home only: overlays that need the feed's posts (the media modal). */
+  renderOverlay?: (ctx: FeedSlotContext) => ReactNode;
+}
+
+export function CommunityFeed({ scrollRoot, onOpenMedia, renderTop, renderEmpty, inlineItem, renderOverlay }: CommunityFeedProps) {
   const t = useTranslations('communityPage');
   const tCategory = useTranslations('categoryBadge');
   const tFeedback = useTranslations('feedback');
@@ -57,7 +87,18 @@ export function CommunityFeed({ scrollRoot }: { scrollRoot: Element | null }) {
   const { posts, loading, loadingMore, error, refetch, hasMore, loadMore, updatePostCounts, removePost } = feed;
   const handlers = usePostEngagementHandlers(updatePostCounts);
   const sentinel = useRef<HTMLDivElement | null>(null);
-  const handleOpenMedia = useCallback((postId: string) => router.push(`/post/${encodeURIComponent(postId)}`), [router]);
+  const handleOpenMedia = useCallback(
+    (postId: string, mediaIndex: number) => {
+      if (onOpenMedia) onOpenMedia(postId, mediaIndex);
+      else router.push(`/post/${encodeURIComponent(postId)}`);
+    },
+    [router, onOpenMedia],
+  );
+  const slotCtx: FeedSlotContext = {
+    tab, category, setTab, posts, loading, error: !!error,
+    isChronoFallback: feed.feedMeta?.isChronoFallback === true,
+    handlers, removePost,
+  };
 
   useEffect(() => {
     const el = sentinel.current;
@@ -118,13 +159,15 @@ export function CommunityFeed({ scrollRoot }: { scrollRoot: Element | null }) {
       </div>
       <div role="tabpanel" className="space-y-2">
         {loading && posts.length === 0 && !error && <PageLoader />}
+        {!loading && !error && renderTop?.(slotCtx)}
         {error && <ErrorState title={tFeedback('error.title')} description={t('feed.error')} retryLabel={t('feed.retry')} onRetry={() => refetch()} />}
-        {!loading && !error && posts.length === 0 && (
+        {!loading && !error && posts.length === 0 && ((!category && renderEmpty?.(slotCtx)) || (
           <EmptyState icon={Newspaper} title={category ? t('filter.empty', { category: tCategory(category) }) : t('feed.empty')} />
-        )}
+        ))}
         {posts.map((post, i) => (
+          <Fragment key={post.id}>
+          {inlineItem && inlineItem.index === i && inlineItem.node}
           <FeedPostCard
-            key={post.id}
             post={post}
             index={i}
             surface={tab === 'forYou' ? 'home_feed' : 'community_feed'}
@@ -135,6 +178,7 @@ export function CommunityFeed({ scrollRoot }: { scrollRoot: Element | null }) {
             removePost={removePost}
             handleOpenMedia={handleOpenMedia}
           />
+          </Fragment>
         ))}
         {loadingMore && (
           <div className="flex justify-center py-4">
@@ -143,6 +187,7 @@ export function CommunityFeed({ scrollRoot }: { scrollRoot: Element | null }) {
         )}
         <div ref={sentinel} className="h-px w-full" />
       </div>
+      {renderOverlay?.(slotCtx)}
     </section>
   );
 }

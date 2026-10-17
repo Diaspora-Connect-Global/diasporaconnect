@@ -45,7 +45,7 @@ test('the hero always renders with real height, and falls back to the bare greet
 test('"Your activity" is built from real data and hidden when there is none', async () => {
     const empty = await open(browser, '/home');
     await expect(empty.page.locator('#home-hero-title')).toBeVisible({ timeout: 90_000 });
-    await expect(empty.page.getByTestId('home-activity')).toHaveCount(0);
+    await expect(empty.page.getByTestId(/^home-activity-/)).toHaveCount(0);
     await empty.page.context().close();
 
     const { page } = await open(browser, '/home', {
@@ -53,15 +53,27 @@ test('"Your activity" is built from real data and hidden when there is none', as
         MyServiceRequests: { myServiceRequests: [{ __typename: 'ServiceRequest', id: 'sr-1', requestNumber: 'DP-2026-0042', requestTypeId: 't', category: 'Passport', status: 'UNDER_REVIEW', ownerType: 'COMMUNITY', ownerEntityId: 'c1', submittedAt: '2026-10-01T00:00:00Z', updatedAt: '2026-10-02T00:00:00Z' }] },
         GetMyKYCStatus: { getMyKYCStatus: { __typename: 'KYCStatus', status: 'UNDER_REVIEW', kycLevel: 0, profileId: null } },
     });
-    const activity = page.getByTestId('home-activity');
+    // A plain list in the RIGHT rail (desktop viewport), one row per item.
+    const activity = page.getByTestId('home-activity-desktop');
     await expect(activity).toBeVisible({ timeout: 90_000 });
-    await expect(page.getByTestId('activity-event')).toContainText('Networking Mixer');
-    await expect(page.getByTestId('activity-request')).toContainText('Under review');
-    await expect(page.getByTestId('activity-request')).toContainText('DP-2026-0042');
-    await expect(page.getByTestId('activity-kyc')).toContainText('Under review');
-    // At most three cards, and no invented progress percentage.
-    expect(await activity.getByRole('listitem').count()).toBeLessThanOrEqual(3);
+    await expect(page.getByTestId('home-rail-desktop').getByTestId('home-activity-desktop')).toHaveCount(1);
+    await expect(page.getByTestId('home-activity-mobile')).toHaveCount(0);
+    await expect(activity.getByRole('heading', { name: 'Your activity' })).toBeVisible();
+    const rows = activity.getByRole('listitem');
+    expect(await rows.count()).toBeLessThanOrEqual(3);
+    // Each row: a human name + a status in words.
+    await expect(activity.getByTestId('activity-event')).toContainText('Networking Mixer');
+    await expect(activity.getByTestId('activity-event-status')).toHaveText('Registered');
+    await expect(activity.getByTestId('activity-request')).toContainText('Passport');
+    await expect(activity.getByTestId('activity-request-status')).toHaveText('Under review');
+    await expect(activity.getByTestId('activity-kyc')).toContainText('Identity verification');
+    await expect(activity.getByTestId('activity-kyc-status')).toHaveText('Under review');
+    // Never the request number or an id on its own.
+    await expect(activity).not.toContainText('DP-2026-0042');
+    expect(await activity.innerText()).not.toMatch(UUID);
     await expect(activity).not.toContainText('%');
+    // And it is no longer in the main column.
+    await expect(page.locator('#home-activity-title')).toHaveCount(0);
     await page.context().close();
 });
 
@@ -123,6 +135,20 @@ test('the full feed is still below, with Happy / Hopeful / Sad reactions on its 
     // The reaction control keeps its design: no "Like" button anywhere on the cards.
     await expect(page.locator('[id^="feed-post-"]').getByRole('button', { name: /^Like$/ })).toHaveCount(0);
     await expect(page.locator('[id^="feed-post-"]').first().getByTestId('reaction-button').first()).toBeVisible();
+    await page.context().close();
+});
+
+test('"Your feed" is the Community feed: For you / Latest / Following tabs, the category filter, and no Discover-communities block', async () => {
+    const { page } = await open(browser, '/home');
+    const feed = page.getByTestId('community-feed');
+    await expect(feed).toBeVisible({ timeout: 90_000 });
+    expect((await feed.getByRole('tab').allTextContents()).map((s) => s.trim())).toEqual(['For you', 'Latest', 'Following']);
+    await expect(feed.getByRole('tab', { name: 'For you' })).toHaveAttribute('aria-selected', 'true');
+    await expect(feed.getByTestId('community-feed-filter')).toBeVisible();
+    await expect(page.locator('[id^="feed-post-"]')).toHaveCount(3);
+    await expect(page.getByText('Discover communities', { exact: true })).toHaveCount(0);
+    await feed.getByRole('tab', { name: 'Following' }).click();
+    await expect(feed.getByRole('tab', { name: 'Following' })).toHaveAttribute('aria-selected', 'true');
     await page.context().close();
 });
 

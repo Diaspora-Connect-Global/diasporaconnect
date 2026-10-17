@@ -68,7 +68,7 @@ export const MORE_SHEETS: Readonly<Record<MoreSheetKey, readonly { key: string; 
     // Pending association requests have their own section on the associations page.
     { key: 'associations', href: '/association' },
     // The "Requests received" tab of the connections list (a modal on the profile page).
-    { key: 'connections', href: '/profile?m=friends&t=3' },
+    { key: 'connections', href: '/friends?tab=requests' },
   ],
   saved: [
     { key: 'posts', href: '/profile?posts=saved' },

@@ -5302,7 +5302,7 @@
     "activity": {
       "title": "Jouw activiteit",
       "event": "Evenement waarvoor je bent aangemeld",
-      "registered": "Aangemeld · {date}",
+      "registered": "Aangemeld",
       "request": "Serviceaanvraag",
       "requestSubtitle": "Aanvraag {number}",
       "requestStatus": {
@@ -6810,5 +6810,47 @@
       "done": "Je bent uitgelogd.",
       "failed": "De server was niet bereikbaar, maar je bent op dit apparaat uitgelogd."
     }
+  },
+  "railMenu": {
+    "open": "Menu openen",
+    "title": "Menu",
+    "close": "Menu sluiten"
+  },
+  "friendsPage": {
+    "metaTitle": "Vrienden",
+    "title": "Vrienden",
+    "subtitle": "Vind mensen, beantwoord verzoeken en blijf in contact met je vrienden.",
+    "tabsLabel": "Onderdelen van je vrienden",
+    "tabs": {
+      "discover": "Ontdekken",
+      "requests": "Verzoeken",
+      "sent": "Verzonden",
+      "friends": "Vrienden"
+    },
+    "discoverSearchLabel": "Zoek mensen",
+    "discoverSearchPlaceholder": "Zoek mensen op naam…",
+    "filterLabel": "Filter deze lijst",
+    "filterPlaceholder": "Filter op naam…",
+    "searchButton": "Zoeken",
+    "clearSearch": "Zoekopdracht wissen",
+    "suggestedTitle": "Voorgesteld voor jou",
+    "resultsTitle": "Resultaten voor ‘{query}’",
+    "browseAll": "Bekijk alle mensen",
+    "loading": "Laden…",
+    "loadFailed": "Deze lijst kon niet worden geladen.",
+    "retry": "Opnieuw proberen",
+    "loadMore": "Meer laden",
+    "requested": "Aangevraagd",
+    "mutual": "{count, plural, one {# gezamenlijke connectie} other {# gezamenlijke connecties}}",
+    "sharedOne": "In {name}",
+    "sharedMore": "In {name} en {count, plural, one {# andere} other {# andere}}",
+    "empty": {
+      "discover": "Op dit moment geen suggesties. Zoek iemand op naam.",
+      "requests": "Geen vriendschapsverzoeken die op je wachten.",
+      "sent": "Je hebt geen verzoeken die op een antwoord wachten.",
+      "friends": "Je hebt nog geen vrienden toegevoegd. Ontdek mensen om te beginnen."
+    },
+    "noMatch": "Niemand gevonden voor ‘{query}’.",
+    "verified": "Geverifieerd"
   }
 }

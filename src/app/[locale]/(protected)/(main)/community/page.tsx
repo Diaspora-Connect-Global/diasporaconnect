@@ -30,6 +30,7 @@ import { REDESIGN_IMAGES } from '@/lib/redesignImages';
 import { CommunityLeftNav, CommunityPromo } from '@/components/community/redesign/CommunityLeftNav';
 import { FeaturedGroups } from '@/components/community/redesign/FeaturedGroups';
 import { CommunityComposer } from '@/components/community/redesign/CommunityComposer';
+import { CommunityRailMenu } from '@/components/community/redesign/CommunityRailMenu';
 import { CommunityFeed } from '@/components/community/redesign/CommunityFeed';
 import { CommunityRail } from '@/components/community/redesign/CommunityRail';
 import { CommunitiesToJoin } from '@/components/community/redesign/CommunitiesToJoin';
@@ -526,9 +527,10 @@ export default function Community() {
                 </form>
             </PageHero>
 
-            {/* Phones: one column (nav, your communities, then the content, then the rail). Large screens: three columns. */}
+            <CommunityRailMenu communities={myJoinedCommunities} pendingRequests={pendingCommunityRequests} associations={joinedAssociations} />
+            {/* Phones: the content only (both rails live in the header's menu drawer). Large screens: three columns. */}
             <div className="grid gap-5 lg:grid-cols-[16rem_minmax(0,1fr)_20rem] xl:grid-cols-[17rem_minmax(0,1fr)_21rem]">
-              <div className="min-w-0 space-y-4 lg:self-start">
+              <div className="hidden min-w-0 space-y-4 lg:block lg:self-start">
                 <CommunityLeftNav />
                 <YourCommunitiesColumn
                     communities={myJoinedCommunities}
@@ -546,7 +548,7 @@ export default function Community() {
                 <CommunityFeed scrollRoot={scrollEl} />
               </div>
 
-              <div className="min-w-0 lg:self-start">
+              <div className="hidden min-w-0 lg:block lg:self-start">
                 <CommunityRail
                   communities={
                     <CommunitiesToJoin

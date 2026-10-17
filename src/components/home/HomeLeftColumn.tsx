@@ -47,21 +47,26 @@ function Members({ count, label }: { count?: number | null; label: string }) {
   return typeof count === 'number' ? <span className="block truncate text-xs text-muted-foreground">{label}</span> : null;
 }
 
-function CommunitiesCard() {
-  const t = useTranslations('homeLeft');
-  const tGroups = useTranslations('communityPage.groups');
+/** The viewer's joined communities and associations (pending requests excluded), for the column and the phone drawer. */
+export function useMyCommunityRows(): Joined[] {
   const userId = useUserStore((s) => s.user?.userId);
   const { data: communitiesData } = useQuery<{ listUserCommunities?: { id: string; name: string; avatarUrl?: string | null }[] | null }>(LIST_MY_JOINED_COMMUNITIES, { fetchPolicy: 'cache-and-network', ...SILENT });
   const { data: associationsData } = useQuery<{ getUserAssociations?: { id: string; name: string; avatarUrl?: string | null; memberCount?: number | null }[] | null }>(GET_USER_ASSOCIATIONS, { variables: { userId: userId! }, skip: !userId, fetchPolicy: 'cache-and-network', ...SILENT });
   const { data: pendingData } = useQuery<MyPendingRequestsData>(GET_MY_PENDING_REQUESTS, { fetchPolicy: 'cache-and-network', ...SILENT });
 
-  const rows = useMemo<Joined[]>(() => {
+  return useMemo<Joined[]>(() => {
     // A request that is still pending is not a membership.
     const pending = new Set((pendingData?.getMyPendingRequests ?? []).map((r) => r.entityId));
     const communities = (communitiesData?.listUserCommunities ?? []).filter((c) => c && c.id && c.name && !pending.has(c.id)).map((c) => ({ id: c.id, name: c.name, avatarUrl: c.avatarUrl, href: `/community/${encodeURIComponent(c.id)}` }));
     const associations = (associationsData?.getUserAssociations ?? []).filter((a) => a && a.id && a.name && !pending.has(a.id)).map((a) => ({ id: a.id, name: a.name, avatarUrl: a.avatarUrl, memberCount: a.memberCount, href: `/association/${encodeURIComponent(a.id)}` }));
     return [...communities, ...associations].slice(0, SHOWN_COMMUNITIES);
   }, [communitiesData, associationsData, pendingData]);
+}
+
+function CommunitiesCard() {
+  const t = useTranslations('homeLeft');
+  const tGroups = useTranslations('communityPage.groups');
+  const rows = useMyCommunityRows();
 
   return (
     <section aria-labelledby="home-left-communities" data-testid="home-left-communities" className={cardCls}>

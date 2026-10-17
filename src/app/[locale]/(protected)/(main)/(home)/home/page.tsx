@@ -2,17 +2,16 @@
 
 import CommunityCardVariant2 from '@/components/cards/community/CommunityCardVariant2';
 import { formatDateProximity } from '@/macros/time';
-import { FeedPostCard } from '@/components/feed/FeedPostCard';
+import { CommunityFeed, type FeedSlotContext } from '@/components/community/redesign/CommunityFeed';
+import { HomeFeedTop, HomeFeedEmpty } from '@/components/home/HomeFeedExtras';
 import { getProfileData } from '@/components/feed/feedPostHelpers';
-import { usePostEngagementHandlers } from '@/hooks/usePostEngagementHandlers';
 import PageLoader from '@/components/custom/PageLoader';
-import { Spinner } from '@/components/ui/spinner';
 import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMediaModal';
 import { HomeHero } from '@/components/home/HomeHero';
-import { YourActivity } from '@/components/home/YourActivity';
 import { LatestListings } from '@/components/home/LatestListings';
 import { CommunityPosts } from '@/components/home/HomeCommunityPosts';
 import { HomeRail } from '@/components/home/HomeRail';
+import { HomeRailMenu } from '@/components/home/HomeRailMenu';
 import { HomeLeftColumn } from '@/components/home/HomeLeftColumn';
 import { GET_MY_PROFILE, type GetProfileResponse } from '@/services/gql/profile';
 import { Link } from '@/i18n/navigation';
@@ -25,31 +24,22 @@ import {
 import {
   RECOMMENDED_COMMUNITIES,
   RECOMMENDED_ASSOCIATIONS,
-  MY_INTEREST_PROFILE,
 } from '@/services/gql/postsFeed';
 import type {
   RecommendedCommunitiesData,
   RecommendedAssociationsData,
-  MyInterestProfileData,
 } from '@/services/gql/types/recommendation';
-import {
-  InterestsPromptCard,
-  INTERESTS_PROMPT_DISMISSED_KEY,
-} from '@/components/home/InterestsPromptCard';
 import { GET_MY_PENDING_REQUESTS, type MyPendingRequestsData } from '@/services/gql/requests';
 import { useApolloClient } from '@apollo/client/react';
-import type { FeedViewMode, Post as ApiPost } from '@/services/gql/types/postsFeed';
-import { useFeed } from '@/hooks/useFeed';
+import type { Post as ApiPost } from '@/services/gql/types/postsFeed';
 import { useQuery, useMutation } from '@apollo/client/react';
-import { ChevronLeftIcon, ChevronRightIcon, Compass, Users, SquarePen } from 'lucide-react';
-import { EmptyState, ErrorState } from '@/components/feedback';
+import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { ButtonType3 } from '@/components/custom/button';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import PrivacyPolicyModal from '@/components/custom/PrivacyPolicyModal';
-import ViewFilter from '@/components/home/viewFilter';
 import { buildMentionMap } from '@/components/custom/richTextRenderer';
 import AccessBadges from '@/components/cards/AccessBadges';
 import { MembershipPaymentModal } from '@/components/memberships/MembershipPaymentModal';
@@ -158,14 +148,7 @@ interface Post {
   };
 }
 
-// Discriminated union the feed's Virtuoso instance iterates. Posts and the
-// recommended-associations rail are virtualised side-by-side so a single
-// scroll viewport drives both — `computeItemKey` and `itemContent` branch on
-// `kind` to keep React happy across re-orders.
-type FeedItem =
-  | { kind: 'post'; post: ApiPost }
-  | { kind: 'associationsRail' };
-
+// Position (posts above it) of the recommended-associations rail in the feed.
 const ASSOCIATIONS_RAIL_INDEX = 3;
 
 /**
@@ -192,14 +175,11 @@ function readCachedCards<T extends { id: string }>(
 
 export default function Home() {
   const t = useTranslations('community');
-  const tFeedback = useTranslations('feedback');
   const tCommon = useTranslations('common');
   const tJoinModal = useTranslations('home.joinModal');
-  const tHome = useTranslations('home');
   const tHomePage = useTranslations('homePage');
   const tActions = useTranslations('actions');
-  const [viewMode, setViewMode] = useState<FeedViewMode>('you');
-  // Already in the cache: the shell's boot gate loaded the profile before this page mounted.
+    // Already in the cache: the shell's boot gate loaded the profile before this page mounted.
   const { data: profileData } = useQuery<GetProfileResponse>(GET_MY_PROFILE, { fetchPolicy: 'cache-first' });
   const profile = profileData?.getProfile?.profile ?? null;
   // Track the open media modal by postId rather than postIndex so the
@@ -245,24 +225,6 @@ export default function Home() {
       variables: { limit: 20 },
       fetchPolicy: 'cache-and-network',
     });
-
-  // Feed with infinite scroll. The rail hydration below runs IN PARALLEL with
-  // it (no longer deferred behind `feedLoading`): the page shows one
-  // <PageLoader /> until feed + rails are all ready, so serialising them would
-  // only lengthen that wait.
-  const {
-    posts,
-    loading: feedLoading,
-    error: feedError,
-    refetch: refetchFeed,
-    loadingMore: feedLoadingMore,
-    feedContainerRef,
-    loadMore: feedLoadMore,
-    hasMore: feedHasMore,
-    feedMeta,
-    updatePostCounts,
-    removePost,
-  } = useFeed({ mode: viewMode });
 
   // Hydrate communities by id, preserving the recommender's order.
   useEffect(() => {
@@ -421,14 +383,6 @@ export default function Home() {
     [requestedEntities],
   );
 
-  const visibleCommunities = useMemo(
-    () =>
-      communities.filter(
-        (c) => !isPendingEntity(c.id, c.membershipStatus, pendingCommunityIds),
-      ),
-    [communities, pendingCommunityIds, isPendingEntity],
-  );
-
   const visibleAssociations = useMemo(
     () =>
       associations.filter(
@@ -443,114 +397,14 @@ export default function Home() {
     void refetchAssociationsRanked();
   }, [refetchCommunitiesRanked, refetchAssociationsRanked]);
 
-  // Scroll container element captured via callback ref so Virtuoso can
-  // virtualize against it instead of the window. The same node is exposed
-  // through `feedContainerRef` for backwards compatibility (some legacy
-  // code paths may still rely on it).
+  // The page's scroll column; it drives the shared feed's infinite scroll.
   const [feedScrollEl, setFeedScrollEl] = useState<HTMLDivElement | null>(null);
-  // Sentinel node at the end of the plain feed list; the IntersectionObserver
-  // effect (declared after `feedItems`) pages in more posts when it nears view.
-  const loadMoreRef = useRef<HTMLDivElement | null>(null);
-  const setFeedScrollRef = useCallback(
-    (el: HTMLDivElement | null) => {
-      setFeedScrollEl(el);
-      if (feedContainerRef) {
-        (feedContainerRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
-      }
-    },
-    [feedContainerRef],
-  );
-
-  // Virtuoso fires `endReached` near the bottom; gate the call behind the
-  // same `hasMore` + already-loading checks the old scroll-listener used.
-  const handleEndReached = useCallback(() => {
-    if (feedHasMore && !feedLoadingMore && !feedLoading) {
-      feedLoadMore();
-    }
-  }, [feedHasMore, feedLoadingMore, feedLoading, feedLoadMore]);
-
-  // Minimum skeleton hold (W4): a very fast next-page fetch flips
-  // `feedLoadingMore` true→false within a frame or two, which makes the Footer
-  // skeleton flash. Keep `showLoadingFooter` true for a short tail after the
-  // load completes so the skeleton is visible long enough to read as a smooth
-  // hand-off rather than a flicker.
-  const [showLoadingFooter, setShowLoadingFooter] = useState(false);
-  useEffect(() => {
-    if (feedLoadingMore) {
-      setShowLoadingFooter(true);
-      return;
-    }
-    const id = setTimeout(() => setShowLoadingFooter(false), 250);
-    return () => clearTimeout(id);
-  }, [feedLoadingMore]);
-
-  // ─── Cold-start interests prompt (C4) ──────────────────────────────────────
-  // Gate the "Set your interests" card on:
-  //   1. myInterestProfile.coldStart === true (recommender has no warm signal)
-  //   2. a thin feed (few/no personalised posts — including the chrono fallback)
-  //   3. the user hasn't dismissed/completed it before (localStorage)
-  // The card is only ever rendered at the top of the "You" feed.
-  const { data: interestProfileData, loading: interestProfileLoading } = useQuery<MyInterestProfileData>(
-    MY_INTEREST_PROFILE,
-    {
-      fetchPolicy: 'cache-and-network',
-      // Only relevant for the personalised arm.
-      skip: viewMode !== 'you',
-    },
-  );
-
-  const [interestsPromptDismissed, setInterestsPromptDismissed] = useState(true);
-  useEffect(() => {
-    try {
-      setInterestsPromptDismissed(
-        localStorage.getItem(INTERESTS_PROMPT_DISMISSED_KEY) === '1',
-      );
-    } catch {
-      // localStorage unavailable — default to dismissed (never nag).
-      setInterestsPromptDismissed(true);
-    }
-  }, []);
-
-  const isColdStart = interestProfileData?.myInterestProfile?.coldStart === true;
-  // "Thin" feed: the recommender returned a sparse/fallback feed. The
-  // chronological fallback flag (set by useFeed) is the strongest signal; we
-  // also treat a small post count as thin so a near-empty personalised feed
-  // still gets the nudge.
-  const THIN_FEED_THRESHOLD = 5;
-  const isThinFeed =
-    feedMeta.isChronoFallback === true || posts.length < THIN_FEED_THRESHOLD;
-  const showInterestsPrompt =
-    viewMode === 'you' &&
-    isColdStart &&
-    isThinFeed &&
-    !interestsPromptDismissed;
-
-  useEffect(() => {
-    const savedView = sessionStorage.getItem('viewFilter');
-    if (savedView === 'you' || savedView === 'following') {
-      setViewMode(savedView);
-    }
-
-    const handleViewFilterChange = (event: Event) => {
-      const customEvent = event as CustomEvent<FeedViewMode>;
-      if (customEvent.detail === 'you' || customEvent.detail === 'following') {
-        setViewMode(customEvent.detail);
-      }
-    };
-
-    window.addEventListener('viewFilterChange', handleViewFilterChange as EventListener);
-    return () => {
-      window.removeEventListener('viewFilterChange', handleViewFilterChange as EventListener);
-    };
-  }, []);
 
   // Mutations
   // Engagement signals are recorded via the post-feed Kafka pipeline (LIKE /
   // UNLIKE / SAVE / UNSAVE / SHARE / COMMENT). VIEW + DWELL still go through
   // the direct recordInteraction gRPC path via <ImpressionTracker>, which
   // owns its own hook instance — so this page no longer needs one directly.
-  const isRecommendedArm = viewMode === 'you';
-
   const [requestJoinCommunity, { loading: joinCommunityLoading }] = useMutation<{requestMembership: {status: string, message: string}}>(REQUEST_JOIN_COMMUNITY, {
     refetchQueries: [{ query: LIST_MY_JOINED_COMMUNITIES }, { query: GET_MY_PENDING_REQUESTS }],
     awaitRefetchQueries: false,
@@ -759,17 +613,8 @@ export default function Home() {
   // ImpressionTracker (VIEW + DWELL) and by future CLICK_THROUGH wiring —
   // those signals don't have a post-feed source.
 
-  const { handleReact, handleSave, handleShare, handleSendComment } = usePostEngagementHandlers(updatePostCounts);
-
-  // --- Horizontal Scroll with Smart Buttons ---
-  // One ref-set per rail (communities + associations) so each rail has
-  // its own scroll state. Same shape as before for the communities rail;
-  // the second triplet drives the associations rail's chevron buttons.
+  // Scroll state of the recommended-associations rail's chevron buttons.
   const SCROLL_STEP = 300;
-
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
 
   // Callback-ref pattern — the associations rail lives inside Virtuoso's
   // itemContent, so it can unmount/remount as the user scrolls vertically.
@@ -781,14 +626,6 @@ export default function Home() {
   const [associationsScrollEl, setAssociationsScrollEl] = useState<HTMLDivElement | null>(null);
   const [assocCanScrollLeft, setAssocCanScrollLeft] = useState(false);
   const [assocCanScrollRight, setAssocCanScrollRight] = useState(true);
-
-  const scrollLeft = () => {
-    scrollRef.current?.scrollBy({ left: -SCROLL_STEP, behavior: 'smooth' });
-  };
-
-  const scrollRight = () => {
-    scrollRef.current?.scrollBy({ left: SCROLL_STEP, behavior: 'smooth' });
-  };
 
   const scrollAssocLeft = () => {
     associationsScrollEl?.scrollBy({ left: -SCROLL_STEP, behavior: 'smooth' });
@@ -822,16 +659,6 @@ export default function Home() {
     };
   };
 
-  useEffect(() => {
-    const cleanupCommunities = wireScrollListeners(
-      scrollRef.current,
-      setCanScrollLeft,
-      setCanScrollRight,
-    );
-    return cleanupCommunities;
-    // pageShown: the rail's DOM node only exists once the page gate opens.
-  }, [visibleCommunities, pageShown]);
-
   // Separate effect for the associations rail — keyed on the actual DOM
   // node so Virtuoso remount → callback ref runs → state changes → effect
   // re-fires → listener attaches to the new node. The communities rail
@@ -845,39 +672,7 @@ export default function Home() {
     return cleanupAssociations;
   }, [associationsScrollEl, visibleAssociations]);
 
-  const hasCommunities = visibleCommunities.length > 0;
   const hasAssociations = visibleAssociations.length > 0;
-
-  const hasPosts = posts.length > 0;
-
-  // Splice the associations rail into the virtualised feed at a fixed depth so
-  // recs surface mid-scroll without dominating the column. Only injected when
-  // the recommender actually returned associations — no skeleton-only row on
-  // a brand-new account where the rail would just be empty noise.
-  const feedItems = useMemo<FeedItem[]>(() => {
-    const items: FeedItem[] = posts.map((post) => ({ kind: 'post', post }));
-    if (hasAssociations && items.length > 0) {
-      const insertAt = Math.min(ASSOCIATIONS_RAIL_INDEX, items.length);
-      items.splice(insertAt, 0, { kind: 'associationsRail' });
-    }
-    return items;
-  }, [posts, hasAssociations]);
-
-  // Infinite scroll for the plain (non-virtualized) feed: when the end sentinel
-  // approaches the scroll container's viewport, page in the next batch. Replaces
-  // Virtuoso's endReached/rangeChanged. No virtualization or size measurement.
-  useEffect(() => {
-    const el = loadMoreRef.current;
-    if (!el || !hasPosts) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) handleEndReached();
-      },
-      { root: feedScrollEl ?? null, rootMargin: '800px 0px' },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, [hasPosts, feedScrollEl, handleEndReached, feedItems.length]);
 
   // Helper function to get profile data based on author type
   // Updated to handle uppercase author types from API
@@ -893,24 +688,6 @@ export default function Home() {
   ];
 
   const getPostMentionMap = (post: ApiPost) => buildMentionMap(post.mentions ?? []);
-
-  const handleNavigatePost = (dir: 'next' | 'prev') => {
-    if (modalState === null) return;
-    const currentIndex = posts.findIndex((p) => p.id === modalState.postId);
-    if (currentIndex < 0) return;
-    let i = dir === 'next' ? currentIndex + 1 : currentIndex - 1;
-    while (i >= 0 && i < posts.length) {
-      const next = posts[i];
-      if (next && getPostMedia(next).length > 0) {
-        setModalState({ postId: next.id, mediaIndex: 0 });
-        return;
-      }
-      i = dir === 'next' ? i + 1 : i - 1;
-    }
-  };
-
-  const modalPost = modalState !== null ? posts.find((p) => p.id === modalState.postId) ?? null : null;
-  const modalProfileData = modalPost ? getProfileData(modalPost) : null;
 
   // Stable handlers so memoised FeedCardWithReply instances don't see a
   // fresh prop on every parent render. handleOpenMedia takes the post id
@@ -932,16 +709,159 @@ export default function Home() {
     associationsLoading &&
     (recAssociationsLoading || !!recAssociationsData?.recommendedAssociations?.items);
   const initialLoading =
-    (feedLoading && !hasPosts && !feedError) ||
     communitiesPending ||
     associationsPending ||
-    (pendingLoading && !pendingData) ||
-    (viewMode === 'you' && interestProfileLoading && !interestProfileData);
+    (pendingLoading && !pendingData);
   // Latched (state declared near the top): once the page has appeared, later
   // refetches never swap it back for the full-page loader.
   useEffect(() => {
     if (!initialLoading) setPageShown(true);
   }, [initialLoading]);
+
+  // The post-media modal (Home only). Rendered inside the shared feed, which
+  // hands over the posts and engagement handlers of the ONE feed it fetched.
+  const renderMediaModal = ({ posts, handlers, removePost }: FeedSlotContext) => {
+    const { handleReact, handleSave, handleShare, handleSendComment } = handlers;
+    const modalPost = modalState !== null ? posts.find((p) => p.id === modalState.postId) ?? null : null;
+    const modalProfileData = modalPost ? getProfileData(modalPost) : null;
+    const handleNavigatePost = (dir: 'next' | 'prev') => {
+      if (modalState === null) return;
+      const currentIndex = posts.findIndex((p) => p.id === modalState.postId);
+      if (currentIndex < 0) return;
+      let i = dir === 'next' ? currentIndex + 1 : currentIndex - 1;
+      while (i >= 0 && i < posts.length) {
+        const next = posts[i];
+        if (next && getPostMedia(next).length > 0) {
+          setModalState({ postId: next.id, mediaIndex: 0 });
+          return;
+        }
+        i = dir === 'next' ? i + 1 : i - 1;
+      }
+    };
+    if (!modalPost || !modalProfileData) return null;
+    return (
+      <PostMediaModal
+        postId={modalPost.id}
+        profileImage={modalProfileData.avatar}
+        profileName={modalProfileData.name}
+        profileTier={modalProfileData.tier}
+        authorUserId={modalPost.authorType?.toUpperCase() === 'USER' ? modalPost.authorId : undefined}
+        authorEntityId={modalPost.authorId}
+        authorEntityType={modalPost.authorType}
+        createdAt={modalPost.createdAt}
+        category={modalProfileData.type}
+        postDate={formatDateProximity(modalPost.createdAt)}
+        visibility={modalPost.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
+        content={modalPost.text}
+        mentionMap={getPostMentionMap(modalPost)}
+        allMedia={getPostMedia(modalPost)}
+        initialMediaIndex={modalState!.mediaIndex}
+        isLiked={modalPost.userEngagement.hasLiked}
+        isSaved={modalPost.userEngagement.hasSaved}
+        likeCount={modalPost.engagementCounts.likes}
+        commentCount={modalPost.engagementCounts.comments}
+        shareCount={modalPost.engagementCounts.shares}
+        // The modal has a plain like button and only ever means Happy.
+        onLike={(liked) =>
+          handleReact(
+            modalPost.id,
+            liked ? 'add' : 'remove',
+            liked ? 'HAPPY' : null,
+            liked ? 1 : -1,
+            // The reaction actually stored, so a refused unlike restores the
+            // real one. Passing null here would resurrect a SAD post as
+            // unreacted, and a default would do exactly that invisibly.
+            modalPost.userEngagement.myReaction ?? null,
+          )
+        }
+        onSave={(saved) => handleSave(modalPost.id, saved)}
+        onShare={() => handleShare(modalPost.id)}
+        onSendComment={(text, parentId, mentions) => handleSendComment(modalPost.id, text, parentId, mentions)}
+        onClose={() => setModalState(null)}
+        onNavigatePost={handleNavigatePost}
+        onDelete={removePost}
+      />
+    );
+  };
+
+  // Recommended associations, spliced into the shared feed a few posts down.
+  const associationsRail = (
+    <div key="associations-rail" className="mb-2 relative">
+                      <div className="flex items-center justify-between mb-4 shrink-0 gap-2">
+                        <h2 className="text-[clamp(0.65rem,2.5vw,0.875rem)] font-medium min-w-0 truncate">
+                          {t('associationsYouMayLike') || 'Associations you may like'}
+                        </h2>
+                        <Link href="/association" prefetch={false} className="flex-shrink-0">
+                          <p className="text-[clamp(0.65rem,2.5vw,0.875rem)] font-medium text-text-brand whitespace-nowrap">
+                            {t('seeall')}
+                          </p>
+                        </Link>
+                      </div>
+                      {/* Chevron buttons — only render when the rail can scroll
+                          in the corresponding direction. Same look + behavior as
+                          the communities rail above. */}
+                      {assocCanScrollLeft && (
+                        <ButtonType3
+                          onClick={scrollAssocLeft}
+                          className="absolute left-0 top-1/2 -translate-y-1/2 z-10
+                                     flex h-10 w-10 items-center justify-center
+                                     rounded-full bg-surface-default/80 shadow-md
+                                     transition-colors hover:bg-surface-subtle border-0 min-w-0"
+                          aria-label={tCommon('scrollLeft')}
+                        >
+                          <ChevronLeftIcon className="h-6 w-6 text-primary" />
+                        </ButtonType3>
+                      )}
+                      {assocCanScrollRight && (
+                        <ButtonType3
+                          onClick={scrollAssocRight}
+                          className="absolute right-0 top-1/2 -translate-y-1/2 z-10
+                                     flex h-10 w-10 items-center justify-center
+                                     rounded-full bg-surface-default/80 shadow-md
+                                     transition-colors hover:bg-surface-subtle border-0 min-w-0"
+                          aria-label={tCommon('scrollRight')}
+                        >
+                          <ChevronRightIcon className="h-6 w-6 text-primary" />
+                        </ButtonType3>
+                      )}
+                      {/* Single flat scroll container — same structure as the
+                          community rail so the chevron-button math (scrollLeft,
+                          scrollWidth, clientWidth) reads identical metrics.
+                          Callback ref re-attaches the scroll listener whenever
+                          Virtuoso remounts this item. */}
+                      <div
+                        ref={setAssociationsScrollEl}
+                        className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory"
+                        style={{ scrollBehavior: 'smooth' }}
+                      >
+                        <div className="contents">
+                        {visibleAssociations.map((association) => (
+                          <div key={association.id} className="flex-none snap-start">
+                            <CommunityCardVariant2
+                              icon={association.avatarUrl}
+                              title={association.name}
+                              description={association.description}
+                              members={association?.memberCount || 0}
+                              onButtonClick={() =>
+                                handleJoinClick('association', association)
+                              }
+                              buttonText={
+                                association.membershipStatus === 'MEMBER' ||
+                                joinedCommunities.has(association.id)
+                                  ? tActions('joined')
+                                  : t('joinassociation')
+                              }
+                              isDisabled={
+                                association.membershipStatus === 'MEMBER' ||
+                                joinedCommunities.has(association.id)
+                              }
+                            />
+                          </div>
+                        ))}
+                        </div>
+                      </div>
+                    </div>
+  );
 
   // Renders the rich body of the join confirmation modal: avatar, name,
   // type/member count, access badges, and a truncated description. Only
@@ -1024,326 +944,25 @@ export default function Home() {
       <HomeLeftColumn />
       {/* Main Feed - Independent Scroll */}
       <div
-        ref={setFeedScrollRef}
+        ref={setFeedScrollEl}
         className="flex min-w-0 w-full flex-1 flex-col gap-5 overflow-y-auto scrollbar-hide px-4 py-4 lg:pl-0 lg:pr-6"
       >
         <HomeHero firstName={profile?.firstName} city={profile?.city} countryCode={profile?.residenceCountry || profile?.countryOfOrigin} />
-        <YourActivity />
         <LatestListings />
         <CommunityPosts />
-        {/* Phones: the rail's cards stack under the sections (the rail itself is desktop-only). */}
-        <div className="lg:hidden">
-          <HomeRail idPrefix="mobile" />
-        </div>
+        {/* Phones: the left column's and the rail's entries live in the header's menu drawer. */}
+        <HomeRailMenu />
         <h2 id="home-feed-title" className="-mb-2 text-lg font-bold text-text-primary">
           {tHomePage('feed.title')}
         </h2>
-        {/* Discover Section — collapses entirely when the recommender has nothing to show. */}
-        {hasCommunities && (
-        <>
-        <div className="flex items-center justify-between mb-4 shrink-0 gap-2">
-          <h2 className="text-[clamp(0.65rem,2.5vw,0.875rem)] font-medium min-w-0 truncate">{t('discover')}</h2>
-          <Link href="/community" prefetch={false} className="flex-shrink-0">
-            <p className="text-[clamp(0.65rem,2.5vw,0.875rem)] font-medium text-text-brand whitespace-nowrap">{t('seeall')}</p>
-          </Link>
-        </div>
-
-        {/* Communities Carousel with Smart Arrows */}
-        <div className="relative mb-6">
-          {/* Communities List */}
-          {hasCommunities && (
-            <>
-              {/* Left Arrow */}
-              {canScrollLeft && (
-                <ButtonType3
-                  onClick={scrollLeft}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 z-10
-                             flex h-10 w-10 items-center justify-center
-                             rounded-full bg-surface-default/80 shadow-md
-                             transition-colors hover:bg-surface-subtle border-0 min-w-0"
-                  aria-label={tCommon('scrollLeft')}
-                >
-                  <ChevronLeftIcon className="h-6 w-6 text-primary" />
-                </ButtonType3>
-              )}
-
-              {/* Right Arrow */}
-              {canScrollRight && (
-                <ButtonType3
-                  onClick={scrollRight}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 z-10
-                             flex h-10 w-10 items-center justify-center
-                             rounded-full bg-surface-default/80 shadow-md
-                             transition-colors hover:bg-surface-subtle border-0 min-w-0"
-                  aria-label={tCommon('scrollRight')}
-                >
-                  <ChevronRightIcon className="h-6 w-6 text-primary" />
-                </ButtonType3>
-              )}
-
-              {/* Scrollable Container */}
-              <div
-                ref={scrollRef}
-                className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 shrink-0
-                           snap-x snap-mandatory"
-                style={{ scrollBehavior: 'smooth' }}
-              >
-                {visibleCommunities.map((community) => (
-                  <div key={community.id} className="flex-none snap-start">
-                    <CommunityCardVariant2
-                      icon={community.avatarUrl}
-                      title={community.name}
-                      description={community.description}
-                      members={community?.memberCount || 0}
-                      communityType={community.communityType}
-                      onButtonClick={() => handleJoinClick('community', community)}
-                      buttonText={
-                        community.membershipStatus === 'MEMBER' || joinedCommunities.has(community.id)
-                          ? tActions('joined')
-                          : t('joincommunity')
-                      }
-                      isDisabled={community.membershipStatus === 'MEMBER' || joinedCommunities.has(community.id)}
-                    />
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-        </>
-        )}
-
-        {/* You / Following — lived in the old left sidebar (and the phone
-            drawer); the feed now carries its own switch. */}
-        <div className="mb-3 shrink-0">
-          <ViewFilter />
-        </div>
-
-        {/* Feed Posts */}
-        <div className="space-y-2">
-          {/* Feed re-loading after the page is already up (e.g. a You /
-              Following switch with nothing cached yet) — the panel shows the
-              standard PageLoader. The FIRST load is covered by the page-level
-              PageLoader below the hooks. */}
-          {feedLoading && posts.length === 0 && !feedError && <PageLoader />}
-
-          {/* Feed Error State */}
-          {feedError && (
-            <ErrorState
-              title={tFeedback('error.title')}
-              description={tFeedback('error.description')}
-              retryLabel={tFeedback('error.retry')}
-              onRetry={() => refetchFeed()}
-            />
-          )}
-
-          {/* Cold-start interests prompt (C4) — rendered above the feed on the
-              "You" tab when the recommender is cold and the feed is thin. */}
-          {!feedLoading && !feedError && showInterestsPrompt && (
-            <InterestsPromptCard
-              onDismiss={() => setInterestsPromptDismissed(true)}
-            />
-          )}
-
-          {/* Chronological-fallback CTA (C1) — when the "You" tab degraded to
-              the chronological feed (NETWORK → ALL) we show a lighter "Set your
-              interests" nudge above the fallback list, unless the full prompt
-              card is already showing. */}
-          {!feedLoading &&
-            !feedError &&
-            viewMode === 'you' &&
-            feedMeta.isChronoFallback === true &&
-            !showInterestsPrompt && (
-              <div className="mb-3 flex items-start gap-3 rounded-xl border border-border-subtle bg-surface-subtle p-3">
-                <Compass className="mt-0.5 h-5 w-5 shrink-0 text-text-brand" />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-text-primary">
-                    {tHome('chronoFallback.title')}
-                  </p>
-                  <p className="mt-0.5 text-sm text-text-secondary">
-                    {tHome('chronoFallback.description')}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setInterestsPromptDismissed(false)}
-                    className="mt-2 text-sm font-medium text-text-brand hover:underline"
-                  >
-                    {tHome('chronoFallback.cta')}
-                  </button>
-                </div>
-              </div>
-            )}
-
-          {/* Following-tab empty CTA (C2) — instead of a blank pane, point the
-              user at community discovery or the personalised "You" tab. */}
-          {!feedLoading && !feedError && !hasPosts && viewMode === 'following' && (
-            <EmptyState
-              icon={Users}
-              title={tHome('followingEmpty.title')}
-              description={tHome('followingEmpty.description')}
-              action={
-                <div className="flex flex-col items-center gap-2 sm:flex-row">
-                  <Link href="/community" prefetch={false}>
-                    <ButtonType3 className="border border-text-brand px-4 py-2 text-sm">
-                      {tHome('followingEmpty.discover')}
-                    </ButtonType3>
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      sessionStorage.setItem('viewFilter', 'you');
-                      window.dispatchEvent(
-                        new CustomEvent('viewFilterChange', { detail: 'you' }),
-                      );
-                    }}
-                    className="text-sm font-medium text-text-brand hover:underline"
-                  >
-                    {tHome('followingEmpty.switchToYou')}
-                  </button>
-                </div>
-              }
-            />
-          )}
-
-          {/* Feed Empty State — absolute last resort ("You" tab with no posts
-              and no chronological fallback available). Instead of a dead-end
-              placeholder, invite the user to create the first post. */}
-          {!feedLoading && !feedError && !hasPosts && viewMode === 'you' && (
-            <EmptyState
-              icon={SquarePen}
-              title={tHome('youEmpty.title')}
-              description={tHome('youEmpty.description')}
-              action={
-                <Link href="/create-post" prefetch={false}>
-                  <ButtonType3 className="inline-flex items-center gap-2 border border-text-brand px-4 py-2 text-sm">
-                    <SquarePen className="h-4 w-4" />
-                    {tHome('youEmpty.createPost')}
-                  </ButtonType3>
-                </Link>
-              }
-            />
-          )}
-
-          {/* Feed Posts — virtualised. Off-screen cards are unmounted so
-              the DOM size stays bounded as the user scrolls deeper, and
-              the surrounding chrome (top toggle, sidebar, modals) keeps
-              its layout because we pass the existing scroll column as
-              the custom scroll parent. */}
-          {/* Plain (non-virtualized) list. Four attempts to make react-virtuoso
-              measure its scroll container on the desktop layout failed (it drew
-              zero rows until a real window resize), so the feed renders its cards
-              directly and lets the column's `overflow-y-auto` handle scrolling.
-              Infinite scroll is an IntersectionObserver sentinel below — no
-              measurement and no scroll-parent to observe, so it cannot hit that
-              class of bug. Fine for a feed of tens–hundreds of posts. */}
-          {hasPosts && (
-            <>
-              {feedItems.map((item, _index) => {
-                if (item.kind === 'associationsRail') {
-                  return (
-                    <div key="associations-rail" className="mb-2 relative">
-                      <div className="flex items-center justify-between mb-4 shrink-0 gap-2">
-                        <h2 className="text-[clamp(0.65rem,2.5vw,0.875rem)] font-medium min-w-0 truncate">
-                          {t('associationsYouMayLike') || 'Associations you may like'}
-                        </h2>
-                        <Link href="/association" prefetch={false} className="flex-shrink-0">
-                          <p className="text-[clamp(0.65rem,2.5vw,0.875rem)] font-medium text-text-brand whitespace-nowrap">
-                            {t('seeall')}
-                          </p>
-                        </Link>
-                      </div>
-                      {/* Chevron buttons — only render when the rail can scroll
-                          in the corresponding direction. Same look + behavior as
-                          the communities rail above. */}
-                      {assocCanScrollLeft && (
-                        <ButtonType3
-                          onClick={scrollAssocLeft}
-                          className="absolute left-0 top-1/2 -translate-y-1/2 z-10
-                                     flex h-10 w-10 items-center justify-center
-                                     rounded-full bg-surface-default/80 shadow-md
-                                     transition-colors hover:bg-surface-subtle border-0 min-w-0"
-                          aria-label={tCommon('scrollLeft')}
-                        >
-                          <ChevronLeftIcon className="h-6 w-6 text-primary" />
-                        </ButtonType3>
-                      )}
-                      {assocCanScrollRight && (
-                        <ButtonType3
-                          onClick={scrollAssocRight}
-                          className="absolute right-0 top-1/2 -translate-y-1/2 z-10
-                                     flex h-10 w-10 items-center justify-center
-                                     rounded-full bg-surface-default/80 shadow-md
-                                     transition-colors hover:bg-surface-subtle border-0 min-w-0"
-                          aria-label={tCommon('scrollRight')}
-                        >
-                          <ChevronRightIcon className="h-6 w-6 text-primary" />
-                        </ButtonType3>
-                      )}
-                      {/* Single flat scroll container — same structure as the
-                          community rail so the chevron-button math (scrollLeft,
-                          scrollWidth, clientWidth) reads identical metrics.
-                          Callback ref re-attaches the scroll listener whenever
-                          Virtuoso remounts this item. */}
-                      <div
-                        ref={setAssociationsScrollEl}
-                        className="flex gap-2 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory"
-                        style={{ scrollBehavior: 'smooth' }}
-                      >
-                        <div className="contents">
-                        {visibleAssociations.map((association) => (
-                          <div key={association.id} className="flex-none snap-start">
-                            <CommunityCardVariant2
-                              icon={association.avatarUrl}
-                              title={association.name}
-                              description={association.description}
-                              members={association?.memberCount || 0}
-                              onButtonClick={() =>
-                                handleJoinClick('association', association)
-                              }
-                              buttonText={
-                                association.membershipStatus === 'MEMBER' ||
-                                joinedCommunities.has(association.id)
-                                  ? tActions('joined')
-                                  : t('joinassociation')
-                              }
-                              isDisabled={
-                                association.membershipStatus === 'MEMBER' ||
-                                joinedCommunities.has(association.id)
-                              }
-                            />
-                          </div>
-                        ))}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
-
-                return (
-                  <FeedPostCard
-                    key={item.post.id}
-                    post={item.post}
-                    index={_index}
-                    surface={isRecommendedArm ? 'home_feed' : 'community_feed'}
-                    handleReact={handleReact}
-                    handleShare={handleShare}
-                    handleSave={handleSave}
-                    handleSendComment={handleSendComment}
-                    removePost={removePost}
-                    handleOpenMedia={handleOpenMedia}
-                  />
-                );
-              })}
-              {showLoadingFooter && (
-                <div className="flex justify-center py-4" role="status" aria-label={tCommon('loading')}>
-                  <Spinner className="size-5 text-text-brand" />
-                </div>
-              )}
-              {/* Infinite-scroll sentinel — observed by the effect near the top. */}
-              <div ref={loadMoreRef} className="h-px w-full" />
-            </>
-          )}
-        </div>
+        <CommunityFeed
+          scrollRoot={feedScrollEl}
+          onOpenMedia={handleOpenMedia}
+          renderTop={(ctx) => <HomeFeedTop ctx={ctx} />}
+          renderEmpty={(ctx) => (ctx.tab === 'latest' ? null : <HomeFeedEmpty ctx={ctx} />)}
+          inlineItem={hasAssociations ? { index: ASSOCIATIONS_RAIL_INDEX, node: associationsRail } : undefined}
+          renderOverlay={renderMediaModal}
+        />
       </div>
 
       {/* Sidebar - Independent Scroll */}
@@ -1386,49 +1005,6 @@ export default function Home() {
         />
       )}
 
-      {modalPost && modalProfileData && (
-        <PostMediaModal
-          postId={modalPost.id}
-          profileImage={modalProfileData.avatar}
-          profileName={modalProfileData.name}
-          profileTier={modalProfileData.tier}
-          authorUserId={modalPost.authorType?.toUpperCase() === 'USER' ? modalPost.authorId : undefined}
-          authorEntityId={modalPost.authorId}
-          authorEntityType={modalPost.authorType}
-          createdAt={modalPost.createdAt}
-          category={modalProfileData.type}
-          postDate={formatDateProximity(modalPost.createdAt)}
-          visibility={modalPost.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
-          content={modalPost.text}
-          mentionMap={getPostMentionMap(modalPost)}
-          allMedia={getPostMedia(modalPost)}
-          initialMediaIndex={modalState!.mediaIndex}
-          isLiked={modalPost.userEngagement.hasLiked}
-          isSaved={modalPost.userEngagement.hasSaved}
-          likeCount={modalPost.engagementCounts.likes}
-          commentCount={modalPost.engagementCounts.comments}
-          shareCount={modalPost.engagementCounts.shares}
-          // The modal has a plain like button and only ever means Happy.
-          onLike={(liked) =>
-            handleReact(
-              modalPost.id,
-              liked ? 'add' : 'remove',
-              liked ? 'HAPPY' : null,
-              liked ? 1 : -1,
-              // The reaction actually stored, so a refused unlike restores the
-              // real one. Passing null here would resurrect a SAD post as
-              // unreacted, and a default would do exactly that invisibly.
-              modalPost.userEngagement.myReaction ?? null,
-            )
-          }
-          onSave={(saved) => handleSave(modalPost.id, saved)}
-          onShare={() => handleShare(modalPost.id)}
-          onSendComment={(text, parentId, mentions) => handleSendComment(modalPost.id, text, parentId, mentions)}
-          onClose={() => setModalState(null)}
-          onNavigatePost={handleNavigatePost}
-          onDelete={removePost}
-        />
-      )}
     </div>
   );
 }

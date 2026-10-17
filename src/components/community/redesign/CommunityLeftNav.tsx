@@ -1,24 +1,23 @@
 'use client';
 
-import { CalendarDays, Home, UserSearch, UsersRound, type LucideIcon } from 'lucide-react';
+import { CalendarDays, UserSearch, UsersRound, type LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 
-const ITEMS: { key: 'home' | 'people' | 'circles' | 'events'; href: string; icon: LucideIcon }[] = [
-  { key: 'home', href: '/home', icon: Home },
+export const COMMUNITY_NAV_ITEMS: { key: 'people' | 'circles' | 'events'; href: string; icon: LucideIcon }[] = [
   { key: 'people', href: '/people', icon: UserSearch },
   { key: 'circles', href: '/circles', icon: UsersRound },
   { key: 'events', href: '/events', icon: CalendarDays },
 ];
 
-/** The mockup's left navigation: only entries that open a real page ("Help & Resources" has none yet). */
+/** The mockup's left navigation (without Home: the top bar and the phone bottom bar already carry Home / Discover / Community / More): only entries that open a real page ("Help & Resources" has none yet). */
 export function CommunityLeftNav() {
   const t = useTranslations('communityPage');
   return (
     <>
       <nav aria-label={t('navLabel')} data-testid="community-nav" className="rounded-2xl border border-border-subtle bg-surface-default p-2 shadow-sm">
         <ul>
-          {ITEMS.map(({ key, href, icon: Icon }) => (
+          {COMMUNITY_NAV_ITEMS.map(({ key, href, icon: Icon }) => (
             <li key={key}>
               <Link href={href} prefetch={false} className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-text-primary transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand">
                 <Icon className="size-4 text-text-brand" aria-hidden />
