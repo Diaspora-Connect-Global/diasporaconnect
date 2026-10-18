@@ -530,7 +530,9 @@ export default function Community() {
             <CommunityRailMenu communities={myJoinedCommunities} pendingRequests={pendingCommunityRequests} associations={joinedAssociations} />
             {/* Phones: the content only (both rails live in the header's menu drawer). Large screens: three columns. */}
             <div className="grid gap-5 lg:grid-cols-[16rem_minmax(0,1fr)_20rem] xl:grid-cols-[17rem_minmax(0,1fr)_21rem]">
-              <div className="hidden min-w-0 space-y-4 lg:block lg:self-start">
+              {/* The whole left column is ONE sticky unit. Only "Your communities" used to be
+                  sticky, so on scroll it pinned and slid over the circles promo below it. */}
+              <div className="hidden min-w-0 space-y-4 lg:sticky lg:top-0 lg:block lg:max-h-[calc(92svh-1rem)] lg:self-start lg:overflow-y-auto scrollbar-hide">
                 <CommunityLeftNav />
                 <YourCommunitiesColumn
                     communities={myJoinedCommunities}

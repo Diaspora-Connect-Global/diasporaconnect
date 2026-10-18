@@ -69,7 +69,7 @@ export function YourCommunitiesColumn({
     <aside
       aria-labelledby="your-communities-heading"
       data-testid="your-communities"
-      className="min-w-0 space-y-4 py-3 lg:sticky lg:top-0 lg:max-h-[calc(92svh-1rem)] lg:overflow-y-auto scrollbar-hide"
+      className="min-w-0 space-y-4 py-3"
     >
       <h2 id="your-communities-heading" className="text-2xl font-bold text-text-primary">
         {t('yourCommunities.title')}

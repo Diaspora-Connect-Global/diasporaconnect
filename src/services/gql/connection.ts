@@ -61,7 +61,6 @@ export const GET_MY_CONNECTIONS = gql`
           email
           avatarUrl
           sector
-          headline
           trustScore
           trustTier
         }
@@ -73,7 +72,6 @@ export const GET_MY_CONNECTIONS = gql`
           email
           avatarUrl
           sector
-          headline
           trustScore
           trustTier
         }
