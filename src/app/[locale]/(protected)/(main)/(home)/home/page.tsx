@@ -956,6 +956,7 @@ export default function Home() {
           {tHomePage('feed.title')}
         </h2>
         <CommunityFeed
+          scope="all"
           scrollRoot={feedScrollEl}
           onOpenMedia={handleOpenMedia}
           renderTop={(ctx) => <HomeFeedTop ctx={ctx} />}

@@ -395,6 +395,8 @@ export interface GetFeedInput {
   viewSeenPosts?: boolean;
   strictOrganic?: boolean;
   allowSeenFallback?: boolean;
+  /** Newest-first (created_at DESC) instead of ranked order. */
+  chronological?: boolean;
 }
 
 /**
@@ -555,6 +557,8 @@ export interface GetPostsByCategoryInput {
   category: string;
   limit?: number;
   offset?: number;
+  /** Restrict to these author types (USER, COMMUNITY, ASSOCIATION). */
+  authorTypes?: string[];
 }
 
 export interface GetPostsByCategoryData {

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, Fragment, type React
 import { useTranslations } from 'next-intl';
 import { ChevronDown, Newspaper } from 'lucide-react';
 import { useRouter } from '@/i18n/navigation';
-import { useFeed } from '@/hooks/useFeed';
+import { useFeed, type UseFeedOptions } from '@/hooks/useFeed';
 import { usePostEngagementHandlers } from '@/hooks/usePostEngagementHandlers';
 import { FeedPostCard } from '@/components/feed/FeedPostCard';
 import type { Post as ApiPost } from '@/services/gql/types/postsFeed';
@@ -50,6 +50,11 @@ const CATEGORIES = [
  */
 export interface CommunityFeedProps {
   scrollRoot: Element | null;
+  /**
+   * 'community' (default): only posts authored by communities and associations,
+   * with no fallback to member posts. 'all': the mixed feed (Home passes this).
+   */
+  scope?: 'community' | 'all';
   /** Home only: open media in the page's own modal instead of the post page. */
   onOpenMedia?: (postId: string, mediaIndex: number) => void;
   /** Home only: rendered above the list (interests prompt, fallback nudge). */
@@ -62,7 +67,27 @@ export interface CommunityFeedProps {
   renderOverlay?: (ctx: FeedSlotContext) => ReactNode;
 }
 
-export function CommunityFeed({ scrollRoot, onOpenMedia, renderTop, renderEmpty, inlineItem, renderOverlay }: CommunityFeedProps) {
+const COMMUNITY_AUTHOR_TYPES = ['COMMUNITY', 'ASSOCIATION'];
+
+/**
+ * Which feed each tab reads.
+ *  - 'all' (Home): unchanged - ranked recommendations, newest-first ALL, joined-community feed.
+ *  - 'community': posts authored by communities/associations only. For you is the ranked
+ *    COMMUNITIES_AND_ASSOCIATIONS feed (no recommender, so no NETWORK/ALL fallback can pull
+ *    member posts in), Latest the same set newest-first, Following the membership-scoped
+ *    joinedCommunityFeed (already community-only).
+ */
+function feedOptions(scope: 'community' | 'all', tab: Tab, category: string): UseFeedOptions {
+  if (scope === 'all') {
+    return category ? { category } : tab === 'latest' ? { feedType: 'ALL' } : { mode: tab === 'following' ? 'following' : 'you' };
+  }
+  if (category) return { category, authorTypes: COMMUNITY_AUTHOR_TYPES };
+  if (tab === 'latest') return { feedType: 'COMMUNITIES_AND_ASSOCIATIONS', chronological: true };
+  if (tab === 'following') return { mode: 'following' };
+  return { feedType: 'COMMUNITIES_AND_ASSOCIATIONS' };
+}
+
+export function CommunityFeed({ scrollRoot, scope = 'community', onOpenMedia, renderTop, renderEmpty, inlineItem, renderOverlay }: CommunityFeedProps) {
   const t = useTranslations('communityPage');
   const tCategory = useTranslations('categoryBadge');
   const tFeedback = useTranslations('feedback');
@@ -81,9 +106,7 @@ export function CommunityFeed({ scrollRoot, onOpenMedia, renderTop, renderEmpty,
     () => CATEGORIES.map((c) => ({ value: c, label: tCategory(c) })).sort((a, b) => a.label.localeCompare(b.label)),
     [tCategory],
   );
-  const feed = useFeed(
-    category ? { category } : tab === 'latest' ? { feedType: 'ALL' } : { mode: tab === 'following' ? 'following' : 'you' },
-  );
+  const feed = useFeed(feedOptions(scope, tab, category));
   const { posts, loading, loadingMore, error, refetch, hasMore, loadMore, updatePostCounts, removePost } = feed;
   const handlers = usePostEngagementHandlers(updatePostCounts);
   const sentinel = useRef<HTMLDivElement | null>(null);
