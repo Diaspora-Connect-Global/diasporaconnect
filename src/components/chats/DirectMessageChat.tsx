@@ -37,7 +37,7 @@ import { useUserStore } from "@/store/useUserStore";
 import { messageService } from "@/services/websocket/messageService";
 import { toast } from "sonner";
 import { displayName as personName, safeName } from '@/lib/displayName';
-import { countryName } from '@/lib/countryName';
+import { countryName, locationWithCountryNames } from '@/lib/countryName';
 import { getCountryTimezone, isGoodTimeToMessage, formatCurrentTime, isMultiTimezoneCountry } from '@/lib/countryTimezone';
 import { formatTimeOnly, getDateLabel, getMessageDateKey } from "@/lib/chatTime";
 import { DateSeparator } from "./DateSeparator";
@@ -151,7 +151,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
             ? countryName(profileFallback.residenceCountry, locale)
             : '';
         const location = isConnected
-            ? (profileFallback?.location ||
+            ? (locationWithCountryNames(profileFallback?.location, locale) ||
                 [profileFallback?.city, resolvedCountry].filter(Boolean).join(', ') ||
                 '')
             : '';

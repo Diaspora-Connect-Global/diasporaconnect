@@ -28,9 +28,9 @@ function world() {
     const removed = new Set<string>();
     const sentOut = new Set<string>();
     const meUser = { ...user(99, 'Ama', 'Mensah'), userId: ME };
-    const received = [conn('c-req-1', user(1, 'Kwame', 'Asante', { username: 'kwame', occupation: 'Software Engineer', location: 'Berlin' }), meUser), conn('c-req-2', user(2, 'Esi', 'Mensah', { country: 'GH' }), meUser)];
+    const received = [conn('c-req-1', user(1, 'Kwame', 'Asante', { username: 'kwame', occupation: 'Software Engineer', location: 'Berlin' }), meUser), conn('c-req-2', user(2, 'Esi', 'Mensah', { location: 'Accra, GHA' }), meUser)];
     const sent = [conn('c-sent-1', meUser, user(3, 'Samuel', 'Agyemang', { occupation: 'Architect' }))];
-    const friends = [conn('c-fr-1', meUser, user(4, 'Grace', 'Boakye', { username: 'grace', headline: 'Nurse' })), conn('c-fr-2', user(5, 'Kofi', 'Owusu', { sector: 'Finance' }), meUser)];
+    const friends = [conn('c-fr-1', meUser, user(4, 'Grace', 'Boakye', { username: 'grace', sector: 'Healthcare' })), conn('c-fr-2', user(5, 'Kofi', 'Owusu', { sector: 'Finance' }), meUser)];
     const live = (rows: ReturnType<typeof conn>[]) => rows.filter((c) => !removed.has(c.id));
     return {
         removed,
@@ -87,7 +87,9 @@ test('each tab is a plain list with the right rows; counts on the labels; no id 
     await expect(list.locator('li')).toHaveCount(2);
     await expect(list.locator('li').nth(0)).toContainText('Kwame Asante');
     await expect(list.locator('li').nth(0)).toContainText('Software Engineer · Berlin');
-    await expect(list.locator('li').nth(1)).toContainText('Ghana');
+    // user-service sends request locations as "City, <ISO code>": the code is shown as the country name.
+    await expect(list.locator('li').nth(1)).toContainText('Accra, Ghana');
+    await expect(list.locator('li').nth(1)).not.toContainText('GHA');
     await expect(list.locator('li').nth(0).getByRole('link')).toHaveAttribute('href', '/en/@kwame');
 
     await pickTab(page, /Sent/, /tab=sent/);
@@ -96,7 +98,8 @@ test('each tab is a plain list with the right rows; counts on the labels; no id 
 
     await pickTab(page, /Friends/, /tab=friends/);
     await expect(list.locator('li')).toHaveCount(2);
-    await expect(list.locator('li').nth(0)).toContainText('Nurse');
+    // GetMyConnections has no headline/occupation (the gateway's ProfileSummary lacks them): sector is shown.
+    await expect(list.locator('li').nth(0)).toContainText('Healthcare');
     // A plain list: every row starts on the same left edge.
     const xs = await list.locator('li').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().x)));
     expect(new Set(xs).size).toBe(1);
@@ -165,7 +168,8 @@ test('Discover search goes in the URL; empty tabs say so', async () => {
     const w = world();
     const { page, graphql } = await open(browser, '/friends', w.overrides as never);
     await page.getByLabel('Search people').fill('zzz', FIRST);
-    await page.getByRole('button', { name: 'Search', exact: true }).click();
+    // Scoped: the header has its own "Search" button (global search).
+    await page.getByTestId('friends-list').getByRole('search').getByRole('button', { name: 'Search', exact: true }).click();
     await expect(page).toHaveURL(/q=zzz/);
     await expect(page.getByTestId('friends-list')).toContainText('No one matches “zzz”.');
     expect(graphql.calls.some((c) => c.name === 'SearchUsers')).toBe(true);

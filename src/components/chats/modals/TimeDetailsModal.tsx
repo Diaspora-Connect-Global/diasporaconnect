@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Clock, Moon, Sun } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
-import { countryName } from "@/lib/countryName";
+import { countryName, locationWithCountryNames } from "@/lib/countryName";
 
 import {
     BottomSheet,
@@ -41,7 +41,8 @@ interface TimeDetailsModalProps {
 
 /** Compose a "City, Country" string from profile fields with sensible fallbacks. */
 function buildLocationLabel(p: { city?: string | null; residenceCountry?: string | null; location?: string | null }, locale: string): string {
-    if (p.location?.trim()) return p.location.trim();
+    const location = locationWithCountryNames(p.location, locale);
+    if (location) return location;
     const country = countryName(p.residenceCountry, locale);
     return [p.city, country].filter(Boolean).join(", ");
 }

@@ -55,8 +55,33 @@ export function countryName(code: string | null | undefined, locale = 'en'): str
   }
 }
 
+/**
+ * A "City, Country" string from the backend can end in a raw ISO code: user-service joins
+ * `[city, residenceCountry]`, so a friend request reads "Accra, GHA". Each comma-separated part
+ * that IS a code (all capitals, 2–3 letters) becomes its name; every other part stays as typed,
+ * so a city such as "Bo" is never turned into Bolivia.
+ */
+export function locationWithCountryNames(location: string | null | undefined, locale = 'en'): string {
+  const raw = (location ?? '').trim();
+  if (!raw) return '';
+  return raw
+    .split(',')
+    .map((part) => {
+      const p = part.trim();
+      return /^[A-Z]{2,3}$/.test(p) ? countryName(p, locale) : p;
+    })
+    .filter(Boolean)
+    .join(', ');
+}
+
 /** `(code) => name` bound to the viewer's next-intl locale. */
 export function useCountryName(): (code: string | null | undefined) => string {
   const locale = useLocale();
   return useCallback((code) => countryName(code, locale), [locale]);
+}
+
+/** `(location) => location with country names` bound to the viewer's next-intl locale. */
+export function useLocationWithCountryNames(): (location: string | null | undefined) => string {
+  const locale = useLocale();
+  return useCallback((location) => locationWithCountryNames(location, locale), [locale]);
 }

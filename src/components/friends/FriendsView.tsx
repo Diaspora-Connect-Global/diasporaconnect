@@ -1,6 +1,6 @@
 'use client';
 
-import { useCountryName } from '@/lib/countryName';
+import { useCountryName, useLocationWithCountryNames } from '@/lib/countryName';
 import { useCallback, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@apollo/client/react';
@@ -93,6 +93,7 @@ export function FriendsView() {
   const query = tab === 'discover' ? (searchParams.get('q') ?? '').trim().slice(0, 100) : '';
   const me = useUserStore((s) => s.user?.userId);
   const countryName = useCountryName();
+  const locationName = useLocationWithCountryNames();
 
   const [draft, setDraft] = useState(query);
   const [gone, setGone] = useState<ReadonlySet<string>>(new Set());
@@ -352,7 +353,7 @@ export function FriendsView() {
               {rows.map((row) => {
                 const p = row.person;
                 const name = displayName(p, tIdentity('unknownUser'));
-                const where = p.location?.trim() || countryName(p.country) || countryName(p.residenceCountry) || countryName(p.countryOfOrigin);
+                const where = locationName(p.location) || countryName(p.country) || countryName(p.residenceCountry) || countryName(p.countryOfOrigin);
                 const about = [p.occupation?.trim() || p.headline?.trim() || p.sector?.trim(), where].filter(Boolean).join(' · ');
                 const wasRequested = requested.has(p.userId) && row.status === 'none';
                 const { buttons, hide } = buttonsFor(row);
