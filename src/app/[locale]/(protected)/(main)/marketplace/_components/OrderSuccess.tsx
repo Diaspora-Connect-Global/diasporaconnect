@@ -128,7 +128,7 @@ export function OrderSuccess({
 
         <ButtonType2
           onClick={onBackToHome}
-          className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700"
+          className="bg-surface-brand text-white px-8 py-3 rounded-lg hover:bg-surface-brand/90"
         >
           {t("doneOrder")}
         </ButtonType2>

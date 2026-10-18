@@ -46,7 +46,7 @@ interface ProfileHeaderProps {
 }
 
 const OUTLINE_BUTTON =
-  "inline-flex items-center justify-center gap-2 h-10 rounded-xl border border-[#E7ECF5] bg-surface-default text-sm font-medium text-[#1B2A5E] dark:text-text-primary hover:bg-[#F3F6FC] dark:hover:bg-surface-hover transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F5FD6] focus-visible:ring-offset-2";
+  "inline-flex items-center justify-center gap-2 h-10 rounded-xl border border-[#E7ECF5] bg-surface-default text-sm font-medium text-[#1B2A5E] dark:text-text-primary hover:bg-[#F3F6FC] dark:hover:bg-surface-hover transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand focus-visible:ring-offset-2";
 
 async function copyText(text: string): Promise<boolean> {
   try {
@@ -164,7 +164,7 @@ export function ProfileHeader({
                   onClick={onEditAvatar}
                   aria-label={t('changeProfilePicture')}
                   title={t('changeProfilePicture')}
-                  className="absolute bottom-0.5 right-0.5 flex h-8 w-8 lg:h-9 lg:w-9 items-center justify-center rounded-full bg-[#1F5FD6] text-white ring-[3px] ring-surface-default shadow-sm cursor-pointer transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-[#1F5FD6]/40 focus-visible:ring-4"
+                  className="absolute bottom-0.5 right-0.5 flex h-8 w-8 lg:h-9 lg:w-9 items-center justify-center rounded-full bg-surface-brand text-white ring-[3px] ring-surface-default shadow-sm cursor-pointer transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-text-brand/40 focus-visible:ring-4"
                 >
                   <CameraIcon weight="fill" className="h-4 w-4 lg:h-[18px] lg:w-[18px]" aria-hidden />
                 </button>
@@ -188,13 +188,13 @@ export function ProfileHeader({
                   <button
                     type="button"
                     onClick={openFriendList}
-                    className="inline-flex items-center gap-1.5 text-[#1F5FD6] font-medium cursor-pointer rounded-md hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F5FD6]"
+                    className="inline-flex items-center gap-1.5 text-text-brand font-medium cursor-pointer rounded-md hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
                   >
                     <UsersThreeIcon size={20} aria-hidden />
                     <span>{userData?.connectionCount ?? 0} {t('friends')}</span>
                   </button>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 text-[#1F5FD6] font-medium">
+                  <span className="inline-flex items-center gap-1.5 text-text-brand font-medium">
                     <UsersThreeIcon size={20} aria-hidden />
                     <span>{userData?.connectionCount ?? 0} {t('friends')}</span>
                   </span>

@@ -85,7 +85,7 @@ const STATUS_STYLES: Record<SocialLinkStatus, string> = {
   CONFIRMED: 'bg-[#E8F5EE] text-[#1E7A4C]',
   UNCONFIRMED: 'bg-[#FFF4E0] text-[#8A5A00]',
   NOT_FOUND: 'bg-[#FDECEC] text-[#B42318]',
-  PENDING: 'bg-[#EEF3FC] text-[#1F5FD6]',
+  PENDING: 'bg-surface-brand-light/60 text-text-brand',
 };
 
 function StatusChip({ status, label }: { status: SocialLinkStatus; label: string }) {
@@ -169,7 +169,7 @@ export default function SocialLinksPanel({ isOwnProfile, links, loading, error, 
             <button
               type="button"
               onClick={onRetry}
-              className="rounded-full border border-[#1F5FD6] px-4 py-1.5 text-sm font-medium text-[#1F5FD6] hover:bg-[#1F5FD6]/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F5FD6]/40"
+              className="rounded-full border border-border-brand px-4 py-1.5 text-sm font-medium text-text-brand hover:bg-surface-brand/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-text-brand/40"
             >
               {t('retry')}
             </button>
@@ -194,7 +194,7 @@ export default function SocialLinksPanel({ isOwnProfile, links, loading, error, 
             onClick={() => setForm({ mode: 'add' })}
             disabled={atLimit}
             title={atLimit ? t('errors.LIMIT_REACHED', { max: MAX_SOCIAL_LINKS, websites: MAX_WEBSITE_LINKS }) : undefined}
-            className="inline-flex items-center gap-1.5 rounded-full bg-[#1F5FD6] px-4 py-2 text-sm font-medium text-white hover:bg-[#1A52BB] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F5FD6]/40 focus-visible:ring-offset-2"
+            className="inline-flex items-center gap-1.5 rounded-full bg-surface-brand px-4 py-2 text-sm font-medium text-white hover:bg-[#1A52BB] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-text-brand/40 focus-visible:ring-offset-2"
           >
             <Plus aria-hidden className="h-4 w-4" />
             {t('add')}
@@ -278,7 +278,7 @@ function LinkText({ link }: { link: SocialLink }) {
 
 function IconBubble({ platform }: { platform: SocialPlatform }) {
   return (
-    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#EEF3FC] text-[#1B2A5E]">
+    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-surface-brand-light/60 text-[#1B2A5E]">
       <PlatformIcon platform={platform} className="h-[18px] w-[18px]" />
     </span>
   );
@@ -293,12 +293,12 @@ function PublicLinkRow({ link }: { link: SocialLink }) {
       href={link.url}
       target="_blank"
       rel="noopener noreferrer nofollow"
-      className="group flex items-center gap-3 rounded-xl p-3 transition-colors hover:bg-surface-subtle focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F5FD6]/40"
+      className="group flex items-center gap-3 rounded-xl p-3 transition-colors hover:bg-surface-subtle focus:outline-none focus-visible:ring-2 focus-visible:ring-text-brand/40"
     >
       <IconBubble platform={link.platform} />
       <LinkText link={link} />
       {link.status === 'CONFIRMED' && <StatusChip status="CONFIRMED" label={t('status.CONFIRMED')} />}
-      <ExternalLink aria-hidden className="h-4 w-4 flex-shrink-0 text-[#1B2A5E]/40 group-hover:text-[#1F5FD6]" />
+      <ExternalLink aria-hidden className="h-4 w-4 flex-shrink-0 text-[#1B2A5E]/40 group-hover:text-text-brand" />
       <span className="sr-only">{t('opensInNewTab')}</span>
     </a>
   );
@@ -320,7 +320,7 @@ function OwnLinkRow({ link, busy, confirming, disabled, onEdit, onRecheck, onAsk
   const t = useTranslations('profile.socials');
   const platform = PLATFORM_LABELS[link.platform];
   const iconBtn =
-    'inline-flex h-9 w-9 items-center justify-center rounded-full text-[#1B2A5E]/70 hover:bg-[#EEF3FC] hover:text-[#1F5FD6] disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F5FD6]/40';
+    'inline-flex h-9 w-9 items-center justify-center rounded-full text-[#1B2A5E]/70 hover:bg-surface-brand-light/60 hover:text-text-brand disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-text-brand/40';
   const help = link.status === 'UNCONFIRMED' || link.status === 'NOT_FOUND' ? t(`statusHelp.${link.status}`) : null;
 
   return (
@@ -334,7 +334,7 @@ function OwnLinkRow({ link, busy, confirming, disabled, onEdit, onRecheck, onAsk
               href={link.url}
               target="_blank"
               rel="noopener noreferrer nofollow"
-              className="min-w-0 flex-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F5FD6]/40"
+              className="min-w-0 flex-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-text-brand/40"
             >
               <LinkText link={link} />
               <span className="sr-only">{t('opensInNewTab')}</span>
@@ -370,7 +370,7 @@ function OwnLinkRow({ link, busy, confirming, disabled, onEdit, onRecheck, onAsk
           <button
             type="button"
             onClick={onCancelRemove}
-            className="rounded-full px-3 py-1.5 text-sm font-medium text-[#1B2A5E] hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F5FD6]/40"
+            className="rounded-full px-3 py-1.5 text-sm font-medium text-[#1B2A5E] hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-text-brand/40"
           >
             {t('cancel')}
           </button>
@@ -429,7 +429,7 @@ function SocialLinkForm({ initial, existing, submitting, onCancel, onSubmit }: S
             value={platform}
             disabled={!!initial}
             onChange={(e) => setPlatform(e.target.value as SocialPlatform)}
-            className="h-10 w-full rounded-lg border border-[#D5DDEB] bg-white px-3 text-sm text-[#1B2A5E] disabled:opacity-70 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F5FD6]/40"
+            className="h-10 w-full rounded-lg border border-[#D5DDEB] bg-white px-3 text-sm text-[#1B2A5E] disabled:opacity-70 focus:outline-none focus-visible:ring-2 focus-visible:ring-text-brand/40"
           >
             {(initial ? [initial.platform] : available).map((p) => (
               <option key={p} value={p}>
@@ -456,7 +456,7 @@ function SocialLinkForm({ initial, existing, submitting, onCancel, onSubmit }: S
             onChange={(e) => setInput(e.target.value)}
             aria-describedby={`${ids}-preview ${ids}-notice`}
             aria-invalid={!preview.ok && preview.code !== 'EMPTY'}
-            className="h-10 w-full rounded-lg border border-[#D5DDEB] bg-white px-3 text-sm text-[#1B2A5E] placeholder:text-[#1B2A5E]/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F5FD6]/40"
+            className="h-10 w-full rounded-lg border border-[#D5DDEB] bg-white px-3 text-sm text-[#1B2A5E] placeholder:text-[#1B2A5E]/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-text-brand/40"
           />
         </div>
       </div>
@@ -479,14 +479,14 @@ function SocialLinkForm({ initial, existing, submitting, onCancel, onSubmit }: S
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-full px-4 py-2 text-sm font-medium text-[#1B2A5E] hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F5FD6]/40"
+          className="rounded-full px-4 py-2 text-sm font-medium text-[#1B2A5E] hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-text-brand/40"
         >
           {t('cancel')}
         </button>
         <button
           type="submit"
           disabled={!preview.ok || submitting}
-          className="inline-flex items-center gap-1.5 rounded-full bg-[#1F5FD6] px-4 py-2 text-sm font-medium text-white hover:bg-[#1A52BB] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1F5FD6]/40 focus-visible:ring-offset-2"
+          className="inline-flex items-center gap-1.5 rounded-full bg-surface-brand px-4 py-2 text-sm font-medium text-white hover:bg-[#1A52BB] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-text-brand/40 focus-visible:ring-offset-2"
         >
           {submitting && <Loader2 aria-hidden className="h-4 w-4 animate-spin" />}
           {submitting ? t('saving') : t('save')}

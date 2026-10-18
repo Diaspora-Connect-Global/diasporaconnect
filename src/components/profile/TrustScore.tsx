@@ -24,7 +24,7 @@ export function TrustScore({ trustScore }: TrustScoreProps) {
       <CardContent className="p-5">
         <div className="flex items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 text-base font-semibold text-[#1B2A5E] dark:text-text-primary">
-            <MedalIcon size={20} className="text-[#1F5FD6]" aria-hidden />
+            <MedalIcon size={20} className="text-text-brand" aria-hidden />
             {t('title')}
           </h2>
           <Popover>
@@ -33,14 +33,14 @@ export function TrustScore({ trustScore }: TrustScoreProps) {
                 type="button"
                 aria-label={t('aboutLabel')}
                 title={t('aboutLabel')}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-[#1B2A5E] dark:text-text-primary hover:bg-[#F3F6FC] dark:hover:bg-surface-hover cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F5FD6]"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-[#1B2A5E] dark:text-text-primary hover:bg-[#F3F6FC] dark:hover:bg-surface-hover cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
               >
                 <CaretRightIcon size={18} weight="bold" aria-hidden />
               </button>
             </PopoverTrigger>
             <PopoverContent align="end" className="w-80 rounded-xl">
               <div className="flex gap-2.5 text-sm text-text-primary">
-                <InfoIcon size={20} className="shrink-0 text-[#1F5FD6]" aria-hidden />
+                <InfoIcon size={20} className="shrink-0 text-text-brand" aria-hidden />
                 <p>{t('description')}</p>
               </div>
             </PopoverContent>
@@ -62,11 +62,11 @@ export function TrustScore({ trustScore }: TrustScoreProps) {
                 key={tier}
                 aria-current={current ? 'true' : undefined}
                 className={`flex items-center justify-between gap-2 rounded-full px-3 py-1.5 ${
-                  current ? 'bg-[#EAF1FD] dark:bg-surface-subtle' : ''
+                  current ? 'bg-surface-brand-light dark:bg-surface-subtle' : ''
                 }`}
               >
                 <UserBadge tier={tier} size="sm" showLabel />
-                {current && <CheckIcon size={16} weight="bold" className="shrink-0 text-[#1F5FD6]" aria-hidden />}
+                {current && <CheckIcon size={16} weight="bold" className="shrink-0 text-text-brand" aria-hidden />}
               </li>
             );
           })}

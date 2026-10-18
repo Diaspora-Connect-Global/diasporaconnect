@@ -844,7 +844,7 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
                                         id="terms"
                                         checked={agreedToTerms}
                                         onCheckedChange={(v) => setAgreedToTerms(!!v)}
-                                        className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-surface-brand data-[state=checked]:text-white"
+                                        className="data-[state=checked]:border-border-brand data-[state=checked]:bg-surface-brand data-[state=checked]:text-white"
                                     />
                                     <Label htmlFor="terms" className="text-text-primary text-sm">
                                         {t("labels.termsAgreement")}

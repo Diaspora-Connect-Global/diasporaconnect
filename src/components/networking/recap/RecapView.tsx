@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { ArrowRight, CalendarCheck, Handshake, MessageSquareHeart, PartyPopper, UserRound, Users, UsersRound } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
-import { TONE_CLASS } from '@/components/more/MoreLinkCard';
+import { ICON_CHIP_CLASS, TONE_CLASS } from '@/components/more/MoreLinkCard';
 import { PersonAvatar, SectionCard, focusRing } from '../primitives';
 import { btnQuiet } from '../meetings/parts';
 import FeedbackSheet from '../feedback/FeedbackSheet';
@@ -51,7 +51,7 @@ export default function RecapView({ recap, api, onFeedbackSaved }: { recap: Reca
         <dl className="mt-4 grid grid-cols-1 gap-3 @sm:grid-cols-3" data-testid="recap-stats">
           {stats.map((s) => (
             <div key={s.key} className="flex items-center gap-3 rounded-xl border border-border-subtle bg-surface-default p-3" data-testid={`recap-stat-${s.key}`}>
-              <span className={`grid size-11 shrink-0 place-items-center rounded-full ${TONE_CLASS[s.tone]}`}>{s.icon}</span>
+              <span className={`grid size-11 shrink-0 place-items-center rounded-full ${ICON_CHIP_CLASS}`}>{s.icon}</span>
               <div className="min-w-0">
                 <dd className="text-2xl font-bold tabular-nums text-text-primary" data-testid="recap-stat-value">{s.value}</dd>
                 <dt className="text-xs text-muted-foreground">{s.label}</dt>

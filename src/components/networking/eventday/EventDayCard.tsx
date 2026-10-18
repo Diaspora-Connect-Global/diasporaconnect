@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { CalendarCheck, ExternalLink, Loader2, MapPin, MapPinned, MessageCircle, UserRound, Video } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
-import { TONE_CLASS } from '@/components/more/MoreLinkCard';
+import { ICON_CHIP_CLASS } from '@/components/more/MoreLinkCard';
 import { btnPrimary, btnQuiet, useIsClient } from '../meetings/parts';
 import { personHref } from '../PersonCard';
 import { formatTimeInZone } from '@/lib/eventCalendar';
@@ -55,7 +55,7 @@ export default function EventDayCard({ meeting, eventId, config }: { meeting: Me
 function Header({ title, subtitle, icon }: { title: string; subtitle?: string; icon: React.ReactNode }) {
   return (
     <div className="flex items-start gap-3">
-      <span className={`grid size-11 shrink-0 place-items-center rounded-full ${TONE_CLASS.brand}`}>{icon}</span>
+      <span className={`grid size-11 shrink-0 place-items-center rounded-full ${ICON_CHIP_CLASS}`}>{icon}</span>
       <div className="min-w-0 flex-1">
         <h4 className="text-base font-semibold text-text-primary">{title}</h4>
         {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
@@ -300,7 +300,7 @@ function InPerson({ meeting, eventId, config, clock }: { meeting: Meeting; event
 
       <div className="space-y-3 border-t border-border-subtle pt-4">
         <div className="flex items-start gap-3">
-          <span className={`grid size-9 shrink-0 place-items-center rounded-full ${TONE_CLASS.info}`}><MapPinned className="size-4" aria-hidden /></span>
+          <span className={`grid size-9 shrink-0 place-items-center rounded-full ${ICON_CHIP_CLASS}`}><MapPinned className="size-4" aria-hidden /></span>
           <div className="min-w-0 flex-1">
             <h5 className="text-sm font-semibold text-text-primary">{td('locationTitle')}</h5>
             <p className="text-xs text-muted-foreground">{td('locationBody', { name })}</p>

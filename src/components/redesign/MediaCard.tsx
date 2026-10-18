@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
-import { TONE_CLASS } from '@/components/more/MoreLinkCard';
+import { ICON_CHIP_CLASS, TONE_CLASS } from '@/components/more/MoreLinkCard';
 import type { MoreTone } from '@/components/more/moreLinks';
 
 /**
@@ -45,7 +45,7 @@ export function MediaCard({
         data-testid={testId}
         className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border-subtle bg-surface-default shadow-sm transition-[border-color,box-shadow] hover:border-border-brand hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
       >
-        <div className={`relative aspect-[16/10] w-full overflow-hidden ${photo ? 'bg-surface-subtle' : TONE_CLASS[tone]}`}>
+        <div className={`relative aspect-[16/10] w-full overflow-hidden ${photo ? 'bg-surface-subtle' : ICON_CHIP_CLASS}`}>
           {photo ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={photo} alt="" width={360} height={225} loading="lazy" decoding="async" className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />

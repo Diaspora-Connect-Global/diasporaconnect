@@ -24,7 +24,7 @@ export const NewPostsBanner: React.FC<NewPostsBannerProps> = ({ count, onClick }
       <button
         type="button"
         onClick={onClick}
-        className="pointer-events-auto bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-full shadow-md transition-colors flex items-center gap-2"
+        className="pointer-events-auto bg-surface-brand hover:bg-surface-brand/90 text-white text-sm font-medium px-4 py-2 rounded-full shadow-md transition-colors flex items-center gap-2"
         aria-label={label}
       >
         <svg

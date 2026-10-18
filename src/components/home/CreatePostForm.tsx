@@ -464,7 +464,7 @@ export default function CreatePostForm({
             className="p-2 rounded-full hover:bg-surface-subtle text-text-secondary hover:text-text-primary transition-colors disabled:opacity-50 border-0 bg-transparent min-w-0"
             title="Mention someone"
           >
-            <AtSign className="w-5 h-5 text-blue-500" />
+            <AtSign className="w-5 h-5 text-text-brand" />
           </ButtonType3>
 
           {/* Visibility selector */}

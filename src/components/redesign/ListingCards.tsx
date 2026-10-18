@@ -4,7 +4,7 @@ import type { LucideIcon } from 'lucide-react';
 import { Briefcase, Building2, CalendarDays, GraduationCap, HandHeart, Landmark, MapPin, Package, TrendingUp, Wrench } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { TONE_CLASS } from '@/components/more/MoreLinkCard';
+import { ICON_CHIP_CLASS, TONE_CLASS } from '@/components/more/MoreLinkCard';
 import { MediaCard } from './MediaCard';
 import { OpportunityBookmark } from './OpportunityBookmark';
 import { CATEGORY_PHOTOS } from '@/lib/redesignImages';
@@ -84,7 +84,7 @@ export function JobCard({ item, testId }: { item: OpportunityItem; testId?: stri
         className="group flex h-full min-w-0 flex-col gap-3 rounded-2xl border border-border-subtle bg-surface-default p-3.5 shadow-sm transition-[border-color,box-shadow] hover:border-border-brand hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
       >
         <div className="flex min-w-0 items-start gap-3">
-          <span className={`grid size-10 shrink-0 place-items-center rounded-xl ${TONE_CLASS.warning}`}>
+          <span className={`grid size-10 shrink-0 place-items-center rounded-xl ${ICON_CHIP_CLASS}`}>
             <Briefcase className="size-5" strokeWidth={1.75} aria-hidden />
           </span>
           <div className="min-w-0 flex-1">

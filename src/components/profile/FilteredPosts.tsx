@@ -364,7 +364,7 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
               onClick={() => setActiveTab(tab.id)}
               className={`w-full text-left flex items-center justify-center gap-2 p-2 transition-colors cursor-pointer border-t first:border-t-0 lg:justify-start lg:gap-3 lg:rounded-xl lg:border-0 lg:px-4 lg:py-3 ${
                 active
-                  ? 'text-brand bg-brand/5 font-medium border-b-2 border-b-border-brand lg:border-b-0 lg:bg-[#EAF1FD] lg:text-[#1F5FD6]'
+                  ? 'text-brand bg-brand/5 font-medium border-b-2 border-b-border-brand lg:border-b-0 lg:bg-surface-brand-light lg:text-text-brand'
                   : 'text-text-primary hover:bg-muted lg:text-[#1B2A5E] lg:hover:bg-[#F3F6FC]'
               }`}
             >

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { ArrowRight, ChevronDown, SlidersHorizontal } from 'lucide-react';
-import { TONE_CLASS } from '@/components/more/MoreLinkCard';
+import { ICON_CHIP_CLASS } from '@/components/more/MoreLinkCard';
 import { CATEGORY_PHOTOS } from '@/lib/redesignImages';
 import { DISCOVER_CATEGORY_KEYS, DISCOVER_ICONS, DISCOVER_TONES, type DiscoverCategoryKey, type DiscoverSort } from './discoverCategories';
 
@@ -79,7 +79,7 @@ export function RefinePanel({
               <li key={k}>
                 <label className="flex cursor-pointer items-center justify-between gap-2 rounded-md px-1 py-1.5 text-sm text-text-primary hover:bg-surface-subtle">
                   <span className="flex min-w-0 items-center gap-2.5">
-                    <span className={`grid size-7 shrink-0 place-items-center rounded-lg ${TONE_CLASS[DISCOVER_TONES[k]]}`}>
+                    <span className={`grid size-7 shrink-0 place-items-center rounded-lg ${ICON_CHIP_CLASS}`}>
                       <Icon className="size-3.5" strokeWidth={2} aria-hidden />
                     </span>
                     <span className="truncate">{tCat(k)}</span>

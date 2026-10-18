@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { ChevronRight } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
-import { TONE_CLASS } from '@/components/more/MoreLinkCard';
+import { ICON_CHIP_CLASS } from '@/components/more/MoreLinkCard';
 import type { MoreTone } from '@/components/more/moreLinks';
 
 const STATUS_TEXT: Record<MoreTone, string> = {
@@ -46,7 +46,7 @@ export function ActivityCard({
   const body = (
     <>
       <span className="flex min-w-0 items-start gap-3">
-        <span className={`grid size-11 shrink-0 place-items-center rounded-full ${TONE_CLASS[tone]}`}>
+        <span className={`grid size-11 shrink-0 place-items-center rounded-full ${ICON_CHIP_CLASS}`}>
           <Icon className="size-5" strokeWidth={1.75} aria-hidden />
         </span>
         <span className="min-w-0 flex-1 break-words">

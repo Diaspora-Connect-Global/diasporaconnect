@@ -276,8 +276,8 @@
   --surface-default: #ffffff;
   --surface-subtle: #f6f6f6;
   --surface-disabled: #e3e3e3;
-  --surface-brand: #004c9c;
-  --surface-brand-light: #ccdbeb;
+  --surface-brand: #186682;
+  --surface-brand-light: #d1e0e6;
   --surface-brand-subtle: #f8fafc;
   --surface-danger: #ffebeb;
   --surface-warning: #fff7eb;
@@ -288,7 +288,7 @@
   --text-secondary: #a7a7a7;
   --text-tertiary: #d1d1d1;
   --text-white: #ffffff;
-  --text-brand: #004c9c;
+  --text-brand: #186682;
   --text-danger: #c20008;
   --text-warning: #cb3500;
   --text-success: #008236;
@@ -298,7 +298,7 @@
   --border-darker: #757575;
   --border-subtle: #e3e3e3;
   --border-disabled: #d1d1d1;
-  --border-brand: #004c9c;
+  --border-brand: #186682;
   --border-danger: #e7000c;
   --border-warning: #e7000c;
   --border-success: #e7000c;
@@ -318,7 +318,7 @@
   --chat-read-receipt: #34b7f1;
   --chat-online-dot: #22c55e;
   --chat-online-text: #16a34a;
-  --chat-parent-bg: #004c9c;
+  --chat-parent-bg: #186682;
   --chat-parent-text: #ffffff;
 }
 
@@ -360,8 +360,8 @@
   --surface-default: #191919;
   --surface-subtle: #545454;
   --surface-disabled: #757575;
-  --surface-brand: #004c9c;
-  --surface-brand-light: #ccdbeb;
+  --surface-brand: #186682;
+  --surface-brand-light: #d1e0e6;
   --surface-brand-subtle: #f8fafc;
   --surface-danger: #ffc9c9;
   --surface-warning: #ffd7a9;
@@ -372,7 +372,7 @@
   --text-secondary: #757575;
   --text-tertiary: #545454;
   --text-white: #ffffff;
-  --text-brand: #004c9c;
+  --text-brand: #186682;
   --text-danger: #e7000c;
   --text-warning: #f64a00;
   --text-success: #00a73e;
@@ -382,7 +382,7 @@
   --border-darker: #f6f6f6;
   --border-subtle: #545454;
   --border-disabled: #757575;
-  --border-brand: #004c9c;
+  --border-brand: #186682;
   --border-danger: #e7000c;
   --border-warning: #e7000c;
   --border-success: #e7000c;
@@ -402,7 +402,7 @@
   --chat-read-receipt: #34b7f1;
   --chat-online-dot: #22c55e;
   --chat-online-text: #4ade80;
-  --chat-parent-bg: #004c9c;
+  --chat-parent-bg: #186682;
   --chat-parent-text: #ffffff;
 }
 

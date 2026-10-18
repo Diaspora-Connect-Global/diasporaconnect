@@ -46,7 +46,7 @@ export function KYCVerification({ verified }: KYCVerificationProps) {
   const openModal = () => modalRef.current?.open();
 
   const linkClass =
-    "mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-[#1F5FD6] cursor-pointer rounded-md hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F5FD6]";
+    "mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-text-brand cursor-pointer rounded-md hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand";
 
   let body;
   if (isVerified) {
@@ -64,7 +64,7 @@ export function KYCVerification({ verified }: KYCVerificationProps) {
   } else if (isPending) {
     body = (
       <>
-        <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#1F5FD6]">
+        <span className="inline-flex items-center gap-2 text-sm font-semibold text-text-brand">
           <ClockIcon size={22} weight="fill" aria-hidden />
           {t('pending')}
         </span>
@@ -108,7 +108,7 @@ export function KYCVerification({ verified }: KYCVerificationProps) {
       <Card className="h-full gap-0 py-0 rounded-2xl border-[#E7ECF5] shadow-none">
         <CardContent className="p-5">
           <h2 className="flex items-center gap-2 text-base font-semibold text-[#1B2A5E] dark:text-text-primary">
-            <ShieldCheckIcon size={20} className="text-[#1F5FD6]" aria-hidden />
+            <ShieldCheckIcon size={20} className="text-text-brand" aria-hidden />
             {t('title')}
           </h2>
           <div className="mt-3">{body}</div>

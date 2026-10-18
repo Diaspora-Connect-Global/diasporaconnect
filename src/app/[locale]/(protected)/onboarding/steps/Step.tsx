@@ -81,7 +81,7 @@ export const Step: React.FC<StepProps> = ({
                         type="submit" 
                         disabled={isNextDisabled}  
                         variant="outline" 
-                        className="px-8 h-12 bg-surface-brand hover:bg-blue-700 text-white rounded-full"
+                        className="px-8 h-12 bg-surface-brand hover:bg-surface-brand/90 text-white rounded-full"
                     >
                         {nextButtonText}
                     </Button>

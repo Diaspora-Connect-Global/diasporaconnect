@@ -28,7 +28,7 @@ export function PersonalDetails({ data }: PersonalDetailsProps) {
         <Card className="h-full gap-0 py-0 rounded-2xl border-[#E7ECF5] shadow-none">
             <CardContent className="p-5">
                 <h2 className="flex items-center gap-2 text-base font-semibold text-[#1B2A5E] dark:text-text-primary">
-                    <CalendarBlankIcon size={20} className="text-[#1F5FD6]" aria-hidden />
+                    <CalendarBlankIcon size={20} className="text-text-brand" aria-hidden />
                     {t('whenJoined')}
                 </h2>
                 <p className="mt-2 text-sm text-text-secondary">

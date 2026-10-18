@@ -56,7 +56,7 @@ const ACCOUNT_PANEL_ITEMS: readonly NavItem[] = [
 ];
 
 const ROW =
-  'flex min-h-12 w-full items-center gap-4 rounded-xl px-4 py-3 text-left transition-colors hover:bg-[#EEF3FC] focus-visible:bg-[#EEF3FC] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004c9c]';
+  'flex min-h-12 w-full items-center gap-4 rounded-xl px-4 py-3 text-left transition-colors hover:bg-surface-brand-light/60 focus-visible:bg-surface-brand-light/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand';
 
 function PanelAvatar() {
   const url = useUserStore((s) => s.user?.avatarUrl);
@@ -68,7 +68,7 @@ function PanelAvatar() {
       src={src || '/PROFILE.png'}
       alt=""
       onError={onError}
-      className="size-14 shrink-0 rounded-full object-cover ring-2 ring-[#DCE5F5]"
+      className="size-14 shrink-0 rounded-full object-cover ring-2 ring-surface-brand-light"
     />
   );
 }
@@ -92,9 +92,9 @@ function MenuRow({
         prefetch={false}
         onClick={onNavigate}
         aria-current={active ? 'page' : undefined}
-        className={`${ROW} ${active ? 'bg-[#EAF1FD]' : ''}`}
+        className={`${ROW} ${active ? 'bg-surface-brand-light' : ''}`}
       >
-        <Icon size={24} weight="regular" className={`shrink-0 ${NAVY}`} aria-hidden />
+        <Icon size={24} weight="regular" className="shrink-0 text-text-brand" aria-hidden />
         <span className={`min-w-0 flex-1 truncate text-base font-normal ${NAVY}`}>{label}</span>
         <CaretRight size={18} weight="regular" className={`shrink-0 ${NAVY}`} aria-hidden />
       </Link>
@@ -141,7 +141,7 @@ export function AccountMenuPanel() {
       <PopoverPrimitive.Root open={open} onOpenChange={setOpen} modal>
         <PopoverPrimitive.Trigger
           aria-label={t('profile')}
-          className="rounded-full p-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#004c9c]"
+          className="rounded-full p-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
         >
           <MyAvatar />
         </PopoverPrimitive.Trigger>
@@ -164,7 +164,7 @@ export function AccountMenuPanel() {
               </div>
               <PopoverPrimitive.Close
                 aria-label={tCommon('closeMenu')}
-                className={`flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-[#EEF3FC] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#004c9c] ${NAVY}`}
+                className={`flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-surface-brand-light/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-text-brand ${NAVY}`}
               >
                 <X size={22} weight="regular" aria-hidden />
               </PopoverPrimitive.Close>
@@ -195,7 +195,7 @@ export function AccountMenuPanel() {
                     }}
                     className={ROW}
                   >
-                    <SignOut size={24} weight="regular" className={`shrink-0 ${NAVY}`} aria-hidden />
+                    <SignOut size={24} weight="regular" className="shrink-0 text-text-brand" aria-hidden />
                     <span className={`min-w-0 flex-1 truncate text-base font-normal ${NAVY}`}>{tPanel('signOut')}</span>
                   </button>
                 </li>

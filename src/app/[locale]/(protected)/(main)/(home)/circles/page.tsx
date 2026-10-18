@@ -16,7 +16,7 @@ import {
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { PageHero } from '@/components/redesign/PageHero';
 import { REDESIGN_IMAGES } from '@/lib/redesignImages';
-import { TONE_CLASS } from '@/components/more/MoreLinkCard';
+import { ICON_CHIP_CLASS } from '@/components/more/MoreLinkCard';
 import { MY_CIRCLES, SEARCH_CIRCLES } from '@/services/gql/circles';
 import type {
   MyCirclesData,
@@ -203,7 +203,7 @@ export default function CirclesPage() {
             <ul className="space-y-4">
               {how.map(({ icon: Icon, tone, title, body }) => (
                 <li key={title} className="flex items-start gap-3">
-                  <span className={`grid size-9 shrink-0 place-items-center rounded-lg ${TONE_CLASS[tone]}`}>
+                  <span className={`grid size-9 shrink-0 place-items-center rounded-lg ${ICON_CHIP_CLASS}`}>
                     <Icon className="size-4" aria-hidden />
                   </span>
                   <span className="min-w-0">

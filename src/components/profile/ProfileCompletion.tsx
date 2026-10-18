@@ -26,7 +26,7 @@ export function ProfileCompletion({ percentage, onCompleteProfile }: ProfileComp
             <CardContent className="p-5">
                 <div className="flex items-center justify-between gap-3">
                     <h2 className="flex items-center gap-2 text-base font-semibold text-[#1B2A5E] dark:text-text-primary">
-                        <UserIcon size={20} className="text-[#1F5FD6]" aria-hidden />
+                        <UserIcon size={20} className="text-text-brand" aria-hidden />
                         {t('title')}
                     </h2>
                     <span className="text-xs text-text-secondary whitespace-nowrap">
@@ -42,7 +42,7 @@ export function ProfileCompletion({ percentage, onCompleteProfile }: ProfileComp
                     <button
                         type="button"
                         onClick={onCompleteProfile}
-                        className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-[#1F5FD6] cursor-pointer rounded-md hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F5FD6]"
+                        className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-text-brand cursor-pointer rounded-md hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
                     >
                         {t('completeYourProfile')}
                         <ArrowRightIcon size={16} aria-hidden />

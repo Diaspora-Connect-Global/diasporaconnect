@@ -19,7 +19,7 @@ import { SEARCH_USERS } from '@/services/gql/connection';
 import { displayName } from '@/lib/displayName';
 import { profileUrl } from '@/lib/profileUrl';
 import { toCdnUrl } from '@/lib/cdn';
-import { TONE_CLASS } from '@/components/more/MoreLinkCard';
+import { ICON_CHIP_CLASS, TONE_CLASS } from '@/components/more/MoreLinkCard';
 
 const SILENT = { context: { silentErrors: true } } as const;
 const SUGGESTIONS = 24;
@@ -310,7 +310,7 @@ export function PeopleView() {
               {links.map(({ href, icon: Icon, tone, title, hint }) => (
                 <li key={href}>
                   <Link href={href} prefetch={false} className="flex min-w-0 items-center gap-3 rounded-lg px-2 py-3 hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-text-brand">
-                    <span className={`grid size-9 shrink-0 place-items-center rounded-lg ${TONE_CLASS[tone]}`}>
+                    <span className={`grid size-9 shrink-0 place-items-center rounded-lg ${ICON_CHIP_CLASS}`}>
                       <Icon className="size-4" aria-hidden />
                     </span>
                     <span className="min-w-0 flex-1">

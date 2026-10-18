@@ -150,12 +150,12 @@ userData
                   aria-selected={active}
                   onClick={() => setActiveTab(tab.id)}
                   className={`relative shrink-0 whitespace-nowrap px-4 lg:px-6 py-3 lg:py-4 text-sm lg:text-[15px] font-medium cursor-pointer transition-colors ${
-                    active ? 'text-[#1F5FD6]' : 'text-[#1B2A5E]/80 hover:text-[#1B2A5E]'
+                    active ? 'text-text-brand' : 'text-[#1B2A5E]/80 hover:text-[#1B2A5E]'
                   }`}
                 >
                   {tab.label}
                   {active && (
-                    <span aria-hidden className="absolute inset-x-3 bottom-0 h-[3px] rounded-full bg-[#1F5FD6]" />
+                    <span aria-hidden className="absolute inset-x-3 bottom-0 h-[3px] rounded-full bg-surface-brand" />
                   )}
                 </button>
               );

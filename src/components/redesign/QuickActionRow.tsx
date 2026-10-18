@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import { ChevronRight } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
-import { TONE_CLASS } from '@/components/more/MoreLinkCard';
+import { ICON_CHIP_CLASS } from '@/components/more/MoreLinkCard';
 import type { MoreTone } from '@/components/more/moreLinks';
 
 /** One row of the Quick actions list: icon chip, title, one-line description. */
@@ -24,7 +24,7 @@ export function QuickActionRow({
       prefetch={false}
       className="group flex items-center gap-3 rounded-xl border border-border-subtle bg-surface-default p-3 transition-[border-color,box-shadow] hover:border-border-brand hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
     >
-      <span className={`grid size-10 shrink-0 place-items-center rounded-full ${TONE_CLASS[tone]}`}>
+      <span className={`grid size-10 shrink-0 place-items-center rounded-full ${ICON_CHIP_CLASS}`}>
         <Icon className="size-5" strokeWidth={1.75} aria-hidden />
       </span>
       <span className="min-w-0 flex-1">

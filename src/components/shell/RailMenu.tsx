@@ -6,7 +6,7 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { ChevronRight, Menu, X, type LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
-import { TONE_CLASS } from '@/components/more/MoreLinkCard';
+import { ICON_CHIP_CLASS, TONE_CLASS } from '@/components/more/MoreLinkCard';
 import type { MoreTone } from '@/components/more/moreLinks';
 
 /**
@@ -127,7 +127,7 @@ export function DrawerRow({
     <li>
       <DialogPrimitive.Close asChild>
         <Link href={href} prefetch={false} data-testid={testId} className={`flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 hover:bg-surface-subtle ${FOCUS}`}>
-          <span className={`grid size-8 shrink-0 place-items-center rounded-full ${TONE_CLASS[tone]}`}>
+          <span className={`grid size-8 shrink-0 place-items-center rounded-full ${ICON_CHIP_CLASS}`}>
             <Icon className="size-4" strokeWidth={1.75} aria-hidden />
           </span>
           <span className="min-w-0 flex-1">

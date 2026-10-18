@@ -1,7 +1,7 @@
 import { jsPDF } from "jspdf";
 import QRCode from "qrcode";
 
-const BRAND = "#004c9c";
+const BRAND = "#186682";
 const INK = "#0f172a";
 const MUTED = "#64748b";
 const LINE = "#e2e8f0";

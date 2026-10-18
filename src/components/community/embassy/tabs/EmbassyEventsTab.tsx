@@ -282,15 +282,15 @@ function EventCalendar({
                 className={[
                   'caption-medium relative flex h-8 items-center justify-center rounded-md',
                   todayCell
-                    ? 'bg-blue-600 font-semibold text-white'
+                    ? 'bg-surface-brand font-semibold text-white'
                     : eventCell
-                      ? 'bg-blue-50 text-blue-700'
+                      ? 'bg-surface-brand-light text-text-brand'
                       : 'text-text-primary',
                 ].join(' ')}
               >
                 {day}
                 {eventCell && !todayCell && (
-                  <span className="absolute bottom-1 size-1 rounded-full bg-blue-500" />
+                  <span className="absolute bottom-1 size-1 rounded-full bg-surface-brand" />
                 )}
               </span>
             );
@@ -384,7 +384,7 @@ function EventRow({
             <Link
               href={detailHref}
               scroll={false}
-              className="label-medium rounded-lg bg-blue-600 px-4 py-1.5 text-white transition-colors hover:bg-blue-700"
+              className="label-medium rounded-lg bg-surface-brand px-4 py-1.5 text-white transition-colors hover:bg-surface-brand/90"
             >
               View Details
             </Link>
@@ -566,7 +566,7 @@ export function EmbassyEventsTab({ props }: { props: EmbassyViewProps }) {
                         className={[
                           'label-medium rounded-full px-4 py-1.5 transition-colors',
                           active
-                            ? 'bg-blue-600 text-white'
+                            ? 'bg-surface-brand text-white'
                             : 'border border-border-subtle text-text-secondary hover:bg-surface-subtle',
                         ].join(' ')}
                       >

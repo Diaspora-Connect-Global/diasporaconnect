@@ -813,8 +813,8 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
               <CardContent className="p-5">
                 <h2 className="label-large text-text-primary">{t('attendeesTitle')}</h2>
                 <div className="mt-4 flex items-center gap-3 rounded-lg border border-border-subtle bg-surface-subtle p-4">
-                  <span className="flex size-11 flex-shrink-0 items-center justify-center rounded-full bg-blue-50">
-                    <Users className="size-5 text-blue-600" aria-hidden />
+                  <span className="flex size-11 flex-shrink-0 items-center justify-center rounded-full bg-surface-brand-light/60">
+                    <Users className="size-5 text-text-brand" aria-hidden />
                   </span>
                   <div>
                     <p className="label-medium text-text-primary">{t('attendeesGoing', { count: going })}</p>
