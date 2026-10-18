@@ -41,6 +41,8 @@ async function stubNavigation(page: Page) {
     await page.route(/\/en\/(@[^/?]+|search)(\?.*)?$/, (route) => route.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><title>stub</title>' }));
 }
 
+// Scoped to the search dialog: pages also have <select> filters (role combobox), e.g. Home's "All posts".
+const searchInput = (page: Page) => page.getByRole('dialog').getByRole('combobox');
 const trigger = (page: Page) => page.locator('header button[aria-label="Search"]:visible');
 
 async function ready(page: Page) {
@@ -53,12 +55,12 @@ test('desktop: opens as a centred panel, shows grouped results, no id on screen'
     await trigger(page).click();
     const dialog = page.getByRole('dialog', { name: 'Search' });
     await expect(dialog).toBeVisible();
-    await expect(page.getByRole('combobox')).toBeFocused();
+    await expect(searchInput(page)).toBeFocused();
     const box = (await dialog.boundingBox())!;
     expect(box.width).toBeLessThanOrEqual(600);
     expect(Math.abs(box.x + box.width / 2 - 640)).toBeLessThan(4);
 
-    await page.getByRole('combobox').fill('kof');
+    await searchInput(page).fill('kof');
     const list = page.getByRole('listbox', { name: 'Search results' });
     await expect(list.getByRole('group', { name: 'People' })).toBeVisible();
     await expect(list.getByRole('group', { name: 'Opportunities' })).toBeVisible();
@@ -75,9 +77,9 @@ test('keyboard: arrows move, Esc closes and returns focus to the trigger', async
     const { page } = await open(browser, '/home', DATA as never, { width: 1280, height: 900 });
     await ready(page);
     await trigger(page).click();
-    const input = page.getByRole('combobox');
+    const input = searchInput(page);
     await input.fill('kof');
-    const options = page.getByRole('option');
+    const options = page.getByRole('dialog').getByRole('option');
     await expect(options.first()).toBeVisible();
     await input.press('ArrowDown');
     await expect(options.nth(0)).toHaveAttribute('aria-selected', 'true');
@@ -97,9 +99,9 @@ test('Enter opens the highlighted result', async () => {
     await ready(page);
     await stubNavigation(page);
     await trigger(page).click();
-    const input = page.getByRole('combobox');
+    const input = searchInput(page);
     await input.fill('kof');
-    await expect(page.getByRole('option').first()).toBeVisible();
+    await expect(page.getByRole('dialog').getByRole('option').first()).toBeVisible();
     await input.press('ArrowDown');
     await input.press('Enter');
     await expect(page).toHaveURL(/\/@kofi/, { timeout: 90_000 });
@@ -111,7 +113,7 @@ test('See all results goes to /search?q=', async () => {
     await ready(page);
     await stubNavigation(page);
     await trigger(page).click();
-    await page.getByRole('combobox').fill('kof');
+    await searchInput(page).fill('kof');
     await page.getByRole('option', { name: /See all results for “kof”/ }).click();
     await expect(page).toHaveURL(/\/search\?q=kof/, { timeout: 90_000 });
     await page.context().close();
@@ -121,7 +123,7 @@ test('debounces: typing fast sends one query set, and shows the empty state', as
     const { page, graphql } = await open(browser, '/home', DATA as never, { width: 1280, height: 900 });
     await ready(page);
     await trigger(page).click();
-    const input = page.getByRole('combobox');
+    const input = searchInput(page);
     await input.pressSequentially('zzqx', { delay: 30 });
     await expect(page.getByText('No results for “zzqx”').first()).toBeVisible();
     const asked = graphql.calls.filter((c) => c.name === 'SearchUsers').map((c) => (c.variables.searchUsersInput as { query: string }).query);
@@ -137,7 +139,7 @@ test('error state with retry', async () => {
     const { page } = await open(browser, '/home', { SearchUsers: boom(DATA.SearchUsers({ searchUsersInput: { query: 'ko' } })), SearchOpportunities: boom({ searchOpportunities: { total: 0, opportunities: [] } }), SearchEvents: boom({ searchEvents: { total: 0, events: [] } }) } as never, { width: 1280, height: 900 });
     await ready(page);
     await trigger(page).click();
-    await page.getByRole('combobox').fill('kof');
+    await searchInput(page).fill('kof');
     await expect(page.getByRole('dialog').getByRole('alert')).toContainText("Search didn't work");
     fail = false;
     await page.getByRole('button', { name: 'Try again' }).click();
@@ -154,10 +156,10 @@ test('phone 360: full-screen sheet, 16px input, no horizontal scroll, long names
     const box = (await dialog.boundingBox())!;
     expect(Math.round(box.width)).toBe(360);
     expect(Math.round(box.height)).toBe(740);
-    const input = page.getByRole('combobox');
+    const input = searchInput(page);
     expect(await input.evaluate((el) => getComputedStyle(el).fontSize)).toBe('16px');
     await input.fill('kof');
-    await expect(page.getByRole('option').first()).toBeVisible();
+    await expect(page.getByRole('dialog').getByRole('option').first()).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     expect(await dialog.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
     // Every target is at least 24px.
@@ -171,8 +173,8 @@ test('Tab stays inside the dialog', async () => {
     const { page } = await open(browser, '/home', DATA as never, { width: 1280, height: 900 });
     await ready(page);
     await trigger(page).click();
-    await page.getByRole('combobox').fill('kof');
-    await expect(page.getByRole('option').first()).toBeVisible();
+    await searchInput(page).fill('kof');
+    await expect(page.getByRole('dialog').getByRole('option').first()).toBeVisible();
     for (let i = 0; i < 8; i++) {
         await page.keyboard.press('Tab');
         expect(await page.evaluate(() => !!document.activeElement?.closest('[role=dialog]'))).toBe(true);
@@ -187,11 +189,11 @@ for (const width of [360, 768, 1280]) {
         const { page } = await open(browser, '/home', DATA as never, { width, height: width === 1280 ? 900 : 780 });
         await ready(page);
         await trigger(page).click();
-        await page.getByRole('combobox').fill('kof');
-        await expect(page.getByRole('option').first()).toBeVisible();
-        await page.getByRole('combobox').press('ArrowDown');
+        await searchInput(page).fill('kof');
+        await expect(page.getByRole('dialog').getByRole('option').first()).toBeVisible();
+        await searchInput(page).press('ArrowDown');
         await page.screenshot({ path: `.artifacts/search-modal/results-${width}.png` });
-        await page.getByRole('combobox').fill('');
+        await searchInput(page).fill('');
         await page.screenshot({ path: `.artifacts/search-modal/empty-${width}.png` });
         await page.context().close();
     });
