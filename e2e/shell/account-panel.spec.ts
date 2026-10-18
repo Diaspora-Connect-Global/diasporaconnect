@@ -47,7 +47,7 @@ async function open(viewport: { width: number; height: number }, profile: Record
     await wireNetwork(context, graphql);
     const page = await context.newPage();
     await page.goto('/en/home', { waitUntil: 'load' });
-    await expect(page.locator('header.h-app-top-down')).toBeVisible({ timeout: 90_000 });
+    await expect(page.locator('header.h-app-top-down')).toBeVisible({ timeout: 400_000 });
     return { page, context, graphql, authWrites };
 }
 
@@ -62,7 +62,7 @@ async function openPanel(page: Page) {
 
 test.describe('account panel', () => {
     // Real routes on a cold dev server compile on first hit.
-    test.describe.configure({ timeout: 240_000 });
+    test.describe.configure({ timeout: 600_000 });
     test('identity is a name and a handle, never an id; every link is a real page and none repeats the top nav', async () => {
         const { page, context } = await open({ width: 1280, height: 800 });
         await openPanel(page);
@@ -126,7 +126,7 @@ test.describe('account panel', () => {
         const { page, context } = await open({ width: 1280, height: 800 });
         await openPanel(page);
         await panel(page).getByRole('link', { name: 'Settings & privacy' }).click();
-        await expect(page).toHaveURL(/\/en\/settings/, { timeout: 200_000 });
+        await expect(page).toHaveURL(/\/en\/settings/, { timeout: 400_000 });
         await expect(page.getByRole('dialog', { name: 'Your account' })).toHaveCount(0);
         await context.close();
     });
