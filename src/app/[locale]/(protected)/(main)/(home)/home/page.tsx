@@ -958,6 +958,7 @@ export default function Home() {
         </h2>
         <FeedComposer avatarUrl={profile?.avatarUrl} />
         <CommunityFeed
+          scope="all"
           scrollRoot={feedScrollEl}
           onOpenMedia={handleOpenMedia}
           renderTop={(ctx) => <HomeFeedTop ctx={ctx} />}

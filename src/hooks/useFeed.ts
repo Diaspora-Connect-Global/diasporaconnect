@@ -69,6 +69,16 @@ export interface UseFeedOptions {
   hashtag?: string | null;
   /** AI-classified category label (e.g. "Politics"). Mutually exclusive with `hashtag`. */
   category?: string | null;
+  /**
+   * Newest-first instead of ranked order (`feed` query only; ignored by the
+   * ranked FOR_YOU / FOLLOWING branches).
+   */
+  chronological?: boolean;
+  /**
+   * Restrict a category feed to these author types (e.g. COMMUNITY, ASSOCIATION).
+   * Narrows only; ignored by every other branch.
+   */
+  authorTypes?: string[];
   initialLimit?: number;
   pageSize?: number;
 }
@@ -169,6 +179,8 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     feedType: feedTypeOverride,
     hashtag = null,
     category = null,
+    chronological = false,
+    authorTypes,
     initialLimit = INITIAL_LIMIT,
     pageSize = PAGE_SIZE,
   } = options;
@@ -177,6 +189,9 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
   const trimmedHashtag = (hashtag ?? '').trim();
   const isCategoryFeed = !isHashtagFeed && Boolean(category && category.trim());
   const trimmedCategory = (category ?? '').trim();
+  // Stable key so an inline array literal doesn't change the query variables every render.
+  const authorTypesKey = authorTypes && authorTypes.length ? authorTypes.join(',') : '';
+  const categoryAuthorTypes = useMemo(() => (authorTypesKey ? authorTypesKey.split(',') : undefined), [authorTypesKey]);
 
   const [mergedPosts, setMergedPosts] = useState<Post[]>([]);
   const [total, setTotal] = useState(0);
@@ -605,13 +620,14 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
 
   const feedInputBase = useMemo((): Omit<GetFeedInput, 'limit' | 'offset' | 'cursor' | 'refreshSeed'> => {
     const input: GetFeedInput = { type: resolvedFeedType };
+    if (chronological) input.chronological = true;
     // For You: personalized feed plus trending and discovery surfacing (backend GetFeedInput).
     // (Now handled by the recommendation branch — kept here only for TRENDING.)
     if (resolvedFeedType === 'TRENDING') {
       input.includeDiscovery = true;
     }
     return input;
-  }, [resolvedFeedType]);
+  }, [resolvedFeedType, chronological]);
 
   const initialFeedVariables = useMemo(
     () => ({
@@ -619,10 +635,11 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
         ...feedInputBase,
         limit: initialLimit,
         offset: 0,
-        clearHistory: true,
+        // A chronological feed must not wipe the viewer's seen-history (Home's ranking relies on it).
+        clearHistory: !chronological,
       } as GetFeedInput,
     }),
-    [feedInputBase, initialLimit]
+    [feedInputBase, initialLimit, chronological]
   );
 
   const {
@@ -660,7 +677,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     error: categoryError,
     refetch: refetchCategoryQuery,
   } = useQuery<GetPostsByCategoryData>(GET_POSTS_BY_CATEGORY, {
-    variables: { input: { category: trimmedCategory, limit: initialLimit, offset: 0 } },
+    variables: { input: { category: trimmedCategory, limit: initialLimit, offset: 0, ...(categoryAuthorTypes ? { authorTypes: categoryAuthorTypes } : {}) } },
     skip: !isCategoryFeed,
     notifyOnNetworkStatusChange: true,
     fetchPolicy: 'network-only',
@@ -759,7 +776,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
       const nextOffset = mergedPosts.length;
       fetchMoreCategory({
         variables: {
-          input: { category: trimmedCategory, limit: pageSize, offset: nextOffset },
+          input: { category: trimmedCategory, limit: pageSize, offset: nextOffset, ...(categoryAuthorTypes ? { authorTypes: categoryAuthorTypes } : {}) },
         },
       }).then((res) => {
         const c = res.data?.postsByCategory;
@@ -875,6 +892,7 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     fetchMoreFeed,
     fetchMoreHashtag,
     fetchMoreCategory,
+    categoryAuthorTypes,
     feedInputBase,
     fallbackActive,
     hasMore,

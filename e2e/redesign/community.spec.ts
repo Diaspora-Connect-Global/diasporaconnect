@@ -2,6 +2,7 @@
 import { test, expect, type Browser } from '@playwright/test';
 import { openBrowser } from '../support/browser';
 import { UUID, event, FUTURE, open, post } from './fixtures';
+import { feedByType } from './communityFeedFixtures';
 
 let browser: Browser;
 test.beforeAll(async () => {
@@ -18,6 +19,8 @@ const DATA = {
     RedesignMyGroupIds: { getMyGroups: { __typename: 'GroupList', groups: [{ __typename: 'Group', id: 'g-2' }] } },
     RecommendedPeople: { recommendedPeople: { __typename: 'PeopleRecommendationPage', rankingStrategy: 'e2e', items: [{ __typename: 'PeopleRecommendation', profile: { __typename: 'ProfileSummary', userId: '00000000-0000-4000-8000-0000000a0c01', firstName: 'Kwame', lastName: 'Asante', avatarUrl: null, headline: 'Software Engineer', bio: null, sector: null, countryOfOrigin: 'GH', residenceCountry: 'DE', connectionStatus: 'NONE', connectionId: null, isVerified: false, verificationBadge: null, trustScore: null, trustTier: null }, score: 1, sharedCommunityCount: 0, sharedCommunityNames: [], mutualConnectionCount: 0, mutualConnectionNames: [], matchReason: null }] } },
     GetTrendingHashtags: { trendingHashtags: [{ __typename: 'Hashtag', id: 'h1', tag: 'diaspora', usageCount: 7 }] },
+    // The Community feed reads `feed(type: COMMUNITIES_AND_ASSOCIATIONS)`, no longer the recommender.
+    GetFeed: feedByType([]),
 };
 
 test('hero, left navigation with real pages only, and your communities', async () => {
