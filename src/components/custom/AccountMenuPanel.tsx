@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, type ComponentType } from 'react';
-import Image from 'next/image';
-import * as DialogPrimitive from '@radix-ui/react-dialog';
+import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { useTranslations } from 'next-intl';
 import {
   BookmarkSimple,
@@ -104,8 +103,10 @@ function MenuRow({
 }
 
 /**
- * Account menu opened from the header avatar: a full-height panel that slides
- * in from the right (full screen on phones). Replaces the old Radix dropdown.
+ * Account menu opened from the header avatar: a dropdown card ANCHORED to the avatar
+ * (Radix Popover), as tall as its content, no dimmed backdrop. Modal for focus only:
+ * focus stays inside while open, Esc / outside click close it, focus returns to the
+ * avatar. It used to be a full-height dialog sheet, which looked heavy (owner, 2026-10-18).
  */
 export function AccountMenuPanel() {
   const t = useTranslations('home.header');
@@ -137,49 +138,39 @@ export function AccountMenuPanel() {
 
   return (
     <>
-      <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
-        <DialogPrimitive.Trigger
+      <PopoverPrimitive.Root open={open} onOpenChange={setOpen} modal>
+        <PopoverPrimitive.Trigger
           aria-label={t('profile')}
           className="rounded-full p-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#004c9c]"
         >
           <MyAvatar />
-        </DialogPrimitive.Trigger>
-        <DialogPrimitive.Portal>
-          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/30 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-          <DialogPrimitive.Content
+        </PopoverPrimitive.Trigger>
+        <PopoverPrimitive.Portal>
+          <PopoverPrimitive.Content
             data-testid="account-panel"
-            className="fixed inset-y-0 right-0 z-50 flex h-dvh w-full flex-col overflow-y-auto overflow-x-hidden bg-[#F8FAFD] shadow-xl duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-[420px]"
+            aria-label={tPanel('panelTitle')}
+            align="end"
+            side="bottom"
+            sideOffset={8}
+            collisionPadding={8}
+            className="z-50 flex max-h-[min(var(--radix-popover-content-available-height),calc(100dvh-5rem))] w-[calc(100vw-1rem)] origin-[var(--radix-popover-content-transform-origin)] flex-col overflow-y-auto overflow-x-hidden rounded-2xl border border-border-subtle bg-[#F8FAFD] shadow-xl duration-150 focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:w-[360px]"
           >
-            <DialogPrimitive.Title className="sr-only">{tPanel('panelTitle')}</DialogPrimitive.Title>
-            <DialogPrimitive.Description className="sr-only">{t('tagline')}</DialogPrimitive.Description>
-
-            {/* Brand header */}
-            <div className="flex items-start justify-between gap-2 px-4 pt-4 sm:px-6 sm:pt-6">
-              <div className="flex min-w-0 items-center gap-3">
-                <Image src="/brand-mark.svg" alt="" width={48} height={28} className="h-7 w-auto shrink-0" priority />
-                <div className="min-w-0">
-                  <p className={`truncate text-xl font-bold leading-none tracking-tight sm:text-2xl ${NAVY}`}>DiaspoPlug</p>
-                  <p className={`mt-1 truncate text-sm ${MUTED}`}>{t('tagline')}</p>
-                </div>
-              </div>
-              <DialogPrimitive.Close
-                aria-label={tCommon('closeMenu')}
-                className={`flex size-11 shrink-0 items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[#004c9c] ${NAVY}`}
-              >
-                <X size={26} weight="regular" aria-hidden />
-              </DialogPrimitive.Close>
-            </div>
-
             {/* Identity — who is signed in; the "My profile" row below is the link */}
-            <div className="mx-4 mt-4 flex items-center gap-4 rounded-2xl bg-white px-4 py-3 sm:mx-6" data-testid="account-identity">
+            <div className="mx-3 mt-3 flex items-center gap-3 rounded-2xl bg-white px-3 py-3" data-testid="account-identity">
               <PanelAvatar />
               <div className="min-w-0 flex-1">
                 <p className={`truncate text-lg font-semibold leading-tight ${NAVY}`}>{displayName}</p>
                 {fullName && username ? <p className={`truncate text-sm ${MUTED}`}>@{username}</p> : null}
               </div>
+              <PopoverPrimitive.Close
+                aria-label={tCommon('closeMenu')}
+                className={`flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-[#EEF3FC] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#004c9c] ${NAVY}`}
+              >
+                <X size={22} weight="regular" aria-hidden />
+              </PopoverPrimitive.Close>
             </div>
 
-            <nav className="px-4 pt-3 sm:px-6" aria-label={tPanel('panelTitle')}>
+            <nav className="px-3 pt-2" aria-label={tPanel('panelTitle')}>
               <ul className="space-y-1">
                 {ACCOUNT_PANEL_ITEMS.map((item) => (
                   <MenuRow
@@ -212,7 +203,7 @@ export function AccountMenuPanel() {
             </nav>
 
             {/* Footer */}
-            <footer className="mt-auto px-4 pb-6 pt-4 sm:px-6 sm:pb-8">
+            <footer className="px-4 pb-4 pt-2">
               <hr className="mb-3 border-[#E3E8F2]" />
               <div className={`flex flex-wrap items-center gap-x-4 gap-y-0 text-sm ${MUTED}`}>
                 <LocaleSwitcher selectClassName={`h-11 px-0 py-0 text-sm font-semibold data-[size=default]:h-11 ${MUTED}`} />
@@ -228,9 +219,9 @@ export function AccountMenuPanel() {
               </div>
               <p className={`mt-2 text-sm ${MUTED}`}>{t('copyright', { year: new Date().getFullYear() })}</p>
             </footer>
-          </DialogPrimitive.Content>
-        </DialogPrimitive.Portal>
-      </DialogPrimitive.Root>
+          </PopoverPrimitive.Content>
+        </PopoverPrimitive.Portal>
+      </PopoverPrimitive.Root>
 
       <LogoutConfirmModal open={confirmLogout} onCancel={() => setConfirmLogout(false)} onConfirm={logout} />
     </>

@@ -1,5 +1,5 @@
 /**
- * The account panel opened from the header avatar.
+ * The account panel opened from the header avatar: a dropdown anchored to it (Radix Popover).
  *
  * Drives the REAL authenticated shell (`/en/home`) with a seeded session and an
  * in-memory GraphQL double. Pins: the identity block shows a name and handle and
@@ -131,15 +131,18 @@ test.describe('account panel', () => {
         await context.close();
     });
 
-    test('phone 360: full-height sheet, no sideways scroll, 44 px targets, 14 px text, long names truncate', async () => {
+    test('phone 360: a card inside the screen (not a full-height sheet), no sideways scroll, 44 px targets, 14 px text, long names truncate', async () => {
         const long = 'Wolfeschlegelsteinhausenbergerdorff'.repeat(2);
         const { page, context } = await open({ width: 360, height: 740 }, { firstName: long, lastName: long });
         await openPanel(page);
 
         const box = await panel(page).boundingBox();
         expect(box).not.toBeNull();
-        expect(Math.round(box!.width)).toBe(360);
-        expect(Math.round(box!.height)).toBe(740);
+        expect(box!.x).toBeGreaterThanOrEqual(0);
+        expect(box!.x + box!.width).toBeLessThanOrEqual(360);
+        expect(box!.y).toBeGreaterThan(0);
+        expect(box!.y + box!.height).toBeLessThanOrEqual(740);
+        expect(box!.height).toBeLessThan(740);
 
         const m = await page.evaluate(() => {
             const dlg = document.querySelector('[data-testid="account-panel"]') as HTMLElement;
@@ -163,6 +166,27 @@ test.describe('account panel', () => {
         // The long name is clipped inside the identity card, not pushing it wider.
         const idBox = await page.getByTestId('account-identity').boundingBox();
         expect(idBox!.x + idBox!.width).toBeLessThanOrEqual(360);
+        await context.close();
+    });
+
+    test('desktop: a 360 px dropdown anchored to the avatar, as tall as its content, not top-to-bottom', async () => {
+        const { page, context } = await open({ width: 1280, height: 900 });
+        // Measure the avatar first: while the (modal) dropdown is open, the rest of the page is
+        // aria-hidden, so the trigger is no longer reachable by role.
+        await expect(trigger(page)).toBeVisible();
+        const avatar = (await trigger(page).boundingBox())!;
+        await openPanel(page);
+        // It opens with a short zoom-in; measure once the animation has settled.
+        await expect.poll(async () => Math.round((await panel(page).boundingBox())?.width ?? 0)).toBe(360);
+        const box = (await panel(page).boundingBox())!;
+        expect(box.height).toBeLessThan(900 - 80);
+        // Anchored: right edges line up with the avatar, and it opens just below it.
+        expect(Math.abs(box.x + box.width - (avatar.x + avatar.width))).toBeLessThanOrEqual(2);
+        expect(box.y).toBeGreaterThanOrEqual(avatar.y + avatar.height);
+        expect(box.y - (avatar.y + avatar.height)).toBeLessThanOrEqual(16);
+        // No dimmed backdrop over the page.
+        expect(await page.locator('[data-radix-popper-content-wrapper]').count()).toBe(1);
+        expect(await page.evaluate(() => Array.from(document.querySelectorAll('div')).some((d) => getComputedStyle(d).position === 'fixed' && d.getBoundingClientRect().width >= window.innerWidth && getComputedStyle(d).backgroundColor.startsWith('rgba(0, 0, 0')))).toBe(false);
         await context.close();
     });
 
