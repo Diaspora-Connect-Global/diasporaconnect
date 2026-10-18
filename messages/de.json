@@ -6786,5 +6786,31 @@
       "refused": "Das ist gerade nicht möglich.",
       "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
     }
+  },
+  "searchModal": {
+    "open": "Suchen",
+    "placeholder": "DiaspoPlug durchsuchen",
+    "dialogLabel": "Suche",
+    "results": "Suchergebnisse",
+    "close": "Schließen",
+    "clear": "Suche leeren",
+    "recent": "Letzte Suchen",
+    "clearRecent": "Alle löschen",
+    "hint": "Gib mindestens 2 Buchstaben ein, um nach Personen, Chancen und Events zu suchen.",
+    "searching": "Suche läuft…",
+    "error": "Die Suche hat nicht funktioniert",
+    "errorHint": "Prüfe deine Verbindung und versuche es erneut.",
+    "retry": "Erneut versuchen",
+    "noResultsTitle": "Keine Ergebnisse für „{query}“",
+    "noResultsHint": "Prüfe die Schreibweise oder probiere ein anderes Wort.",
+    "seeAll": "Alle Ergebnisse für „{query}“ anzeigen",
+    "similarNote": "Keine genauen Treffer. Ähnliche Ergebnisse werden angezeigt.",
+    "resultsCount": "{count, plural, =1 {1 Ergebnis} other {# Ergebnisse}}",
+    "keyboardHint": "↑ ↓ zum Wechseln · Enter zum Öffnen · Esc zum Schließen",
+    "groups": {
+      "people": "Personen",
+      "opportunity": "Chancen",
+      "event": "Events"
+    }
   }
 }

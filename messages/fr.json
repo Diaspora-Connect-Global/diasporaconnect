@@ -6786,5 +6786,31 @@
       "refused": "Ce n'est pas possible pour le moment.",
       "generic": "Une erreur s'est produite. Veuillez réessayer."
     }
+  },
+  "searchModal": {
+    "open": "Rechercher",
+    "placeholder": "Rechercher sur DiaspoPlug",
+    "dialogLabel": "Recherche",
+    "results": "Résultats de recherche",
+    "close": "Fermer",
+    "clear": "Effacer la recherche",
+    "recent": "Recherches récentes",
+    "clearRecent": "Tout effacer",
+    "hint": "Saisissez au moins 2 lettres pour chercher des personnes, des opportunités et des événements.",
+    "searching": "Recherche en cours…",
+    "error": "La recherche a échoué",
+    "errorHint": "Vérifiez votre connexion et réessayez.",
+    "retry": "Réessayer",
+    "noResultsTitle": "Aucun résultat pour « {query} »",
+    "noResultsHint": "Vérifiez l’orthographe ou essayez un autre mot.",
+    "seeAll": "Voir tous les résultats pour « {query} »",
+    "similarNote": "Aucune correspondance exacte. Voici des résultats similaires.",
+    "resultsCount": "{count, plural, =1 {1 résultat} other {# résultats}}",
+    "keyboardHint": "↑ ↓ pour naviguer · Entrée pour ouvrir · Échap pour fermer",
+    "groups": {
+      "people": "Personnes",
+      "opportunity": "Opportunités",
+      "event": "Événements"
+    }
   }
 }

@@ -6786,5 +6786,31 @@
       "refused": "That is not possible right now.",
       "generic": "Something went wrong. Please try again."
     }
+  },
+  "searchModal": {
+    "open": "Search",
+    "placeholder": "Search DiaspoPlug",
+    "dialogLabel": "Search",
+    "results": "Search results",
+    "close": "Close",
+    "clear": "Clear search",
+    "recent": "Recent searches",
+    "clearRecent": "Clear all",
+    "hint": "Type at least 2 letters to search people, opportunities and events.",
+    "searching": "Searching…",
+    "error": "Search didn't work",
+    "errorHint": "Check your connection and try again.",
+    "retry": "Try again",
+    "noResultsTitle": "No results for “{query}”",
+    "noResultsHint": "Check the spelling or try a different word.",
+    "seeAll": "See all results for “{query}”",
+    "similarNote": "No exact matches. Showing similar results.",
+    "resultsCount": "{count, plural, =1 {1 result} other {# results}}",
+    "keyboardHint": "↑ ↓ to move · Enter to open · Esc to close",
+    "groups": {
+      "people": "People",
+      "opportunity": "Opportunities",
+      "event": "Events"
+    }
   }
 }
