@@ -250,6 +250,17 @@
     "noConversations": "Nessuna conversazione ancora",
     "noGroups": "Nessun gruppo ancora"
   },
+  "composer": {
+    "title": "Crea post",
+    "description": "Scrivi un post e scegli chi può vederlo.",
+    "close": "Chiudi",
+    "discardTitle": "Scartare questo post?",
+    "discardBody": "Il testo scritto e le foto o i file aggiunti andranno persi.",
+    "discardConfirm": "Scarta",
+    "keepEditing": "Continua a modificare",
+    "draftRestored": "Bozza ripristinata: riprendi da dove avevi lasciato.",
+    "discard": "Scarta"
+  },
   "createPost": {
     "placeholder": "A cosa sta pensando, {name}?",
     "posting": "Pubblicazione in corso...",
