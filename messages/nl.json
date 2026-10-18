@@ -6868,5 +6868,10 @@
       "opportunity": "Kansen",
       "event": "Evenementen"
     }
+  },
+  "signInProvider": {
+    "google": "Doorgaan met Google",
+    "facebook": "Doorgaan met Facebook",
+    "twitter": "Doorgaan met X"
   }
 }

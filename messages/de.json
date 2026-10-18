@@ -6868,5 +6868,10 @@
       "opportunity": "Chancen",
       "event": "Events"
     }
+  },
+  "signInProvider": {
+    "google": "Weiter mit Google",
+    "facebook": "Weiter mit Facebook",
+    "twitter": "Weiter mit X"
   }
 }
