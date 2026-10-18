@@ -115,9 +115,9 @@ export function AddMembersModal({
     const query = searchQuery.toLowerCase();
     return allUsers.filter(
       (user) =>
-        user.firstName.toLowerCase().includes(query) ||
-        user.lastName.toLowerCase().includes(query) ||
-        user.email.toLowerCase().includes(query) ||
+        // No email: the gateway no longer returns other people's addresses (it was a leak).
+        (user.firstName ?? '').toLowerCase().includes(query) ||
+        (user.lastName ?? '').toLowerCase().includes(query) ||
         (user.sector && user.sector.toLowerCase().includes(query))
     );
   }, [allUsers, searchQuery]);
@@ -216,9 +216,6 @@ export function AddMembersModal({
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-text-primary truncate">
                         {user.firstName} {user.lastName}
-                      </p>
-                      <p className="text-xs text-text-secondary truncate">
-                        {user.email}
                       </p>
                       {user.sector && (
                         <p className="text-xs text-text-tertiary truncate">
