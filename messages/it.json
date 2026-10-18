@@ -6842,5 +6842,31 @@
     },
     "noMatch": "Nessuno corrisponde a “{query}”.",
     "verified": "Verificato"
+  },
+  "searchModal": {
+    "open": "Cerca",
+    "placeholder": "Cerca su DiaspoPlug",
+    "dialogLabel": "Ricerca",
+    "results": "Risultati della ricerca",
+    "close": "Chiudi",
+    "clear": "Cancella ricerca",
+    "recent": "Ricerche recenti",
+    "clearRecent": "Cancella tutto",
+    "hint": "Scrivi almeno 2 lettere per cercare persone, opportunità ed eventi.",
+    "searching": "Ricerca in corso…",
+    "error": "La ricerca non ha funzionato",
+    "errorHint": "Controlla la connessione e riprova.",
+    "retry": "Riprova",
+    "noResultsTitle": "Nessun risultato per “{query}”",
+    "noResultsHint": "Controlla l’ortografia o prova un’altra parola.",
+    "seeAll": "Vedi tutti i risultati per “{query}”",
+    "similarNote": "Nessuna corrispondenza esatta. Ecco risultati simili.",
+    "resultsCount": "{count, plural, =1 {1 risultato} other {# risultati}}",
+    "keyboardHint": "↑ ↓ per spostarti · Invio per aprire · Esc per chiudere",
+    "groups": {
+      "people": "Persone",
+      "opportunity": "Opportunità",
+      "event": "Eventi"
+    }
   }
 }

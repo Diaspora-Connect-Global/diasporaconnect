@@ -6842,5 +6842,31 @@
     },
     "noMatch": "Niemand gevonden voor ‘{query}’.",
     "verified": "Geverifieerd"
+  },
+  "searchModal": {
+    "open": "Zoeken",
+    "placeholder": "Zoek op DiaspoPlug",
+    "dialogLabel": "Zoeken",
+    "results": "Zoekresultaten",
+    "close": "Sluiten",
+    "clear": "Zoekopdracht wissen",
+    "recent": "Recente zoekopdrachten",
+    "clearRecent": "Alles wissen",
+    "hint": "Typ minstens 2 letters om te zoeken naar mensen, kansen en evenementen.",
+    "searching": "Zoeken…",
+    "error": "Zoeken is niet gelukt",
+    "errorHint": "Controleer je verbinding en probeer het opnieuw.",
+    "retry": "Opnieuw proberen",
+    "noResultsTitle": "Geen resultaten voor “{query}”",
+    "noResultsHint": "Controleer de spelling of probeer een ander woord.",
+    "seeAll": "Alle resultaten voor “{query}” bekijken",
+    "similarNote": "Geen exacte treffers. Dit zijn vergelijkbare resultaten.",
+    "resultsCount": "{count, plural, =1 {1 resultaat} other {# resultaten}}",
+    "keyboardHint": "↑ ↓ om te bewegen · Enter om te openen · Esc om te sluiten",
+    "groups": {
+      "people": "Mensen",
+      "opportunity": "Kansen",
+      "event": "Evenementen"
+    }
   }
 }
