@@ -1,99 +1,141 @@
-// steps/Step4.tsx - Phone Number
-import React, { useCallback, useMemo } from 'react';
+// steps/Step4.tsx - OTP Verification
+import React, { useEffect, useState } from 'react';
 import { FormData } from '../page';
 import { MultiStep } from '@/components/custom/multistep';
-import { LabelMedium } from '@/components/utils';
-import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/components/ui/input-group';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { useTranslations } from 'next-intl';
-import { CountryCodeSelect } from '@/components/custom/input';
-import { COUNTRIES } from '@/data/CountryCodesWithFlags';
-import { getRegistrationPhonePlaceholder } from '@/lib/registrationPhonePlaceholder';
-import {
-    getNationalNumberBounds,
-    getRegistrationPhoneInputStatus,
-    normalizeNationalPhoneInput,
-} from '@/lib/registrationPhoneValidation';
+import { ButtonType3 } from '@/components/custom/button';
 
 interface Step4Props {
     data: FormData;
     updateData: (data: Partial<FormData>) => void;
     nextStep: () => void;
     prevStep: () => void;
+    resendCode: () => Promise<void>;
     loading: boolean;
+    resendLoading: boolean;
     errorMessage?: string;
 }
 
-export const Step4: React.FC<Step4Props> = ({ data, loading, updateData, nextStep, prevStep, errorMessage }) => {
+export const Step4: React.FC<Step4Props> = ({
+    data,
+    loading,
+    nextStep,
+    prevStep,
+    updateData,
+    resendCode,
+    resendLoading,
+    errorMessage
+}) => {
     const t = useTranslations('onboarding');
     const tActions = useTranslations('actions');
 
-    const phonePlaceholder = useMemo(
-        () => getRegistrationPhonePlaceholder(data.country),
-        [data.country]
-    );
+    // The code goes to the email only: no phone is collected in onboarding.
 
-    const nationalDigits = useMemo(
-        () => normalizeNationalPhoneInput(data.phoneNumber || '', data.countryCode || ''),
-        [data.phoneNumber, data.countryCode]
-    );
+    const [value, setValue] = React.useState("");
+    const [codeExpirySeconds, setCodeExpirySeconds] = useState<number | null>(null);
+    const [timeLeft, setTimeLeft] = useState<number | null>(null);
+    const [isComplete, setIsComplete] = useState(false);
+    const [showResend, setShowResend] = useState(false);
 
-    const phoneInputStatus = useMemo(
-        () => getRegistrationPhoneInputStatus(data.countryCode, nationalDigits),
-        [data.countryCode, nationalDigits]
-    );
+    const COUNTDOWN_KEY = 'otp_resend_expires_at';
+    const OTP_EXPIRES_AT_KEY = 'otp_expires_at';
 
-    const bounds = useMemo(
-        () => getNationalNumberBounds(data.countryCode || ''),
-        [data.countryCode]
-    );
+    const handleChange = (newValue: string) => {
+        const numericValue = newValue.replace(/\D/g, '');
+        setValue(numericValue);
+        updateData({ verificationCode: numericValue });
+    };
 
-    const isNextDisabled =
-        !data.countryCode || phoneInputStatus !== 'valid';
+    const isNextDisabled = value.length !== 6;
 
-    const showShortHint =
-        Boolean(data.countryCode) &&
-        nationalDigits.length > 0 &&
-        phoneInputStatus === 'incomplete' &&
-        nationalDigits.length < bounds.min;
-
-    const inputRingClass = useMemo(() => {
-        if (!data.countryCode || nationalDigits.length === 0) {
-            return 'border-border-default';
+    // "Code expires in X:XX" countdown from otp_expires_at (set when OTP is sent)
+    useEffect(() => {
+        if (!sessionStorage.getItem(OTP_EXPIRES_AT_KEY)) {
+            setCodeExpirySeconds(null);
+            setShowResend(true);
+            return;
         }
-        if (phoneInputStatus === 'valid') {
-            return 'border-emerald-600/70 dark:border-emerald-500/70';
-        }
-        if (showShortHint) {
-            return 'border-amber-600/80 dark:border-amber-500/80';
-        }
-        return 'border-border-default';
-    }, [data.countryCode, nationalDigits.length, phoneInputStatus, showShortHint]);
-
-    const handlePhoneChange = useCallback(
-        (e: React.ChangeEvent<HTMLInputElement>) => {
-            if (!data.countryCode) {
-                return;
+        const updateExpiryCountdown = () => {
+            // Re-read every tick: a resend writes a new expiry while this step is open.
+            const expiresAt = sessionStorage.getItem(OTP_EXPIRES_AT_KEY);
+            if (!expiresAt) return;
+            const now = Date.now();
+            const expirationTime = parseInt(expiresAt, 10);
+            const remaining = Math.floor((expirationTime - now) / 1000);
+            if (remaining <= 0) {
+                setCodeExpirySeconds(0);
+                setShowResend(true);
+            } else {
+                setCodeExpirySeconds(remaining);
+                setShowResend(true);
             }
-            const next = normalizeNationalPhoneInput(
-                e.target.value,
-                data.countryCode
-            );
-            updateData({ phoneNumber: next });
-        },
-        [data.countryCode, updateData]
-    );
+        };
+        updateExpiryCountdown();
+        const timer = setInterval(updateExpiryCountdown, 1000);
+        return () => clearInterval(timer);
+    }, []);
 
-    const handleCodeChange = (value: string) => {
+    useEffect(() => {
+        // Get resend expiration time from sessionStorage (set after resend)
+        const expiresAt =
+            sessionStorage.getItem(COUNTDOWN_KEY) ||
+            sessionStorage.getItem(OTP_EXPIRES_AT_KEY);
+        
+        if (!expiresAt) {
+            // No expiration metadata available: allow resend
+            setShowResend(true);
+            setIsComplete(true);
+            setTimeLeft(null);
+            return;
+        }
 
+        const updateCountdown = () => {
+            const now = Date.now();
+            const expirationTime = parseInt(expiresAt);
+            const remaining = Math.floor((expirationTime - now) / 1000);
 
-        // Find the full country object to get the dial code
-        const selectedCountry = COUNTRIES.find(country => country.code === value);
+            if (remaining <= 0) {
+                setTimeLeft(0);
+                setIsComplete(true);
+                setShowResend(true);
+                sessionStorage.removeItem(COUNTDOWN_KEY);
+            } else {
+                setTimeLeft(remaining);
+                setIsComplete(false);
+                setShowResend(true);
+            }
+        };
 
-        if (selectedCountry) {
-            updateData({
-                country: selectedCountry.code,
-                countryCode: selectedCountry.dial_code
-            });
+        // Update immediately
+        updateCountdown();
+
+        // Then update every second
+        const timer = setInterval(updateCountdown, 1000);
+
+        return () => clearInterval(timer);
+    }, []);
+
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    const handleResendCode = async () => {
+        if (!isComplete) return;
+
+        await resendCode();
+        const expiresAt = sessionStorage.getItem(OTP_EXPIRES_AT_KEY);
+        if (expiresAt) {
+            sessionStorage.setItem(COUNTDOWN_KEY, expiresAt);
+            const now = Date.now();
+            const expirationTime = parseInt(expiresAt, 10);
+            const remaining = Math.floor((expirationTime - now) / 1000);
+            setCodeExpirySeconds(remaining > 0 ? remaining : 0);
+            setTimeLeft(remaining > 0 ? remaining : 0);
+            setIsComplete(remaining <= 0);
+            setShowResend(true);
         }
     };
 
@@ -101,75 +143,62 @@ export const Step4: React.FC<Step4Props> = ({ data, loading, updateData, nextSte
         <MultiStep
             isLoading={loading}
             stepNumber={4}
-            totalSteps={7}
-            title={t('phoneVerification.title')}
-            subtitle={t('phoneVerification.description')}
+            totalSteps={5}
+            title={t('confirmVerification.title')}
+            subtitle={
+                data.otpEmail
+                    ? t('confirmVerification.description', { email: data.otpEmail })
+                    : t('confirmVerification.descriptionNoEmail')
+            }
             isNextDisabled={isNextDisabled}
-            nextButtonText={tActions('sendCode')}
+            nextButtonText={tActions('submit')}
             showBackButton={true}
             showSkipButton={false}
             onNext={() => nextStep()}
             onBack={prevStep}
             errorMessage={errorMessage}
         >
-            <div className="w-full">
-                <label
-                    htmlFor="phoneNumber"
-                    className="block text-sm font-medium mb-2"
+            <div className="w-full space-y-6">
+                <InputOTP
+                    maxLength={6}
+                    value={value}
+                    onChange={handleChange}
+                    pattern="[0-9]*"
+                    inputMode="numeric"
+                    className="w-full"
                 >
-                    <LabelMedium>
-                        {t('phoneVerification.phoneNumber.label')}
-                    </LabelMedium>
-                </label>
+                    <InputOTPGroup className="w-full gap-2 text-text-primary body-large focus:outline-none focus:ring-0 border-0 bg-surface-subtle">
+                        <InputOTPSlot index={0} className="flex-1 h-12 text-lg rounded-md" />
+                        <InputOTPSlot index={1} className="flex-1 h-12 text-lg rounded-md" />
+                        <InputOTPSlot index={2} className="flex-1 h-12 text-lg rounded-md" />
+                        <InputOTPSlot index={3} className="flex-1 h-12 text-lg rounded-md" />
+                        <InputOTPSlot index={4} className="flex-1 h-12 text-lg rounded-md" />
+                        <InputOTPSlot index={5} className="flex-1 h-12 text-lg rounded-md" />
+                    </InputOTPGroup>
+                </InputOTP>
 
-
-
-
-
-                <InputGroup
-                    className={`px-3 py-6 border-1 rounded-sm bg-surface-subtle text-text-primary focus:outline-none focus:ring-0 transition ${inputRingClass}`}
-                >
-                    <InputGroupAddon>
-                        <InputGroupText>
-                            <CountryCodeSelect
-                                value={data.country}
-                                onChange={handleCodeChange}
-                                label={t('location.country.label')}
-
-                            />
-                        </InputGroupText>
-                    </InputGroupAddon>
-
-                    <InputGroupInput
-                        id="phoneNumber"
-                        inputMode="tel"
-                        autoComplete="tel-national"
-                        onChange={handlePhoneChange}
-                        value={data.phoneNumber || ''}
-                        placeholder={phonePlaceholder}
-                        aria-invalid={showShortHint}
-                        aria-describedby={
-                            showShortHint ? 'phone-national-hint' : undefined
-                        }
-                        className='text-text-primary body-large  px-3 py-6 ml-5 focus:outline-none focus:ring-0 border-0'
-                    />
-                </InputGroup>
-                {showShortHint ? (
-                    <p
-                        id="phone-national-hint"
-                        className="mt-2 text-sm text-amber-800 dark:text-amber-200/90"
-                        role="status"
-                    >
-                        {bounds.min === bounds.max
-                            ? t('phoneVerification.phoneNumber.validation.needExact', {
-                                  n: bounds.min,
-                              })
-                            : t('phoneVerification.phoneNumber.validation.needMin', {
-                                  min: bounds.min,
-                                  max: bounds.max,
-                              })}
+                {codeExpirySeconds !== null && (
+                    <p className="text-text-secondary text-sm">
+                        {codeExpirySeconds > 0
+                            ? t('confirmVerification.codeExpiresIn', { time: formatTime(codeExpirySeconds) })
+                            : t('confirmVerification.codeExpired')}
                     </p>
-                ) : null}
+                )}
+
+                {showResend && (
+                    <div className="flex ">
+                        <ButtonType3
+                            onClick={handleResendCode}
+                            disabled={resendLoading || !isComplete}
+                        >
+                            {resendLoading
+                                ? 'Sending...'
+                                : !isComplete && timeLeft !== null
+                                    ? `Resend code in ${formatTime(timeLeft)}`
+                                    : 'Resend code'}
+                        </ButtonType3>
+                    </div>
+                )}
             </div>
         </MultiStep>
     );

@@ -164,21 +164,11 @@
         "placeholder": "Sélectionnez votre pays"
       }
     },
-    "phoneVerification": {
-      "title": "Vérifiez votre numéro de téléphone",
-      "description": "Nous vous enverrons un code court pour confirmer votre numéro. Cela aide à sécuriser votre compte et facilite la connexion avec votre communauté.",
-      "phoneNumber": {
-        "label": "Numéro de téléphone",
-        "placeholder": "Numéro de mobile",
-        "validation": {
-          "needExact": "Saisissez {n} chiffres (numéro national uniquement, sans indicatif pays).",
-          "needMin": "Saisissez entre {min} et {max} chiffres (numéro national uniquement, sans indicatif pays)."
-        }
-      }
-    },
     "confirmVerification": {
       "title": "Entrez le code de vérification",
-      "description": "{hasPhone, select, true {Entrez le code de vérification qui a été envoyé à votre e-mail ({email}) et à votre téléphone ({phoneNumber})} other {Entrez le code de vérification qui a été envoyé à votre e-mail ({email})}}",
+      "description": "Entrez le code de vérification envoyé à votre adresse e-mail ({email})",
+      "descriptionNoEmail": "Entrez le code de vérification envoyé à votre adresse e-mail",
+      "verified": "Compte vérifié avec succès !",
       "resend": "Renvoyer le code",
       "codeExpiresIn": "Le code expire dans {time}",
       "codeExpired": "Code expiré"

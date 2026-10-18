@@ -53,7 +53,7 @@ export const Step1: React.FC<Step1Props> = ({
     return (
         <MultiStep
             stepNumber={1}
-            totalSteps={7}
+            totalSteps={5}
             showSkipButton={false}
             title={t('personalInfo.title')}
             isNextDisabled={isNextDisabled}

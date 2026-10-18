@@ -164,21 +164,11 @@
         "placeholder": "Wählen Sie Ihr Land"
       }
     },
-    "phoneVerification": {
-      "title": "Bestätigen Sie Ihre Telefonnummer",
-      "description": "Wir senden Ihnen einen Kurzcode zur Bestätigung Ihrer Nummer. Dies hilft, Ihr Konto sicher zu halten und erleichtert die Verbindung mit Ihrer Community.",
-      "phoneNumber": {
-        "label": "Telefonnummer",
-        "placeholder": "Handynummer",
-        "validation": {
-          "needExact": "Geben Sie {n} Ziffern ein (nur nationale Nummer, ohne Landesvorwahl).",
-          "needMin": "Geben Sie zwischen {min} und {max} Ziffern ein (nur nationale Nummer, ohne Landesvorwahl)."
-        }
-      }
-    },
     "confirmVerification": {
       "title": "Bestätigungscode eingeben",
-      "description": "{hasPhone, select, true {Geben Sie den Bestätigungscode ein, der an Ihre E-Mail-Adresse ({email}) und Ihr Telefon ({phoneNumber}) gesendet wurde} other {Geben Sie den Bestätigungscode ein, der an Ihre E-Mail-Adresse ({email}) gesendet wurde}}",
+      "description": "Gib den Bestätigungscode ein, der an deine E-Mail-Adresse ({email}) gesendet wurde",
+      "descriptionNoEmail": "Gib den Bestätigungscode ein, der an deine E-Mail-Adresse gesendet wurde",
+      "verified": "Konto erfolgreich bestätigt!",
       "resend": "Code erneut senden",
       "codeExpiresIn": "Code läuft ab in {time}",
       "codeExpired": "Code abgelaufen"

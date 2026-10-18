@@ -164,21 +164,11 @@
         "placeholder": "Selecteer uw land"
       }
     },
-    "phoneVerification": {
-      "title": "Verifieer uw telefoonnummer",
-      "description": "We sturen u een korte code om uw nummer te bevestigen. Dit helpt uw account veilig te houden en maakt het gemakkelijker om verbonden te blijven met uw gemeenschap.",
-      "phoneNumber": {
-        "label": "Telefoonnummer",
-        "placeholder": "Mobiel nummer",
-        "validation": {
-          "needExact": "Voer {n} cijfers in (alleen nationaal nummer, zonder landcode).",
-          "needMin": "Voer tussen {min} en {max} cijfers in (alleen nationaal nummer, zonder landcode)."
-        }
-      }
-    },
     "confirmVerification": {
       "title": "Voer verificatiecode in",
-      "description": "{hasPhone, select, true {Voer de verificatiecode in die naar uw e-mail ({email}) en telefoon ({phoneNumber}) is verzonden} other {Voer de verificatiecode in die naar uw e-mail ({email}) is verzonden}}",
+      "description": "Voer de verificatiecode in die naar je e-mailadres ({email}) is verzonden",
+      "descriptionNoEmail": "Voer de verificatiecode in die naar je e-mailadres is verzonden",
+      "verified": "Account succesvol geverifieerd!",
       "resend": "Code opnieuw verzenden",
       "codeExpiresIn": "Code verloopt over {time}",
       "codeExpired": "Code verlopen"

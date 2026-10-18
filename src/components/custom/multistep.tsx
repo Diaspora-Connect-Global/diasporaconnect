@@ -1,7 +1,6 @@
 'use client';
 import React from 'react';
 import { ArrowLeft, Loader2 } from 'lucide-react';
-import { HeadingMedium } from '@/components/utils';
 import { Button } from '@/components/ui/button';
 import { ButtonType2, ButtonType3 } from './button';
 import { FormBanner } from './FormBanner';
@@ -93,7 +92,8 @@ export const MultiStep: React.FC<StepProps> = ({
       {/* Title & Subtitle */}
       <div className="lg:h-[6.25rem] space-y-[0.25rem]">
         <div className="lg:h-[2.5rem]">
-          <HeadingMedium>{title}</HeadingMedium>
+          {/* 28px on phones, the 32px heading-medium from lg up (base-layer classes can't take variants, utilities can). */}
+          <h3 className="heading-medium-mobile lg:text-[length:var(--font-size-heading-medium)] lg:leading-[var(--line-height-heading-medium)]">{title}</h3>
         </div>
         {subtitle && (
           <div className="lg:h-[3.5rem]">

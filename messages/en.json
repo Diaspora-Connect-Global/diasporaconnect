@@ -164,21 +164,11 @@
         "placeholder": "Select your country"
       }
     },
-    "phoneVerification": {
-      "title": "Verify your phone number",
-      "description": "We'll send you a short code to confirm your number. This helps keep your account safe and makes it easier to stay connected with your community.",
-      "phoneNumber": {
-        "label": "Phone number",
-        "placeholder": "Mobile number",
-        "validation": {
-          "needExact": "Enter {n} digits (national number only, without country code).",
-          "needMin": "Enter between {min} and {max} digits (national number only, without country code)."
-        }
-      }
-    },
     "confirmVerification": {
       "title": "Enter verification code",
-      "description": "{hasPhone, select, true {Enter the verification code that was sent to your email ({email}) and phone ({phoneNumber})} other {Enter the verification code that was sent to your email ({email})}}",
+      "description": "Enter the verification code that was sent to your email ({email})",
+      "descriptionNoEmail": "Enter the verification code that was sent to your email",
+      "verified": "Account verified successfully!",
       "resend": "Resend code",
       "codeExpiresIn": "Code expires in {time}",
       "codeExpired": "Code expired"

@@ -25,7 +25,7 @@ export const Step2: React.FC<Step2Props> = ({ data, updateData, nextStep, prevSt
   return (
     <MultiStep
       stepNumber={2}
-      totalSteps={7}
+      totalSteps={5}
       title={t('community.title')}
       subtitle={t('community.description')}
 

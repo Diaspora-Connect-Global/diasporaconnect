@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { redirect, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { Step1 } from './steps/Step1';
@@ -11,8 +12,6 @@ import { Step2 } from './steps/Step2';
 import { Step3 } from './steps/Step3';
 import { Step4 } from './steps/Step4';
 import { Step5 } from './steps/Step5';
-import { Step6 } from './steps/Step6';
-import { Step7 } from './steps/Step7';
 
 import {
   REGISTER_USER,
@@ -38,25 +37,28 @@ import LoadingScreen from '@/components/custom/LoadingScreen';
 export interface FormData {
   firstName: string;
   lastName: string;
-  community: any[];
+  /** 'local' | 'diaspora' — sent as `role`. */
   communityType: string;
   country: string;
-  countryCode: string;
-  phoneNumber: string;
   verificationCode: string;
   topics: string[];
   recommendations: string[];
   /**
    * Whether the OTP was actually sent by SMS (per auth-service's OTP channel
    * settings — email is always attempted, SMS only when admin-enabled for
-   * the user's country). Drives Step5's "sent to your email [and phone]" copy.
+   * the user's country). Read off the mutation response; no phone is collected
+   * during onboarding, so the code step's copy only ever names the email.
    */
   otpSmsSent?: boolean;
   /** The email the OTP was sent to, from the mutation response's meta.userEmail. */
   otpEmail?: string;
 }
 
+/** Steps: 1 name, 2 local/diaspora, 3 country (creates the account), 4 code, 5 topics. */
+const TOTAL_STEPS = 5;
+
 export default function CompleteAccount() {
+  const t = useTranslations('onboarding');
   const router = useRouter();
   const { setTokens, setDeviceMetadata } =
     useAuthStore();
@@ -65,11 +67,8 @@ export default function CompleteAccount() {
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
-    community: [],
     communityType: '',
     country: '',
-    countryCode: '',
-    phoneNumber: '',
     verificationCode: '',
     topics: [],
     recommendations: [],
@@ -81,7 +80,7 @@ export default function CompleteAccount() {
     useState(false);
   const [verifyOTPLoading, setVerifyOTPLoading] =
     useState(false);
-  // Persistent form-level error for the phone (Step 4) and OTP (Step 5) steps.
+  // Persistent form-level error for the country (3, creates the account) and code (4) steps.
   const [formError, setFormError] = useState('');
 
   const [isOAuth, setIsOAuth] =
@@ -208,43 +207,11 @@ export default function CompleteAccount() {
 
   const nextStep = () => {
     setFormError('');
-    setCurrentStep(s => Math.min(s + 1, 7));
+    setCurrentStep(s => Math.min(s + 1, TOTAL_STEPS));
   };
   const prevStep = () => {
     setFormError('');
     setCurrentStep(s => Math.max(s - 1, 1));
-  };
-
-  const formatPhone = (phone: string, countryCode: string) => {
-    const raw = (phone || '').trim();
-    const countryDigits = (countryCode || '').replace(/\D/g, '');
-
-    if (!raw || !countryDigits) return '';
-
-    // Accept already international format: +<country><number>
-    if (raw.startsWith('+')) {
-      const normalized = `+${raw.slice(1).replace(/\D/g, '')}`;
-      // Enforce consistency between selected country and phone prefix
-      return normalized.startsWith(`+${countryDigits}`)
-        ? normalized
-        : '';
-    }
-
-    // Accept international prefix 00<country><number>
-    if (raw.startsWith('00')) {
-      const normalized = `+${raw.slice(2).replace(/\D/g, '')}`;
-      // Enforce consistency between selected country and phone prefix
-      return normalized.startsWith(`+${countryDigits}`)
-        ? normalized
-        : '';
-    }
-
-    const digits = raw.replace(/\D/g, '');
-    if (!digits) return '';
-
-    // Remove one local trunk zero for local input (e.g. 0470...)
-    const localDigits = digits.startsWith('0') ? digits.slice(1) : digits;
-    return `+${countryDigits}${localDigits}`;
   };
 
   /* ------------------------------------------------------------------ */
@@ -253,7 +220,7 @@ export default function CompleteAccount() {
   /* ------------------------------------------------------------------ */
   const persistOnboardingInterests = async () => {
     // Normalize: lowercase + trim, drop empty entries, dedupe.
-    // Step6 stores topic keys like `technology` / `artsCulture`; recommendation-
+    // Step5 stores topic keys like `technology` / `artsCulture`; recommendation-
     // service stores topics as lowercase slugs, so we lowercase here.
     const normalized = Array.from(
       new Set(
@@ -303,7 +270,7 @@ export default function CompleteAccount() {
   };
 
   /* ------------------------------------------------------------------ */
-  /* Step 4 – Send OTP */
+  /* Step 3 – Create the account (no phone) and send the code */
   /* ------------------------------------------------------------------ */
   // page.tsx - Update submitFormA to store expiration time
 
@@ -312,20 +279,15 @@ export default function CompleteAccount() {
       setSendCodeLoading(true);
       setFormError('');
 
-      if (!formData.countryCode) {
-        throw new Error('Please select your country code.');
-      }
-
-      const phone = formatPhone(formData.phoneNumber, formData.countryCode);
-      if (!phone) {
-        throw new Error('Please enter a valid phone number.');
+      if (!formData.country) {
+        throw new Error(t('location.country.placeholder'));
       }
 
       let token = '';
       let verificationExpiresAt = '';
 
       if (isOAuth) {
-        const { data } = await completeOAuthRegistration({
+        const { data, error } = await completeOAuthRegistration({
           variables: {
             input: {
               oauthRegistrationToken: JSON.parse(
@@ -333,13 +295,14 @@ export default function CompleteAccount() {
               ).oauthRegistrationToken,
               firstName: formData.firstName,
               lastName: formData.lastName,
-              phone,
               country: formData.country,
               role: formData.communityType
             }
           }
         });
 
+        // errorPolicy 'all': a refusal RESOLVES with data null + error.
+        if (error && !data?.completeOAuthRegistration) throw error;
         if (!data?.completeOAuthRegistration.success)
           throw new Error(data?.completeOAuthRegistration.message);
 
@@ -350,20 +313,20 @@ export default function CompleteAccount() {
           otpEmail: data.completeOAuthRegistration.meta?.userEmail || undefined,
         });
       } else {
-        const { data } = await registerUser({
+        const { data, error } = await registerUser({
           variables: {
             input: {
               email: sessionStorage.getItem('signupEmail'),
               password: sessionStorage.getItem('signupPassword'),
               firstName: formData.firstName,
               lastName: formData.lastName,
-              phone,
               country: formData.country,
               role: formData.communityType
             }
           }
         });
 
+        if (error && !data?.registerUser) throw error;
         if (!data?.registerUser.success)
           throw new Error(data?.registerUser.message);
 
@@ -461,7 +424,7 @@ export default function CompleteAccount() {
   };
 
   /* ------------------------------------------------------------------ */
-  /* Step 5 – Verify OTP */
+  /* Step 4 – Verify OTP */
   /* ------------------------------------------------------------------ */
   const submitFormB = async () => {
     try {
@@ -476,13 +439,14 @@ export default function CompleteAccount() {
         return;
       }
 
-      const { data } = await verifyOtp({
+      const { data, error } = await verifyOtp({
         variables: {
           registrationToken: token,
           otp: formData.verificationCode
         }
       });
 
+      if (error && !data?.verifyRegistrationOtp) throw error;
       if (!data?.verifyRegistrationOtp.success)
         throw new Error(
           data?.verifyRegistrationOtp.message
@@ -517,7 +481,7 @@ export default function CompleteAccount() {
       setDeviceMetadata(deviceMetadata);
 
       // Clear only signup credentials and registration tokens, NOT onboarding progress
-      // (user still needs to complete Steps 6 & 7)
+      // (user still needs to pick topics)
       sessionStorage.removeItem('signupEmail');
       sessionStorage.removeItem('signupPassword');
       sessionStorage.removeItem('signupDeviceId');
@@ -525,7 +489,7 @@ export default function CompleteAccount() {
       sessionStorage.removeItem('otp_expires_at');
       sessionStorage.removeItem('otp_ttl_ms');
 
-      toast.success('Phone number verified successfully!');
+      toast.success(t('confirmVerification.verified'));
       nextStep();
     } catch (e: any) {
       const message = e?.message ?? String(e);
@@ -574,22 +538,14 @@ export default function CompleteAccount() {
         <Step3
           data={formData}
           updateData={updateData}
-          nextStep={nextStep}
-          prevStep={prevStep}
-        />
-      )}
-      {currentStep === 4 && (
-        <Step4
-          data={formData}
-          updateData={updateData}
           nextStep={() => submitFormA(true)}
           loading={sendCodeLoading}
           prevStep={prevStep}
           errorMessage={formError}
         />
       )}
-      {currentStep === 5 && (
-        <Step5
+      {currentStep === 4 && (
+        <Step4
           data={formData}
           updateData={updateData}
           nextStep={submitFormB}
@@ -600,16 +556,8 @@ export default function CompleteAccount() {
           errorMessage={formError}
         />
       )}
-      {currentStep === 6 && (
-        <Step6
-          data={formData}
-          updateData={updateData}
-          nextStep={nextStep}
-          prevStep={prevStep}
-        />
-      )}
-      {currentStep === 7 && (
-        <Step7
+      {currentStep === 5 && (
+        <Step5
           data={formData}
           updateData={updateData}
           nextStep={completeOnboarding}

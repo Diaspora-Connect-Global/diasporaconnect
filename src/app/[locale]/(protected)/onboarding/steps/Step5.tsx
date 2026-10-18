@@ -1,211 +1,74 @@
-// steps/Step5.tsx - OTP Verification
-import React, { useEffect, useState } from 'react';
+// steps/Step5.tsx - Topics Selection
+import React from 'react';
 import { FormData } from '../page';
 import { MultiStep } from '@/components/custom/multistep';
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { useTranslations } from 'next-intl';
-import { ButtonType3 } from '@/components/custom/button';
 
 interface Step5Props {
     data: FormData;
     updateData: (data: Partial<FormData>) => void;
     nextStep: () => void;
     prevStep: () => void;
-    resendCode: () => Promise<void>;
-    loading: boolean;
-    resendLoading: boolean;
-    errorMessage?: string;
 }
 
-export const Step5: React.FC<Step5Props> = ({
-    data,
-    loading,
-    nextStep,
-    prevStep,
-    updateData,
-    resendCode,
-    resendLoading,
-    errorMessage
-}) => {
-    const t = useTranslations('onboarding');
+export const Step5: React.FC<Step5Props> = ({ data, updateData, nextStep, prevStep }) => {
+    const t = useTranslations('onboarding.topics');
     const tActions = useTranslations('actions');
+    
+    const topics = [
+        { key: 'technology', value: t('technology') },
+        { key: 'science', value: t('science') },
+        { key: 'artsCulture', value: t('artsCulture') },
+        { key: 'sports', value: t('sports') },
+        { key: 'healthWellness', value: t('healthWellness') },
+        { key: 'business', value: t('business') },
+        { key: 'entertainment', value: t('entertainment') },
+        { key: 'education', value: t('education') },
+        { key: 'travel', value: t('travel') },
+        { key: 'foodCooking', value: t('foodCooking') },
+        { key: 'politics', value: t('politics') },
+        { key: 'environment', value: t('environment') }
+    ];
 
-    // The code is always emailed; SMS is only used when auth-service's
-    // admin-configured OTP channel settings allow it for this user's number
-    // (default: no countries). `otpSmsSent` reflects what was ACTUALLY used
-    // for the initial send, not a guess from the phone number — see
-    // page.tsx's submitFormA, which reads it off the registerUser /
-    // completeOAuthRegistration mutation response.
-    const formattedPhone = `${data.countryCode}${data.phoneNumber.replace(/^0/, '')}`;
-    const smsAlsoSent = Boolean(data.otpSmsSent);
-
-    const [value, setValue] = React.useState("");
-    const [codeExpirySeconds, setCodeExpirySeconds] = useState<number | null>(null);
-    const [timeLeft, setTimeLeft] = useState<number | null>(null);
-    const [isComplete, setIsComplete] = useState(false);
-    const [showResend, setShowResend] = useState(false);
-
-    const COUNTDOWN_KEY = 'otp_resend_expires_at';
-    const OTP_EXPIRES_AT_KEY = 'otp_expires_at';
-
-    const handleChange = (newValue: string) => {
-        const numericValue = newValue.replace(/\D/g, '');
-        setValue(numericValue);
-        updateData({ verificationCode: numericValue });
-    };
-
-    const isNextDisabled = value.length !== 6;
-
-    // "Code expires in X:XX" countdown from otp_expires_at (set when OTP is sent)
-    useEffect(() => {
-        if (!sessionStorage.getItem(OTP_EXPIRES_AT_KEY)) {
-            setCodeExpirySeconds(null);
-            setShowResend(true);
-            return;
-        }
-        const updateExpiryCountdown = () => {
-            // Re-read every tick: a resend writes a new expiry while this step is open.
-            const expiresAt = sessionStorage.getItem(OTP_EXPIRES_AT_KEY);
-            if (!expiresAt) return;
-            const now = Date.now();
-            const expirationTime = parseInt(expiresAt, 10);
-            const remaining = Math.floor((expirationTime - now) / 1000);
-            if (remaining <= 0) {
-                setCodeExpirySeconds(0);
-                setShowResend(true);
-            } else {
-                setCodeExpirySeconds(remaining);
-                setShowResend(true);
-            }
-        };
-        updateExpiryCountdown();
-        const timer = setInterval(updateExpiryCountdown, 1000);
-        return () => clearInterval(timer);
-    }, []);
-
-    useEffect(() => {
-        // Get resend expiration time from sessionStorage (set after resend)
-        const expiresAt =
-            sessionStorage.getItem(COUNTDOWN_KEY) ||
-            sessionStorage.getItem(OTP_EXPIRES_AT_KEY);
-        
-        if (!expiresAt) {
-            // No expiration metadata available: allow resend
-            setShowResend(true);
-            setIsComplete(true);
-            setTimeLeft(null);
-            return;
-        }
-
-        const updateCountdown = () => {
-            const now = Date.now();
-            const expirationTime = parseInt(expiresAt);
-            const remaining = Math.floor((expirationTime - now) / 1000);
-
-            if (remaining <= 0) {
-                setTimeLeft(0);
-                setIsComplete(true);
-                setShowResend(true);
-                sessionStorage.removeItem(COUNTDOWN_KEY);
-            } else {
-                setTimeLeft(remaining);
-                setIsComplete(false);
-                setShowResend(true);
-            }
-        };
-
-        // Update immediately
-        updateCountdown();
-
-        // Then update every second
-        const timer = setInterval(updateCountdown, 1000);
-
-        return () => clearInterval(timer);
-    }, []);
-
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    };
-
-    const handleResendCode = async () => {
-        if (!isComplete) return;
-
-        await resendCode();
-        const expiresAt = sessionStorage.getItem(OTP_EXPIRES_AT_KEY);
-        if (expiresAt) {
-            sessionStorage.setItem(COUNTDOWN_KEY, expiresAt);
-            const now = Date.now();
-            const expirationTime = parseInt(expiresAt, 10);
-            const remaining = Math.floor((expirationTime - now) / 1000);
-            setCodeExpirySeconds(remaining > 0 ? remaining : 0);
-            setTimeLeft(remaining > 0 ? remaining : 0);
-            setIsComplete(remaining <= 0);
-            setShowResend(true);
+    const toggleTopic = (topicKey: string) => {
+        const currentTopics = data.topics || [];
+        if (currentTopics.includes(topicKey)) {
+            updateData({ topics: currentTopics.filter(t => t !== topicKey) });
+        } else {
+            updateData({ topics: [...currentTopics, topicKey] });
         }
     };
 
     return (
         <MultiStep
-            isLoading={loading}
             stepNumber={5}
-            totalSteps={7}
-            title={t('confirmVerification.title')}
-            subtitle={t('confirmVerification.description', {
-                hasPhone: smsAlsoSent ? 'true' : 'other',
-                email: data.otpEmail || '',
-                phoneNumber: formattedPhone,
-            })}
-            isNextDisabled={isNextDisabled}
-            nextButtonText={tActions('submit')}
-            showBackButton={true}
-            showSkipButton={false}
+            totalSteps={5}
+            title={t('title')}
+            subtitle={t('description')}
+            isNextDisabled={false}
+            nextButtonText={tActions('finish')}
+            showBackButton={false}
+            showSkipButton={true}
             onNext={() => nextStep()}
             onBack={prevStep}
-            errorMessage={errorMessage}
+            onSkip={() => nextStep()}
         >
-            <div className="w-full space-y-6">
-                <InputOTP
-                    maxLength={6}
-                    value={value}
-                    onChange={handleChange}
-                    pattern="[0-9]*"
-                    inputMode="numeric"
-                    className="w-full"
-                >
-                    <InputOTPGroup className="w-full gap-2 text-text-primary body-large focus:outline-none focus:ring-0 border-0 bg-surface-subtle">
-                        <InputOTPSlot index={0} className="flex-1 h-12 text-lg rounded-md" />
-                        <InputOTPSlot index={1} className="flex-1 h-12 text-lg rounded-md" />
-                        <InputOTPSlot index={2} className="flex-1 h-12 text-lg rounded-md" />
-                        <InputOTPSlot index={3} className="flex-1 h-12 text-lg rounded-md" />
-                        <InputOTPSlot index={4} className="flex-1 h-12 text-lg rounded-md" />
-                        <InputOTPSlot index={5} className="flex-1 h-12 text-lg rounded-md" />
-                    </InputOTPGroup>
-                </InputOTP>
-
-                {codeExpirySeconds !== null && (
-                    <p className="text-text-secondary text-sm">
-                        {codeExpirySeconds > 0
-                            ? t('confirmVerification.codeExpiresIn', { time: formatTime(codeExpirySeconds) })
-                            : t('confirmVerification.codeExpired')}
-                    </p>
-                )}
-
-                {showResend && (
-                    <div className="flex ">
-                        <ButtonType3
-                            onClick={handleResendCode}
-                            disabled={resendLoading || !isComplete}
-                        >
-                            {resendLoading
-                                ? 'Sending...'
-                                : !isComplete && timeLeft !== null
-                                    ? `Resend code in ${formatTime(timeLeft)}`
-                                    : 'Resend code'}
-                        </ButtonType3>
-                    </div>
-                )}
+            <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-5 gap-2 w-full"> 
+                {topics.map((topic) => (
+                    <button
+                        key={topic.key}
+                        type="button"
+                        onClick={() => toggleTopic(topic.key)}
+                        className={`h-10 px-2 flex items-center justify-center rounded-md border text-text-primary transition-all cursor-pointer text-sm sm:text-base text-center
+                            ${
+                                data.topics?.includes(topic.key)
+                                    ? 'border-border-brand text-text-primary'
+                                    : 'bg-surface-subtle text-text-primary'
+                            }`}
+                    >
+                        {topic.value}
+                    </button>
+                ))}
             </div>
         </MultiStep>
     );
