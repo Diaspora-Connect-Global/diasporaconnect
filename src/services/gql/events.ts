@@ -1,5 +1,6 @@
 import { gql } from '@apollo/client';
 import { toCdnUrl } from '@/lib/cdn';
+import { countryName } from '@/lib/countryName';
 
 export interface EventLocation {
   type: 'physical' | 'virtual' | 'hybrid';
@@ -871,7 +872,7 @@ export function getEventLocationDisplay(event: Pick<Event, 'locationType' | 'loc
     return 'Hybrid';
   }
   if (loc.type === 'physical') {
-    return [loc.venueName, loc.city, loc.country].filter(Boolean).join(', ') || 'Physical';
+    return [loc.venueName, loc.city, countryName(loc.country)].filter(Boolean).join(', ') || 'Physical';
   }
   if (loc.type === 'virtual') {
     return loc.platform || loc.virtualLink || 'Virtual';
@@ -894,7 +895,7 @@ export function getEventVenueLines(
   const addressLines: string[] = [];
   if (loc && isPhysical) {
     if (loc.address) addressLines.push(loc.address);
-    const cityCountry = [loc.city, loc.country].filter(Boolean).join(', ');
+    const cityCountry = [loc.city, countryName(loc.country)].filter(Boolean).join(', ');
     if (cityCountry) addressLines.push(cityCountry);
   }
 

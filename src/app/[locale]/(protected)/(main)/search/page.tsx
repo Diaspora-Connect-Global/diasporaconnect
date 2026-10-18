@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, useParams } from 'next/navigation';
 import { useLazyQuery } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
+import { useCountryName } from '@/lib/countryName';
 import { Link } from '@/i18n/navigation';
 import { useSearchStore, type SearchTab } from '@/store/useSearchStore';
 import { SEARCH_USERS } from '@/services/gql/connection';
@@ -176,6 +177,7 @@ function HighlightText({ text, query }: { text: string; query: string }) {
 
 function PeopleCard({ profile, query }: { profile: UserProfile; query: string }) {
   const name = `${profile.firstName} ${profile.lastName}`;
+  const countryName = useCountryName();
   return (
     <Link href={profileUrl({ username: profile.username, userId: profile.userId })} className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors">
       <Avatar src={profile.avatarUrl} name={name} />
@@ -183,7 +185,7 @@ function PeopleCard({ profile, query }: { profile: UserProfile; query: string })
         <p className="text-text-primary text-sm font-medium truncate"><HighlightText text={name} query={query} /></p>
         <p className="text-text-secondary text-xs truncate">{profile.headline || profile.sector}</p>
         {profile.residenceCountry && (
-          <p className="text-text-secondary text-xs truncate">{profile.residenceCountry}</p>
+          <p className="text-text-secondary text-xs truncate">{countryName(profile.residenceCountry)}</p>
         )}
       </div>
       {profile.connectionStatus && profile.connectionStatus !== 'NONE' && (

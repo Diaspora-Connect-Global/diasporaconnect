@@ -2,6 +2,7 @@
 
 import { useQuery } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
+import { countryName } from '@/lib/countryName';
 import { CalendarDays, MapPin } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { USER_EVENTS, UserEventsData, Event } from '@/services/gql/events';
@@ -26,7 +27,7 @@ function EventRow({ event }: { event: Event }) {
     event.locationType === 'virtual'
       ? t('virtual')
       : event.locationDetails?.city
-        ? `${event.locationDetails.city}${event.locationDetails.country ? `, ${event.locationDetails.country}` : ''}`
+        ? `${event.locationDetails.city}${event.locationDetails.country ? `, ${countryName(event.locationDetails.country)}` : ''}`
         : event.locationDetails?.venueName ?? null;
 
   return (

@@ -6,6 +6,7 @@ import { seoGraphQL, truncate, plainText } from '@/lib/seoFetch';
 import { eventSchema, breadcrumbSchema } from '@/lib/seoSchemas';
 import EventDetailClient from './EventDetailClient';
 
+import { countryName } from '@/lib/countryName';
 const EVENT_SEO_QUERY = `
   query EventSeo($id: ID!) {
     getEvent(id: $id) {
@@ -124,7 +125,7 @@ export default async function EventPublicPage({
     const locationStr =
       event.locationType === 'virtual'
         ? 'Online event'
-        : [event.locationDetails?.venueName, event.locationDetails?.city, event.locationDetails?.country]
+        : [event.locationDetails?.venueName, event.locationDetails?.city, countryName(event.locationDetails?.country, locale)]
             .filter(Boolean)
             .join(', ');
 

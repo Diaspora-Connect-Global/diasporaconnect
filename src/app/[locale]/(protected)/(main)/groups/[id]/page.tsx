@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { ArrowLeft, CalendarDays, Clock, Globe, Lock, LogOut, MessageCircle, UserPlus, Users } from 'lucide-react';
 import { useFormatter, useTranslations } from 'next-intl';
+import { useCountryName } from '@/lib/countryName';
 import { toast } from 'sonner';
 
 import { ButtonType1 } from '@/components/custom/button';
@@ -53,6 +54,7 @@ export default function GroupDetailPage() {
     const t = useTranslations('community');
     const tActions = useTranslations('actions');
     const tIdentity = useTranslations('common.identity');
+    const countryName = useCountryName();
     const format = useFormatter();
     const router = useRouter();
 
@@ -361,7 +363,7 @@ export default function GroupDetailPage() {
                             <ul className="-mx-2 divide-y divide-border-subtle">
                                     {members.map((m) => {
                                         const name = personName(m.profile, tIdentity('unknownUser'));
-                                        const place = [m.profile?.city, m.profile?.residenceCountry].filter(Boolean).join(', ');
+                                        const place = [m.profile?.city, countryName(m.profile?.residenceCountry)].filter(Boolean).join(', ');
                                         const subtitle = [m.profile?.occupation, place].filter(Boolean).join(' · ');
                                         const role = m.role && m.role !== MemberRole.MEMBER ? m.role : null;
                                         return (

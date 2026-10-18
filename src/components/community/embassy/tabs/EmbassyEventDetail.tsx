@@ -75,6 +75,7 @@ import type { EmbassyProfile } from '../embassyData';
 import type { EmbassyViewProps } from '../types';
 import { useIsEmbassy } from '../communityVariant';
 
+import { countryName } from '@/lib/countryName';
 // ─── Sub-tabs ─────────────────────────────────────────────────────────────────
 
 type SubTabKey = 'about' | 'agenda' | 'speakers' | 'venue' | 'attendees' | 'faqs';
@@ -516,7 +517,7 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
   const isVirtual = event.locationType === 'virtual' || event.locationDetails?.type === 'virtual';
   const loc = event.locationDetails;
   const addressText =
-    [loc?.venueName, loc?.address, loc?.city, loc?.country].filter(Boolean).join(', ') ||
+    [loc?.venueName, loc?.address, loc?.city, countryName(loc?.country)].filter(Boolean).join(', ') ||
     getEventLocationDisplay(event);
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressText)}`;
 
@@ -1344,7 +1345,7 @@ function VenueSection({
               {loc?.venueName && <VenueRow label={t('venueName')} value={loc.venueName} />}
               {loc?.address && <VenueRow label={t('venueAddress')} value={loc.address} />}
               {loc?.city && <VenueRow label={t('venueCity')} value={loc.city} />}
-              {loc?.country && <VenueRow label={t('venueCountry')} value={loc.country} />}
+              {loc?.country && <VenueRow label={t('venueCountry')} value={countryName(loc.country)} />}
               {!loc?.venueName && !loc?.address && !loc?.city && !loc?.country && (
                 <VenueRow label={t('venueLocation')} value={addressText} />
               )}

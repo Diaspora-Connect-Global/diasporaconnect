@@ -30,7 +30,7 @@ import { FriendType, TypeOfFriend } from "../friends/TypeOfFriend";
 import { Profile } from "@/services/gql/profile";
 import { mapTrustScoreToTier } from "@/lib/userTier";
 import { toCdnUrl } from "@/lib/cdn";
-import { countryLookup } from "@/macros/countryLookup";
+import { useCountryName } from "@/lib/countryName";
 import { absoluteProfileUrl, profileUrl as profilePath } from "@/lib/profileUrl";
 
 interface ProfileHeaderProps {
@@ -73,6 +73,7 @@ export function ProfileHeader({
   const searchParams = useSearchParams();
   const router = useRouter();
   const localeRouter = useLocaleRouter();
+  const countryName = useCountryName();
   const userTier = mapTrustScoreToTier(userData?.trustScore);
   const isOwnProfile = !showFriendActions;
 
@@ -88,9 +89,7 @@ export function ProfileHeader({
     .join(' ');
 
   const residence = userData?.residenceCountry;
-  const residenceName = residence
-    ? countryLookup[residence.slice(0, 2).toUpperCase()]?.name || residence
-    : '';
+  const residenceName = countryName(residence);
 
   const username = userData?.username ?? null;
   const profileUrl = () =>
