@@ -7,6 +7,9 @@ import { test, expect, type Browser, type Page } from '@playwright/test';
 import { openBrowser } from '../support/browser';
 import { fakeGraphql, wireNetwork } from '../support/fakeSession';
 
+// A cold dev server compiles each step's chunks on first use.
+test.setTimeout(300_000);
+
 let browser: Browser;
 test.beforeAll(async () => {
     browser = await openBrowser();
@@ -135,7 +138,7 @@ for (const kind of ['password', 'oauth'] as const) {
         await page.getByRole('button', { name: 'Finish' }).click();
         await expect.poll(() => gql.calls.some((c) => c.name === 'SetOnboardingInterests')).toBe(true);
         expect(gql.calls.find((c) => c.name === 'SetOnboardingInterests')!.variables).toEqual({ topics: ['technology'] });
-        await page.waitForURL(/\/home/, { waitUntil: 'commit' });
+        await page.waitForURL(/\/home/, { waitUntil: 'commit', timeout: 120_000 });
         await context.close();
     });
 }
@@ -148,8 +151,8 @@ test('a wrong code keeps the user on the code step (no session, no topics)', asy
     await page.getByRole('button', { name: 'Submit' }).click();
     await expect.poll(() => gql.calls.some((c) => c.name === 'VerifyOtp')).toBe(true);
     await expect(stepLabel(page)).toHaveText('Step 4 of 5');
-    await expect(page.getByText('Invalid verification code')).toBeVisible();
-    expect(await page.evaluate(() => localStorage.getItem('auth-store'))).not.toContain('"sessionToken":"tok"');
+    await expect(page.locator('p', { hasText: 'Invalid verification code' })).toBeVisible();
+    expect(await page.evaluate(() => localStorage.getItem('auth-store') ?? '')).not.toContain('"sessionToken":"tok"');
     await context.close();
 });
 
