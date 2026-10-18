@@ -10,7 +10,7 @@ import {
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
 import { LOGOUT_USER } from "@/services/gql/signin";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 
 interface LogoutResponse {
@@ -34,58 +34,45 @@ export function LogoutConfirmModal({
   onConfirm,
   logoutAllSessions = false,
 }: LogoutConfirmModalProps) {
-  const router = useRouter();
+  const t = useTranslations("accountPanel.confirm");
 
   const [logout, { loading }] = useMutation<LogoutResponse>(LOGOUT_USER, {
     onCompleted: (data) => {
       if (data.logout.success) {
-        toast.success(data.logout.message || "Logged out successfully");
+        toast.success(t("done"));
       } else {
-        toast.error(data.logout.error || "Logout failed");
-        onConfirm();
-        onCancel();
+        toast.error(t("failed"));
       }
     },
     onError: (error) => {
-      toast.error(error.message || "An error occurred during logout");
-      // Close modal on error
-      onCancel();
+      toast.error(t("failed"));
     },
   });
 
+  // The server call is best-effort: whatever it answers, this browser must end
+  // up signed out, so onConfirm (the local sign-out) runs exactly once.
   const handleLogout = async () => {
     try {
-      await logout({
-        variables: {
-          logoutAllSessions,
-        },
-      });
-      onConfirm();
-      router.push("/signin");
-
-
+      await logout({ variables: { logoutAllSessions } });
     } catch (error) {
       console.error("Logout error:", error);
-      onConfirm();
-      onCancel();
-    } finally {
-      onConfirm();
-      onCancel();
     }
+    onConfirm();
+    onCancel();
   };
 
   return (
     <Dialog open={open} onOpenChange={onCancel}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Confirm logout</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
         </DialogHeader>
 
         <p className="text-sm text-muted-foreground">
-          Are you sure you want to log out?
+          {t("body")}
           {logoutAllSessions && (
             <span className="block mt-2 font-medium">
-              This will log you out from all devices.
+              {t("allDevices")}
             </span>
           )}
         </p>
@@ -96,7 +83,7 @@ export function LogoutConfirmModal({
             onClick={onCancel}
             disabled={loading}
           >
-            Cancel
+            {t("cancel")}
           </ButtonType3>
           <ButtonType2
             className="py-2 px-3 flex items-center gap-2"
@@ -106,10 +93,10 @@ export function LogoutConfirmModal({
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Logging out...
+                {t("working")}
               </>
             ) : (
-              "Logout"
+              t("action")
             )}
           </ButtonType2>
         </div>

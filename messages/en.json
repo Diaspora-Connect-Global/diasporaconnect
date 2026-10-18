@@ -6777,6 +6777,30 @@
       "generic": "Something went wrong. Please try again."
     }
   },
+  "accountPanel": {
+    "panelTitle": "Your account",
+    "accountFallback": "Your account",
+    "items": {
+      "profile": "My profile",
+      "network": "My network",
+      "saved": "Saved",
+      "requests": "My requests",
+      "wallet": "Wallet",
+      "settings": "Settings & privacy",
+      "contact": "Contact us"
+    },
+    "signOut": "Sign out",
+    "confirm": {
+      "title": "Sign out?",
+      "body": "Are you sure you want to sign out?",
+      "allDevices": "This will sign you out on all your devices.",
+      "cancel": "Cancel",
+      "action": "Sign out",
+      "working": "Signing out…",
+      "done": "You have been signed out.",
+      "failed": "We couldn't reach the server, but you are signed out on this device."
+    }
+  },
   "railMenu": {
     "open": "Open menu",
     "title": "Menu",

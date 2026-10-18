@@ -6777,6 +6777,30 @@
       "generic": "Er ging iets mis. Probeer het opnieuw."
     }
   },
+  "accountPanel": {
+    "panelTitle": "Je account",
+    "accountFallback": "Je account",
+    "items": {
+      "profile": "Mijn profiel",
+      "network": "Mijn netwerk",
+      "saved": "Opgeslagen",
+      "requests": "Mijn aanvragen",
+      "wallet": "Wallet",
+      "settings": "Instellingen en privacy",
+      "contact": "Contact"
+    },
+    "signOut": "Uitloggen",
+    "confirm": {
+      "title": "Uitloggen?",
+      "body": "Weet je zeker dat je wilt uitloggen?",
+      "allDevices": "Je wordt op al je apparaten uitgelogd.",
+      "cancel": "Annuleren",
+      "action": "Uitloggen",
+      "working": "Bezig met uitloggen…",
+      "done": "Je bent uitgelogd.",
+      "failed": "De server was niet bereikbaar, maar je bent op dit apparaat uitgelogd."
+    }
+  },
   "railMenu": {
     "open": "Menu openen",
     "title": "Menu",

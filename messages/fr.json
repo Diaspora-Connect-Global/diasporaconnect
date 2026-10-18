@@ -6777,6 +6777,30 @@
       "generic": "Une erreur s'est produite. Veuillez réessayer."
     }
   },
+  "accountPanel": {
+    "panelTitle": "Votre compte",
+    "accountFallback": "Votre compte",
+    "items": {
+      "profile": "Mon profil",
+      "network": "Mon réseau",
+      "saved": "Enregistrés",
+      "requests": "Mes demandes",
+      "wallet": "Portefeuille",
+      "settings": "Paramètres et confidentialité",
+      "contact": "Nous contacter"
+    },
+    "signOut": "Se déconnecter",
+    "confirm": {
+      "title": "Se déconnecter ?",
+      "body": "Voulez-vous vraiment vous déconnecter ?",
+      "allDevices": "Vous serez déconnecté de tous vos appareils.",
+      "cancel": "Annuler",
+      "action": "Se déconnecter",
+      "working": "Déconnexion…",
+      "done": "Vous avez été déconnecté.",
+      "failed": "Le serveur est injoignable, mais vous êtes déconnecté sur cet appareil."
+    }
+  },
   "railMenu": {
     "open": "Ouvrir le menu",
     "title": "Menu",
