@@ -1,4 +1,4 @@
-/** The redesigned Community: hero, left nav, groups to join, composer, feed tabs with reactions, right rail. */
+/** The redesigned Community: hero, left nav, groups to join, feed tabs with reactions, right rail. */
 import { test, expect, type Browser } from '@playwright/test';
 import { openBrowser } from '../support/browser';
 import { UUID, event, FUTURE, open, post } from './fixtures';
@@ -66,15 +66,17 @@ test('a group the server says is PENDING reads Requested after a reload; ACTIVE 
 
 test('groups section is hidden when there are none', async () => {
     const { page } = await open(browser, '/community', { ...DATA, RedesignGroupsToJoin: { searchGroups: null } });
-    await expect(page.getByTestId('community-composer')).toBeVisible({ timeout: 90_000 });
+    await expect(page.getByRole('tablist', { name: 'Feed' })).toBeVisible({ timeout: 90_000 });
     await expect(page.getByTestId('community-groups')).toHaveCount(0);
     await page.context().close();
 });
 
-test('composer, feed tabs and post cards that keep the Happy / Hopeful / Sad reactions', async () => {
+test('no composer, feed tabs and post cards that keep the Happy / Hopeful / Sad reactions', async () => {
     const { page } = await open(browser, '/community', DATA);
-    await expect(page.getByTestId('community-composer')).toBeVisible({ timeout: 90_000 });
-    await expect(page.getByRole('link', { name: /Share an update/ })).toHaveAttribute('href', '/en/create-post');
+    await expect(page.getByRole('tablist', { name: 'Feed' })).toBeVisible({ timeout: 90_000 });
+    // Post creation lives on Home now: no composer box on Community.
+    await expect(page.getByTestId('feed-composer')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /Share an update/ })).toHaveCount(0);
     const tabs = page.getByRole('tab');
     expect((await tabs.allTextContents()).map((s) => s.trim())).toEqual(['For you', 'Latest', 'Following']);
     await expect(page.getByRole('tab', { name: 'For you' })).toHaveAttribute('aria-selected', 'true');
@@ -85,7 +87,7 @@ test('composer, feed tabs and post cards that keep the Happy / Hopeful / Sad rea
     await page.context().close();
 });
 
-test('right rail: suggested people (Connect), trending topics, upcoming events, create post', async () => {
+test('right rail: suggested people (Connect), trending topics, upcoming events (and no create-post card)', async () => {
     const { page } = await open(browser, '/community', DATA);
     await expect(page.getByTestId('community-people')).toContainText('Kwame Asante', { timeout: 90_000 });
     await expect(page.getByTestId('community-people').getByRole('button', { name: 'Connect' })).toBeVisible();
@@ -93,7 +95,7 @@ test('right rail: suggested people (Connect), trending topics, upcoming events, 
     await expect(page.getByTestId('community-topics')).toContainText('7 posts');
     await expect(page.getByTestId('community-events')).toContainText('Diaspora Business Summit');
     await expect(page.getByTestId('community-events')).not.toContainText('An event that already happened');
-    await expect(page.getByTestId('community-rail').getByRole('link', { name: 'Create post' })).toBeVisible();
+    await expect(page.getByTestId('community-rail').getByRole('link', { name: 'Create post' })).toHaveCount(0);
     // Never an id on screen.
     expect(await page.locator('body').innerText()).not.toMatch(UUID);
     await page.context().close();
@@ -158,7 +160,7 @@ test('"All posts" filter narrows the feed to one category and selects Latest; Fo
 
 test('rail cards hide when their data is empty or null', async () => {
     const { page, errors } = await open(browser, '/community', { RecommendedPeople: {}, GetTrendingHashtags: { trendingHashtags: null }, ListEvents: { listEvents: null } });
-    await expect(page.getByTestId('community-rail')).toBeVisible({ timeout: 90_000 });
+    await expect(page.getByTestId('community-rail')).toBeAttached({ timeout: 90_000 });
     for (const id of ['community-people', 'community-topics', 'community-events', 'community-join']) await expect(page.getByTestId(id)).toHaveCount(0);
     expect(errors).toEqual([]);
     void event; void FUTURE;
@@ -168,7 +170,7 @@ test('rail cards hide when their data is empty or null', async () => {
 for (const width of [360, 768]) {
     test(`no horizontal scroll at ${width}px`, async () => {
         const { page } = await open(browser, '/community', DATA, { width, height: 900 });
-        await expect(page.getByTestId('community-composer')).toBeVisible({ timeout: 90_000 });
+        await expect(page.getByRole('tablist', { name: 'Feed' })).toBeVisible({ timeout: 90_000 });
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
         expect(overflow).toBeLessThanOrEqual(0);
         await page.context().close();

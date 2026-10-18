@@ -392,6 +392,30 @@ export function useFeed(options: UseFeedOptions = {}): UseFeedResult {
     };
   }, [apolloClient]);
 
+  // A post made in the composer modal (same page, no navigation): fetch it and
+  // prepend it exactly like the sessionStorage hand-off above.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onCreated = (e: Event) => {
+      const id = (e as CustomEvent<{ id?: string }>).detail?.id;
+      if (!id) return;
+      void apolloClient
+        .query<GetPostData>({ query: GET_POST, variables: { id }, fetchPolicy: 'network-only', errorPolicy: 'ignore' })
+        .then((res) => {
+          const raw = res.data?.post;
+          if (!raw) return;
+          const post = normalizeFeedPost(raw);
+          post.__source = 'just_created';
+          setPendingPrepend(post);
+        })
+        .catch(() => {
+          /* Non-fatal: the post still shows up on the next refresh. */
+        });
+    };
+    window.addEventListener('diaspoplug:post-created', onCreated);
+    return () => window.removeEventListener('diaspoplug:post-created', onCreated);
+  }, [apolloClient]);
+
   useEffect(() => {
     if (!isRankedFeed) return;
     let cancelled = false;

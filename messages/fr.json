@@ -250,6 +250,17 @@
     "noConversations": "Pas encore de conversations",
     "noGroups": "Pas encore de groupes"
   },
+  "composer": {
+    "title": "Créer une publication",
+    "description": "Rédigez une publication et choisissez qui peut la voir.",
+    "close": "Fermer",
+    "discardTitle": "Abandonner cette publication ?",
+    "discardBody": "Votre texte ainsi que les photos ou fichiers ajoutés seront supprimés.",
+    "discardConfirm": "Abandonner",
+    "keepEditing": "Continuer à modifier",
+    "draftRestored": "Brouillon restauré — reprenez là où vous vous étiez arrêté.",
+    "discard": "Abandonner"
+  },
   "createPost": {
     "placeholder": "Qu'avez-vous en tête, {name} ?",
     "posting": "Publication en cours...",

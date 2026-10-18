@@ -250,6 +250,17 @@
     "registered": "Registered",
     "downloadTicket": "Download ticket"
   },
+  "composer": {
+    "title": "Create post",
+    "description": "Write a post and choose who can see it.",
+    "close": "Close",
+    "discardTitle": "Discard this post?",
+    "discardBody": "What you wrote and any photos or files you added will be thrown away.",
+    "discardConfirm": "Discard",
+    "keepEditing": "Keep editing",
+    "draftRestored": "Draft restored — pick up where you left off.",
+    "discard": "Discard"
+  },
   "createPost": {
     "placeholder": "What's on your mind, {name}?",
     "posting": "Posting...",

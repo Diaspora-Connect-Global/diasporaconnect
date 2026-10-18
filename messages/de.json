@@ -250,6 +250,17 @@
     "noConversations": "Noch keine Gespräche",
     "noGroups": "Noch keine Gruppen"
   },
+  "composer": {
+    "title": "Beitrag erstellen",
+    "description": "Schreibe einen Beitrag und lege fest, wer ihn sehen kann.",
+    "close": "Schließen",
+    "discardTitle": "Beitrag verwerfen?",
+    "discardBody": "Dein Text sowie hinzugefügte Fotos oder Dateien gehen verloren.",
+    "discardConfirm": "Verwerfen",
+    "keepEditing": "Weiter bearbeiten",
+    "draftRestored": "Entwurf wiederhergestellt – mach dort weiter, wo du aufgehört hast.",
+    "discard": "Verwerfen"
+  },
   "createPost": {
     "placeholder": "Was bewegt Sie, {name}?",
     "posting": "Wird gepostet...",
