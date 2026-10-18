@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@apollo/client/react';
 import { useFormatter, useTranslations } from 'next-intl';
-import { Flame, Hash, SquarePen } from 'lucide-react';
+import { Flame, Hash } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { RailCard } from '@/components/redesign/RailCard';
 import { useFriendActions } from '@/hooks/friends/useFriendActions';
@@ -143,21 +143,12 @@ function UpcomingEvents() {
  * `communities` is the page's "Communities to join" card (the page owns the join flow).
  */
 export function CommunityRail({ communities }: { communities?: React.ReactNode } = {}) {
-  const t = useTranslations('communityPage.rail');
   return (
     <div className="space-y-4" data-testid="community-rail">
       <SuggestedPeople />
       <TrendingTopics />
       <UpcomingEvents />
       {communities}
-      <section className="rounded-2xl border border-border-subtle bg-surface-brand-subtle p-4 shadow-sm">
-        <h2 className="text-sm font-bold text-text-primary">{t('createTitle')}</h2>
-        <p className="mt-1 text-xs text-muted-foreground">{t('createBody')}</p>
-        <Link href="/create-post" prefetch={false} className="mt-3 inline-flex items-center gap-2 rounded-full bg-surface-brand px-4 py-2 text-sm font-semibold text-white hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand focus-visible:ring-offset-2">
-          <SquarePen className="size-4" aria-hidden />
-          {t('createCta')}
-        </Link>
-      </section>
     </div>
   );
 }

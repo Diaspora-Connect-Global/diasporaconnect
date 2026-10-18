@@ -29,12 +29,10 @@ import { PageHero } from '@/components/redesign/PageHero';
 import { REDESIGN_IMAGES } from '@/lib/redesignImages';
 import { CommunityLeftNav, CommunityPromo } from '@/components/community/redesign/CommunityLeftNav';
 import { FeaturedGroups } from '@/components/community/redesign/FeaturedGroups';
-import { CommunityComposer } from '@/components/community/redesign/CommunityComposer';
 import { CommunityRailMenu } from '@/components/community/redesign/CommunityRailMenu';
 import { CommunityFeed } from '@/components/community/redesign/CommunityFeed';
 import { CommunityRail } from '@/components/community/redesign/CommunityRail';
 import { CommunitiesToJoin } from '@/components/community/redesign/CommunitiesToJoin';
-import { GET_MY_PROFILE, type GetProfileResponse } from '@/services/gql/profile';
 
 interface RequestMembershipPayload {
     id?: string | null;
@@ -117,7 +115,6 @@ export default function Community() {
     const intlRouter = useIntlRouter();
     const [scrollEl, setScrollEl] = useState<HTMLDivElement | null>(null);
     const [searchText, setSearchText] = useState('');
-    const { data: profileData } = useQuery<GetProfileResponse>(GET_MY_PROFILE, { fetchPolicy: 'cache-first' });
 
     const onSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -544,7 +541,6 @@ export default function Community() {
 
               <div className="min-w-0 space-y-5">
                 <FeaturedGroups />
-                <CommunityComposer avatarUrl={profileData?.getProfile?.profile?.avatarUrl} />
                 <CommunityFeed scrollRoot={scrollEl} />
               </div>
 

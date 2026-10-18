@@ -10,6 +10,7 @@ import PostMediaModal, { type ModalMediaItem } from '@/components/cards/PostMedi
 import { HomeHero } from '@/components/home/HomeHero';
 import { LatestListings } from '@/components/home/LatestListings';
 import { CommunityPosts } from '@/components/home/HomeCommunityPosts';
+import { FeedComposer } from '@/components/posts/FeedComposer';
 import { HomeRail } from '@/components/home/HomeRail';
 import { HomeRailMenu } from '@/components/home/HomeRailMenu';
 import { HomeLeftColumn } from '@/components/home/HomeLeftColumn';
@@ -955,6 +956,7 @@ export default function Home() {
         <h2 id="home-feed-title" className="-mb-2 text-lg font-bold text-text-primary">
           {tHomePage('feed.title')}
         </h2>
+        <FeedComposer avatarUrl={profile?.avatarUrl} />
         <CommunityFeed
           scrollRoot={feedScrollEl}
           onOpenMedia={handleOpenMedia}
