@@ -1,9 +1,10 @@
 'use client';
 
+import { useCountryName } from '@/lib/countryName';
 import { useMemo, useState, type FormEvent } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@apollo/client/react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { BadgeCheck, ChevronRight, MessageCircle, Search, UserPlus, Users, UsersRound, X, type LucideIcon } from 'lucide-react';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { PageHero } from '@/components/redesign/PageHero';
@@ -56,24 +57,6 @@ function PersonAvatar({ src }: { src?: string | null }) {
   const { src: resolved, onError } = useImageFallback(src ? toCdnUrl(src) : undefined, '/PROFILE.png');
   // eslint-disable-next-line @next/next/no-img-element
   return <img src={resolved || '/PROFILE.png'} alt="" width={48} height={48} loading="lazy" onError={onError} className="size-12 shrink-0 rounded-full border border-border-subtle object-cover" />;
-}
-
-/** A country code shown as its name in the viewer's language; anything else is shown as given. */
-function useCountryName() {
-  const locale = useLocale();
-  const names = useMemo(() => {
-    try {
-      return new Intl.DisplayNames([locale], { type: 'region' });
-    } catch {
-      return null;
-    }
-  }, [locale]);
-  return (code?: string | null) => {
-    const c = (code ?? '').trim();
-    if (!c) return '';
-    if (/^[A-Za-z]{2}$/.test(c) && names) return names.of(c.toUpperCase()) ?? c;
-    return c;
-  };
 }
 
 /**

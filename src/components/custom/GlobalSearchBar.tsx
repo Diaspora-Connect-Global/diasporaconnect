@@ -22,6 +22,7 @@ import { SEARCH_USERS } from '@/services/gql/connection';
 import { SEARCH_OPPORTUNITIES } from '@/services/gql/opportunities';
 import { SEARCH_EVENTS } from '@/services/gql/events';
 import { profileUrl } from '@/lib/profileUrl';
+import { countryName } from '@/lib/countryName';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -125,16 +126,6 @@ function humanize(v?: string | null): string | undefined {
   if (!/^[A-Z0-9_]+$/.test(v)) return v;
   const s = v.replace(/_/g, ' ').toLowerCase();
   return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
-function countryName(code: string | null | undefined, locale: string): string | undefined {
-  if (!code) return undefined;
-  if (!/^[A-Za-z]{2}$/.test(code)) return code;
-  try {
-    return new Intl.DisplayNames([locale], { type: 'region' }).of(code.toUpperCase()) ?? code;
-  } catch {
-    return code;
-  }
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */

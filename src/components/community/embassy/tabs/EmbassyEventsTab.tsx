@@ -35,6 +35,7 @@ import { EmbassyEventDetail } from './EmbassyEventDetail';
 import { EmbassyEventsCalendar } from './EmbassyEventsCalendar';
 import { useOwnerKind } from '../communityVariant';
 
+import { countryName } from '@/lib/countryName';
 // ─── Types ─────────────────────────────────────────────────────────────────
 
 interface OwnerEvent {
@@ -115,7 +116,7 @@ function locationDisplay(evt: OwnerEvent): string {
     if (loc.type === 'virtual' || evt.locationType === 'virtual') {
       return loc.platform || loc.virtualLink || 'Online';
     }
-    const parts = [loc.venueName, loc.city, loc.country].filter(Boolean);
+    const parts = [loc.venueName, loc.city, countryName(loc.country)].filter(Boolean);
     if (parts.length) return parts.join(', ');
   }
   if (evt.locationType === 'virtual') return 'Online';

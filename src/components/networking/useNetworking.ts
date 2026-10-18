@@ -49,6 +49,7 @@ import type { EventPageEvent } from '@/services/gql/eventsM2';
 import type { NetworkingEventContext } from './NetworkingShell';
 import type { SuggestFn, SuggestKind } from './draft';
 
+import { countryName } from '@/lib/countryName';
 const PREFIX_BY_KIND: Record<SuggestKind, string[]> = {
   NEEDS: ['capability.'],
   OFFERS: ['capability.'],
@@ -60,7 +61,7 @@ const PREFIX_BY_KIND: Record<SuggestKind, string[]> = {
 export function eventVenueLabel(e: EventPageEvent | null | undefined): string | null {
   const l = e?.locationDetails;
   if (!l) return null;
-  const parts = [l.venueName, l.city, l.country].filter(Boolean);
+  const parts = [l.venueName, l.city, countryName(l.country)].filter(Boolean);
   return parts.length ? parts.join(', ') : null;
 }
 

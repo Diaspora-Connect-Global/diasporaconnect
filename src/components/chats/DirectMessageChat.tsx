@@ -37,7 +37,8 @@ import { useUserStore } from "@/store/useUserStore";
 import { messageService } from "@/services/websocket/messageService";
 import { toast } from "sonner";
 import { displayName as personName, safeName } from '@/lib/displayName';
-import { resolveCountryName, getCountryTimezone, isGoodTimeToMessage, formatCurrentTime, isMultiTimezoneCountry } from '@/lib/countryTimezone';
+import { countryName } from '@/lib/countryName';
+import { getCountryTimezone, isGoodTimeToMessage, formatCurrentTime, isMultiTimezoneCountry } from '@/lib/countryTimezone';
 import { formatTimeOnly, getDateLabel, getMessageDateKey } from "@/lib/chatTime";
 import { DateSeparator } from "./DateSeparator";
 import { UserBadge } from "@/components/custom/userBadge";
@@ -147,7 +148,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
         // residenceCountry data to non-connected users who open a chat by userId
         const isConnected = !!otherUser;
         const resolvedCountry = isConnected && profileFallback?.residenceCountry
-            ? resolveCountryName(profileFallback.residenceCountry)
+            ? countryName(profileFallback.residenceCountry, locale)
             : '';
         const location = isConnected
             ? (profileFallback?.location ||
@@ -168,7 +169,7 @@ export default function DirectMessageChat({ chat, onBack }: { chat: ChatInfo; on
     // `timeTick` is included so the memo re-derives goodTimeToMessage / otherLocalTime
     // every minute — formatCurrentTime / isGoodTimeToMessage call new Date() internally.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [otherUser, profileFallback?.residenceCountry, profileFallback?.city, profileFallback?.location, timeTick]);
+    }, [otherUser, profileFallback?.residenceCountry, profileFallback?.city, profileFallback?.location, timeTick, locale]);
 
     useEffect(() => {
         if (!conversationId) return;

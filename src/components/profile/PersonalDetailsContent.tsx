@@ -11,7 +11,7 @@ import { useTranslations } from 'next-intl';
 import { GET_MY_PROFILE, Profile, UpdateProfileInput } from '@/services/gql/profile';
 import { useMutation } from '@apollo/client/react';
 import { UPDATE_PROFILE } from '@/services/gql/profile';
-import { countryLookup } from '@/macros/countryLookup';
+import { useCountryName } from '@/lib/countryName';
 
 interface PersonalDetailsContentProps {
   userId: string;
@@ -81,13 +81,11 @@ export function PersonalDetailsContent({ userId, isOwnProfile = false, userData 
   const [isResidenceModalOpen, setIsResidenceModalOpen] = useState(false);
   const [isHomeCountryModalOpen, setIsHomeCountryModalOpen] = useState(false);
   
-  const countryName = 
-  countryLookup[localUserData?.residenceCountry?.slice(0, 2).toUpperCase() ?? '']?.name 
-  || localUserData?.residenceCountry 
-  || 'Unknown';
+  const toCountryName = useCountryName();
+  const countryName = toCountryName(localUserData?.residenceCountry) || 'Unknown';
 
 
-  const homeCountryName = countryLookup[localUserData?.countryOfOrigin?.slice(0, 2).toUpperCase() ?? '']?.name || localUserData?.countryOfOrigin  || 'Unknown';
+  const homeCountryName = toCountryName(localUserData?.countryOfOrigin) || 'Unknown';
 
 const residenceParts = [
     localUserData?.city,

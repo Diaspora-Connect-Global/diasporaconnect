@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Clock, Moon, Sun } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { countryName } from "@/lib/countryName";
 
 import {
     BottomSheet,
@@ -14,7 +15,6 @@ import {
     formatCurrentTime,
     getCountryTimezone,
     isGoodTimeToMessage,
-    resolveCountryName,
 } from "@/lib/countryTimezone";
 import { useUserStore } from "@/store/useUserStore";
 
@@ -40,9 +40,9 @@ interface TimeDetailsModalProps {
 }
 
 /** Compose a "City, Country" string from profile fields with sensible fallbacks. */
-function buildLocationLabel(p: { city?: string | null; residenceCountry?: string | null; location?: string | null }): string {
+function buildLocationLabel(p: { city?: string | null; residenceCountry?: string | null; location?: string | null }, locale: string): string {
     if (p.location?.trim()) return p.location.trim();
-    const country = p.residenceCountry ? resolveCountryName(p.residenceCountry) : "";
+    const country = countryName(p.residenceCountry, locale);
     return [p.city, country].filter(Boolean).join(", ");
 }
 
@@ -103,6 +103,7 @@ function TimeRow({ iconBgClass, iconColorClass, label, sublabel, time, date, tim
 
 export function TimeDetailsModal({ open, onOpenChange, other, otherDisplayName, containerRef }: TimeDetailsModalProps) {
     const t = useTranslations("chat.direct.timeDetails");
+    const locale = useLocale();
     const user = useUserStore((s) => s.user);
 
     // The modal stays mounted with the parent chat, so without a refresh trigger the
@@ -131,13 +132,13 @@ export function TimeDetailsModal({ open, onOpenChange, other, otherDisplayName, 
             city: user?.city,
             residenceCountry: user?.residenceCountry,
             location: user?.location,
-        });
+        }, locale);
         const theirLocation = other
             ? buildLocationLabel({
                   city: other.city,
                   residenceCountry: other.residenceCountry,
                   location: other.location,
-              })
+              }, locale)
             : "";
 
         const myAbbr = timezoneAbbreviation(myTz);
@@ -160,7 +161,7 @@ export function TimeDetailsModal({ open, onOpenChange, other, otherDisplayName, 
         // `tick` intentionally included to force re-derivation of "current time" values
         // (formatCurrentTime / formatTzDate / isGoodTimeToMessage internally call new Date()).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user, other, tick]);
+    }, [user, other, tick, locale]);
 
     const goodTimeReason = detail.theirCity
         ? t("goodTimeReason", { city: detail.theirCity })

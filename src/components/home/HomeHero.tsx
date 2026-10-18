@@ -6,22 +6,14 @@ import { ArrowRight } from 'lucide-react';
 import { PageHero } from '@/components/redesign/PageHero';
 import { useGreeting } from '@/components/redesign/useGreeting';
 import { REDESIGN_IMAGES } from '@/lib/redesignImages';
-
-function regionName(code: string | null | undefined, locale: string): string {
-  if (!code) return '';
-  try {
-    return new Intl.DisplayNames([locale], { type: 'region' }).of(code.toUpperCase()) ?? '';
-  } catch {
-    return '';
-  }
-}
+import { countryName } from '@/lib/countryName';
 
 /** "Good morning, Ama" hero. The location chip appears only when the profile has a city or country. */
 export function HomeHero({ firstName, city, countryCode }: { firstName?: string | null; city?: string | null; countryCode?: string | null }) {
   const t = useTranslations('homePage');
   const locale = useLocale();
   const greeting = useGreeting();
-  const place = [city?.trim(), regionName(countryCode, locale)].filter(Boolean).join(', ');
+  const place = [city?.trim(), countryName(countryCode, locale)].filter(Boolean).join(', ');
   const name = firstName?.trim();
   return (
     <PageHero
