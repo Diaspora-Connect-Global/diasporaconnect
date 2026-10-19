@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+import { isAllowedWebSignInRole } from '@/lib/webSignInRoles';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { useRouter } from '@/i18n/navigation';
@@ -48,10 +49,7 @@ interface PendingTwoFactor {
     rememberMe: boolean;
 }
 
-const isAllowedUserRole = (role?: string | null) => {
-    const normalized = (role || '').trim().toLowerCase();
-    return normalized === 'local' || normalized === 'diaspora';
-};
+const isAllowedUserRole = isAllowedWebSignInRole;
 
 /** Seconds between "send a new code" requests (matches the server cooldown). */
 const RESEND_COOLDOWN_SECONDS = 60;
