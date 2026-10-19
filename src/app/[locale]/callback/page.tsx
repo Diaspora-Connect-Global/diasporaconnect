@@ -10,7 +10,7 @@ import { useUserStore } from '@/store/useUserStore';
 export default function OAuthCallbackPage() {
   const params = useSearchParams();
   const router = useRouter();
-  const { setTokens, setDeviceMetadata } = useAuthStore();
+  const { setTokens, setDeviceMetadata, setRole } = useAuthStore();
   const { setUser } = useUserStore();
 
   useEffect(() => {
@@ -108,6 +108,7 @@ export default function OAuthCallbackPage() {
         sessionId: deviceMetadata.deviceId,
         expiresIn: 3600
       });
+      setRole(role);
 
       setUser(user);
       setDeviceMetadata(deviceMetadata);
@@ -147,7 +148,7 @@ export default function OAuthCallbackPage() {
 
     // Fallback - something went wrong
     router.replace('/signin');
-  }, [params, router, setTokens, setUser, setDeviceMetadata]);
+  }, [params, router, setTokens, setUser, setDeviceMetadata, setRole]);
 
   return <LoadingScreen />;
 }

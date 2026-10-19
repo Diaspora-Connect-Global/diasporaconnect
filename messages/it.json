@@ -4452,6 +4452,14 @@
     }
   },
   "feed": {
+    "adminDelete": {
+      "menuItem": "Elimina post",
+      "title": "Eliminare questo post come admin?",
+      "description": "Stai eliminando questo post come amministratore della piattaforma. Verrà rimosso per tutti e non potrai annullare l'operazione.",
+      "confirm": "Elimina post",
+      "deleted": "Post eliminato",
+      "failed": "Impossibile eliminare il post. Riprova."
+    },
     "errors": {
       "insufficient_data": "Fornisci tutte le informazioni richieste",
       "not_authorized": "Non hai l'autorizzazione per eseguire questa azione",

@@ -478,6 +478,15 @@ export const DELETE_POST = gql`
   }
 `;
 
+/** Platform-admin delete: removes ANY post. Only ever sent by a super admin (the server refuses everyone else). */
+export const ADMIN_DELETE_POST = gql`
+  mutation AdminDeletePost($input: PostIdInput!) {
+    adminDeletePost(input: $input) {
+      success
+    }
+  }
+`;
+
 export const EDIT_COMMENT = gql`
   mutation EditComment($input: EditCommentInput!) {
     editComment(input: $input) {

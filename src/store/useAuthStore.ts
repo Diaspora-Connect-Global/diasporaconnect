@@ -23,6 +23,12 @@ interface AuthState {
   // Persisted state
   tokens: AuthTokens | null;
   deviceMetadata: DeviceMetadata | null;
+  /**
+   * The signed-in user's platform role (as the sign-in response reported it),
+   * lower-cased. Used ONLY to decide which controls to show (see
+   * useIsSuperAdmin): the server re-checks the role on every admin call.
+   */
+  role: string | null;
 
   // Computed
   isAuthenticated: () => boolean;
@@ -40,6 +46,7 @@ interface AuthState {
     refreshTokenExpiry: number
   ) => void;
   setDeviceMetadata: (metadata: DeviceMetadata) => void;
+  setRole: (role: string | null | undefined) => void;
   clearTokens: () => void;
   clearAuth: () => void;
 }
@@ -50,6 +57,7 @@ export const useAuthStore = create<AuthState>()(
       // ---------- STATE ----------
       tokens: null,
       deviceMetadata: null,
+      role: null,
 
       // ---------- COMPUTED ----------
       isAuthenticated: () => {
@@ -176,12 +184,15 @@ export const useAuthStore = create<AuthState>()(
 
       setDeviceMetadata: (metadata) => set({ deviceMetadata: metadata }),
 
-      clearTokens: () => set({ tokens: null }),
+      setRole: (role) => set({ role: role ? role.trim().toLowerCase() : null }),
+
+      clearTokens: () => set({ tokens: null, role: null }),
 
       clearAuth: () =>
         set({
           tokens: null,
           deviceMetadata: null,
+          role: null,
         }),
     }),
     {
@@ -190,6 +201,7 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         tokens: state.tokens,
         deviceMetadata: state.deviceMetadata,
+        role: state.role,
       }),
     }
   )

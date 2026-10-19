@@ -125,6 +125,7 @@ export default function SignInForm() {
     const setTokens = useAuthStore((s) => s.setTokens);
     const setUser = useUserStore((s) => s.setUser);
     const setDeviceMetadata = useAuthStore((s) => s.setDeviceMetadata);
+    const setRole = useAuthStore((s) => s.setRole);
     const setRememberMeStore = useUserStore((s) => s.setRememberMe);
 
     /* ============ Validation ============ */
@@ -182,6 +183,8 @@ export default function SignInForm() {
                 sessionId: payload.sessionId,
                 expiresIn: payload.expiresIn,
             });
+            // Remembered only to show admin controls; the server enforces the role.
+            setRole(payload.user?.role);
             const user = payload.user;
             setUser({
                 ...user,
@@ -204,7 +207,7 @@ export default function SignInForm() {
             router.push(getAndClearRedirectUrl() ?? '/home');
             return true;
         },
-        [router, setDeviceMetadata, setRememberMeStore, setTokens, setUser, t],
+        [router, setDeviceMetadata, setRememberMeStore, setRole, setTokens, setUser, t],
     );
 
     /* ============ Submit (email + password) ============ */

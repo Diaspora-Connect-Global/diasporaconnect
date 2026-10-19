@@ -60,7 +60,7 @@ const TOTAL_STEPS = 5;
 export default function CompleteAccount() {
   const t = useTranslations('onboarding');
   const router = useRouter();
-  const { setTokens, setDeviceMetadata } =
+  const { setTokens, setDeviceMetadata, setRole } =
     useAuthStore();
   const { setUser } = useUserStore();
 
@@ -465,6 +465,7 @@ export default function CompleteAccount() {
         sessionId: deviceMetadata.deviceId,
         expiresIn: 3600
       });
+      setRole(user?.role);
 
       setUser({
         ...user,

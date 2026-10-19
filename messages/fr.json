@@ -4452,6 +4452,14 @@
     }
   },
   "feed": {
+    "adminDelete": {
+      "menuItem": "Supprimer la publication",
+      "title": "Supprimer cette publication en tant qu'admin ?",
+      "description": "Vous supprimez cette publication en tant qu'administrateur de la plateforme. Elle sera retirée pour tout le monde et cette action est irréversible.",
+      "confirm": "Supprimer la publication",
+      "deleted": "Publication supprimée",
+      "failed": "Impossible de supprimer la publication. Veuillez réessayer."
+    },
     "errors": {
       "insufficient_data": "Veuillez fournir toutes les informations requises",
       "not_authorized": "Vous n'avez pas la permission d'effectuer cette action",
