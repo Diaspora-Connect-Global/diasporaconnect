@@ -3277,7 +3277,8 @@
         "invite": "Invite to join",
         "approval": "Request and approval",
         "public": "Public",
-        "inviteOnly": "Invite only"
+        "inviteOnly": "Invite only",
+        "open": "Open to join"
       },
       "pills": {
         "voteCloses": "Vote closes {time}",
@@ -3304,6 +3305,16 @@
         "goalsBody": "Set shared goals, run projects and take on challenges together.",
         "voteTitle": "Decided together",
         "voteBody": "Members decide together by voting; no one runs the circle alone."
+      },
+      "joinCircle": "Join circle",
+      "ways": {
+        "title": "How people get in",
+        "inviteTitle": "Invite only",
+        "inviteBody": "Only people a member invites can join.",
+        "requestTitle": "Request to join",
+        "requestBody": "People ask, and the circle decides together.",
+        "openTitle": "Open to join",
+        "openBody": "Anyone can join with one tap."
       }
     },
     "create": {
@@ -3331,12 +3342,14 @@
       "access": {
         "question": "2. How do people get in?",
         "help": "Choose how new members can join.",
-        "applyLabel": "Anyone can apply",
+        "applyLabel": "Request to join",
         "applyDescription": "People can request to join.",
         "inviteLabel": "Invite only",
         "inviteDescription": "Only invited people can join.",
         "approvalLabel": "Request + approval",
-        "approvalDescription": "People request and are approved."
+        "approvalDescription": "People request and are approved.",
+        "openLabel": "Open to join",
+        "openDescription": "Anyone can join straight away."
       },
       "avatarLabel": "Profile picture",
       "avatarCta": "Add a profile picture",
@@ -3758,7 +3771,9 @@
         "joinModeSaved": "Joining updated.",
         "saveFailed": "We couldn't change that setting. Please try again.",
         "leadNote": "You can change these two settings because you are a lead. Any member can also ask for a change by opening a motion, and the circle decides together.",
-        "proposeInstead": "Only a lead can change these directly. You can ask the circle to change them by opening a motion."
+        "proposeInstead": "Only a lead can change these directly. You can ask the circle to change them by opening a motion.",
+        "openTitle": "Open to join",
+        "openDescription": "Anyone can join straight away, no request needed."
       },
       "archive": {
         "title": "Archive this circle",
@@ -4246,6 +4261,22 @@
           "title": "We could not use this link",
           "description": "Something went wrong on the way to the circle. Trying again often works."
         }
+      },
+      "openJoined": "You're in. Welcome to the circle.",
+      "openErrors": {
+        "CIRCLE_NOT_OPEN": "This circle is no longer open to join. You can ask to be invited.",
+        "CIRCLE_FULL": "This circle is full right now.",
+        "CIRCLE_JOIN_NOT_ALLOWED": "You can't join this circle on your own. You can still be invited.",
+        "CIRCLE_NOT_JOINABLE": "This circle can't take new members right now.",
+        "CIRCLE_NOT_FOUND": "We couldn't find this circle. It may have been archived.",
+        "UNKNOWN": "We couldn't add you to this circle. Please try again.",
+        "CIRCLE_UNAVAILABLE": "We can't reach this circle right now. Please try again in a moment.",
+        "RATE_LIMITED": "You're doing that too fast. Please wait a moment and try again.",
+        "CIRCLE_IS_OPEN": "This circle is open to join now. Tap Join circle."
+      },
+      "landing": {
+        "open": "Anyone can join this circle. Tap the button and you're in.",
+        "request": "Members decide who comes in. Send a request and the circle will answer."
       }
     },
     "actions": {

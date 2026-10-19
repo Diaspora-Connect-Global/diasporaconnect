@@ -837,6 +837,27 @@ export const REQUEST_TO_JOIN_CIRCLE = gql`
   ${CIRCLE_JOIN_REQUEST_FRAGMENT}
 `;
 
+/**
+ * Join an OPEN circle in one step. Idempotent: an existing member gets success.
+ * Returns the same `CircleInviteLinkRedemption` as `redeemCircleInviteLink`
+ * (`link` is always null here). A refusal is told apart by `extensions.code`
+ * (see `circleJoinOutcome.ts`).
+ */
+export const CIRCLE_JOIN = gql`
+  mutation CircleJoin($circleId: ID!) {
+    circleJoin(circleId: $circleId) {
+      circle {
+        ...CircleSummaryFields
+      }
+      member {
+        ...CircleMemberFields
+      }
+    }
+  }
+  ${CIRCLE_SUMMARY_FRAGMENT}
+  ${CIRCLE_MEMBER_FRAGMENT}
+`;
+
 export const WITHDRAW_JOIN_REQUEST = gql`
   mutation WithdrawJoinRequest($joinRequestId: ID!) {
     withdrawJoinRequest(joinRequestId: $joinRequestId) {

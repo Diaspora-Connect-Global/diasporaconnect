@@ -70,8 +70,10 @@ export function MembersTable({
     );
   }
 
+  // `relative`: the sr-only header span is absolutely positioned; without a positioned
+  // ancestor it escapes this scroller and widens the whole page at 360 px.
   return (
-    <div className="overflow-x-auto rounded-xl border border-border-subtle">
+    <div className="relative overflow-x-auto rounded-xl border border-border-subtle">
       <table className="w-full min-w-[520px] border-collapse text-left">
         <thead className="border-b border-border-subtle bg-surface-subtle">
           <tr>

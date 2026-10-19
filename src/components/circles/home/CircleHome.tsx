@@ -1,11 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react';
+import { CombinedGraphQLErrors } from '@apollo/client';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { History, MessageSquare, Sparkles } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
+import { CircleJoinAction } from '@/components/circles/join';
 import { DateSeparator } from '@/components/chats/DateSeparator';
 import { MessageInput } from '@/components/chats/MessageInput';
 import { TypingDots } from '@/components/chats/TypingDots';
@@ -23,6 +25,7 @@ import {
   CIRCLE_CHALLENGES,
   CIRCLE_CHAT,
   CIRCLE_MOTIONS,
+  CIRCLE_PUBLIC_CARD,
   CIRCLE_PROJECTS,
   MY_CIRCLE_MEMBERSHIP,
 } from '@/services/gql/circles';
@@ -32,6 +35,7 @@ import type {
   CircleChat,
   CircleMembershipCheck,
   CircleMotion,
+  CirclePublicCardData,
   CircleProject,
 } from '@/services/gql/types/circles';
 import { SEND_MESSAGE } from '@/services/gql/messaging';
@@ -173,6 +177,19 @@ export function CircleHome({ circleId }: CircleHomeProps) {
     },
   );
   const isMember = membershipData?.myCircleMembership?.isMember ?? false;
+
+  // The non-member landing: `circle` is null for a stranger, so how the circle
+  // lets people in comes from its public card. Skipped once the viewer is in.
+  const { data: cardData, loading: cardLoading } = useQuery<CirclePublicCardData>(
+    CIRCLE_PUBLIC_CARD,
+    {
+      variables: { circleId },
+      skip: Boolean(circle),
+      fetchPolicy: 'cache-and-network',
+      errorPolicy: 'all',
+    },
+  );
+  const publicCard = cardData?.circlePublicCard ?? null;
 
   // ── Chat handle ──────────────────────────────────────────────────────────
   const { data: chatData, loading: chatLoading } = useQuery<ChatData>(CIRCLE_CHAT, {
@@ -390,7 +407,13 @@ export function CircleHome({ circleId }: CircleHomeProps) {
     return <PageLoader />;
   }
 
-  if (circleError && !circle) {
+  // The gateway answers a stranger with `CIRCLE_NOT_A_MEMBER` (it used to be FORBIDDEN,
+  // which signed people out). That is not a load failure: it is the join landing below.
+  const notAMember =
+    CombinedGraphQLErrors.is(circleError) &&
+    circleError.errors.some((e) => e.extensions?.code === 'CIRCLE_NOT_A_MEMBER');
+
+  if (circleError && !circle && !notAMember) {
     return (
       <div className="flex h-app-inner items-center justify-center px-4">
         <ErrorState
@@ -408,6 +431,31 @@ export function CircleHome({ circleId }: CircleHomeProps) {
     // is not a member — the membership check is what tells them apart, and each
     // deserves its own words.
     const scope = isMember ? 'notFound' : 'noAccess';
+    if (!isMember && cardLoading && !cardData) return <PageLoader />;
+    if (!isMember && publicCard && publicCard.joinMode !== 'INVITE_ONLY') {
+      const open = publicCard.joinMode === 'OPEN';
+      return (
+        <div className="flex h-app-inner items-center justify-center px-4">
+          <EmptyState
+            size="lg"
+            title={publicCard.name}
+            description={open ? t('join.landing.open') : t('join.landing.request')}
+            action={
+              <div className="w-full max-w-xs space-y-3" data-testid="circle-join-landing">
+                {open && (
+                  <p className="caption-small text-text-brand">{t('index.access.open')}</p>
+                )}
+                <CircleJoinAction
+                  circleId={circleId}
+                  joinMode={publicCard.joinMode}
+                  refetch={['Circle', 'MyCircleMembership', 'CircleChat', 'CirclePublicCard']}
+                />
+              </div>
+            }
+          />
+        </div>
+      );
+    }
     return (
       <div className="flex h-app-inner items-center justify-center px-4">
         <EmptyState

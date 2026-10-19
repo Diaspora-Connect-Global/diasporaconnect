@@ -3277,7 +3277,8 @@
         "invite": "Beitritt auf Einladung",
         "approval": "Anfrage und Zustimmung",
         "public": "Öffentlich",
-        "inviteOnly": "Nur mit Einladung"
+        "inviteOnly": "Nur mit Einladung",
+        "open": "Offen zum Beitreten"
       },
       "pills": {
         "voteCloses": "Abstimmung endet {time}",
@@ -3304,6 +3305,16 @@
         "goalsBody": "Setzt gemeinsame Ziele, startet Projekte und nehmt Herausforderungen an.",
         "voteTitle": "Gemeinsam entschieden",
         "voteBody": "Mitglieder entscheiden gemeinsam per Abstimmung; niemand leitet den Kreis allein."
+      },
+      "joinCircle": "Kreis beitreten",
+      "ways": {
+        "title": "Wie man hineinkommt",
+        "inviteTitle": "Nur mit Einladung",
+        "inviteBody": "Nur Personen, die ein Mitglied einlädt, können beitreten.",
+        "requestTitle": "Beitritt anfragen",
+        "requestBody": "Du fragst an, und der Kreis entscheidet gemeinsam.",
+        "openTitle": "Offen zum Beitreten",
+        "openBody": "Alle können mit einem Tipp beitreten."
       }
     },
     "create": {
@@ -3331,12 +3342,14 @@
       "access": {
         "question": "2. Wie kommt man hinein?",
         "help": "Wähle, wie neue Mitglieder beitreten können.",
-        "applyLabel": "Alle können sich bewerben",
+        "applyLabel": "Beitritt anfragen",
         "applyDescription": "Andere können den Beitritt anfragen.",
         "inviteLabel": "Nur mit Einladung",
         "inviteDescription": "Nur eingeladene Personen können beitreten.",
         "approvalLabel": "Anfrage + Zustimmung",
-        "approvalDescription": "Andere fragen an und werden bestätigt."
+        "approvalDescription": "Andere fragen an und werden bestätigt.",
+        "openLabel": "Offen zum Beitreten",
+        "openDescription": "Alle können sofort beitreten."
       },
       "avatarLabel": "Profilbild",
       "avatarCta": "Profilbild hinzufügen",
@@ -3758,7 +3771,9 @@
         "joinModeSaved": "Beitritt aktualisiert.",
         "saveFailed": "Wir konnten diese Einstellung nicht ändern. Bitte versuche es erneut.",
         "leadNote": "Du kannst diese beiden Einstellungen ändern, weil du eine Leitung bist. Jedes Mitglied kann eine Änderung außerdem per Antrag vorschlagen — dann entscheidet der Kreis gemeinsam.",
-        "proposeInstead": "Nur eine Leitung kann das direkt ändern. Du kannst den Kreis per Antrag um die Änderung bitten."
+        "proposeInstead": "Nur eine Leitung kann das direkt ändern. Du kannst den Kreis per Antrag um die Änderung bitten.",
+        "openTitle": "Offen zum Beitreten",
+        "openDescription": "Alle können sofort beitreten, ohne Anfrage."
       },
       "archive": {
         "title": "Diesen Kreis archivieren",
@@ -4246,6 +4261,22 @@
           "title": "Wir konnten diesen Link nicht verwenden",
           "description": "Auf dem Weg zum Kreis ist etwas schiefgegangen. Ein erneuter Versuch hilft oft."
         }
+      },
+      "openJoined": "Du bist dabei. Willkommen im Kreis.",
+      "openErrors": {
+        "CIRCLE_NOT_OPEN": "Dieser Kreis ist nicht mehr offen. Du kannst um eine Einladung bitten.",
+        "CIRCLE_FULL": "Dieser Kreis ist gerade voll.",
+        "CIRCLE_JOIN_NOT_ALLOWED": "Du kannst diesem Kreis nicht selbst beitreten. Eine Einladung ist weiterhin möglich.",
+        "CIRCLE_NOT_JOINABLE": "Dieser Kreis kann gerade keine neuen Mitglieder aufnehmen.",
+        "CIRCLE_NOT_FOUND": "Wir konnten diesen Kreis nicht finden. Er wurde vielleicht archiviert.",
+        "UNKNOWN": "Wir konnten dich diesem Kreis nicht hinzufügen. Bitte versuche es erneut.",
+        "CIRCLE_UNAVAILABLE": "Wir erreichen diesen Kreis gerade nicht. Bitte versuche es gleich noch einmal.",
+        "RATE_LIMITED": "Das geht gerade zu schnell. Bitte warte einen Moment und versuche es erneut.",
+        "CIRCLE_IS_OPEN": "Dieser Kreis ist jetzt offen. Tippe auf „Kreis beitreten“."
+      },
+      "landing": {
+        "open": "Alle können diesem Kreis beitreten. Tippe auf den Button und du bist dabei.",
+        "request": "Die Mitglieder entscheiden, wer hineinkommt. Sende eine Anfrage, der Kreis antwortet dir."
       }
     },
     "actions": {

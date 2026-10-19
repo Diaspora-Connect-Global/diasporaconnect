@@ -1,18 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { useMutation } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
-import { toast } from 'sonner';
 
-import { ButtonType1 } from '@/components/custom/button';
+import { CircleJoinAction } from '@/components/circles/join';
 import { toCdnUrl } from '@/lib/cdn';
-import { readMutationOutcome } from '@/lib/mutationOutcome';
-import { REQUEST_TO_JOIN_CIRCLE } from '@/services/gql/circles';
-import type {
-  CirclePublicCard,
-  RequestToJoinCircleData,
-} from '@/services/gql/types/circles';
+import type { CirclePublicCard } from '@/services/gql/types/circles';
 
 import { CircleAvatar } from './CircleImagery';
 
@@ -27,6 +19,11 @@ export interface DiscoverCircleCardProps {
  * enumerates exactly what a non-member may see. So this component takes that
  * type and only that type — handing it a `Circle` would compile and would leak
  * the inside of a circle onto a public card.
+ *
+ * ## OPEN, REQUEST and INVITE_ONLY (see `CircleJoinAction`)
+ *
+ * OPEN gets "Join circle" (one step, `circleJoin`), REQUEST keeps "Request
+ * Access", INVITE_ONLY gets no button:
  *
  * ## Why INVITE_ONLY gets no button
  *
@@ -53,39 +50,6 @@ export interface DiscoverCircleCardProps {
  */
 export function DiscoverCircleCard({ circle }: DiscoverCircleCardProps) {
   const t = useTranslations('circles');
-  const [requested, setRequested] = useState(false);
-
-  const [requestToJoin, { loading }] = useMutation<RequestToJoinCircleData>(
-    REQUEST_TO_JOIN_CIRCLE,
-    { variables: { circleId: circle.id } },
-  );
-
-  const canRequest = circle.joinMode === 'REQUEST';
-
-  /*
-   * `graph-client.ts` sets `errorPolicy: 'all'` globally for mutations, so a
-   * REFUSED request resolves with `{ data: null }` rather than throwing. The
-   * old `onCompleted` here therefore flipped the label to "Request sent" for
-   * refusals too — telling someone they had applied when circle-service had
-   * turned them down. `readMutationOutcome` is the check that `data` came back.
-   */
-  const handleRequest = async () => {
-    try {
-      const result = await requestToJoin();
-      const outcome = readMutationOutcome(
-        result,
-        (d) => d?.requestToJoinCircle,
-      );
-      if (!outcome.ok) {
-        toast.error(t('errors.join'));
-        return;
-      }
-      setRequested(true);
-    } catch {
-      // A link-level throw or an aborted request still rejects.
-      toast.error(t('errors.join'));
-    }
-  };
 
   return (
     <div className="flex h-full flex-col rounded-lg border border-border-subtle bg-surface-default p-4">
@@ -107,9 +71,11 @@ export function DiscoverCircleCard({ circle }: DiscoverCircleCardProps) {
             can ask to get in.
           */}
           <p className="caption-small mt-0.5 text-text-secondary">
-            {canRequest
-              ? t('index.access.public')
-              : t('index.access.inviteOnly')}
+            {circle.joinMode === 'OPEN'
+              ? t('index.access.open')
+              : circle.joinMode === 'REQUEST'
+                ? t('index.access.public')
+                : t('index.access.inviteOnly')}
             <span aria-hidden="true" className="px-1">
               ·
             </span>
@@ -126,25 +92,11 @@ export function DiscoverCircleCard({ circle }: DiscoverCircleCardProps) {
       ) : null}
 
       <div className="mt-auto pt-4">
-        {canRequest ? (
-          <ButtonType1
-            className="w-full"
-            disabled={loading || requested}
-            onClick={() => {
-              void handleRequest();
-            }}
-          >
-            {requested ? t('index.requestSent') : t('index.requestAccess')}
-          </ButtonType1>
-        ) : (
-          /*
-            Invite-only: no action exists, so the space keeps the same height as
-            a button rather than collapsing and pulling the tile out of line.
-          */
-          <p className="caption-small flex h-9 items-center justify-center text-text-secondary">
-            {t('index.access.invite')}
-          </p>
-        )}
+        {/*
+          OPEN → Join circle · REQUEST → Request Access · INVITE_ONLY → no action
+          exists, so the same height is kept for text and the tile stays in line.
+        */}
+        <CircleJoinAction circleId={circle.id} joinMode={circle.joinMode} />
       </div>
     </div>
   );

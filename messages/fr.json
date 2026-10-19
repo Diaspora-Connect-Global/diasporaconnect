@@ -3277,7 +3277,8 @@
         "invite": "Adhésion sur invitation",
         "approval": "Demande et approbation",
         "public": "Public",
-        "inviteOnly": "Sur invitation uniquement"
+        "inviteOnly": "Sur invitation uniquement",
+        "open": "Ouvert à tous"
       },
       "pills": {
         "voteCloses": "Fin du vote {time}",
@@ -3304,6 +3305,16 @@
         "goalsBody": "Fixez des objectifs communs, menez des projets et relevez des défis ensemble.",
         "voteTitle": "Décidé ensemble",
         "voteBody": "Les membres décident ensemble par vote ; personne ne dirige le cercle seul."
+      },
+      "joinCircle": "Rejoindre le cercle",
+      "ways": {
+        "title": "Comment entre-t-on",
+        "inviteTitle": "Sur invitation uniquement",
+        "inviteBody": "Seules les personnes invitées par un membre peuvent rejoindre.",
+        "requestTitle": "Demander à rejoindre",
+        "requestBody": "Vous demandez, et le cercle décide ensemble.",
+        "openTitle": "Ouvert à tous",
+        "openBody": "Tout le monde peut rejoindre d'un geste."
       }
     },
     "create": {
@@ -3331,12 +3342,14 @@
       "access": {
         "question": "2. Comment entre-t-on ?",
         "help": "Choisissez comment les nouveaux membres peuvent rejoindre.",
-        "applyLabel": "Tout le monde peut postuler",
+        "applyLabel": "Demander à rejoindre",
         "applyDescription": "Les gens peuvent demander à rejoindre.",
         "inviteLabel": "Sur invitation uniquement",
         "inviteDescription": "Seules les personnes invitées peuvent rejoindre.",
         "approvalLabel": "Demande + approbation",
-        "approvalDescription": "Les gens font une demande et sont approuvés."
+        "approvalDescription": "Les gens font une demande et sont approuvés.",
+        "openLabel": "Ouvert à tous",
+        "openDescription": "Tout le monde peut rejoindre tout de suite."
       },
       "avatarLabel": "Photo de profil",
       "avatarCta": "Ajouter une photo de profil",
@@ -3758,7 +3771,9 @@
         "joinModeSaved": "Mode d’adhésion mis à jour.",
         "saveFailed": "Nous n'avons pas pu modifier ce paramètre. Veuillez réessayer.",
         "leadNote": "Vous pouvez modifier ces deux paramètres parce que vous êtes référent. Tout membre peut aussi demander un changement en ouvrant une motion, et le cercle décide ensemble.",
-        "proposeInstead": "Seule une personne référente peut les modifier directement. Vous pouvez demander ce changement au cercle en ouvrant une motion."
+        "proposeInstead": "Seule une personne référente peut les modifier directement. Vous pouvez demander ce changement au cercle en ouvrant une motion.",
+        "openTitle": "Ouvert à tous",
+        "openDescription": "Tout le monde peut rejoindre tout de suite, sans demande."
       },
       "archive": {
         "title": "Archiver ce cercle",
@@ -4246,6 +4261,22 @@
           "title": "Nous n'avons pas pu utiliser ce lien",
           "description": "Un problème est survenu en route vers le cercle. Réessayer suffit souvent."
         }
+      },
+      "openJoined": "Vous en faites partie. Bienvenue dans le cercle.",
+      "openErrors": {
+        "CIRCLE_NOT_OPEN": "Ce cercle n'est plus ouvert à tous. Vous pouvez demander une invitation.",
+        "CIRCLE_FULL": "Ce cercle est complet pour le moment.",
+        "CIRCLE_JOIN_NOT_ALLOWED": "Vous ne pouvez pas rejoindre ce cercle seul. Une invitation reste possible.",
+        "CIRCLE_NOT_JOINABLE": "Ce cercle ne peut pas accueillir de nouveaux membres pour le moment.",
+        "CIRCLE_NOT_FOUND": "Nous n'avons pas trouvé ce cercle. Il a peut-être été archivé.",
+        "UNKNOWN": "Nous n'avons pas pu vous ajouter à ce cercle. Veuillez réessayer.",
+        "CIRCLE_UNAVAILABLE": "Nous ne parvenons pas à joindre ce cercle pour le moment. Veuillez réessayer dans un instant.",
+        "RATE_LIMITED": "Vous allez trop vite. Patientez un instant puis réessayez.",
+        "CIRCLE_IS_OPEN": "Ce cercle est désormais ouvert à tous. Appuyez sur « Rejoindre le cercle »."
+      },
+      "landing": {
+        "open": "Tout le monde peut rejoindre ce cercle. Appuyez sur le bouton et vous en faites partie.",
+        "request": "Les membres décident qui entre. Envoyez une demande, le cercle vous répondra."
       }
     },
     "actions": {

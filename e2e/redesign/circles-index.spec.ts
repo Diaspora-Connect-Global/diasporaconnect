@@ -26,7 +26,7 @@ test('hero with search and create, your circles, discover, and how circles work;
     expect(await page.locator('body').innerText()).not.toMatch(UUID);
 
     await page.getByLabel('Search circles').fill('tech');
-    await page.getByRole('button', { name: 'Search', exact: true }).click();
+    await page.getByRole('search').getByRole('button', { name: 'Search', exact: true }).click();
     await expect(page).toHaveURL(/\/circles\?q=tech/, { timeout: 60_000 });
     await expect(page.getByTestId('discover-circles')).toContainText('No circles match “tech”.', { timeout: 60_000 });
     await expect(page.getByTestId('my-circles')).toHaveCount(0);

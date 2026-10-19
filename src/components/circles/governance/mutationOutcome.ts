@@ -137,6 +137,14 @@ export function classifyCircleWriteFailure(error: unknown): CircleWriteFailure {
   const rawMessage = circleErrorText(error);
   const text = rawMessage.toLowerCase();
 
+  // The gateway's typed codes win over message matching. Membership gates answer
+  // with these (never FORBIDDEN, which would sign the user out).
+  if (CombinedGraphQLErrors.is(error)) {
+    const codes = error.errors.map((e) => e.extensions?.code);
+    if (codes.includes('CIRCLE_NOT_A_MEMBER')) return { refusal: 'NOT_A_MEMBER', rawMessage };
+    if (codes.includes('CIRCLE_LEAD_REQUIRED')) return { refusal: 'PROPOSER_ROLE', rawMessage };
+  }
+
   // ── Entitlement caps ─────────────────────────────────────────────────────
   // `EntitlementLockError`: "Entitlement MAX_ACTIVE_PROJECTS reached: usage 3
   // of limit 3 for CIRCLE:<id>". Tested first: it is the single most likely

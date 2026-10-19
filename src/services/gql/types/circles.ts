@@ -93,8 +93,11 @@ export type CircleStatus =
   | 'ARCHIVED'
   | 'DISSOLVED';
 
-/** How someone gets in. Independent of `discoverable` — two separate axes. */
-export type CircleJoinMode = 'INVITE_ONLY' | 'REQUEST';
+/**
+ * How someone gets in. Independent of `discoverable` — two separate axes.
+ * `OPEN` = anyone may join with one tap (`circleJoin`), no request, no vote.
+ */
+export type CircleJoinMode = 'INVITE_ONLY' | 'REQUEST' | 'OPEN';
 
 /** A LEAD is a facilitator, not a boss — they hold only what the circle left them. */
 export type CircleMemberRole = 'MEMBER' | 'LEAD';
@@ -956,6 +959,10 @@ export interface MyCirclesData {
 
 export interface SearchCirclesData {
   searchCircles: CirclePublicCard[];
+}
+
+export interface CircleJoinData {
+  circleJoin: { circle: Circle; member?: CircleMember | null } | null;
 }
 
 export interface CirclePublicCardData {
