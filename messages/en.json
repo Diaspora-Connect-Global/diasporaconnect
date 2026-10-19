@@ -4462,6 +4462,14 @@
     }
   },
   "feed": {
+    "adminDelete": {
+      "menuItem": "Delete post",
+      "title": "Delete this post as an admin?",
+      "description": "You are deleting this post as a platform admin. It will be removed for everyone and this can't be undone.",
+      "confirm": "Delete post",
+      "deleted": "Post deleted",
+      "failed": "Couldn't delete the post. Please try again."
+    },
     "errors": {
       "insufficient_data": "Please provide all required information",
       "not_authorized": "You don't have permission to perform this action",

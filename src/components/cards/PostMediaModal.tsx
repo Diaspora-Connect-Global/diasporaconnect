@@ -22,6 +22,8 @@ import {
     DeleteCommentData,
 } from '@/services/gql/postsFeed';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { AdminDeletePostDialog } from '@/components/cards/AdminDeletePostDialog';
+import { useIsSuperAdmin } from '@/hooks/useIsSuperAdmin';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import { toast } from 'sonner';
 import { SEARCH_USERS } from '@/services/gql/connection';
@@ -232,6 +234,11 @@ export default function PostMediaModal({
     }, [router, currentUserId]);
 
     const isOwnPost = !!currentUserId && !!authorUserId && currentUserId === authorUserId;
+    const isSuperAdmin = useIsSuperAdmin();
+    // A super admin may delete anyone else's post (server-enforced; this only shows the control).
+    const showAdminDelete = isSuperAdmin && !isOwnPost;
+    const [adminDeleteOpen, setAdminDeleteOpen] = useState(false);
+    const tAdminDel = useTranslations('feed.adminDelete');
     const canEditPost = isOwnPost && !!createdAt && (Date.now() - new Date(createdAt).getTime()) < 24 * 60 * 60 * 1000;
     const isOwnComment = (c: Comment) => !!currentUserId && c.authorId === currentUserId;
     const canEditComment = (c: Comment) =>
@@ -582,7 +589,7 @@ export default function PostMediaModal({
                     {visibility === 'CONNECTIONS' ? <Users className="w-3.5 h-3.5 flex-shrink-0" /> : visibility === 'PRIVATE' ? <Lock className="w-3.5 h-3.5 flex-shrink-0" /> : <Globe className="w-3.5 h-3.5 flex-shrink-0" />}
                 </p>
             </div>
-            {isOwnPost && (
+            {(isOwnPost || showAdminDelete) && (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <button className="p-1 rounded-full hover:bg-surface-alt text-text-secondary flex-shrink-0">
@@ -596,9 +603,15 @@ export default function PostMediaModal({
                             </DropdownMenuItem>
                         )}
                         {canEditPost && <DropdownMenuSeparator />}
-                        <DropdownMenuItem variant="destructive" onSelect={() => setDeletePostModalOpen(true)}>
-                            <Trash2 className="w-4 h-4 mr-2" /> Delete
-                        </DropdownMenuItem>
+                        {isOwnPost ? (
+                            <DropdownMenuItem variant="destructive" onSelect={() => setDeletePostModalOpen(true)}>
+                                <Trash2 className="w-4 h-4 mr-2" /> Delete
+                            </DropdownMenuItem>
+                        ) : (
+                            <DropdownMenuItem variant="destructive" onSelect={() => setAdminDeleteOpen(true)}>
+                                <Trash2 className="w-4 h-4 mr-2" /> {tAdminDel('menuItem')}
+                            </DropdownMenuItem>
+                        )}
                     </DropdownMenuContent>
                 </DropdownMenu>
             )}
@@ -962,6 +975,15 @@ export default function PostMediaModal({
                 confirmVariant="destructive"
                 isLoading={deletePostLoading}
             />
+
+            {showAdminDelete && (
+                <AdminDeletePostDialog
+                    open={adminDeleteOpen}
+                    onCancel={() => setAdminDeleteOpen(false)}
+                    postId={postId}
+                    onDeleted={onDelete}
+                />
+            )}
         </>
     );
 }

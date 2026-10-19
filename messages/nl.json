@@ -4452,6 +4452,14 @@
     }
   },
   "feed": {
+    "adminDelete": {
+      "menuItem": "Bericht verwijderen",
+      "title": "Dit bericht als beheerder verwijderen?",
+      "description": "Je verwijdert dit bericht als platformbeheerder. Het verdwijnt voor iedereen en dit kan niet ongedaan worden gemaakt.",
+      "confirm": "Bericht verwijderen",
+      "deleted": "Bericht verwijderd",
+      "failed": "Het bericht kon niet worden verwijderd. Probeer het opnieuw."
+    },
     "errors": {
       "insufficient_data": "Geef alstublieft alle vereiste informatie",
       "not_authorized": "U bent niet gemachtigd om deze actie uit te voeren",

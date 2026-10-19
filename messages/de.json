@@ -4452,6 +4452,14 @@
     }
   },
   "feed": {
+    "adminDelete": {
+      "menuItem": "Beitrag löschen",
+      "title": "Diesen Beitrag als Admin löschen?",
+      "description": "Du löschst diesen Beitrag als Plattform-Admin. Er wird für alle entfernt und das lässt sich nicht rückgängig machen.",
+      "confirm": "Beitrag löschen",
+      "deleted": "Beitrag gelöscht",
+      "failed": "Der Beitrag konnte nicht gelöscht werden. Bitte versuche es erneut."
+    },
     "errors": {
       "insufficient_data": "Bitte füllen Sie alle erforderlichen Felder aus",
       "not_authorized": "Sie haben keine Berechtigung für diese Aktion",

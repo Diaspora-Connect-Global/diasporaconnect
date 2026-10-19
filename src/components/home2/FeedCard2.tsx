@@ -44,6 +44,8 @@ import { formatDateProximity } from '@/macros/time';
 import { resolveUserTier } from '@/lib/userTier';
 import { useRouter } from '@/i18n/navigation';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { AdminDeletePostDialog } from '@/components/cards/AdminDeletePostDialog';
+import { useIsSuperAdmin } from '@/hooks/useIsSuperAdmin';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ButtonType2, ButtonType3 } from '@/components/custom/button';
@@ -791,6 +793,11 @@ function FeedCard2Inner({
     const currentUserId = useUserStore((s) => s.user?.userId);
 
     const isOwnPost = !!currentUserId && !!authorUserId && currentUserId === authorUserId;
+    const isSuperAdmin = useIsSuperAdmin();
+    // A super admin may delete anyone else's post (server-enforced; this only shows the control).
+    const showAdminDelete = isSuperAdmin && !isOwnPost;
+    const [adminDeleteOpen, setAdminDeleteOpen] = useState(false);
+    const tAdminDel = useTranslations('feed.adminDelete');
     const canEditPost = isOwnPost && !!createdAt && (Date.now() - new Date(createdAt).getTime()) < 24 * 60 * 60 * 1000;
 
     const goToProfile = useCallback((id?: string, authorType?: string) => {
@@ -1615,7 +1622,7 @@ function FeedCard2Inner({
                             </p>
                         </div>
                     </div>
-                    {isOwnPost && (
+                    {(isOwnPost || showAdminDelete) && (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <button className="p-1 rounded-full hover:bg-surface-alt text-text-secondary flex-shrink-0">
@@ -1635,9 +1642,15 @@ function FeedCard2Inner({
                                     </DropdownMenuItem>
                                 )}
                                 {isOwnPost && <DropdownMenuSeparator />}
-                                <DropdownMenuItem variant="destructive" onSelect={() => setDeletePostModalOpen(true)}>
-                                    <Trash2 className="w-4 h-4 mr-2" /> Delete
-                                </DropdownMenuItem>
+                                {isOwnPost ? (
+                                    <DropdownMenuItem variant="destructive" onSelect={() => setDeletePostModalOpen(true)}>
+                                        <Trash2 className="w-4 h-4 mr-2" /> Delete
+                                    </DropdownMenuItem>
+                                ) : (
+                                    <DropdownMenuItem variant="destructive" onSelect={() => setAdminDeleteOpen(true)}>
+                                        <Trash2 className="w-4 h-4 mr-2" /> {tAdminDel('menuItem')}
+                                    </DropdownMenuItem>
+                                )}
                             </DropdownMenuContent>
                         </DropdownMenu>
                     )}
@@ -1740,6 +1753,15 @@ function FeedCard2Inner({
                 confirmVariant="destructive"
                 isLoading={deletePostLoading}
             />
+
+            {showAdminDelete && (
+                <AdminDeletePostDialog
+                    open={adminDeleteOpen}
+                    onCancel={() => setAdminDeleteOpen(false)}
+                    postId={postId}
+                    onDeleted={onDelete}
+                />
+            )}
 
             <ConfirmationModal
                 open={!!deleteCommentId}
