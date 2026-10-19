@@ -143,14 +143,14 @@ test('Refine: location and sort change the real query', async () => {
     await page.getByLabel('Location').fill('Accra');
     await page.getByLabel('Location').press('Enter');
     await expect(page).toHaveURL(/loc=Accra/);
-    await expect.poll(() => [...graphql.calls].reverse().find((c) => c.name === 'ListOpportunities')?.variables).toMatchObject({ input: { type: 'EMPLOYMENT', location: 'Accra', sortBy: 'deadline', sortOrder: 'ASC' } });
+    await expect.poll(() => [...graphql.calls].reverse().find((c) => c.name === 'ListOpportunities')?.variables).toMatchObject({ input: { type: 'EMPLOYMENT', location: 'Accra', sortBy: 'DEADLINE', sortOrder: 'ASC' } });
     await page.context().close();
 });
 
 test('the hero search goes to the global search', async () => {
     const { page } = await open(browser, '/discover');
     await page.getByLabel('Search DiaspoPlug').fill('cocoa');
-    await page.getByRole('button', { name: 'Search', exact: true }).click();
+    await page.getByRole('search').getByRole('button', { name: 'Search', exact: true }).click(); // the header has its own Search button
     await expect(page).toHaveURL(/\/search\?q=cocoa/);
     await page.context().close();
 });

@@ -73,7 +73,7 @@ test('search goes in the URL, lists matches, and clears back to suggestions', as
     };
     const { page } = await open(browser, '/people', { ...SUGGESTED, SearchUsers: searchUsers } as never);
     await page.getByLabel('Search people').fill('kofi', { timeout: 90_000 });
-    await page.getByRole('button', { name: 'Search', exact: true }).click();
+    await page.getByRole('search').getByRole('button', { name: 'Search', exact: true }).click(); // the header has its own Search button
     await expect(page).toHaveURL(/\/people\?q=kofi/);
     const list = page.getByTestId('people-list');
     await expect(list.getByRole('heading', { name: 'Results for “kofi”' })).toBeVisible();

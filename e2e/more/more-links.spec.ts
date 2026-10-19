@@ -103,24 +103,17 @@ test.describe('More page', () => {
         await page.context().close();
     });
 
-    test('"My Requests" and "Saved" open a sheet of real links, from the keyboard too', async () => {
+    test('"My Requests" and "Saved" go to their own pages (since the /requests and /saved pages, 2026-10-13), from the keyboard too', async () => {
         const page = await open('/en/more');
-        const requests = page.getByRole('button', { name: /My Requests/ });
+        const requests = page.getByRole('link', { name: /My Requests/ }).first();
         await expect(requests).toBeVisible({ timeout: 90_000 });
+        expect(new URL((await requests.getAttribute('href'))!, 'http://x').pathname).toBe('/en/requests');
+        expect(new URL((await page.getByRole('link', { name: /^Saved/ }).first().getAttribute('href'))!, 'http://x').pathname).toBe('/en/saved');
+        expect(new URL((await page.getByTestId('more-rail').getByRole('link', { name: 'Saved items' }).getAttribute('href'))!, 'http://x').pathname).toBe('/en/saved');
+        // Reachable from the keyboard: Enter on the focused card opens the page.
         await requests.focus();
         await page.keyboard.press('Enter');
-        const sheet = page.getByRole('dialog', { name: 'My Requests' });
-        await expect(sheet).toBeVisible();
-        expect(await linkPaths(page, '[role="dialog"]')).toEqual(['/en/community', '/en/association', '/en/friends?tab=requests']);
-        await page.keyboard.press('Escape');
-        await expect(sheet).toHaveCount(0);
-        await expect(requests).toBeFocused();
-
-        await page.getByTestId('more-rail').getByRole('button', { name: 'Saved items' }).click();
-        await expect(page.getByRole('dialog', { name: 'Saved' })).toBeVisible();
-        expect(await linkPaths(page, '[role="dialog"]')).toEqual(['/en/profile?posts=saved', '/en/events?tab=saved', '/en/opportunities?tab=saved']);
-        await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
-        await expect(page.getByRole('dialog')).toHaveCount(0);
+        await expect(page).toHaveURL(/\/en\/requests/, { timeout: 300_000 });
         await page.context().close();
     });
 
@@ -139,7 +132,7 @@ test.describe('Discover v1', () => {
         const box = page.getByRole('searchbox', { name: 'Search DiaspoPlug' });
         await expect(box).toBeVisible({ timeout: 90_000 });
 
-        await page.getByRole('button', { name: 'Search', exact: true }).click();
+        await page.getByRole('search').getByRole('button', { name: 'Search', exact: true }).click(); // the header has its own Search button
         await expect(page).toHaveURL(/\/en\/discover$/);
         await expect(box).toBeFocused();
 

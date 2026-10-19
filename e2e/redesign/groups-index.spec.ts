@@ -85,7 +85,7 @@ test('search goes in the URL, lists every match (yours marked Open), and clears'
     const calls: { query: string; offset: number }[] = [];
     const { page } = await open(browser, '/groups', DATA(calls) as never);
     await page.getByLabel('Search groups').fill('ber', { timeout: 90_000 });
-    await page.getByRole('button', { name: 'Search', exact: true }).click();
+    await page.getByRole('search').getByRole('button', { name: 'Search', exact: true }).click(); // the header has its own Search button
     await expect(page).toHaveURL(/\/groups\?q=ber/);
     const discover = page.getByTestId('groups-discover');
     await expect(discover.getByRole('heading', { name: 'Results for “ber”' })).toBeVisible();
