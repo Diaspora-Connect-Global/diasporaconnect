@@ -104,6 +104,7 @@ export function PrivateReplyPanel({
     onChanged: () => void;
 }) {
     const t = useTranslations('chat.group.privateReply');
+    const tGroup = useTranslations('chat.group');
     const tFeedback = useTranslations('feedback.error');
     const locale = useLocale();
     const tIdentity = useTranslations('common.identity');
@@ -553,7 +554,7 @@ export function PrivateReplyPanel({
                     <div className="flex-shrink-0">
                         <MessageInput
                             onSendMessage={handleSend}
-                            placeholder={target.mode === 'start' ? t('writeFirstMessage') : t('writeMessage')}
+                            placeholder={tGroup('writeReply')}
                             conversationId={privateReplyId ?? groupConversationId}
                             senderId={currentUserId}
                             disabled={sending || (target.mode === 'start' && chosen.length === 0)}
