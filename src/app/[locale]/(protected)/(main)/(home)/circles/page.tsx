@@ -4,7 +4,7 @@ import { useMemo, useState, type FormEvent } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
-import { Flag, Plus, Search, Target, Users, Vote, X } from 'lucide-react';
+import { DoorOpen, Flag, Mail, Plus, Search, Target, UserPlus, Users, Vote, X } from 'lucide-react';
 
 import PageLoader from '@/components/custom/PageLoader';
 import { EmptyState, ErrorState } from '@/components/feedback';
@@ -90,6 +90,12 @@ export default function CirclesPage() {
     { icon: Users, tone: 'info' as const, title: tPage('how.smallTitle'), body: tPage('how.smallBody') },
     { icon: Target, tone: 'success' as const, title: tPage('how.goalsTitle'), body: tPage('how.goalsBody') },
     { icon: Vote, tone: 'brand' as const, title: tPage('how.voteTitle'), body: tPage('how.voteBody') },
+  ];
+
+  const ways = [
+    { icon: Mail, title: tPage('ways.inviteTitle'), body: tPage('ways.inviteBody') },
+    { icon: UserPlus, title: tPage('ways.requestTitle'), body: tPage('ways.requestBody') },
+    { icon: DoorOpen, title: tPage('ways.openTitle'), body: tPage('ways.openBody') },
   ];
 
   return (
@@ -213,6 +219,22 @@ export default function CirclesPage() {
                 </li>
               ))}
             </ul>
+            <div className="space-y-3 border-t border-border-subtle pt-4" data-testid="circles-ways">
+              <h3 id="circles-ways-title" className="text-sm font-bold text-text-primary">{tPage('ways.title')}</h3>
+              <ul aria-labelledby="circles-ways-title" className="space-y-3">
+                {ways.map(({ icon: Icon, title, body }) => (
+                  <li key={title} className="flex items-start gap-3">
+                    <span className={`grid size-8 shrink-0 place-items-center rounded-lg ${ICON_CHIP_CLASS}`}>
+                      <Icon className="size-4" aria-hidden />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-semibold text-text-primary">{title}</span>
+                      <span className="block text-xs text-text-secondary">{body}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
             <Link href="/circles/create" className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-full bg-surface-brand px-5 text-sm font-semibold text-white hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand focus-visible:ring-offset-2">
               <Flag className="size-4" aria-hidden />
               {tPage('startCta')}

@@ -3277,7 +3277,8 @@
         "invite": "Ingresso su invito",
         "approval": "Richiesta e approvazione",
         "public": "Pubblica",
-        "inviteOnly": "Solo su invito"
+        "inviteOnly": "Solo su invito",
+        "open": "Aperta a tutti"
       },
       "pills": {
         "voteCloses": "Fine voto {time}",
@@ -3304,6 +3305,16 @@
         "goalsBody": "Fissate obiettivi comuni, portate avanti progetti e affrontate sfide insieme.",
         "voteTitle": "Decise insieme",
         "voteBody": "I membri decidono insieme votando; nessuno guida la cerchia da solo."
+      },
+      "joinCircle": "Unisciti alla cerchia",
+      "ways": {
+        "title": "Come si entra",
+        "inviteTitle": "Solo su invito",
+        "inviteBody": "Possono entrare solo le persone invitate da un membro.",
+        "requestTitle": "Richiedi di entrare",
+        "requestBody": "Tu chiedi e la cerchia decide insieme.",
+        "openTitle": "Aperta a tutti",
+        "openBody": "Chiunque può entrare con un tocco."
       }
     },
     "create": {
@@ -3331,12 +3342,14 @@
       "access": {
         "question": "2. Come si entra?",
         "help": "Scegli come possono entrare i nuovi membri.",
-        "applyLabel": "Tutti possono candidarsi",
+        "applyLabel": "Richiedi di entrare",
         "applyDescription": "Le persone possono chiedere di entrare.",
         "inviteLabel": "Solo su invito",
         "inviteDescription": "Possono entrare solo le persone invitate.",
         "approvalLabel": "Richiesta + approvazione",
-        "approvalDescription": "Le persone fanno richiesta e vengono approvate."
+        "approvalDescription": "Le persone fanno richiesta e vengono approvate.",
+        "openLabel": "Aperta a tutti",
+        "openDescription": "Chiunque può entrare subito."
       },
       "avatarLabel": "Immagine del profilo",
       "avatarCta": "Aggiungi un'immagine del profilo",
@@ -3758,7 +3771,9 @@
         "joinModeSaved": "Modalità di ingresso aggiornata.",
         "saveFailed": "Non siamo riusciti a cambiare questa impostazione. Riprova.",
         "leadNote": "Puoi cambiare queste due impostazioni perché sei una guida. Anche qualsiasi membro può chiedere una modifica aprendo una mozione, e la cerchia decide insieme.",
-        "proposeInstead": "Solo una guida può cambiarle direttamente. Puoi chiedere la modifica alla cerchia aprendo una mozione."
+        "proposeInstead": "Solo una guida può cambiarle direttamente. Puoi chiedere la modifica alla cerchia aprendo una mozione.",
+        "openTitle": "Aperta a tutti",
+        "openDescription": "Chiunque può entrare subito, senza richiesta."
       },
       "archive": {
         "title": "Archivia questa cerchia",
@@ -4246,6 +4261,22 @@
           "title": "Non siamo riusciti a usare questo link",
           "description": "Qualcosa è andato storto lungo il percorso verso la cerchia. Spesso basta riprovare."
         }
+      },
+      "openJoined": "Sei dentro. Benvenuto nella cerchia.",
+      "openErrors": {
+        "CIRCLE_NOT_OPEN": "Questa cerchia non è più aperta a tutti. Puoi chiedere un invito.",
+        "CIRCLE_FULL": "Questa cerchia è al completo in questo momento.",
+        "CIRCLE_JOIN_NOT_ALLOWED": "Non puoi entrare in questa cerchia da solo. Puoi comunque essere invitato.",
+        "CIRCLE_NOT_JOINABLE": "Questa cerchia non può accogliere nuovi membri in questo momento.",
+        "CIRCLE_NOT_FOUND": "Non siamo riusciti a trovare questa cerchia. Forse è stata archiviata.",
+        "UNKNOWN": "Non siamo riusciti ad aggiungerti a questa cerchia. Riprova.",
+        "CIRCLE_UNAVAILABLE": "Al momento non riusciamo a raggiungere questa cerchia. Riprova tra poco.",
+        "RATE_LIMITED": "Stai andando troppo veloce. Attendi un momento e riprova.",
+        "CIRCLE_IS_OPEN": "Questa cerchia ora è aperta a tutti. Tocca «Unisciti alla cerchia»."
+      },
+      "landing": {
+        "open": "Chiunque può entrare in questa cerchia. Tocca il pulsante e sei dentro.",
+        "request": "I membri decidono chi entra. Invia una richiesta e la cerchia ti risponderà."
       }
     },
     "actions": {

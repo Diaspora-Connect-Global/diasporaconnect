@@ -3277,7 +3277,8 @@
         "invite": "Deelname op uitnodiging",
         "approval": "Aanvraag en goedkeuring",
         "public": "Openbaar",
-        "inviteOnly": "Alleen op uitnodiging"
+        "inviteOnly": "Alleen op uitnodiging",
+        "open": "Open om lid te worden"
       },
       "pills": {
         "voteCloses": "Stemming sluit {time}",
@@ -3304,6 +3305,16 @@
         "goalsBody": "Stel gezamenlijke doelen, voer projecten uit en ga samen uitdagingen aan.",
         "voteTitle": "Samen besloten",
         "voteBody": "Leden besluiten samen door te stemmen; niemand leidt de kring alleen."
+      },
+      "joinCircle": "Word lid van de kring",
+      "ways": {
+        "title": "Hoe komen mensen binnen",
+        "inviteTitle": "Alleen op uitnodiging",
+        "inviteBody": "Alleen mensen die een lid uitnodigt, kunnen deelnemen.",
+        "requestTitle": "Deelname aanvragen",
+        "requestBody": "Je vraagt aan en de kring beslist samen.",
+        "openTitle": "Open om lid te worden",
+        "openBody": "Iedereen kan met één tik deelnemen."
       }
     },
     "create": {
@@ -3331,12 +3342,14 @@
       "access": {
         "question": "2. Hoe komen mensen binnen?",
         "help": "Kies hoe nieuwe leden kunnen deelnemen.",
-        "applyLabel": "Iedereen kan zich aanmelden",
+        "applyLabel": "Deelname aanvragen",
         "applyDescription": "Mensen kunnen deelname aanvragen.",
         "inviteLabel": "Alleen op uitnodiging",
         "inviteDescription": "Alleen uitgenodigde mensen kunnen deelnemen.",
         "approvalLabel": "Aanvraag + goedkeuring",
-        "approvalDescription": "Mensen vragen aan en worden goedgekeurd."
+        "approvalDescription": "Mensen vragen aan en worden goedgekeurd.",
+        "openLabel": "Open om lid te worden",
+        "openDescription": "Iedereen kan meteen deelnemen."
       },
       "avatarLabel": "Profielfoto",
       "avatarCta": "Profielfoto toevoegen",
@@ -3758,7 +3771,9 @@
         "joinModeSaved": "Deelname bijgewerkt.",
         "saveFailed": "We konden deze instelling niet wijzigen. Probeer het opnieuw.",
         "leadNote": "Je kunt deze twee instellingen wijzigen omdat je begeleider bent. Elk lid kan ook om een wijziging vragen door een motie te openen, en dan beslist de kring samen.",
-        "proposeInstead": "Alleen een begeleider kan deze direct wijzigen. Je kunt de kring om de wijziging vragen door een motie te openen."
+        "proposeInstead": "Alleen een begeleider kan deze direct wijzigen. Je kunt de kring om de wijziging vragen door een motie te openen.",
+        "openTitle": "Open om lid te worden",
+        "openDescription": "Iedereen kan meteen deelnemen, zonder aanvraag."
       },
       "archive": {
         "title": "Deze kring archiveren",
@@ -4246,6 +4261,22 @@
           "title": "We konden deze link niet gebruiken",
           "description": "Er ging iets mis onderweg naar de kring. Opnieuw proberen helpt vaak."
         }
+      },
+      "openJoined": "Je bent erbij. Welkom in de kring.",
+      "openErrors": {
+        "CIRCLE_NOT_OPEN": "Deze kring is niet meer open. Je kunt om een uitnodiging vragen.",
+        "CIRCLE_FULL": "Deze kring is op dit moment vol.",
+        "CIRCLE_JOIN_NOT_ALLOWED": "Je kunt niet zelf lid worden van deze kring. Een uitnodiging kan nog wel.",
+        "CIRCLE_NOT_JOINABLE": "Deze kring kan nu geen nieuwe leden aannemen.",
+        "CIRCLE_NOT_FOUND": "We konden deze kring niet vinden. Misschien is hij gearchiveerd.",
+        "UNKNOWN": "We konden je niet aan deze kring toevoegen. Probeer het opnieuw.",
+        "CIRCLE_UNAVAILABLE": "We kunnen deze kring nu niet bereiken. Probeer het zo meteen opnieuw.",
+        "RATE_LIMITED": "Je gaat te snel. Wacht even en probeer het opnieuw.",
+        "CIRCLE_IS_OPEN": "Deze kring is nu open. Tik op „Word lid van de kring“."
+      },
+      "landing": {
+        "open": "Iedereen kan lid worden van deze kring. Tik op de knop en je bent erbij.",
+        "request": "De leden beslissen wie erin komt. Stuur een aanvraag en de kring antwoordt."
       }
     },
     "actions": {

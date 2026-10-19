@@ -3,7 +3,7 @@
 import { useId, useState, type FormEvent } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
-import { Eye, EyeOff, Info, Mail, UserPlus } from 'lucide-react';
+import { DoorOpen, Eye, EyeOff, Info, Mail, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { RadioCard, RadioCardGroup } from '@/components/circles/primitives';
@@ -39,9 +39,12 @@ const MAX_NAME_LENGTH = 120;
  * ask to join. They are asked separately because they are separate, and they
  * are two separate `<fieldset>`s so assistive tech hears them that way too.
  *
- * ## Why the second question has two options, not the design's three
+ * ## Three ways in: invite only, request to join, open to join (`OPEN`).
+ * OPEN lets anyone join with one tap (`circleJoin`); REQUEST needs approval.
  *
- * `CircleJoinMode` is `INVITE_ONLY | REQUEST` — there is no third mode, and
+ * ## Why REQUEST is offered once (the design had two cards for it)
+ *
+ * `REQUEST` is ONE enum value, and
  * `CreateCircleInput` carries no approval flag beside it. The design's "Anyone
  * can apply" and "Request + approval" are the SAME enum value: joining always
  * creates a PENDING row, and admission is an ADMIT_MEMBER motion (circle-service
@@ -380,6 +383,12 @@ export function CreateCircleScreen() {
                 icon={<Mail aria-hidden="true" />}
                 title={t('create.access.inviteLabel')}
                 description={t('create.access.inviteDescription')}
+              />
+              <RadioCard
+                value="OPEN"
+                icon={<DoorOpen aria-hidden="true" />}
+                title={t('create.access.openLabel')}
+                description={t('create.access.openDescription')}
               />
             </RadioCardGroup>
           </fieldset>

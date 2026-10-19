@@ -3,7 +3,7 @@
 import { useId, useState } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
-import { Eye, EyeOff, Mail, UserPlus } from 'lucide-react';
+import { DoorOpen, Eye, EyeOff, Mail, UserPlus } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { RadioCard, RadioCardGroup } from '@/components/circles/primitives';
@@ -46,12 +46,11 @@ import { SettingsSection } from './SettingsSection';
  * of those states would be silently reconfigured the first time its lead
  * touched the switch. They are asked separately because they are separate.
  *
- * ── WHY THERE ARE TWO JOIN MODES AND NOT THREE ──────────────────────────────
- * `CircleJoinMode` is `INVITE_ONLY | REQUEST`. There is no auto-admitting mode:
- * `requestToJoinCircle` only ever creates a PENDING row, and admission is an
- * `ADMIT_MEMBER` motion — circle-service has no approve-a-request command at
- * all. Splitting REQUEST into "anyone can apply" and "request + approval" would
- * show one setting twice and advertise a mode that does not exist.
+ * ── THREE JOIN MODES ────────────────────────────────────────────────────────
+ * `CircleJoinMode` is `INVITE_ONLY | REQUEST | OPEN`. REQUEST only ever creates
+ * a PENDING row (admission is an `ADMIT_MEMBER` motion); OPEN admits at once via
+ * `circleJoin`. Changing the mode is always THIS path (a lead sets it, or a
+ * `CHANGE_JOIN_MODE` motion) — there is no shortcut for OPEN.
  *
  * ── WHY EACH CHANGE APPLIES IMMEDIATELY ─────────────────────────────────────
  * One control, one mutation, no shared save button — so a Save would only add a
@@ -207,7 +206,9 @@ export function CircleDiscoverySection({
             <dd className="body-small mt-0.5 text-text-secondary">
               {circle.joinMode === 'INVITE_ONLY'
                 ? t('discovery.inviteTitle')
-                : t('discovery.requestTitle')}
+                : circle.joinMode === 'OPEN'
+                  ? t('discovery.openTitle')
+                  : t('discovery.requestTitle')}
             </dd>
           </div>
         </dl>
@@ -282,6 +283,13 @@ export function CircleDiscoverySection({
               icon={<Mail aria-hidden="true" />}
               title={t('discovery.inviteTitle')}
               description={t('discovery.inviteDescription')}
+              disabled={savingJoinMode}
+            />
+            <RadioCard
+              value="OPEN"
+              icon={<DoorOpen aria-hidden="true" />}
+              title={t('discovery.openTitle')}
+              description={t('discovery.openDescription')}
               disabled={savingJoinMode}
             />
           </RadioCardGroup>
