@@ -4507,6 +4507,21 @@
       "cta": "Uitnodigingen",
       "badgeCount": "{count, plural, =1 {1 openstaande uitnodiging} other {# openstaande uitnodigingen}}",
       "loadError": "We konden je uitnodigingen niet laden. Probeer het opnieuw."
+    },
+    "joinRequests": {
+      "title": "Verzoeken om lid te worden ({count})",
+      "description": "Mensen die zich willen aansluiten. De kring beslist met een stemming.",
+      "empty": "Geen openstaande verzoeken.",
+      "loadError": "We konden de verzoeken niet laden.",
+      "requestedOn": "Gevraagd op {date}",
+      "approve": "Goedkeuren",
+      "approveFor": "{name} goedkeuren",
+      "approveHint": "De leden stemmen hierover.",
+      "voteOpened": "De leden stemmen hierover.",
+      "voteRunning": "De leden stemmen hier nu over.",
+      "viewVote": "Bekijk de stemming",
+      "motionTitle": "{name} toelaten tot de kring",
+      "motionTitleFallback": "Een nieuw lid toelaten"
     }
   },
   "feed": {

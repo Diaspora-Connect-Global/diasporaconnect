@@ -4507,6 +4507,21 @@
       "cta": "Invitations",
       "badgeCount": "{count, plural, =1 {1 invitation en attente} other {# invitations en attente}}",
       "loadError": "Impossible de charger vos invitations. Veuillez réessayer."
+    },
+    "joinRequests": {
+      "title": "Demandes d’adhésion ({count})",
+      "description": "Les personnes qui ont demandé à rejoindre. Le cercle décide par un vote.",
+      "empty": "Aucune demande en attente.",
+      "loadError": "Impossible de charger les demandes d’adhésion.",
+      "requestedOn": "Demandé le {date}",
+      "approve": "Accepter",
+      "approveFor": "Accepter {name}",
+      "approveHint": "Les membres voteront sur cette demande.",
+      "voteOpened": "Les membres voteront sur cette demande.",
+      "voteRunning": "Les membres sont en train de voter.",
+      "viewVote": "Voir le vote",
+      "motionTitle": "Admettre {name} dans le cercle",
+      "motionTitleFallback": "Admettre un nouveau membre"
     }
   },
   "feed": {

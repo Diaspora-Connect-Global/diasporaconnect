@@ -11,6 +11,7 @@ import {
   GovernanceCallout,
   InviteCard,
   InviteLinksPanel,
+  JoinRequestsSection,
   MembersTable,
   MembersToolbar,
   PastMembersSection,
@@ -252,6 +253,8 @@ export default function CircleMembersPage() {
                 </>
               )}
             </div>
+
+            {isLead && <JoinRequestsSection circleId={circleId} />}
 
             <MembersTable
               members={visibleMembers}

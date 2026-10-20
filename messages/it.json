@@ -4507,6 +4507,21 @@
       "cta": "Inviti",
       "badgeCount": "{count, plural, =1 {1 invito in sospeso} other {# inviti in sospeso}}",
       "loadError": "Non siamo riusciti a caricare i tuoi inviti. Riprova."
+    },
+    "joinRequests": {
+      "title": "Richieste di adesione ({count})",
+      "description": "Persone che hanno chiesto di unirsi. Il cerchio decide con un voto.",
+      "empty": "Nessuna richiesta in attesa.",
+      "loadError": "Non siamo riusciti a caricare le richieste di adesione.",
+      "requestedOn": "Richiesta il {date}",
+      "approve": "Approva",
+      "approveFor": "Approva {name}",
+      "approveHint": "I membri voteranno su questa richiesta.",
+      "voteOpened": "I membri voteranno su questa richiesta.",
+      "voteRunning": "I membri stanno votando.",
+      "viewVote": "Vedi il voto",
+      "motionTitle": "Ammetti {name} nel cerchio",
+      "motionTitleFallback": "Ammetti un nuovo membro"
     }
   },
   "feed": {
