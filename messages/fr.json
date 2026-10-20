@@ -265,6 +265,8 @@
     "placeholder": "Qu'avez-vous en tête, {name} ?",
     "posting": "Publication en cours...",
     "emptyError": "Impossible de publier un contenu vide",
+    "emptyHint": "Ajoutez du texte, une photo, une vidéo ou un fichier pour publier.",
+    "postEmpty": "Votre publication est vide. Ajoutez du texte ou au moins une photo, vidéo ou un fichier.",
     "successMessage": "Publication réussie !",
     "errorMessage": "Échec de la création du post. Veuillez réessayer.",
     "visibility": {

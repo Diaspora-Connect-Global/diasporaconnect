@@ -265,6 +265,8 @@
     "placeholder": "A cosa sta pensando, {name}?",
     "posting": "Pubblicazione in corso...",
     "emptyError": "Impossibile pubblicare contenuto vuoto",
+    "emptyHint": "Aggiungi del testo, una foto, un video o un file per pubblicare.",
+    "postEmpty": "Il tuo post è vuoto. Aggiungi del testo o almeno una foto, un video o un file.",
     "successMessage": "Post pubblicato con successo!",
     "errorMessage": "Impossibile creare il post. Riprovi per favore.",
     "visibility": {

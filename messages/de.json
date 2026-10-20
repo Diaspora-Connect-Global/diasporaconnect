@@ -265,6 +265,8 @@
     "placeholder": "Was bewegt Sie, {name}?",
     "posting": "Wird gepostet...",
     "emptyError": "Leere Inhalte können nicht gepostet werden",
+    "emptyHint": "Füge Text, ein Foto, ein Video oder eine Datei hinzu, um zu posten.",
+    "postEmpty": "Dein Beitrag ist leer. Füge Text oder mindestens ein Foto, Video oder eine Datei hinzu.",
     "successMessage": "Beitrag erfolgreich veröffentlicht!",
     "errorMessage": "Beitrag konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
     "visibility": {

@@ -265,6 +265,8 @@
     "placeholder": "What's on your mind, {name}?",
     "posting": "Posting...",
     "emptyError": "Cannot post empty content",
+    "emptyHint": "Add some text, a photo, a video or a file to post.",
+    "postEmpty": "Your post is empty. Add some text or at least one photo, video or file.",
     "successMessage": "Post published successfully!",
     "errorMessage": "Failed to create post. Please try again.",
     "visibility": {
