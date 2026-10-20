@@ -4480,6 +4480,31 @@
       "sentTitle": "Melding ontvangen",
       "sentBody": "Het Trust & Safety-team van DiaspoPlug beoordeelt de melding. We nemen contact op als we meer informatie nodig hebben.",
       "backToCircle": "Terug naar de kring"
+    },
+    "invitations": {
+      "title": "Uitnodigingen voor circles",
+      "subtitle": "Circles die je hebben uitgenodigd",
+      "emptyTitle": "Geen openstaande uitnodigingen",
+      "emptyBody": "Als een circle je uitnodigt, verschijnt de uitnodiging hier.",
+      "unknownCircle": "Een circle",
+      "someone": "Iemand",
+      "invitedBy": "Uitgenodigd door {name}",
+      "accept": "Accepteren",
+      "accepting": "Bezig met toetreden...",
+      "decline": "Weigeren",
+      "declining": "Bezig met weigeren...",
+      "acceptAria": "Uitnodiging van {name} accepteren",
+      "declineAria": "Uitnodiging van {name} weigeren",
+      "accepted": "Je bent toegetreden tot {name}",
+      "declined": "Uitnodiging geweigerd",
+      "errors": {
+        "full": "Deze circle zit nu vol, dus je kunt nog niet toetreden.",
+        "gone": "Deze uitnodiging is niet meer geldig.",
+        "unknown": "Dat is niet gelukt. Probeer het opnieuw."
+      },
+      "cta": "Uitnodigingen",
+      "badgeCount": "{count, plural, =1 {1 openstaande uitnodiging} other {# openstaande uitnodigingen}}",
+      "loadError": "We konden je uitnodigingen niet laden. Probeer het opnieuw."
     }
   },
   "feed": {

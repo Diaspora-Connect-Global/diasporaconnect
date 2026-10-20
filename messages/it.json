@@ -4480,6 +4480,31 @@
       "sentTitle": "Segnalazione ricevuta",
       "sentBody": "Il team Trust & Safety di DiaspoPlug la esaminerà. Ti contatteremo se ci servono altre informazioni.",
       "backToCircle": "Torna alla cerchia"
+    },
+    "invitations": {
+      "title": "Inviti ai circle",
+      "subtitle": "I circle che ti hanno invitato a unirti",
+      "emptyTitle": "Nessun invito in sospeso",
+      "emptyBody": "Quando un circle ti invita, l'invito compare qui.",
+      "unknownCircle": "Un circle",
+      "someone": "Qualcuno",
+      "invitedBy": "Invitato da {name}",
+      "accept": "Accetta",
+      "accepting": "Ingresso in corso...",
+      "decline": "Rifiuta",
+      "declining": "Rifiuto in corso...",
+      "acceptAria": "Accetta l'invito di {name}",
+      "declineAria": "Rifiuta l'invito di {name}",
+      "accepted": "Sei entrato in {name}",
+      "declined": "Invito rifiutato",
+      "errors": {
+        "full": "Questo circle è al completo, per ora non puoi unirti.",
+        "gone": "Questo invito non è più valido.",
+        "unknown": "Non è andata a buon fine. Riprova."
+      },
+      "cta": "Inviti",
+      "badgeCount": "{count, plural, =1 {1 invito in sospeso} other {# inviti in sospeso}}",
+      "loadError": "Non siamo riusciti a caricare i tuoi inviti. Riprova."
     }
   },
   "feed": {

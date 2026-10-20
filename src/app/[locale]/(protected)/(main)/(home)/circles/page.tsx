@@ -17,6 +17,7 @@ import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { PageHero } from '@/components/redesign/PageHero';
 import { REDESIGN_IMAGES } from '@/lib/redesignImages';
 import { ICON_CHIP_CLASS } from '@/components/more/MoreLinkCard';
+import { useMyCircleInvitations } from '@/components/circles/invitations';
 import { MY_CIRCLES, SEARCH_CIRCLES } from '@/services/gql/circles';
 import type {
   MyCirclesData,
@@ -57,6 +58,7 @@ export default function CirclesPage() {
   });
 
   const { unreadByConversationId } = useCircleUnreadCounts();
+  const { pending: pendingInvitations } = useMyCircleInvitations();
 
   const myCircles = useMemo(() => mine.data?.myCircles ?? [], [mine.data]);
 
@@ -126,6 +128,15 @@ export default function CirclesPage() {
               {/* The glyph is decorative — the label already says it. */}
               <Plus aria-hidden className="size-4 shrink-0" />
               {tPage('createCta')}
+            </Link>
+            <Link href="/circles/invitations" data-testid="circle-invitations-link" className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full border border-border-subtle bg-surface-default px-5 text-sm font-semibold text-text-primary hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand focus-visible:ring-offset-2">
+              <Mail aria-hidden className="size-4 shrink-0" />
+              {t('invitations.cta')}
+              {pendingInvitations.length > 0 && (
+                <span data-testid="circle-invitations-badge" aria-label={t('invitations.badgeCount', { count: pendingInvitations.length })} className="grid min-w-5 place-items-center rounded-full bg-surface-brand px-1.5 text-xs font-bold text-white">
+                  {pendingInvitations.length}
+                </span>
+              )}
             </Link>
           </div>
         </PageHero>
