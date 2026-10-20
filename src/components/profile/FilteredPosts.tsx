@@ -484,8 +484,8 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
                 }
                 documents={splitPostAttachments(post.attachments).documents}
                 likes={likeCount}
-                comments={post.engagementCounts.comments}
-                shares={post.engagementCounts.shares}
+                comments={counts?.comments ?? 0}
+                shares={counts?.shares ?? 0}
                 reactionBreakdown={reactionBreakdown}
                 onReact={handleReact}
                 onShare={handleShare}
@@ -497,8 +497,10 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
                 // hasLiked and assumes Happy, so a stored Hopeful or Sad comes
                 // back as a heart.
                 serverReaction={viewerReaction}
-                isSaved={post.userEngagement.hasSaved}
-                isShared={post.userEngagement.hasShared}
+                // Some tabs' posts come back with userEngagement / engagementCounts null;
+                // an unguarded read here crashed the whole profile page.
+                isSaved={post.userEngagement?.hasSaved ?? false}
+                isShared={post.userEngagement?.hasShared ?? false}
               />
             </div>
           );

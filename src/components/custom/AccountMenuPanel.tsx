@@ -19,6 +19,7 @@ import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import LocaleSwitcher from '@/components/LocalSwitcher';
 import { LogoutConfirmModal } from '@/components/auth/LogoutConfirmModal';
 import { clearStorage } from '@/lib/logout';
+import { useAuthStore } from '@/store/useAuthStore';
 import { useUserStore } from '@/store/useUserStore';
 import { useImageFallback } from '@/components/ui/ImageWithFallback';
 import { MyAvatar } from './MyAvatar';
@@ -111,8 +112,13 @@ export function AccountMenuPanel() {
   const fullName = [firstName, middleName, lastName].filter(Boolean).join(' ');
 
   const close = () => setOpen(false);
+  // The server session is revoked by the confirm modal's mutation; this drops the
+  // local one. Without clearAuth/clearUser the persisted tokens survive and the
+  // app still treats the browser as signed in.
   const logout = () => {
     clearStorage();
+    useAuthStore.getState().clearAuth();
+    useUserStore.getState().clearUser();
     router.replace('/signin');
   };
 
