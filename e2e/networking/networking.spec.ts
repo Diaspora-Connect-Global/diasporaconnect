@@ -94,6 +94,45 @@ test('wizard: save and finish later stores a draft and needs no consent', async 
     await page.context().close();
 });
 
+test('wizard: a saved draft read back from the server is sent back without __typename (Save later and Join)', async () => {
+    // A real reply carries __typename on every object; GraphQL input types reject it. Owner report
+    // 2026-10-20: both buttons failed on "Field __typename is not defined by type EventNetworkingFieldFlagsInput".
+    const draft = {
+        status: 'NOT_JOINED',
+        availability: [{ __typename: 'EventNetworkingAvailabilitySlot', startAt: '2026-11-07T09:00:00.000Z', endAt: '2026-11-07T09:30:00.000Z' }],
+    };
+    const overrides = () => networkingOverrides({
+        NetworkingStatus: status({ participationStatus: 'NOT_JOINED' }),
+        NetworkingMyParticipation: mine({}, draft),
+        NetworkingSaveDraft: mine({}, draft),
+        NetworkingJoin: mine(),
+        NetworkingSetAvailability: mine(),
+    });
+    const hasTypename = (v: unknown) => JSON.stringify(v).includes('__typename');
+    const PLAIN_FLAGS = { organization: true, location: true, availability: true, needsNote: true, offersNote: true };
+
+    const later = await openPage(browser, `${BASE}/setup`, overrides());
+    await later.page.getByTestId('save-later').click({ timeout: 90_000 });
+    await expect.poll(() => later.graphql.calls.some((c) => c.name === 'NetworkingSaveDraft')).toBe(true);
+    const saved = later.graphql.calls.find((c) => c.name === 'NetworkingSaveDraft')!.variables as { preferences: { fieldFlags: unknown } };
+    expect(hasTypename(saved)).toBe(false);
+    expect(saved.preferences.fieldFlags).toEqual(PLAIN_FLAGS);
+    await later.page.context().close();
+
+    const joining = await openPage(browser, `${BASE}/setup`, overrides());
+    await expect(joining.page.getByTestId('wizard')).toBeVisible(READY);
+    await joining.page.getByTestId('consent').check();
+    for (let i = 0; i < 5; i += 1) await joining.page.getByTestId('wizard-next').click();
+    await joining.page.getByTestId('wizard-join').click();
+    await expect.poll(() => joining.graphql.calls.some((c) => c.name === 'NetworkingSetAvailability')).toBe(true);
+    const joined = joining.graphql.calls.find((c) => c.name === 'NetworkingJoin')!.variables;
+    const slots = joining.graphql.calls.find((c) => c.name === 'NetworkingSetAvailability')!.variables;
+    expect(hasTypename(joined)).toBe(false);
+    expect(hasTypename(slots)).toBe(false);
+    expect(slots.slots).toEqual([{ startAt: '2026-11-07T09:00:00.000Z', endAt: '2026-11-07T09:30:00.000Z' }]);
+    await joining.page.context().close();
+});
+
 test('hub: goals editor, people to meet with tier labels and reasons; no percentage, no ids', async () => {
     const { page } = await openPage(browser, BASE, networkingOverrides());
     await expect(page.getByTestId('goals-editor')).toBeVisible(READY);

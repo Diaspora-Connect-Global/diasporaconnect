@@ -26,6 +26,17 @@ export interface NetworkingDraft {
 
 export const DEFAULT_FLAGS: FieldFlags = { organization: true, location: true, availability: true, needsNote: true, offersNote: true };
 
+/*
+ * Objects read back from a query carry Apollo's `__typename`, and GraphQL input types reject
+ * unknown fields: spreading a loaded `fieldFlags` into Join / Save draft failed with
+ * 'Field "__typename" is not defined by type "EventNetworkingFieldFlagsInput"'. Copy only the
+ * declared fields whenever a server object is turned into draft or input state.
+ */
+const plainFlags = (f: FieldFlags): FieldFlags => ({
+  organization: f.organization, location: f.location, availability: f.availability, needsNote: f.needsNote, offersNote: f.offersNote,
+});
+const plainSlots = (slots: AvailabilitySlot[]): AvailabilitySlot[] => slots.map((s) => ({ startAt: s.startAt, endAt: s.endAt }));
+
 export function emptyDraft(): NetworkingDraft {
   return {
     roles: [], interests: [], needs: [], offers: [], industries: [], markets: [], languages: [],
@@ -48,11 +59,11 @@ export function draftFromParticipation(mp: MyParticipation | null | undefined): 
     needsNote: f.needsNote ?? '', offersNote: f.offersNote ?? '',
     attendanceFormat: f.attendanceFormat ?? 'EITHER',
     visibility: p.visibility ?? 'RECOMMENDED',
-    fieldFlags: p.fieldFlags ?? { ...DEFAULT_FLAGS },
+    fieldFlags: p.fieldFlags ? plainFlags(p.fieldFlags) : { ...DEFAULT_FLAGS },
     acceptsInterests: p.acceptsInterests ?? true,
     openToMeetings: p.openToMeetings ?? true,
     inCircleDiscovery: p.inCircleDiscovery ?? true,
-    availability: p.availability ?? [],
+    availability: plainSlots(p.availability ?? []),
   };
 }
 
@@ -69,7 +80,7 @@ export function profileInput(d: NetworkingDraft) {
 export function preferencesInput(d: NetworkingDraft) {
   return {
     visibility: d.visibility,
-    fieldFlags: { ...d.fieldFlags },
+    fieldFlags: plainFlags(d.fieldFlags),
     acceptsInterests: d.acceptsInterests,
     openToMeetings: d.openToMeetings,
     inCircleDiscovery: d.inCircleDiscovery,
