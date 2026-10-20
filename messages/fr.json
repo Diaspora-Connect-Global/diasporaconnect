@@ -265,6 +265,8 @@
     "placeholder": "Qu'avez-vous en tête, {name} ?",
     "posting": "Publication en cours...",
     "emptyError": "Impossible de publier un contenu vide",
+    "emptyHint": "Ajoutez du texte, une photo, une vidéo ou un fichier pour publier.",
+    "postEmpty": "Votre publication est vide. Ajoutez du texte ou au moins une photo, vidéo ou un fichier.",
     "successMessage": "Publication réussie !",
     "errorMessage": "Échec de la création du post. Veuillez réessayer.",
     "visibility": {
@@ -4480,6 +4482,46 @@
       "sentTitle": "Signalement reçu",
       "sentBody": "L'équipe Trust & Safety de DiaspoPlug va l'examiner. Nous vous contacterons si nous avons besoin de plus d'informations.",
       "backToCircle": "Retour au cercle"
+    },
+    "invitations": {
+      "title": "Invitations aux cercles",
+      "subtitle": "Les cercles qui vous invitent à les rejoindre",
+      "emptyTitle": "Aucune invitation en attente",
+      "emptyBody": "Lorsqu'un cercle vous invite, l'invitation apparaît ici.",
+      "unknownCircle": "Un cercle",
+      "someone": "Quelqu'un",
+      "invitedBy": "Invité par {name}",
+      "accept": "Accepter",
+      "accepting": "Adhésion en cours...",
+      "decline": "Refuser",
+      "declining": "Refus en cours...",
+      "acceptAria": "Accepter l'invitation de {name}",
+      "declineAria": "Refuser l'invitation de {name}",
+      "accepted": "Vous avez rejoint {name}",
+      "declined": "Invitation refusée",
+      "errors": {
+        "full": "Ce cercle est complet pour le moment, vous ne pouvez pas encore le rejoindre.",
+        "gone": "Cette invitation n'est plus valable.",
+        "unknown": "L'opération a échoué. Veuillez réessayer."
+      },
+      "cta": "Invitations",
+      "badgeCount": "{count, plural, =1 {1 invitation en attente} other {# invitations en attente}}",
+      "loadError": "Impossible de charger vos invitations. Veuillez réessayer."
+    },
+    "joinRequests": {
+      "title": "Demandes d’adhésion ({count})",
+      "description": "Les personnes qui ont demandé à rejoindre. Le cercle décide par un vote.",
+      "empty": "Aucune demande en attente.",
+      "loadError": "Impossible de charger les demandes d’adhésion.",
+      "requestedOn": "Demandé le {date}",
+      "approve": "Accepter",
+      "approveFor": "Accepter {name}",
+      "approveHint": "Les membres voteront sur cette demande.",
+      "voteOpened": "Les membres voteront sur cette demande.",
+      "voteRunning": "Les membres sont en train de voter.",
+      "viewVote": "Voir le vote",
+      "motionTitle": "Admettre {name} dans le cercle",
+      "motionTitleFallback": "Admettre un nouveau membre"
     }
   },
   "feed": {

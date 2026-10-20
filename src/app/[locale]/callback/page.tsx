@@ -1,5 +1,6 @@
 'use client';
 
+import { isAllowedWebSignInRole } from '@/lib/webSignInRoles';
 import { useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from '@/i18n/navigation';
@@ -14,10 +15,7 @@ export default function OAuthCallbackPage() {
   const { setUser } = useUserStore();
 
   useEffect(() => {
-    const isAllowedUserRole = (role?: string | null) => {
-      const normalized = (role || '').trim().toLowerCase();
-      return normalized === 'local' || normalized === 'diaspora';
-    };
+    const isAllowedUserRole = isAllowedWebSignInRole;
 
     const error = params.get('error');
     const description = params.get('description');

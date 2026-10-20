@@ -1,5 +1,6 @@
 'use client';
 
+import { hasMeaningfulPostText, isPostEmptyRefusal } from '@/lib/postContent';
 import { X, ChevronLeft, ChevronRight, Bookmark, Loader2, Globe, Users, Lock, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { GoHeartFill } from 'react-icons/go';
@@ -246,11 +247,15 @@ export default function PostMediaModal({
 
     const handleEditPostConfirm = async () => {
         const newText = editPostText.trim();
-        if (!newText) return;
+        if (!hasMeaningfulPostText(newText)) return;
         try {
             const result = await editPostMutation({ variables: { input: { id: postId, text: newText } } });
             const outcome = readMutationOutcome(result, d => d.editPost);
             if (!outcome.ok) {
+                if (isPostEmptyRefusal(result)) {
+                    toast.error(tRoot('createPost.postEmpty'));
+                    return;
+                }
                 const key = refusalMessageKey(outcome.message, 'feed.errors');
                 toast.error(tRoot(key));
                 return;
@@ -306,7 +311,7 @@ export default function PostMediaModal({
 
     const handleEditCommentSubmit = async (commentId: string) => {
         const newText = editingText.trim();
-        if (!newText) return;
+        if (!hasMeaningfulPostText(newText)) return;
         const previous = loadedComments.find(c => c.id === commentId);
         setLoadedComments(prev => prev.map(c => c.id === commentId ? { ...c, content: newText } : c));
         setEditingCommentId(null);
@@ -633,8 +638,9 @@ export default function PostMediaModal({
                     onClick={() => setIsEditingPost(false)}>Cancel</button>
                 <button className="px-2 py-1 label-medium text-text-white bg-surface-brand rounded-md hover:bg-border-brand text-xs disabled:opacity-50"
                     onClick={handleEditPostConfirm}
-                    disabled={editPostLoading || !editPostText.trim()}>
-                    {editPostLoading ? 'Saving…' : 'Save'}
+                    disabled={editPostLoading || !hasMeaningfulPostText(editPostText)}
+                    title={!hasMeaningfulPostText(editPostText) ? tRoot('createPost.emptyHint') : undefined}>
+                    {editPostLoading ? 'Saving…' : 'Save'}{!hasMeaningfulPostText(editPostText) && <span className="sr-only"> {tRoot('createPost.emptyHint')}</span>}
                 </button>
             </div>
         </div>
