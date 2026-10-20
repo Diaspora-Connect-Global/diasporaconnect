@@ -42,7 +42,7 @@ const MANY = {
     RedesignFeaturedServices: { getFeaturedMarketplaceServices: { __typename: 'ServiceList', services: [1, 2, 3, 4, 5].map(svc) } },
     ListOpportunities: (v: Record<string, unknown>) => {
         const input = (v.input ?? {}) as { type?: string };
-        const rows = input.type === 'EMPLOYMENT' ? [job(1, { owner: { __typename: 'OpportunityOwner', name: 'Tech Solutions Ltd' }, commitmentType: 'FULL_TIME', compensationMin: 80000, compensationMax: 120000, compensationCurrency: 'USD' }), job(2, { compensationMin: 250000, compensationCurrency: 'USD' }), job(3, { compensationMax: 90000, compensationCurrency: 'USD' }), ...[4, 5, 6].map((i) => job(i))] : [];
+        const rows = input.type === 'EMPLOYMENT' ? [job(1, { owner: { __typename: 'OpportunityOwner', name: 'Tech Solutions Ltd' }, commitmentType: 'FULL_TIME', compensationMin: 80000, compensationMax: 120000, compensationCurrency: 'USD' }), job(2, { compensationMin: 250000, compensationCurrency: 'USD' }), job(3, { compensationMax: 90000, compensationCurrency: 'USD' }), job(4, { compensationMin: 50_000_000_000, compensationMax: 75_000_000_000, compensationCurrency: 'USD' }), ...[5, 6].map((i) => job(i))] : [];
         return { listOpportunities: { __typename: 'OpportunityList', total: rows.length, opportunities: rows } };
     },
 };
@@ -71,7 +71,9 @@ test('job cards say who is hiring, the commitment and the pay (API sends integer
     // One bound only: "From" / "Up to"; no pay at all: nothing rendered.
     await expect(page.getByTestId('discover-card-jobs').nth(1).getByTestId('job-pay')).toHaveText('From $2,500.00');
     await expect(page.getByTestId('discover-card-jobs').nth(2).getByTestId('job-pay')).toHaveText('Up to $900.00');
-    await expect(page.getByTestId('discover-card-jobs').nth(3).getByTestId('job-pay')).toHaveCount(0);
+    // Past the old 32-bit Int: 5e10 minor units (GraphQL Float) = $500,000,000.00, exactly.
+    await expect(page.getByTestId('discover-card-jobs').nth(3).getByTestId('job-pay')).toHaveText(/\$500,000,000\.00\s*–\s*\$750,000,000\.00/);
+    await expect(page.getByTestId('discover-card-jobs').nth(4).getByTestId('job-pay')).toHaveCount(0);
     // Filtered views show more than one row and no Latest row.
     await expect(page.getByTestId('discover-card-jobs')).toHaveCount(6);
     await expect(page.getByTestId('discover-section-latest')).toHaveCount(0);

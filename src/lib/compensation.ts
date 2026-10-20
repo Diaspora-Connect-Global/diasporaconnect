@@ -1,16 +1,44 @@
-import { formatMoney, toMajorUnits } from '@/types/money';
+import { DEFAULT_CURRENCY, toMajorUnits } from '@/types/money';
 
 /**
  * Opportunity compensation arrives as INTEGER MINOR UNITS (x100), like every other
- * amount on the GraphQL boundary (see `src/types/money.ts`). `formatMoney` is the
- * single minor -> major division; never divide again before calling it.
+ * amount on the GraphQL boundary (see `src/types/money.ts`). `formatMinorExact` below is
+ * the single minor -> major conversion for display; never divide again before calling it.
+ *
+ * The fields are 64-bit on the backend (bigint / int64) and a GraphQL `Float` (Int is
+ * 32-bit, too small for e.g. a GHS 500,000,000 investment = 5e10 minor units). Only a
+ * positive SAFE integer is an amount; anything else (a fraction, > 2^53-1) is not shown.
  */
 export type CompensationParts =
   | { kind: 'range'; min: string; max: string }
   | { kind: 'from'; min: string }
   | { kind: 'upTo'; max: string };
 
-const positive = (n?: number | null): n is number => typeof n === 'number' && Number.isFinite(n) && n > 0;
+const positive = (n?: number | null): n is number => typeof n === 'number' && Number.isSafeInteger(n) && n > 0;
+
+/**
+ * Same output as `formatMoney` (currency style, 2 decimals, `CODE 1,234.00` fallback for an
+ * unknown code), but the division by 100 is done on the integer, not in floating point:
+ * `minor / 100` is inexact past ~2^46 minor units (90071992547409.91 would print .90).
+ * The major amount goes to Intl as an exact decimal STRING (Intl.NumberFormat v3); an
+ * engine without string support coerces it to a number, i.e. no worse than before.
+ */
+export function formatMinorExact(minor: number, currency?: string | null, locale?: string): string {
+  const cents = minor % 100;
+  const major = (minor - cents) / 100; // exact: an integer <= 2^53 / 100
+  const decimal = `${major}.${String(cents).padStart(2, '0')}` as unknown as number;
+  const code = (currency || DEFAULT_CURRENCY).toUpperCase();
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: code,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(decimal);
+  } catch {
+    return `${code} ${new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(decimal)}`;
+  }
+}
 
 export function compensationParts(
   min?: number | null,
@@ -20,7 +48,7 @@ export function compensationParts(
 ): CompensationParts | null {
   const hasMin = positive(min);
   const hasMax = positive(max);
-  const f = (n: number) => formatMoney(n, currency ?? undefined, locale);
+  const f = (n: number) => formatMinorExact(n, currency, locale);
   if (hasMin && hasMax) return { kind: 'range', min: f(min), max: f(max) };
   if (hasMin) return { kind: 'from', min: f(min) };
   if (hasMax) return { kind: 'upTo', max: f(max) };
