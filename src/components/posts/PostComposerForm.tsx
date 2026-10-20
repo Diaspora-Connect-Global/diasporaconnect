@@ -29,6 +29,7 @@ import { useUserStore } from '@/store/useUserStore';
 import { MyAvatar } from '@/components/custom/header';
 import { useMutation } from '@apollo/client/react';
 import { CREATE_POST, CreatePostData, GET_FEED, REQUEST_UPLOAD_URL, RequestUploadUrlData } from '@/services/gql/postsFeed';
+import { canSubmitPost, isPostEmptyRefusal } from '@/lib/postContent';
 import RichTextarea, { type RichTextareaHandle, type MentionedUser } from '@/components/custom/RichTextarea';
 import { AttachmentInput } from '@/services/gql/types/postsFeed';
 import { usePostDraft } from '@/hooks/usePostDraft';
@@ -189,6 +190,8 @@ export function PostComposerForm({ variant = 'page', onPosted, onDirtyChange, ha
   const charCount = postContent.length;
 
   const dirty = postContent.trim().length > 0 || attachments.length > 0;
+  // Never an empty post: visible text (not just whitespace / invisible characters) or an attachment.
+  const canPost = canSubmitPost(postContent, attachments.length);
   React.useEffect(() => {
     onDirtyChange?.(dirty);
   }, [dirty, onDirtyChange]);
@@ -470,7 +473,7 @@ export function PostComposerForm({ variant = 'page', onPosted, onDirtyChange, ha
 
   const handlePost = async () => {
     if (submittingRef.current) return;
-    if (!postContent.trim() && attachments.length === 0) {
+    if (!canPost) {
       toast.error(t('emptyError'));
       return;
     }
@@ -582,7 +585,7 @@ export function PostComposerForm({ variant = 'page', onPosted, onDirtyChange, ha
       // only ever reported when the server really returned the new post.
       const created = result.data?.createPost;
       if (!created?.id) {
-        setSubmitError(t('errorMessage'));
+        setSubmitError(isPostEmptyRefusal(result) ? t('postEmpty') : t('errorMessage'));
         return;
       }
       {
@@ -620,7 +623,7 @@ export function PostComposerForm({ variant = 'page', onPosted, onDirtyChange, ha
       }
     } catch (error: any) {
       console.error('Failed to create post:', error);
-      setSubmitError(t('errorMessage'));
+      setSubmitError(isPostEmptyRefusal(error) ? t('postEmpty') : t('errorMessage'));
     } finally {
       submittingRef.current = false;
       setIsSubmitting(false);
@@ -698,7 +701,8 @@ export function PostComposerForm({ variant = 'page', onPosted, onDirtyChange, ha
               {/* Post Button */}
               <ButtonType2
                 onClick={handlePost}
-                disabled={isSubmitting || (!postContent.trim() && attachments.length === 0)}
+                disabled={isSubmitting || !canPost}
+                aria-describedby={!canPost ? 'post-empty-hint' : undefined}
                 className="flex items-center gap-2 px-6 py-2 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all disabled:hover:scale-100"
               >
                 {isSubmitting ? (
@@ -730,6 +734,10 @@ export function PostComposerForm({ variant = 'page', onPosted, onDirtyChange, ha
               minHeight={isModal ? '140px' : '200px'}
             />
           </div>
+
+          {!canPost && (
+            <p id="post-empty-hint" className="sr-only">{t('emptyHint')}</p>
+          )}
 
           {submitError && (
             <div role="alert" className="mx-6 mb-4 rounded-lg border border-text-danger/40 bg-surface-danger px-3 py-2 text-sm text-text-danger">

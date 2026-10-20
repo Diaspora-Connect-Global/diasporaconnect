@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
+import { canSubmitPost } from '@/lib/postContent';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   ImageIcon,
@@ -241,7 +242,7 @@ export default function CreatePostForm({
 
   /* — submit post — */
   const handleSubmit = async () => {
-    if (!text.trim() && files.length === 0) return;
+    if (!canSubmitPost(text, files.length)) return;
 
     setSubmitting(true);
 
@@ -327,7 +328,7 @@ export default function CreatePostForm({
   const currentVisOption =
     VISIBILITY_OPTIONS.find((o) => o.value === visibility) ?? VISIBILITY_OPTIONS[0];
 
-  const canSubmit = (text.trim().length > 0 || files.length > 0) && !submitting;
+  const canSubmit = canSubmitPost(text, files.length) && !submitting;
 
   /* ---------------------------------------------------------------- */
   /*  Render                                                          */
