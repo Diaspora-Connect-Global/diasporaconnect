@@ -4480,6 +4480,31 @@
       "sentTitle": "Report received",
       "sentBody": "The DiaspoPlug Trust & Safety team will review it. We will contact you if we need more information.",
       "backToCircle": "Back to circle"
+    },
+    "invitations": {
+      "title": "Circle invitations",
+      "subtitle": "Circles that asked you to join",
+      "emptyTitle": "No pending invitations",
+      "emptyBody": "When a circle invites you, it will show up here.",
+      "unknownCircle": "A circle",
+      "someone": "Someone",
+      "invitedBy": "Invited by {name}",
+      "accept": "Accept",
+      "accepting": "Joining...",
+      "decline": "Decline",
+      "declining": "Declining...",
+      "acceptAria": "Accept the invitation to {name}",
+      "declineAria": "Decline the invitation to {name}",
+      "accepted": "You joined {name}",
+      "declined": "Invitation declined",
+      "errors": {
+        "full": "This circle is full right now, so you can't join yet.",
+        "gone": "This invitation is no longer valid.",
+        "unknown": "That didn't go through. Please try again."
+      },
+      "cta": "Invitations",
+      "badgeCount": "{count, plural, =1 {1 pending invitation} other {# pending invitations}}",
+      "loadError": "We couldn't load your invitations. Please try again."
     }
   },
   "requests": {
