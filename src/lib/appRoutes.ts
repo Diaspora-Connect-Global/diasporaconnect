@@ -41,6 +41,7 @@ export const APP_ROUTE_PATTERNS: readonly string[] = [
   '/circles/[id]/report',
   '/circles/[id]/settings',
   '/circles/create',
+  '/circles/invitations',
   '/circles/join',
   '/community',
   '/community/[id]',

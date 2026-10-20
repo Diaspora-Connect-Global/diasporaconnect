@@ -1,4 +1,5 @@
 'use client';
+import { hasMeaningfulPostText, isPostEmptyRefusal } from '@/lib/postContent';
 import { Bookmark, X, ChevronLeft, ChevronRight, Loader2, Globe, Users, Lock, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { useState, useEffect, useCallback, useRef, memo } from 'react';
 import { GoHeartFill } from 'react-icons/go';
@@ -400,11 +401,15 @@ function FeedCardWithReplyInner({
     const hasAnyMedia = (images?.length ?? 0) + (videos?.length ?? 0) > 0;
 
     const handleEditPostSubmit = async () => {
-        if (!editPostText.trim() && !hasAnyMedia) return;
+        if (!hasMeaningfulPostText(editPostText) && !hasAnyMedia) return;
         try {
             const result = await editPostMutation({ variables: { input: { id: postId, text: editPostText } } });
             const outcome = readMutationOutcome(result, d => d.editPost);
             if (!outcome.ok) {
+                if (isPostEmptyRefusal(result)) {
+                    toast.error(tRoot('createPost.postEmpty'));
+                    return;
+                }
                 const key = refusalMessageKey(outcome.message, 'feed.errors');
                 toast.error(tRoot(key));
                 return;
@@ -1002,9 +1007,10 @@ function FeedCardWithReplyInner({
                         <button
                             className="px-3 py-1 label-medium text-text-white bg-surface-brand rounded-md hover:bg-border-brand disabled:opacity-50"
                             onClick={handleEditPostSubmit}
-                            disabled={editPostLoading || (!editPostText.trim() && !hasAnyMedia)}
+                            disabled={editPostLoading || (!hasMeaningfulPostText(editPostText) && !hasAnyMedia)}
+                            title={!hasMeaningfulPostText(editPostText) && !hasAnyMedia ? tRoot('createPost.emptyHint') : undefined}
                         >
-                            {editPostLoading ? 'Saving…' : 'Save'}
+                            {editPostLoading ? 'Saving…' : 'Save'}{!hasMeaningfulPostText(editPostText) && !hasAnyMedia && <span className="sr-only"> {tRoot('createPost.emptyHint')}</span>}
                         </button>
                     </div>
                 </div>

@@ -265,6 +265,8 @@
     "placeholder": "Was bewegt Sie, {name}?",
     "posting": "Wird gepostet...",
     "emptyError": "Leere Inhalte können nicht gepostet werden",
+    "emptyHint": "Füge Text, ein Foto, ein Video oder eine Datei hinzu, um zu posten.",
+    "postEmpty": "Dein Beitrag ist leer. Füge Text oder mindestens ein Foto, Video oder eine Datei hinzu.",
     "successMessage": "Beitrag erfolgreich veröffentlicht!",
     "errorMessage": "Beitrag konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
     "visibility": {
@@ -4480,6 +4482,31 @@
       "sentTitle": "Meldung eingegangen",
       "sentBody": "Das DiaspoPlug Trust-&-Safety-Team prüft sie. Wir melden uns, falls wir weitere Informationen brauchen.",
       "backToCircle": "Zurück zum Kreis"
+    },
+    "invitations": {
+      "title": "Einladungen zu Circles",
+      "subtitle": "Circles, die dich einladen",
+      "emptyTitle": "Keine offenen Einladungen",
+      "emptyBody": "Wenn dich ein Circle einlädt, erscheint die Einladung hier.",
+      "unknownCircle": "Ein Circle",
+      "someone": "Jemand",
+      "invitedBy": "Eingeladen von {name}",
+      "accept": "Annehmen",
+      "accepting": "Beitritt läuft ...",
+      "decline": "Ablehnen",
+      "declining": "Wird abgelehnt ...",
+      "acceptAria": "Einladung zu {name} annehmen",
+      "declineAria": "Einladung zu {name} ablehnen",
+      "accepted": "Du bist {name} beigetreten",
+      "declined": "Einladung abgelehnt",
+      "errors": {
+        "full": "Dieser Circle ist gerade voll, du kannst noch nicht beitreten.",
+        "gone": "Diese Einladung ist nicht mehr gültig.",
+        "unknown": "Das hat nicht geklappt. Bitte versuche es erneut."
+      },
+      "cta": "Einladungen",
+      "badgeCount": "{count, plural, =1 {1 offene Einladung} other {# offene Einladungen}}",
+      "loadError": "Deine Einladungen konnten nicht geladen werden. Bitte versuche es erneut."
     },
     "joinRequests": {
       "title": "Beitrittsanfragen ({count})",
