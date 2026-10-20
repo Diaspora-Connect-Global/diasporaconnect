@@ -8,6 +8,7 @@ import { getEventLocationDisplay } from '@/services/gql/events';
 import type { EventPageEvent, EventSpeaker, EventVenueInfo, ProgrammeSession } from '@/services/gql/eventsM2';
 import { formatInZone, formatTimeInZone, timezoneLabel, zoneDiffersFromViewer } from '@/lib/eventCalendar';
 import { httpUrlOrNull } from '@/lib/safeUrl';
+import { eventFormat } from '@/lib/eventFormat';
 import { canJoinFromEvent, type OrganiserView } from './organiser';
 
 const CARD = 'rounded-2xl border border-border-subtle bg-surface-default p-4 sm:p-5';
@@ -45,12 +46,13 @@ export function OverviewTab({
   const contactPhone = venueInfo?.contactPublic ? venueInfo.contactPhone : null;
   const hasContact = Boolean(contactEmail || contactPhone);
   const external = httpUrlOrNull(event.registrationLink);
+  const fmt = eventFormat(event.locationType);
 
   const access = event.requiresApproval ? t('accessApproval') : t('accessRegistration');
   const tiles: Array<{ key: string; icon: typeof CalendarDays; label: string; lines: string[] }> = [
     { key: 'date', icon: CalendarDays, label: t('date'), lines: [`${formatInZone(event.startAt, locale, event.timezone)}${zone ? ` (${zone})` : ''}`] },
     { key: 'location', icon: MapPin, label: t('location'), lines: [place] },
-    { key: 'format', icon: Globe2, label: t('format'), lines: [tFmt(event.locationType), tFmt(`${event.locationType}Sub`)] },
+    ...(fmt ? [{ key: 'format', icon: Globe2, label: t('format'), lines: [tFmt(fmt), tFmt(`${fmt}Sub`)] }] : []),
     { key: 'access', icon: ShieldCheck, label: t('access'), lines: [access] },
     { key: 'price', icon: Ticket, label: t('price'), lines: [priceLabel] },
   ];

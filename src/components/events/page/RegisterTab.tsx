@@ -35,6 +35,7 @@ import { openPaystackMobileMoney } from '@/lib/paystack';
 import { isMobileMoneySupported } from '@/types/money';
 import { eventCodeOf, eventRefusal, hasErrors } from '@/lib/eventRefusal';
 import { formatInZone } from '@/lib/eventCalendar';
+import { eventFormat } from '@/lib/eventFormat';
 import { canStartRegistration, type RegistrationUiState } from '@/lib/eventRegistrationState';
 import { useUserStore } from '@/store/useUserStore';
 import { canJoinFromEvent, type OrganiserView } from './organiser';
@@ -130,7 +131,7 @@ export default function RegisterTab({
     }
   };
 
-  const hybrid = event.locationType === 'hybrid';
+  const hybrid = eventFormat(event.locationType) === 'hybrid';
   const fields = event.registrationFormFields ?? [];
   const formOk = fields.every((f) => {
     if (!f.required) return true;

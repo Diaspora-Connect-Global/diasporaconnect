@@ -7,6 +7,7 @@ import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
 import { EVENT_PLACEHOLDER_IMAGE, getEventCoverImage, getEventLocationDisplay, getEventVenueLines } from '@/services/gql/events';
 import type { EventPageEvent } from '@/services/gql/eventsM2';
 import { formatInZone, timezoneLabel } from '@/lib/eventCalendar';
+import { eventFormat } from '@/lib/eventFormat';
 
 const ICON_BTN =
   'inline-flex size-11 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur hover:bg-black/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white';
@@ -31,6 +32,7 @@ export default function EventHero({
 }) {
   const t = useTranslations('eventPage');
   const tFmt = useTranslations('eventPage.format');
+  const fmt = eventFormat(event.locationType);
   const locale = useLocale();
   const zone = timezoneLabel(event.startAt, locale, event.timezone);
   const venue = getEventVenueLines(event);
@@ -75,14 +77,16 @@ export default function EventHero({
               {placeSub && <dd className="break-words text-xs text-white/75">{placeSub}</dd>}
             </div>
           </div>
-          <div className="flex items-start gap-3 sm:pl-5">
-            <Globe2 className="mt-0.5 size-5 shrink-0" aria-hidden />
-            <div className="min-w-0">
-              <dt className="sr-only">{t('overview.format')}</dt>
-              <dd className="font-semibold">{tFmt(event.locationType)}</dd>
-              <dd className="text-xs text-white/75">{tFmt(`${event.locationType}Sub`)}</dd>
+          {fmt && (
+            <div className="flex items-start gap-3 sm:pl-5">
+              <Globe2 className="mt-0.5 size-5 shrink-0" aria-hidden />
+              <div className="min-w-0">
+                <dt className="sr-only">{t('overview.format')}</dt>
+                <dd className="font-semibold">{tFmt(fmt)}</dd>
+                <dd className="text-xs text-white/75">{tFmt(`${fmt}Sub`)}</dd>
+              </div>
             </div>
-          </div>
+          )}
         </dl>
         {children}
       </div>

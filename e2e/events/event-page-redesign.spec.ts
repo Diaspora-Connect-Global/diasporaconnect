@@ -116,3 +116,36 @@ test('confirmed: registration card says so and offers the details; no id is show
     await expect(card.getByRole('button', { name: 'View registration details' })).toBeVisible();
     await page.context().close();
 });
+
+test('an uppercase format from the server (PHYSICAL) still shows its label, never a missing-translation key', async () => {
+    const { page } = await openPage(browser, `/events/${EVENT_ID}`, eventPageOverrides(eventFixture({ locationType: 'PHYSICAL' })));
+    const hero = page.getByTestId('event-hero');
+    await expect(hero.getByRole('heading', { level: 1, name: 'Diaspora Business Summit' })).toBeVisible({ timeout: 90_000 });
+    await expect(hero.getByText('In person')).toBeVisible();
+    await expect(hero.getByText('At the venue')).toBeVisible();
+    expect(await page.locator('body').innerText()).not.toContain('eventPage.format');
+    await page.context().close();
+});
+
+for (const viewport of [{ width: 1280, height: 900 }, { width: 360, height: 800 }]) {
+    test(`share card at ${viewport.width}px: "Get invite link" and "QR code" never overlap and keep their full label`, async () => {
+        const { page } = await openPage(browser, `/events/${EVENT_ID}`, eventPageOverrides(), viewport);
+        const card = page.getByTestId('share-card');
+        const link = card.getByRole('button', { name: 'Get invite link' });
+        const qr = card.getByRole('button', { name: 'QR code' });
+        await link.scrollIntoViewIfNeeded({ timeout: 90_000 });
+        const [a, b, c] = [await link.boundingBox(), await qr.boundingBox(), await card.boundingBox()];
+        if (!a || !b || !c) throw new Error('share buttons not laid out');
+        const apart = a.x + a.width <= b.x + 0.5 || b.x + b.width <= a.x + 0.5 || a.y + a.height <= b.y + 0.5 || b.y + b.height <= a.y + 0.5;
+        expect(apart, `buttons overlap: ${JSON.stringify({ a, b })}`).toBe(true);
+        for (const box of [a, b]) {
+            expect(box.x).toBeGreaterThanOrEqual(c.x);
+            expect(box.x + box.width).toBeLessThanOrEqual(c.x + c.width + 0.5);
+        }
+        // The label is not clipped or spilling out of its own button.
+        for (const btn of [link, qr]) {
+            expect(await btn.evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
+        }
+        await page.context().close();
+    });
+}
