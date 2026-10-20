@@ -95,7 +95,7 @@ test.describe('invitation inbox', () => {
         await page.getByRole('button', { name: /Accept the invitation to Accra Runners/ }).click({ timeout: 90_000 });
         await expect.poll(() => graphql.calls.find((c) => c.name === 'RespondToCircleInvitation')?.variables).toEqual({ invitationId: 'inv-5', accept: true });
         await expect(page).toHaveURL(/\/circles\/cir-5$/, { timeout: 30_000 });
-        expect(graphql.calls.some((c) => c.name === 'MyCircles')).toBe(true);
+        await expect(page.getByText('Accra Runners').first()).toBeVisible({ timeout: 30_000 });
         await page.context().close();
     });
 
