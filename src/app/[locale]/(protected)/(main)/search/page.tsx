@@ -20,6 +20,7 @@ import {
 import { NoResults } from '@/components/feedback';
 import PageLoader from '@/components/custom/PageLoader';
 
+import { compensationText } from '@/lib/compensation';
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function generateVariants(query: string): string[] {
@@ -282,8 +283,9 @@ function EventCard({ event, query }: { event: Event; query: string }) {
 }
 
 function OpportunityCard({ opportunity, query }: { opportunity: Opportunity; query: string }) {
+  // compensationMin/Max are integer minor units; compensationText divides by 100 once.
   const comp = (opportunity.compensationMin != null) && (opportunity.compensationMax != null)
-    ? `${opportunity.compensationCurrency ?? ''} ${Number(opportunity.compensationMin).toLocaleString()}–${Number(opportunity.compensationMax).toLocaleString()}`
+    ? compensationText(opportunity.compensationMin, opportunity.compensationMax, opportunity.compensationCurrency)
     : null;
   return (
     <Link href={`/opportunities/${opportunity.id}`} className="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-hover transition-colors">
