@@ -35,3 +35,6 @@ export {
   occupiesLiveSlot,
   resolveInviteLinkStatus,
 } from './inviteLinkStatus';
+
+// Pending join requests (LEAD only) — approving opens an ADMIT_MEMBER motion.
+export { JoinRequestsSection, type JoinRequestsSectionProps } from './JoinRequestsSection';

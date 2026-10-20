@@ -4480,6 +4480,21 @@
       "sentTitle": "Meldung eingegangen",
       "sentBody": "Das DiaspoPlug Trust-&-Safety-Team prüft sie. Wir melden uns, falls wir weitere Informationen brauchen.",
       "backToCircle": "Zurück zum Kreis"
+    },
+    "joinRequests": {
+      "title": "Beitrittsanfragen ({count})",
+      "description": "Personen, die beitreten möchten. Der Kreis entscheidet per Abstimmung.",
+      "empty": "Keine offenen Anfragen.",
+      "loadError": "Die Beitrittsanfragen konnten nicht geladen werden.",
+      "requestedOn": "Angefragt am {date}",
+      "approve": "Annehmen",
+      "approveFor": "{name} annehmen",
+      "approveHint": "Die Mitglieder stimmen darüber ab.",
+      "voteOpened": "Die Mitglieder stimmen darüber ab.",
+      "voteRunning": "Die Mitglieder stimmen gerade darüber ab.",
+      "viewVote": "Abstimmung ansehen",
+      "motionTitle": "{name} in den Kreis aufnehmen",
+      "motionTitleFallback": "Neues Mitglied aufnehmen"
     }
   },
   "feed": {

@@ -4480,6 +4480,21 @@
       "sentTitle": "Signalement reçu",
       "sentBody": "L'équipe Trust & Safety de DiaspoPlug va l'examiner. Nous vous contacterons si nous avons besoin de plus d'informations.",
       "backToCircle": "Retour au cercle"
+    },
+    "joinRequests": {
+      "title": "Demandes d’adhésion ({count})",
+      "description": "Les personnes qui ont demandé à rejoindre. Le cercle décide par un vote.",
+      "empty": "Aucune demande en attente.",
+      "loadError": "Impossible de charger les demandes d’adhésion.",
+      "requestedOn": "Demandé le {date}",
+      "approve": "Accepter",
+      "approveFor": "Accepter {name}",
+      "approveHint": "Les membres voteront sur cette demande.",
+      "voteOpened": "Les membres voteront sur cette demande.",
+      "voteRunning": "Les membres sont en train de voter.",
+      "viewVote": "Voir le vote",
+      "motionTitle": "Admettre {name} dans le cercle",
+      "motionTitleFallback": "Admettre un nouveau membre"
     }
   },
   "feed": {

@@ -4480,6 +4480,21 @@
       "sentTitle": "Report received",
       "sentBody": "The DiaspoPlug Trust & Safety team will review it. We will contact you if we need more information.",
       "backToCircle": "Back to circle"
+    },
+    "joinRequests": {
+      "title": "Join requests ({count})",
+      "description": "People who asked to join. The circle decides by vote.",
+      "empty": "No pending requests.",
+      "loadError": "We couldn't load the join requests.",
+      "requestedOn": "Asked {date}",
+      "approve": "Approve",
+      "approveFor": "Approve {name}",
+      "approveHint": "Members will vote on this.",
+      "voteOpened": "Members will vote on this.",
+      "voteRunning": "Members are voting on this.",
+      "viewVote": "View the vote",
+      "motionTitle": "Admit {name} to the circle",
+      "motionTitleFallback": "Admit a new member"
     }
   },
   "requests": {
