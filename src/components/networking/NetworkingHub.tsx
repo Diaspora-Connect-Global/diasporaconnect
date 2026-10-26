@@ -137,7 +137,8 @@ export default function NetworkingHub({ eventId }: { eventId: string }) {
       if (hasFailure(r1)) return report(r1);
       const r2 = await setVisibility({ variables: { eventId, preferences: preferencesInput(current) } });
       if (hasFailure(r2)) return report(r2);
-      const before = JSON.stringify(base.mine?.participation?.availability ?? []);
+      // Compare like with like: the draft's slots are plain, the loaded ones carry __typename.
+      const before = JSON.stringify(draftFromParticipation(base.mine).availability);
       if (before !== JSON.stringify(current.availability)) {
         const r3 = await setAvailability({ variables: { eventId, slots: current.availability } });
         if (hasFailure(r3)) return report(r3);

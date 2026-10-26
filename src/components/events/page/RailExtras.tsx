@@ -78,9 +78,11 @@ export function ShareCard({ eventId, title }: { eventId: string; title: string }
         <h2 id="share-card-title" className="text-base font-semibold text-text-primary">{t('title')}</h2>
         <p className="text-xs text-text-secondary">{t('sub')}</p>
       </div>
-      <div className="grid grid-cols-2 gap-2">
-        <ButtonType1 onClick={onShare} className="flex items-center justify-center gap-2"><Share2 className="size-4" aria-hidden />{t('inviteLink')}</ButtonType1>
-        <ButtonType1 onClick={() => setShowQr((v) => !v)} aria-expanded={showQr} className="flex items-center justify-center gap-2"><QrCode className="size-4" aria-hidden />{t('qr')}</ButtonType1>
+      {/* The shared button is `w-fit whitespace-nowrap`, so a fixed 2-column grid let "Get invite link" spill over
+          the QR button in the 20rem rail and on phones. Wrap instead: side by side when both fit, else one per row. */}
+      <div className="flex flex-wrap gap-2" data-testid="share-actions">
+        <ButtonType1 onClick={onShare} className="flex grow basis-40 items-center justify-center gap-2"><Share2 className="size-4 shrink-0" aria-hidden />{t('inviteLink')}</ButtonType1>
+        <ButtonType1 onClick={() => setShowQr((v) => !v)} aria-expanded={showQr} className="flex grow basis-40 items-center justify-center gap-2"><QrCode className="size-4 shrink-0" aria-hidden />{t('qr')}</ButtonType1>
       </div>
       {showQr && qr && (
         // eslint-disable-next-line @next/next/no-img-element
