@@ -172,3 +172,45 @@ for (const width of [360, 768]) {
         await page.context().close();
     });
 }
+
+const recEvent = {
+    __typename: 'EventGQL',
+    id: 'evt-rec-1',
+    title: 'Diaspora founders meetup',
+    status: 'published',
+    startAt: new Date(Date.now() + 5 * 86_400_000).toISOString(),
+    endAt: new Date(Date.now() + 5 * 86_400_000 + 7_200_000).toISOString(),
+    eventCategory: 'NETWORKING',
+    coverImageUrl: null,
+    locationType: 'physical',
+    locationDetails: { __typename: 'EventLocationDetails', type: 'physical', venueName: 'Hub', city: 'Accra', country: 'Ghana', virtualLink: null },
+};
+const FOR_YOU = {
+    RecommendedEvents: { recommendedEvents: [{ __typename: 'RecommendedEventGQL', reasons: ['NEAR_YOU', 'STARTING_SOON'], event: recEvent }] },
+    RecommendedOpportunities: { recommendedOpportunities: { __typename: 'OpportunityList', opportunities: [{ ...job(9), isSavedByCurrentUser: false, compensationMin: null, compensationMax: null, compensationCurrency: null, commitmentType: null, reasons: ['MATCHES_SKILLS', 'NOT_A_REAL_CODE'] }] } },
+    RecommendedMarketplaceServices: { recommendedMarketplaceServices: { __typename: 'ServiceList', services: [{ ...svc(1), reasons: ['TOP_RATED'] }] } },
+    RecommendedProducts: { getRecommendedProducts: { __typename: 'ProductList', products: [] } },
+};
+
+test('"For you" leads the overview with ranked picks, says why, and those cards leave the rows below', async () => {
+    const { page } = await open(browser, '/discover', { ...MANY, ...FOR_YOU }, { width: 1280, height: 900 });
+    const forYou = page.getByTestId('discover-section-forYou');
+    await expect(forYou.getByRole('heading', { name: 'For you' })).toBeVisible({ timeout: 90_000 });
+    for (const name of ['Diaspora founders meetup', 'Job number 9', 'Service number 1']) await expect(forYou.getByText(name)).toBeVisible();
+    // Reasons are translated codes; an unknown code is dropped, never shown raw.
+    await expect(forYou.getByText('Near you · Starting soon')).toBeVisible();
+    await expect(forYou.getByText('Matches your skills', { exact: true })).toBeVisible();
+    await expect(forYou.getByText('Top rated')).toBeVisible();
+    await expect(forYou).not.toContainText('NOT_A_REAL_CODE');
+    // A picked service is not repeated in the Latest row or the Services section.
+    await expect(page.locator(':text-is("Service number 1"):visible')).toHaveCount(1);
+    expect(await page.locator('body').innerText()).not.toMatch(UUID);
+    await page.context().close();
+});
+
+test('"For you" is hidden when nothing is recommended', async () => {
+    const { page } = await open(browser, '/discover');
+    await expect(page.getByTestId('discover-section-latest')).toBeVisible({ timeout: 90_000 });
+    await expect(page.getByTestId('discover-section-forYou')).toHaveCount(0);
+    await page.context().close();
+});

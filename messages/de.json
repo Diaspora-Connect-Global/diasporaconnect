@@ -4806,6 +4806,10 @@
       "community": {
         "title": "Aus der Community",
         "subtitle": "Sieh, worüber Menschen in deinen Communities sprechen."
+      },
+      "forYou": {
+        "title": "Für dich",
+        "subtitle": "Ausgewählt nach deinen Communities, Interessen, Fähigkeiten und deinem Wohnort."
       }
     },
     "refine": {
@@ -6971,5 +6975,60 @@
     "google": "Weiter mit Google",
     "facebook": "Weiter mit Facebook",
     "twitter": "Weiter mit X"
+  },
+  "postActions": {
+    "menuLabel": "Weitere Aktionen für diesen Beitrag",
+    "notInterested": "Kein Interesse",
+    "report": "Beitrag melden",
+    "unfriend": "Verbindung mit {name} entfernen",
+    "unfollow": "{name} nicht mehr folgen",
+    "leave": "{name} verlassen",
+    "loading": "Wird geladen…",
+    "unfriendTitle": "Verbindung mit {name} entfernen?",
+    "unfriendBody": "Ihr seid dann nicht mehr verbunden, und du siehst weniger Beiträge dieser Person.",
+    "unfriendConfirm": "Verbindung entfernen",
+    "leaveTitle": "{name} verlassen?",
+    "leaveBody": "Du bist dann kein Mitglied mehr und verlierst den Zugang zu Beiträgen und Veranstaltungen nur für Mitglieder.",
+    "leaveConfirm": "Verlassen",
+    "cancel": "Abbrechen",
+    "unfriended": "Du bist nicht mehr mit {name} verbunden",
+    "unfollowed": "Du folgst {name} nicht mehr",
+    "left": "Du hast {name} verlassen",
+    "failed": "Das hat nicht geklappt. Bitte versuche es erneut.",
+    "reportTitle": "Diesen Beitrag melden",
+    "reportBody": "Sag uns, was nicht stimmt. Unser Team prüft jede Meldung.",
+    "reasonLabel": "Grund",
+    "reason": {
+      "SPAM": "Spam",
+      "HARASSMENT": "Belästigung oder Mobbing",
+      "HATE_SPEECH": "Hassrede",
+      "VIOLENCE": "Gewalt oder Drohungen",
+      "NUDITY": "Nacktheit oder sexuelle Inhalte",
+      "MISINFORMATION": "Falschinformationen",
+      "SCAM": "Betrug",
+      "OTHER": "Etwas anderes"
+    },
+    "detailsLabel": "Weitere Details (optional)",
+    "detailsHint": "{count}/{max}",
+    "submit": "Meldung senden",
+    "sentTitle": "Danke für deinen Hinweis",
+    "sentBody": "Unser Team wird diesen Beitrag prüfen.",
+    "close": "Schließen",
+    "hiddenNotice": "Beitrag ausgeblendet. Du siehst künftig weniger Beiträge wie diesen.",
+    "reportedNotice": "Du hast diesen Beitrag gemeldet. Unser Team wird ihn prüfen."
+  },
+  "recommendationReasons": {
+    "IN_YOUR_COMMUNITY": "Aus deiner Community",
+    "NEAR_YOU": "In deiner Nähe",
+    "MATCHES_INTERESTS": "Passt zu deinen Interessen",
+    "MATCHES_SKILLS": "Passt zu deinen Fähigkeiten",
+    "SIMILAR_TO_VIEWED": "Ähnlich wie Angesehenes",
+    "STARTING_SOON": "Beginnt bald",
+    "CLOSING_SOON": "Endet bald",
+    "ONLINE": "Online",
+    "REMOTE": "Remote",
+    "TOP_RATED": "Top bewertet",
+    "POPULAR": "Beliebt",
+    "NEW": "Neu"
   }
 }

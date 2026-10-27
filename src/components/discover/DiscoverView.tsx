@@ -11,18 +11,22 @@ import { CategoryTileRow } from '@/components/redesign/CategoryTileRow';
 import { LazyMount } from '@/components/redesign/LazyMount';
 import { CommunityPosts } from '@/components/home/HomeCommunityPosts';
 import { DiscoverHelpCard, RefinePanel } from './RefinePanel';
-import { EventsSection, LatestSection, OpportunitySection, ProductsSection, ServicesSection, useLatestMix } from './DiscoverSections';
+import { EventsSection, ForYouSection, LatestSection, OpportunitySection, ProductsSection, ServicesSection, useForYou, useLatestMix } from './DiscoverSections';
 import { DISCOVER_CATEGORY_KEYS, DISCOVER_ICONS, DISCOVER_SECTION_ORDER, DISCOVER_TONES, parseCategories, parseSort, type DiscoverCategoryKey, type DiscoverSort } from './discoverCategories';
 
 /** Overview: one row of 4 per section, fetched with one spare so the "Latest" row can take an item without leaving a gap. */
 const OVERVIEW_SHOWN = 4;
 const OVERVIEW_FETCH = OVERVIEW_SHOWN + 1;
 const EXPANDED_LIMIT = 12;
+/** "For you" asks each recommender for a couple of picks; the row shows the first OVERVIEW_SHOWN, interleaved by kind. */
+const FOR_YOU_PER_KIND = 2;
 /** Sections mounted (and queried) immediately; the rest wait until they near the viewport. */
 const EAGER_SECTIONS = 2;
 
 /**
- * `/discover`: hero search, category tiles, a "Latest opportunities" row mixing
+ * `/discover`: hero search, category tiles, a personalised "For you" row
+ * (events, opportunities, services, products ranked for the viewer, each with
+ * why), a "Latest opportunities" row mixing
  * the newest of each kind, then real, queryable sections (services, jobs,
  * investments, real estate, products, events, community posts).
  * The URL carries the filters (`?cat=jobs,events&loc=Accra&sort=closing`), so a
@@ -75,11 +79,15 @@ export function DiscoverView() {
   const shown = filtered ? EXPANDED_LIMIT : OVERVIEW_SHOWN;
   // The mixed row is part of the untouched overview only; any refinement shows the plain sections.
   const overview = !filtered && !location && sort === 'newest';
+  // Personalised picks lead the overview; whatever they show is left out of every row below.
+  const forYou = useForYou(FOR_YOU_PER_KIND, overview);
+  const forYouShown = useMemo(() => forYou.slice(0, OVERVIEW_SHOWN), [forYou]);
+  const forYouIds = useMemo(() => new Set(forYouShown.map((e) => e.id)), [forYouShown]);
   const mix = useLatestMix(OVERVIEW_FETCH, overview);
   // How many Latest cards fit in one row (reported by the row itself); exactly those leave the sections below.
   const [mixCapacity, setMixCapacity] = useState(3);
-  const mixShown = useMemo(() => mix.slice(0, mixCapacity), [mix, mixCapacity]);
-  const mixIds = useMemo(() => new Set(mixShown.map((e) => e.id)), [mixShown]);
+  const mixShown = useMemo(() => mix.filter((e) => !forYouIds.has(e.id)).slice(0, mixCapacity), [mix, mixCapacity, forYouIds]);
+  const mixIds = useMemo(() => new Set([...forYouIds, ...mixShown.map((e) => e.id)]), [forYouIds, mixShown]);
   // Products and services have no place to filter on, so a location filter leaves them out.
   const visible = DISCOVER_SECTION_ORDER.filter((k) => (!filtered || categories.includes(k)) && !(location && (k === 'services' || k === 'products')));
 
@@ -147,6 +155,7 @@ export function DiscoverView() {
             </div>
           </div>
           <div className="min-w-0 space-y-5 lg:col-start-1 lg:row-start-1" data-testid="discover-sections" aria-label={tRefine('title')}>
+            {overview && <ForYouSection entries={forYouShown} />}
             {overview && <LatestSection entries={mixShown} onCapacity={setMixCapacity} />}
             {visible.map((k, i) => (
               <div key={`${k}-${limit}-${location}-${sort}`} className="empty:hidden">{i < EAGER_SECTIONS ? renderSection(k) : <LazyMount root={scrollEl} minHeight={120}>{renderSection(k)}</LazyMount>}</div>

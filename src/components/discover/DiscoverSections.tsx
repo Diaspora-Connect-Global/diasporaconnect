@@ -8,6 +8,17 @@ import { SectionHeader } from '@/components/redesign/SectionHeader';
 import { EventTile, JobCard, OpportunityCard, ProductCard, ServiceCard } from '@/components/redesign/ListingCards';
 import { useFeaturedProducts, useFeaturedServices, useOpportunities, type OpportunityItem, type OpportunitySortBy } from '@/hooks/redesign/useFreshListings';
 import { LIST_EVENTS, getEventLocationDisplay, type Event, type ListEventsData } from '@/services/gql/events';
+import {
+  RECOMMENDED_EVENTS,
+  RECOMMENDED_OPPORTUNITIES,
+  RECOMMENDED_PRODUCTS,
+  RECOMMENDED_SERVICES,
+  type RecommendedEventsData,
+  type RecommendedOpportunitiesData,
+  type RecommendedProductsData,
+  type RecommendedServicesData,
+} from '@/services/gql/recommendations';
+import { RecommendationReasons } from '@/components/redesign/RecommendationReasons';
 import type { DiscoverCategoryKey, DiscoverSort } from './discoverCategories';
 
 // opportunity-service accepts only CREATED_AT | DEADLINE | COMPENSATION | RELEVANCE and refuses
@@ -66,7 +77,7 @@ function keep<T extends { id: string }>(items: T[], exclude: ReadonlySet<string>
   return (exclude?.size ? items.filter((i) => !exclude.has(i.id)) : items).slice(0, shown);
 }
 
-function Frame({ k, count, onViewAll, expanded, children }: { k: DiscoverCategoryKey | 'latest'; count: number; onViewAll?: () => void; expanded: boolean; children: ReactNode }) {
+function Frame({ k, count, onViewAll, expanded, children }: { k: DiscoverCategoryKey | 'latest' | 'forYou'; count: number; onViewAll?: () => void; expanded: boolean; children: ReactNode }) {
   const t = useTranslations('discover.sections');
   const tAll = useTranslations('redesign');
   if (count === 0) return null;
@@ -131,6 +142,59 @@ export function EventsSection({ shown, expanded, onViewAll, location }: Common &
 }
 
 export type MixEntry = { id: string; node: ReactNode };
+
+const SILENT = { context: { silentErrors: true } } as const;
+
+/**
+ * Personalised picks across events, opportunities, services and products,
+ * ranked per viewer on the server. Interleaved one kind at a time so a single
+ * busy kind cannot fill the row. Each card shows why it was picked. A failed
+ * or empty query just contributes nothing (the row hides when all are empty).
+ */
+export function useForYou(perKind: number, enabled: boolean): MixEntry[] {
+  const skip = !enabled;
+  const events = useQuery<RecommendedEventsData>(RECOMMENDED_EVENTS, { variables: { limit: perKind }, fetchPolicy: 'cache-first', skip, ...SILENT });
+  const opps = useQuery<RecommendedOpportunitiesData>(RECOMMENDED_OPPORTUNITIES, { variables: { limit: perKind }, fetchPolicy: 'cache-first', skip, ...SILENT });
+  const services = useQuery<RecommendedServicesData>(RECOMMENDED_SERVICES, { variables: { limit: perKind }, fetchPolicy: 'cache-first', skip, ...SILENT });
+  const products = useQuery<RecommendedProductsData>(RECOMMENDED_PRODUCTS, { variables: { limit: perKind }, fetchPolicy: 'cache-first', skip, ...SILENT });
+  return useMemo(() => {
+    if (!enabled) return [];
+    const withReasons = (node: ReactNode, reasons?: string[] | null) => (
+      <>
+        {node}
+        <RecommendationReasons codes={reasons} />
+      </>
+    );
+    const kinds: MixEntry[][] = [
+      (events.data?.recommendedEvents ?? [])
+        .filter((r): r is { event: Event; reasons?: string[] | null } => !!r?.event?.id && !!r.event.startAt)
+        .map((r) => ({ id: r.event.id, node: withReasons(<EventTile event={r.event} testId="discover-foryou-events" />, r.reasons) })),
+      (opps.data?.recommendedOpportunities?.opportunities ?? [])
+        .filter((o): o is OpportunityItem & { reasons?: string[] | null } => !!o?.id && !!o.title)
+        .map((o) => ({ id: o.id, node: withReasons(<OpportunityCard item={o} testId="discover-foryou-opportunities" />, o.reasons) })),
+      (services.data?.recommendedMarketplaceServices?.services ?? [])
+        .filter((s): s is NonNullable<typeof s> => !!s?.id && !!s.title)
+        .map((s) => ({ id: s.id, node: withReasons(<ServiceCard item={s} testId="discover-foryou-services" />, s.reasons) })),
+      (products.data?.getRecommendedProducts?.products ?? [])
+        .filter((p): p is NonNullable<typeof p> => !!p?.id && !!p.title)
+        .map((p) => ({ id: p.id, node: withReasons(<ProductCard item={p} testId="discover-foryou-products" />, p.reasons) })),
+    ];
+    const out: MixEntry[] = [];
+    for (let i = 0; kinds.some((k) => i < k.length); i++) {
+      for (const k of kinds) if (i < k.length) out.push(k[i]);
+    }
+    return out;
+  }, [enabled, events.data, opps.data, services.data, products.data]);
+}
+
+/** The "For you" row: one row of picks, hidden when there is nothing to recommend. */
+export function ForYouSection({ entries }: { entries: MixEntry[] }) {
+  return (
+    <Frame k="forYou" count={entries.length} expanded={false}>
+      <Grid overview>{entries.map((e) => e.node)}</Grid>
+    </Frame>
+  );
+}
 
 /**
  * The newest property, service, investment and job — one of each, like the

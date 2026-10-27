@@ -4806,6 +4806,10 @@
       "community": {
         "title": "From the community",
         "subtitle": "See what people in your communities are talking about."
+      },
+      "forYou": {
+        "title": "For you",
+        "subtitle": "Picked from your communities, interests, skills and where you live."
       }
     },
     "refine": {
@@ -6971,5 +6975,60 @@
     "google": "Continue with Google",
     "facebook": "Continue with Facebook",
     "twitter": "Continue with X"
+  },
+  "postActions": {
+    "menuLabel": "More actions for this post",
+    "notInterested": "Not interested",
+    "report": "Report post",
+    "unfriend": "Unfriend {name}",
+    "unfollow": "Unfollow {name}",
+    "leave": "Leave {name}",
+    "loading": "Loading…",
+    "unfriendTitle": "Unfriend {name}?",
+    "unfriendBody": "You'll no longer be connected, and you'll see fewer of their posts.",
+    "unfriendConfirm": "Unfriend",
+    "leaveTitle": "Leave {name}?",
+    "leaveBody": "You'll stop being a member and lose access to members-only posts and events.",
+    "leaveConfirm": "Leave",
+    "cancel": "Cancel",
+    "unfriended": "You're no longer connected with {name}",
+    "unfollowed": "You unfollowed {name}",
+    "left": "You left {name}",
+    "failed": "That didn't work. Please try again.",
+    "reportTitle": "Report this post",
+    "reportBody": "Tell us what's wrong. Our team reviews every report.",
+    "reasonLabel": "Reason",
+    "reason": {
+      "SPAM": "Spam",
+      "HARASSMENT": "Harassment or bullying",
+      "HATE_SPEECH": "Hate speech",
+      "VIOLENCE": "Violence or threats",
+      "NUDITY": "Nudity or sexual content",
+      "MISINFORMATION": "False information",
+      "SCAM": "Scam or fraud",
+      "OTHER": "Something else"
+    },
+    "detailsLabel": "More details (optional)",
+    "detailsHint": "{count}/{max}",
+    "submit": "Send report",
+    "sentTitle": "Thanks for letting us know",
+    "sentBody": "Our team will review this post.",
+    "close": "Close",
+    "hiddenNotice": "Post hidden. You'll see fewer posts like this.",
+    "reportedNotice": "You reported this post. Our team will review it."
+  },
+  "recommendationReasons": {
+    "IN_YOUR_COMMUNITY": "From your community",
+    "NEAR_YOU": "Near you",
+    "MATCHES_INTERESTS": "Matches your interests",
+    "MATCHES_SKILLS": "Matches your skills",
+    "SIMILAR_TO_VIEWED": "Like things you viewed",
+    "STARTING_SOON": "Starting soon",
+    "CLOSING_SOON": "Closing soon",
+    "ONLINE": "Online",
+    "REMOTE": "Remote",
+    "TOP_RATED": "Top rated",
+    "POPULAR": "Popular",
+    "NEW": "New"
   }
 }

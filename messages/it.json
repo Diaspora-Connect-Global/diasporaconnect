@@ -4806,6 +4806,10 @@
       "community": {
         "title": "Dalla community",
         "subtitle": "Scopri di cosa parlano le persone nelle tue community."
+      },
+      "forYou": {
+        "title": "Per te",
+        "subtitle": "Scelti in base alle tue comunità, ai tuoi interessi, alle tue competenze e a dove vivi."
       }
     },
     "refine": {
@@ -6971,5 +6975,60 @@
     "google": "Continua con Google",
     "facebook": "Continua con Facebook",
     "twitter": "Continua con X"
+  },
+  "postActions": {
+    "menuLabel": "Altre azioni per questo post",
+    "notInterested": "Non mi interessa",
+    "report": "Segnala il post",
+    "unfriend": "Rimuovi {name} dai collegamenti",
+    "unfollow": "Non seguire più {name}",
+    "leave": "Lascia {name}",
+    "loading": "Caricamento…",
+    "unfriendTitle": "Rimuovere {name} dai collegamenti?",
+    "unfriendBody": "Non sarete più collegati e vedrai meno post di questa persona.",
+    "unfriendConfirm": "Rimuovi",
+    "leaveTitle": "Lasciare {name}?",
+    "leaveBody": "Non sarai più membro e perderai l’accesso a post ed eventi riservati ai membri.",
+    "leaveConfirm": "Lascia",
+    "cancel": "Annulla",
+    "unfriended": "Non sei più collegato con {name}",
+    "unfollowed": "Non segui più {name}",
+    "left": "Hai lasciato {name}",
+    "failed": "Non ha funzionato. Riprova.",
+    "reportTitle": "Segnala questo post",
+    "reportBody": "Dicci cosa non va. Il nostro team esamina ogni segnalazione.",
+    "reasonLabel": "Motivo",
+    "reason": {
+      "SPAM": "Spam",
+      "HARASSMENT": "Molestie o bullismo",
+      "HATE_SPEECH": "Incitamento all’odio",
+      "VIOLENCE": "Violenza o minacce",
+      "NUDITY": "Nudità o contenuti sessuali",
+      "MISINFORMATION": "Informazioni false",
+      "SCAM": "Truffa o frode",
+      "OTHER": "Altro"
+    },
+    "detailsLabel": "Altri dettagli (facoltativo)",
+    "detailsHint": "{count}/{max}",
+    "submit": "Invia segnalazione",
+    "sentTitle": "Grazie per avercelo segnalato",
+    "sentBody": "Il nostro team esaminerà questo post.",
+    "close": "Chiudi",
+    "hiddenNotice": "Post nascosto. Vedrai meno post come questo.",
+    "reportedNotice": "Hai segnalato questo post. Il nostro team lo esaminerà."
+  },
+  "recommendationReasons": {
+    "IN_YOUR_COMMUNITY": "Dalla tua comunità",
+    "NEAR_YOU": "Vicino a te",
+    "MATCHES_INTERESTS": "In linea con i tuoi interessi",
+    "MATCHES_SKILLS": "In linea con le tue competenze",
+    "SIMILAR_TO_VIEWED": "Simile a ciò che hai visto",
+    "STARTING_SOON": "Inizia presto",
+    "CLOSING_SOON": "Scade presto",
+    "ONLINE": "Online",
+    "REMOTE": "Da remoto",
+    "TOP_RATED": "Più votato",
+    "POPULAR": "Popolare",
+    "NEW": "Nuovo"
   }
 }

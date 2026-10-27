@@ -4806,6 +4806,10 @@
       "community": {
         "title": "Uit de community",
         "subtitle": "Zie waar mensen in je communities over praten."
+      },
+      "forYou": {
+        "title": "Voor jou",
+        "subtitle": "Gekozen op basis van je community’s, interesses, vaardigheden en waar je woont."
       }
     },
     "refine": {
@@ -6971,5 +6975,60 @@
     "google": "Doorgaan met Google",
     "facebook": "Doorgaan met Facebook",
     "twitter": "Doorgaan met X"
+  },
+  "postActions": {
+    "menuLabel": "Meer acties voor dit bericht",
+    "notInterested": "Niet geïnteresseerd",
+    "report": "Bericht melden",
+    "unfriend": "Verbinding met {name} verbreken",
+    "unfollow": "{name} niet meer volgen",
+    "leave": "{name} verlaten",
+    "loading": "Laden…",
+    "unfriendTitle": "Verbinding met {name} verbreken?",
+    "unfriendBody": "Jullie zijn dan niet meer verbonden en je ziet minder berichten van deze persoon.",
+    "unfriendConfirm": "Verbinding verbreken",
+    "leaveTitle": "{name} verlaten?",
+    "leaveBody": "Je bent dan geen lid meer en verliest de toegang tot berichten en evenementen die alleen voor leden zijn.",
+    "leaveConfirm": "Verlaten",
+    "cancel": "Annuleren",
+    "unfriended": "Je bent niet meer verbonden met {name}",
+    "unfollowed": "Je volgt {name} niet meer",
+    "left": "Je hebt {name} verlaten",
+    "failed": "Dat is niet gelukt. Probeer het opnieuw.",
+    "reportTitle": "Dit bericht melden",
+    "reportBody": "Vertel ons wat er mis is. Ons team bekijkt elke melding.",
+    "reasonLabel": "Reden",
+    "reason": {
+      "SPAM": "Spam",
+      "HARASSMENT": "Intimidatie of pesten",
+      "HATE_SPEECH": "Haatzaaiende taal",
+      "VIOLENCE": "Geweld of bedreigingen",
+      "NUDITY": "Naakt of seksuele inhoud",
+      "MISINFORMATION": "Onjuiste informatie",
+      "SCAM": "Oplichting of fraude",
+      "OTHER": "Iets anders"
+    },
+    "detailsLabel": "Meer details (optioneel)",
+    "detailsHint": "{count}/{max}",
+    "submit": "Melding versturen",
+    "sentTitle": "Bedankt voor je melding",
+    "sentBody": "Ons team gaat dit bericht bekijken.",
+    "close": "Sluiten",
+    "hiddenNotice": "Bericht verborgen. Je ziet voortaan minder berichten zoals dit.",
+    "reportedNotice": "Je hebt dit bericht gemeld. Ons team gaat het bekijken."
+  },
+  "recommendationReasons": {
+    "IN_YOUR_COMMUNITY": "Uit je community",
+    "NEAR_YOU": "Bij jou in de buurt",
+    "MATCHES_INTERESTS": "Past bij je interesses",
+    "MATCHES_SKILLS": "Past bij je vaardigheden",
+    "SIMILAR_TO_VIEWED": "Lijkt op wat je bekeek",
+    "STARTING_SOON": "Begint binnenkort",
+    "CLOSING_SOON": "Sluit binnenkort",
+    "ONLINE": "Online",
+    "REMOTE": "Op afstand",
+    "TOP_RATED": "Best beoordeeld",
+    "POPULAR": "Populair",
+    "NEW": "Nieuw"
   }
 }

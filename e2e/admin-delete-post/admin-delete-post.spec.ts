@@ -116,12 +116,18 @@ test('super admin: own post still uses DeletePost', async () => {
     await page.context().close();
 });
 
-test('normal user: no menu on others\' posts, AdminDeletePost is never sent', async () => {
+// Since the post actions menu (Not interested / Report / Unfriend…) every signed-in
+// viewer has a "⋯" on others' posts; what must never appear for them is admin delete.
+test('normal user: others\' posts offer no admin delete, AdminDeletePost is never sent', async () => {
     const { page, graphql } = await openAs('diaspora', '/home', OK);
     await expect(cardOf(page, 'Cocoa suppliers')).toBeVisible({ timeout: 90_000 });
     await expect(cardOf(page, 'My own post')).toBeVisible();
-    await expect(menuOf(page, 'Cocoa suppliers')).toHaveCount(0);
-    await expect(menuOf(page, 'Community meeting notes')).toHaveCount(0);
+    for (const text of ['Cocoa suppliers', 'Community meeting notes']) {
+        await menuOf(page, text).click();
+        await expect(page.getByRole('menuitem', { name: 'Report post' })).toBeVisible();
+        await expect(page.getByRole('menuitem', { name: 'Delete post' })).toHaveCount(0);
+        await page.keyboard.press('Escape');
+    }
     await expect(menuOf(page, 'My own post')).toHaveCount(1);
     expect(calls(graphql, 'AdminDeletePost')).toHaveLength(0);
     await page.context().close();
@@ -129,7 +135,8 @@ test('normal user: no menu on others\' posts, AdminDeletePost is never sent', as
     // A session with no recorded role (signed in before this shipped) behaves the same.
     const bare = await openAs(null, '/home', OK);
     await expect(cardOf(bare.page, 'Cocoa suppliers')).toBeVisible({ timeout: 90_000 });
-    await expect(menuOf(bare.page, 'Cocoa suppliers')).toHaveCount(0);
+    await menuOf(bare.page, 'Cocoa suppliers').click();
+    await expect(bare.page.getByRole('menuitem', { name: 'Delete post' })).toHaveCount(0);
     await bare.page.context().close();
 });
 

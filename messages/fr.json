@@ -4806,6 +4806,10 @@
       "community": {
         "title": "De la communauté",
         "subtitle": "Voyez de quoi parlent les membres de vos communautés."
+      },
+      "forYou": {
+        "title": "Pour vous",
+        "subtitle": "Choisis selon vos communautés, vos centres d’intérêt, vos compétences et votre lieu de résidence."
       }
     },
     "refine": {
@@ -6971,5 +6975,60 @@
     "google": "Continuer avec Google",
     "facebook": "Continuer avec Facebook",
     "twitter": "Continuer avec X"
+  },
+  "postActions": {
+    "menuLabel": "Plus d’actions pour cette publication",
+    "notInterested": "Pas intéressé",
+    "report": "Signaler la publication",
+    "unfriend": "Retirer {name} de vos relations",
+    "unfollow": "Ne plus suivre {name}",
+    "leave": "Quitter {name}",
+    "loading": "Chargement…",
+    "unfriendTitle": "Retirer {name} de vos relations ?",
+    "unfriendBody": "Vous ne serez plus connectés et vous verrez moins de ses publications.",
+    "unfriendConfirm": "Retirer",
+    "leaveTitle": "Quitter {name} ?",
+    "leaveBody": "Vous ne serez plus membre et perdrez l’accès aux publications et événements réservés aux membres.",
+    "leaveConfirm": "Quitter",
+    "cancel": "Annuler",
+    "unfriended": "Vous n’êtes plus en relation avec {name}",
+    "unfollowed": "Vous ne suivez plus {name}",
+    "left": "Vous avez quitté {name}",
+    "failed": "Cela n’a pas fonctionné. Veuillez réessayer.",
+    "reportTitle": "Signaler cette publication",
+    "reportBody": "Dites-nous ce qui ne va pas. Notre équipe examine chaque signalement.",
+    "reasonLabel": "Motif",
+    "reason": {
+      "SPAM": "Spam",
+      "HARASSMENT": "Harcèlement ou intimidation",
+      "HATE_SPEECH": "Discours haineux",
+      "VIOLENCE": "Violence ou menaces",
+      "NUDITY": "Nudité ou contenu sexuel",
+      "MISINFORMATION": "Fausses informations",
+      "SCAM": "Arnaque ou fraude",
+      "OTHER": "Autre chose"
+    },
+    "detailsLabel": "Plus de détails (facultatif)",
+    "detailsHint": "{count}/{max}",
+    "submit": "Envoyer le signalement",
+    "sentTitle": "Merci de nous avoir prévenus",
+    "sentBody": "Notre équipe va examiner cette publication.",
+    "close": "Fermer",
+    "hiddenNotice": "Publication masquée. Vous verrez moins de publications de ce type.",
+    "reportedNotice": "Vous avez signalé cette publication. Notre équipe va l’examiner."
+  },
+  "recommendationReasons": {
+    "IN_YOUR_COMMUNITY": "De votre communauté",
+    "NEAR_YOU": "Près de chez vous",
+    "MATCHES_INTERESTS": "Correspond à vos centres d’intérêt",
+    "MATCHES_SKILLS": "Correspond à vos compétences",
+    "SIMILAR_TO_VIEWED": "Semblable à ce que vous avez vu",
+    "STARTING_SOON": "Commence bientôt",
+    "CLOSING_SOON": "Se termine bientôt",
+    "ONLINE": "En ligne",
+    "REMOTE": "À distance",
+    "TOP_RATED": "Très bien noté",
+    "POPULAR": "Populaire",
+    "NEW": "Nouveau"
   }
 }

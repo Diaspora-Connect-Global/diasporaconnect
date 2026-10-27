@@ -46,6 +46,7 @@ import { resolveUserTier } from '@/lib/userTier';
 import { useRouter } from '@/i18n/navigation';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { AdminDeletePostDialog } from '@/components/cards/AdminDeletePostDialog';
+import { PostActionsMenu, PostActionNotice, type PostActionOutcome } from '@/components/posts/PostActionsMenu';
 import { useIsSuperAdmin } from '@/hooks/useIsSuperAdmin';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -347,6 +348,8 @@ function FeedCard2Inner({
     const [isEditingPost, setIsEditingPost] = useState(false);
     const [editPostText, setEditPostText] = useState(content);
     const [deletePostModalOpen, setDeletePostModalOpen] = useState(false);
+    /** Set once the viewer hides or reports someone else's post: the card collapses to a notice. */
+    const [actionOutcome, setActionOutcome] = useState<PostActionOutcome | null>(null);
     const [deletePost, { loading: deletePostLoading }] = useMutation(DELETE_POST);
     const [editPostMutation, { loading: editPostLoading }] = useMutation(EDIT_POST);
 
@@ -1579,6 +1582,14 @@ function FeedCard2Inner({
     /* --------------------------------------------------------------- */
     /*  Main Render                                                    */
     /* --------------------------------------------------------------- */
+    if (actionOutcome) {
+        return (
+            <div className="relative w-full bg-surface-default border border-border-subtle rounded-lg p-[1rem] flex flex-col my-[0.5rem]">
+                <PostActionNotice outcome={actionOutcome} />
+            </div>
+        );
+    }
+
     return (
         <>
             {/* The reaction picker is portalled to <body>, so neither the card
@@ -1628,7 +1639,7 @@ function FeedCard2Inner({
                             </p>
                         </div>
                     </div>
-                    {(isOwnPost || showAdminDelete) && (
+                    {isOwnPost && (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <button className="p-1 rounded-full hover:bg-surface-alt text-text-secondary flex-shrink-0">
@@ -1642,23 +1653,26 @@ function FeedCard2Inner({
                                     </DropdownMenuItem>
                                 )}
                                 {canEditPost && <DropdownMenuSeparator />}
-                                {isOwnPost && (
-                                    <DropdownMenuItem onSelect={() => setVisibilityModalOpen(true)}>
-                                        <Globe className="w-4 h-4 mr-2" /> Change visibility
-                                    </DropdownMenuItem>
-                                )}
-                                {isOwnPost && <DropdownMenuSeparator />}
-                                {isOwnPost ? (
-                                    <DropdownMenuItem variant="destructive" onSelect={() => setDeletePostModalOpen(true)}>
-                                        <Trash2 className="w-4 h-4 mr-2" /> Delete
-                                    </DropdownMenuItem>
-                                ) : (
-                                    <DropdownMenuItem variant="destructive" onSelect={() => setAdminDeleteOpen(true)}>
-                                        <Trash2 className="w-4 h-4 mr-2" /> {tAdminDel('menuItem')}
-                                    </DropdownMenuItem>
-                                )}
+                                <DropdownMenuItem onSelect={() => setVisibilityModalOpen(true)}>
+                                    <Globe className="w-4 h-4 mr-2" /> Change visibility
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem variant="destructive" onSelect={() => setDeletePostModalOpen(true)}>
+                                    <Trash2 className="w-4 h-4 mr-2" /> Delete
+                                </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
+                    )}
+                    {!isOwnPost && !!currentUserId && (
+                        <PostActionsMenu
+                            postId={postId}
+                            authorName={profileName}
+                            authorUserId={authorUserId}
+                            authorEntityId={authorEntityId}
+                            authorEntityType={authorEntityType}
+                            onDone={setActionOutcome}
+                            adminDelete={showAdminDelete ? { label: tAdminDel('menuItem'), onSelect: () => setAdminDeleteOpen(true) } : undefined}
+                        />
                     )}
                 </div>
 
