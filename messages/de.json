@@ -1985,6 +1985,10 @@
     "searchVisibility": {
       "title": "Wer Sie finden kann",
       "body": "Mit der Einstellung „Mich in Suchergebnissen anzeigen“ in den Einstellungen können Sie sich aus den Suchergebnissen ausblenden. Solange sie deaktiviert ist, finden andere Sie nicht, wenn sie in der App nach Personen suchen oder Personen auswählen, und Sie werden nicht unter „Personen, die Sie kennen könnten“ vorgeschlagen. Wer einen direkten Link zu Ihrem Profil hat, kann es weiterhin öffnen, und Plattform-Administratoren können Ihr Konto weiterhin finden."
+    },
+    "postDrafts": {
+      "title": "Unveröffentlichte Beiträge auf deinem Gerät",
+      "body": "Wenn du einen Beitrag schreibst und ihn nicht sofort veröffentlichst, speichern wir ihn als Entwurf in deinem Browser auf diesem Gerät, damit du ihn später fertigstellen kannst – einschließlich angehängter Fotos oder Dateien. Ein Entwurf wird erst an uns gesendet, wenn du ihn veröffentlichst. Die Entwürfe jedes Kontos werden getrennt gespeichert. Ein Entwurf wird gelöscht, wenn du ihn veröffentlichst oder verwirfst, wenn du dich abmeldest oder automatisch nach 30 Tagen (in den Admin-Konsolen für Communitys und Vereine nach 14 Tagen). Jede Person, die diesen Browser benutzen kann, könnte lesen, was darin gespeichert ist – melde dich daher an gemeinsam genutzten Computern ab."
     }
   },
   "friends": {

@@ -4,8 +4,8 @@ import { getTranslations } from 'next-intl/server';
 import JsonLd from '@/components/seo/JsonLd';
 import { BASE, SITE_NAME, buildAlternates, publicRobots, ogImages } from '@/lib/seo';
 
-const LAST_UPDATED = '2026-10-01';
-const LAST_UPDATED_DISPLAY = 'October 1, 2026';
+const LAST_UPDATED = '2026-10-27';
+const LAST_UPDATED_DISPLAY = 'October 27, 2026';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
@@ -114,9 +114,21 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
     title: t('searchVisibility.title'),
     body: t('searchVisibility.body'),
   };
-  // After "How we use information" / "Sharing of information" respectively.
+  // Added 2026-10-27 with browser-stored post drafts (web app and both admin consoles).
+  const postDraftsSection: PolicySection = {
+    id: 'post-drafts',
+    title: t('postDrafts.title'),
+    body: t('postDrafts.body'),
+  };
+  // After "How we use information" / "Sharing of information" / "Cookies and tracking" respectively.
   const allSections: PolicySection[] = sections.flatMap((s) =>
-    s.id === 'use' ? [s, notificationsSection] : s.id === 'sharing' ? [s, searchVisibilitySection] : [s],
+    s.id === 'use'
+      ? [s, notificationsSection]
+      : s.id === 'sharing'
+        ? [s, searchVisibilitySection]
+        : s.id === 'cookies'
+          ? [s, postDraftsSection]
+          : [s],
   );
 
   return (

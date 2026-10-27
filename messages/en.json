@@ -1985,6 +1985,10 @@
     "searchVisibility": {
       "title": "Who can find you",
       "body": "You can hide yourself from search results with the “Show me in search results” setting in Settings. While it is off, other people won’t find you when they search for people or pick people in the app, and you won’t be suggested in “People you may know”. Anyone with a direct link to your profile can still open it, and platform administrators can still find your account."
+    },
+    "postDrafts": {
+      "title": "Unfinished posts on your device",
+      "body": "When you write a post and don’t publish it straight away, we keep it as a draft in your browser on this device so you can finish it later, including any photos or files you attached. A draft is not sent to us until you publish it. Each account’s drafts are kept separately. A draft is deleted when you publish or discard it, when you sign out, or automatically after 30 days (14 days in the community and association admin consoles). Anyone who can use this browser could read what is stored in it, so sign out when you use a shared computer."
     }
   },
   "friends": {

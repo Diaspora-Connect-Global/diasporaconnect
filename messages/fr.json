@@ -1985,6 +1985,10 @@
     "searchVisibility": {
       "title": "Qui peut vous trouver",
       "body": "Vous pouvez vous masquer des résultats de recherche avec le paramètre « M’afficher dans les résultats de recherche » dans les Paramètres. Tant qu’il est désactivé, les autres personnes ne vous trouvent pas lorsqu’elles recherchent ou sélectionnent des personnes dans l’application, et vous n’êtes pas suggéré dans « Personnes que vous pourriez connaître ». Toute personne disposant d’un lien direct vers votre profil peut toujours l’ouvrir, et les administrateurs de la plateforme peuvent toujours trouver votre compte."
+    },
+    "postDrafts": {
+      "title": "Publications non terminées sur votre appareil",
+      "body": "Lorsque vous rédigez une publication sans la publier tout de suite, nous la conservons comme brouillon dans votre navigateur, sur cet appareil, afin que vous puissiez la terminer plus tard, y compris les photos ou fichiers joints. Un brouillon ne nous est envoyé qu’au moment où vous le publiez. Les brouillons de chaque compte sont conservés séparément. Un brouillon est supprimé lorsque vous le publiez ou l’abandonnez, lorsque vous vous déconnectez, ou automatiquement après 30 jours (14 jours dans les consoles d’administration des communautés et des associations). Toute personne pouvant utiliser ce navigateur pourrait lire ce qui y est stocké : déconnectez-vous donc sur un ordinateur partagé."
     }
   },
   "friends": {

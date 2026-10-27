@@ -1985,6 +1985,10 @@
     "searchVisibility": {
       "title": "Wie je kan vinden",
       "body": "Met de instelling ‘Toon mij in zoekresultaten’ in Instellingen kun je jezelf verbergen in zoekresultaten. Zolang die uit staat, vinden anderen je niet als ze in de app naar personen zoeken of personen kiezen, en word je niet voorgesteld bij ‘Mensen die u misschien kent’. Wie een directe link naar je profiel heeft, kan het nog steeds openen, en platformbeheerders kunnen je account nog steeds vinden."
+    },
+    "postDrafts": {
+      "title": "Onvoltooide berichten op je apparaat",
+      "body": "Als je een bericht schrijft en het niet meteen plaatst, bewaren we het als concept in je browser op dit apparaat, zodat je het later kunt afmaken, inclusief eventuele foto's of bestanden die je hebt toegevoegd. Een concept wordt pas naar ons verstuurd als je het plaatst. De concepten van elk account worden apart bewaard. Een concept wordt verwijderd als je het plaatst of weggooit, als je uitlogt of automatisch na 30 dagen (14 dagen in de beheerconsoles voor gemeenschappen en verenigingen). Iedereen die deze browser kan gebruiken, kan lezen wat erin is opgeslagen, dus log uit op een gedeelde computer."
     }
   },
   "friends": {

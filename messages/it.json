@@ -1985,6 +1985,10 @@
     "searchVisibility": {
       "title": "Chi può trovarti",
       "body": "Puoi nasconderti dai risultati di ricerca con l’impostazione “Mostrami nei risultati di ricerca” nelle Impostazioni. Finché è disattivata, le altre persone non ti trovano quando cercano o selezionano persone nell’app, e non vieni suggerito in “Persone che potresti conoscere”. Chi ha un link diretto al tuo profilo può comunque aprirlo, e gli amministratori della piattaforma possono comunque trovare il tuo account."
+    },
+    "postDrafts": {
+      "title": "Post non pubblicati sul tuo dispositivo",
+      "body": "Quando scrivi un post e non lo pubblichi subito, lo conserviamo come bozza nel tuo browser su questo dispositivo, così puoi finirlo più tardi, insieme a eventuali foto o file allegati. Una bozza non ci viene inviata finché non la pubblichi. Le bozze di ogni account sono conservate separatamente. Una bozza viene eliminata quando la pubblichi o la scarti, quando esci o automaticamente dopo 30 giorni (14 giorni nelle console di amministrazione di community e associazioni). Chiunque possa usare questo browser potrebbe leggere ciò che vi è salvato, quindi esci quando usi un computer condiviso."
     }
   },
   "friends": {
