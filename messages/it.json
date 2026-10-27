@@ -254,12 +254,16 @@
     "title": "Crea post",
     "description": "Scrivi un post e scegli chi può vederlo.",
     "close": "Chiudi",
-    "discardTitle": "Scartare questo post?",
-    "discardBody": "Il testo scritto e le foto o i file aggiunti andranno persi.",
     "discardConfirm": "Scarta",
     "keepEditing": "Continua a modificare",
     "draftRestored": "Bozza ripristinata: riprendi da dove avevi lasciato.",
-    "discard": "Scarta"
+    "discard": "Scarta",
+    "saveDraft": "Salva bozza",
+    "draftSaved": "Bozza salvata: riprendila quando vuoi dal riquadro dei post.",
+    "leaveTitle": "Salvare questo post come bozza?",
+    "leaveBody": "Conservalo su questo dispositivo per finirlo più tardi, oppure eliminalo insieme alle foto o ai file aggiunti.",
+    "trendingHashtags": "Hashtag di tendenza",
+    "hashtagSuggestions": "Hashtag suggeriti"
   },
   "createPost": {
     "placeholder": "A cosa sta pensando, {name}?",
@@ -5423,8 +5427,6 @@
       "title": "Il tuo feed"
     },
     "rail": {
-      "ctaTitle": "Fai parte di qualcosa di più grande",
-      "ctaBody": "Unisciti a una community, accedi alle opportunità e porta a termine le cose — insieme.",
       "quickActions": "Azioni rapide",
       "getDone": "Fai sbrigare qualcosa",
       "getDoneHint": "Invia una richiesta a una community o organizzazione",
@@ -5475,9 +5477,7 @@
     },
     "composer": {
       "prompt": "Condividi un aggiornamento, fai una domanda o avvia una discussione…",
-      "post": "Post",
-      "photo": "Aggiungi foto",
-      "group": "Gruppo"
+      "continueDraft": "Riprendi la bozza"
     },
     "tabs": {
       "label": "Feed",

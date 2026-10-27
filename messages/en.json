@@ -254,12 +254,16 @@
     "title": "Create post",
     "description": "Write a post and choose who can see it.",
     "close": "Close",
-    "discardTitle": "Discard this post?",
-    "discardBody": "What you wrote and any photos or files you added will be thrown away.",
     "discardConfirm": "Discard",
     "keepEditing": "Keep editing",
     "draftRestored": "Draft restored — pick up where you left off.",
-    "discard": "Discard"
+    "discard": "Discard",
+    "saveDraft": "Save draft",
+    "draftSaved": "Draft saved — continue it from the post box any time.",
+    "leaveTitle": "Save this post as a draft?",
+    "leaveBody": "Keep it on this device to finish later, or discard it along with any photos or files you added.",
+    "trendingHashtags": "Trending hashtags",
+    "hashtagSuggestions": "Hashtag suggestions"
   },
   "createPost": {
     "placeholder": "What's on your mind, {name}?",
@@ -5423,8 +5427,6 @@
       "title": "Your feed"
     },
     "rail": {
-      "ctaTitle": "You’re part of something bigger",
-      "ctaBody": "Join a community, access opportunities and get things done — together.",
       "quickActions": "Quick actions",
       "getDone": "Get something done",
       "getDoneHint": "Send a request to a community or organisation",
@@ -5475,9 +5477,7 @@
     },
     "composer": {
       "prompt": "Share an update, ask a question or start a discussion…",
-      "post": "Post",
-      "photo": "Add photo",
-      "group": "Group"
+      "continueDraft": "Continue your draft"
     },
     "tabs": {
       "label": "Feed",

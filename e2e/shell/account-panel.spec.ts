@@ -211,4 +211,20 @@ test.describe('account panel', () => {
         expect(authWrites.some((w) => JSON.parse(w).state?.tokens === null)).toBe(true);
         await context.close();
     });
+
+    test('sign-out deletes every post draft kept in this browser, including the pre-per-user one', async () => {
+        const { page, context } = await open({ width: 1280, height: 800 });
+        await page.evaluate(() => {
+            localStorage.setItem('cpd:v2:abc123', JSON.stringify({ text: 'half a post', visibility: 'PUBLIC', hasMedia: false, savedAt: 1 }));
+            localStorage.setItem('cpd:v2:zz9', JSON.stringify({ text: 'someone else', visibility: 'PUBLIC', hasMedia: false, savedAt: 1 }));
+            localStorage.setItem('cpd_text', 'legacy draft');
+        });
+        await openPanel(page);
+        await panel(page).getByRole('button', { name: 'Sign out' }).click();
+        await page.getByRole('dialog', { name: 'Sign out?' }).getByRole('button', { name: 'Sign out' }).click();
+        await expect(page).toHaveURL(/\/en\/signin/, { timeout: 90_000 });
+        const left = await page.evaluate(() => Object.keys(localStorage).filter((k) => k.startsWith('cpd')));
+        expect(left).toEqual([]);
+        await context.close();
+    });
 });

@@ -1,7 +1,7 @@
 'use client';
 
 import { useFormatter, useTranslations } from 'next-intl';
-import { ArrowRight, Briefcase, ChevronRight, Compass, Users, UsersRound } from 'lucide-react';
+import { ArrowRight, Briefcase, ChevronRight, Compass, Users } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { QuickActionRow } from '@/components/redesign/QuickActionRow';
 import { YourActivity } from '@/components/home/YourActivity';
@@ -13,8 +13,8 @@ import { CATEGORY_PHOTOS, circleCoverPlaceholder } from '@/lib/redesignImages';
 import { toCdnUrl } from '@/lib/cdn';
 
 /**
- * Home right rail: community call to action, quick actions that exist, the
- * viewer's registered upcoming events and their circles. `idPrefix` keeps ids
+ * Home right rail: the viewer's activity, quick actions that exist, their
+ * registered upcoming events and their circles. `idPrefix` keeps ids
  * unique because the rail is rendered once for desktop and once under the main
  * column on phones.
  */
@@ -29,20 +29,6 @@ export function HomeRail({ idPrefix }: { idPrefix: string }) {
   return (
     <div className="space-y-4" data-testid={`home-rail-${idPrefix}`}>
       <YourActivity idPrefix={idPrefix} />
-      <Link
-        href="/community"
-        prefetch={false}
-        className="flex items-center gap-4 rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm transition-[border-color,box-shadow] hover:border-border-brand hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
-      >
-        <span className="grid size-14 shrink-0 place-items-center rounded-full bg-surface-info text-text-info">
-          <UsersRound className="size-7" strokeWidth={1.5} aria-hidden />
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-sm font-bold text-text-primary">{t('ctaTitle')}</span>
-          <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{t('ctaBody')}</span>
-        </span>
-        <ChevronRight className="size-5 shrink-0 text-muted-foreground" aria-hidden />
-      </Link>
 
       <RailCard id={`${idPrefix}-quick`} title={t('quickActions')} className="space-y-0">
         <div className="space-y-2.5">

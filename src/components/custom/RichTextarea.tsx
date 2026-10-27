@@ -6,15 +6,28 @@ import React, {
   useEffect,
   useLayoutEffect,
   useCallback,
+  useMemo,
+  useId,
   forwardRef,
   useImperativeHandle,
 } from 'react';
 import Image from 'next/image';
 import { useLazyQuery } from '@apollo/client/react';
+import { useTranslations } from 'next-intl';
 import { SEARCH_USERS } from '@/services/gql/connection';
+import { GET_TRENDING_HASHTAGS } from '@/services/gql/postsFeed';
 import type { SearchUsersResponse } from '@/services/gql/types/connection';
-import { Loader2 } from 'lucide-react';
+import { Hash, Loader2 } from 'lucide-react';
 import { renderRichText } from '@/components/custom/richTextRenderer';
+import { filterHashtagSuggestions, findHashtagTrigger, normaliseHashtagPool } from '@/lib/hashtagSuggestions';
+
+/** Pool the #hashtag suggestions are filtered from: last 30 days' trending tags, fetched once. */
+const HASHTAG_POOL_INPUT = { input: { limit: 50, timeRange: '30d' } } as const;
+const HASHTAG_SUGGESTION_LIMIT = 6;
+
+interface TrendingHashtagsData {
+  trendingHashtags?: Array<{ id: string; tag: string; usageCount?: number | null }> | null;
+}
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -48,6 +61,8 @@ interface RichTextareaProps {
   disabled?: boolean;
   className?: string;
   minHeight?: string;
+  /** Typing `#` suggests trending hashtags. Off unless a composer opts in. */
+  hashtagSuggestions?: boolean;
 }
 
 /* ------------------------------------------------------------------ */
@@ -64,9 +79,12 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
       disabled = false,
       className = '',
       minHeight = '200px',
+      hashtagSuggestions = false,
     },
     ref,
   ) => {
+    const tComposer = useTranslations('composer');
+    const hashtagListId = useId();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const backdropRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -83,11 +101,49 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
     const [selectedMentionIdx, setSelectedMentionIdx] = useState(0);
     const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
 
+    /* — hashtag state — */
+    const [hashtagQuery, setHashtagQuery] = useState<string | null>(null);
+    const [hashtagStartIdx, setHashtagStartIdx] = useState<number>(-1);
+    const [selectedHashtagIdx, setSelectedHashtagIdx] = useState(0);
+
     /* — search query — */
     const [searchUsers, { loading: searchLoading }] =
       useLazyQuery<SearchUsersResponse>(SEARCH_USERS, {
         fetchPolicy: 'network-only',
       });
+
+    // One request per composer (and Apollo's cache across composers), never per keystroke.
+    const [loadTrendingHashtags, { data: trendingData, called: trendingCalled }] =
+      useLazyQuery<TrendingHashtagsData>(GET_TRENDING_HASHTAGS, { fetchPolicy: 'cache-first' });
+    const hashtagPool = useMemo(
+      () => normaliseHashtagPool((trendingData?.trendingHashtags ?? []).map((h) => h.tag)),
+      [trendingData],
+    );
+    const hashtagResults = useMemo(
+      () => (hashtagQuery === null ? [] : filterHashtagSuggestions(hashtagPool, hashtagQuery, HASHTAG_SUGGESTION_LIMIT)),
+      [hashtagPool, hashtagQuery],
+    );
+    const showHashtags = hashtagSuggestions && hashtagQuery !== null && hashtagResults.length > 0;
+
+    const detectHashtag = useCallback(
+      (text: string, cursorPos: number) => {
+        if (!hashtagSuggestions) return;
+        const trigger = findHashtagTrigger(text, cursorPos);
+        if (!trigger) {
+          setHashtagQuery(null);
+          setHashtagStartIdx(-1);
+          return;
+        }
+        if (!trendingCalled) {
+          // No suggestions is a fine outcome: the user just types the tag.
+          loadTrendingHashtags({ variables: HASHTAG_POOL_INPUT, context: { silentErrors: true } }).catch(() => {});
+        }
+        setHashtagStartIdx(trigger.start);
+        setHashtagQuery(trigger.query);
+        setSelectedHashtagIdx(0);
+      },
+      [hashtagSuggestions, trendingCalled, loadTrendingHashtags],
+    );
 
     /* — expose methods to parent — */
     useImperativeHandle(ref, () => ({
@@ -219,9 +275,10 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
       return () => clearTimeout(timeout);
     }, [mentionQuery, searchUsers]);
 
-    /* — compute dropdown position (below the @ character) — */
+    /* — compute dropdown position (below the @ or # character) — */
+    const triggerIdx = mentionQuery !== null ? mentionStartIdx : showHashtags ? hashtagStartIdx : -1;
     useEffect(() => {
-      if (mentionQuery === null || !textareaRef.current || !containerRef.current)
+      if (triggerIdx < 0 || !textareaRef.current || !containerRef.current)
         return;
 
       const ta = textareaRef.current;
@@ -251,7 +308,7 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
       mirror.style.overflowWrap = 'break-word';
 
       // Insert text before the @, then a marker span
-      const textBefore = value.slice(0, mentionStartIdx);
+      const textBefore = value.slice(0, triggerIdx);
       const textNode = document.createTextNode(textBefore);
       mirror.appendChild(textNode);
 
@@ -275,7 +332,7 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
       });
 
       document.body.removeChild(mirror);
-    }, [mentionQuery, mentionStartIdx, value]);
+    }, [triggerIdx, value]);
 
     /* — select a mention — */
     const selectMention = useCallback(
@@ -323,8 +380,54 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
       [value, mentionStartIdx, mentionQuery, onChange, onMentionsChange],
     );
 
+    /* — select a hashtag: replaces the typed `#prefix` with `#tag ` — */
+    const selectHashtag = useCallback(
+      (tag: string) => {
+        if (hashtagQuery === null || hashtagStartIdx < 0) return;
+        const before = value.slice(0, hashtagStartIdx);
+        const after = value.slice(hashtagStartIdx + 1 + hashtagQuery.length);
+        const insert = `#${tag}` + (after.startsWith(' ') ? '' : ' ');
+        const cursorPos = before.length + insert.length + (after.startsWith(' ') ? 1 : 0);
+        setHashtagQuery(null);
+        setHashtagStartIdx(-1);
+        onChange(before + insert + after);
+        setTimeout(() => {
+          const el = textareaRef.current;
+          if (el) {
+            el.focus();
+            el.setSelectionRange(cursorPos, cursorPos);
+          }
+        }, 0);
+      },
+      [value, hashtagStartIdx, hashtagQuery, onChange],
+    );
+
     /* — keyboard navigation in dropdown — */
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (showHashtags) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          setSelectedHashtagIdx((i) => (i < hashtagResults.length - 1 ? i + 1 : 0));
+          return;
+        }
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          setSelectedHashtagIdx((i) => (i > 0 ? i - 1 : hashtagResults.length - 1));
+          return;
+        }
+        if (e.key === 'Enter' || e.key === 'Tab') {
+          e.preventDefault();
+          selectHashtag(hashtagResults[Math.min(selectedHashtagIdx, hashtagResults.length - 1)]);
+          return;
+        }
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          // The composer dialog skips its own Esc while aria-expanded is true (see PostComposerModal).
+          setHashtagQuery(null);
+          return;
+        }
+      }
+
       if (mentionQuery !== null && mentionResults.length > 0) {
         if (e.key === 'ArrowDown') {
           e.preventDefault();
@@ -408,13 +511,17 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
       requestAnimationFrame(() => {
         const cursor = e.target.selectionStart;
         detectMention(newVal, cursor);
+        detectHashtag(newVal, cursor);
       });
     };
 
     /* — handle click (reposition mention detection) — */
     const handleClick = () => {
       const el = textareaRef.current;
-      if (el) detectMention(value, el.selectionStart);
+      if (el) {
+        detectMention(value, el.selectionStart);
+        detectHashtag(value, el.selectionStart);
+      }
     };
 
     /* — close dropdown on outside click — */
@@ -425,6 +532,7 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
           !containerRef.current.contains(e.target as Node)
         ) {
           setMentionQuery(null);
+          setHashtagQuery(null);
         }
       };
       document.addEventListener('mousedown', handler);
@@ -467,7 +575,47 @@ const RichTextarea = forwardRef<RichTextareaHandle, RichTextareaProps>(
           disabled={disabled}
           className={`relative w-full bg-transparent border-none outline-none resize-none text-text-primary caret-text-primary ${className}`}
           style={{ minHeight, caretColor: 'var(--color-text-primary, #000)' }}
+          {...(hashtagSuggestions && {
+            'aria-autocomplete': 'list' as const,
+            'aria-expanded': showHashtags,
+            'aria-controls': showHashtags ? hashtagListId : undefined,
+            'aria-activedescendant': showHashtags ? `${hashtagListId}-${selectedHashtagIdx}` : undefined,
+          })}
         />
+
+        {/* Hashtag suggestions (trending tags matching what was typed after #) */}
+        {showHashtags && (
+          <div
+            className="absolute z-50 w-64 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border-subtle bg-surface-default shadow-2xl"
+            style={{ top: dropdownPos.top, left: Math.max(0, dropdownPos.left) }}
+            data-testid="hashtag-suggestions"
+          >
+            <p className="border-b border-border-subtle px-3 py-2 text-xs font-medium text-text-secondary">
+              {tComposer('trendingHashtags')}
+            </p>
+            <ul id={hashtagListId} role="listbox" aria-label={tComposer('hashtagSuggestions')} className="max-h-60 overflow-y-auto py-1">
+              {hashtagResults.map((tag, idx) => (
+                <li
+                  key={tag}
+                  id={`${hashtagListId}-${idx}`}
+                  role="option"
+                  aria-selected={idx === selectedHashtagIdx}
+                  onMouseDown={(e) => {
+                    e.preventDefault(); // keep focus in the textarea
+                    selectHashtag(tag);
+                  }}
+                  onMouseEnter={() => setSelectedHashtagIdx(idx)}
+                  className={`flex min-h-10 cursor-pointer items-center gap-2 px-3 text-sm text-text-primary ${
+                    idx === selectedHashtagIdx ? 'bg-surface-subtle' : 'hover:bg-surface-subtle/50'
+                  }`}
+                >
+                  <Hash className="size-4 shrink-0 text-text-brand" aria-hidden />
+                  <span className="truncate">{tag}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* Mention dropdown */}
         {showDropdown && (

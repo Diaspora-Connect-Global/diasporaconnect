@@ -20,6 +20,7 @@ import {
   Camera,
   FolderOpen,
   RotateCcw,
+  Save,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
@@ -140,6 +141,8 @@ const VisibilityDropdown: React.FC<{
 export interface PostComposerHandle {
   /** Throw away the draft (text, media, stored copy) — used when the user confirms a discard. */
   discard: () => Promise<void>;
+  /** Keep the draft in this browser and report it (toast + onDraftSaved). */
+  saveDraft: () => Promise<void>;
 }
 
 export interface PostComposerFormProps {
@@ -147,6 +150,8 @@ export interface PostComposerFormProps {
   variant?: 'page' | 'modal';
   /** Called once the post really exists on the server (never on a refused mutation). */
   onPosted?: (postId: string) => void;
+  /** Called after "Save draft" has stored the draft — the host closes or navigates away. */
+  onDraftSaved?: () => void;
   /** Tells a host whether there is unsaved text or media (for the discard confirmation). */
   onDirtyChange?: (dirty: boolean) => void;
   /** Lets a host discard the draft imperatively. */
@@ -159,7 +164,7 @@ export interface PostComposerFormProps {
 export const POST_CREATED_EVENT = 'diaspoplug:post-created';
 
 // Shared create-post form (route page + composer modal)
-export function PostComposerForm({ variant = 'page', onPosted, onDirtyChange, handleRef, autoFocus = false }: PostComposerFormProps) {
+export function PostComposerForm({ variant = 'page', onPosted, onDraftSaved, onDirtyChange, handleRef, autoFocus = false }: PostComposerFormProps) {
   const isModal = variant === 'modal';
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [postContent, setPostContent] = useState('');
@@ -233,7 +238,10 @@ export function PostComposerForm({ variant = 'page', onPosted, onDirtyChange, ha
       setDraftChecked(true);
       if (!draft) return;
       if (draft.text) setPostContent(draft.text);
-      if (draft.visibility) setVisibility(draft.visibility as Visibility);
+      // Stored data is untrusted: an unknown value would post with no visibility at all.
+      if (draft.visibility === 'PUBLIC' || draft.visibility === 'CONNECTIONS' || draft.visibility === 'PRIVATE') {
+        setVisibility(draft.visibility);
+      }
       if (draft.attachments.length > 0) {
         const restored: Attachment[] = draft.attachments.map(a => ({
           id: a.id,
@@ -258,8 +266,10 @@ export function PostComposerForm({ variant = 'page', onPosted, onDirtyChange, ha
     if (autoFocus && draftChecked) textareaRef.current?.focus();
   }, [autoFocus, draftChecked]);
 
-  // Auto-save draft with debounce
+  // Auto-save draft with debounce — only once the stored draft has been read, so the
+  // empty first render can never overwrite it.
   React.useEffect(() => {
+    if (!draftChecked) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       saveDraft(postContent, visibility, attachments);
@@ -267,7 +277,7 @@ export function PostComposerForm({ variant = 'page', onPosted, onDirtyChange, ha
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [postContent, visibility, attachments, saveDraft]);
+  }, [draftChecked, postContent, visibility, attachments, saveDraft]);
 
   // Function to insert text at cursor position
   const insertAtCursor = (textToInsert: string) => {
@@ -461,7 +471,15 @@ export function PostComposerForm({ variant = 'page', onPosted, onDirtyChange, ha
     setDraftRestored(false);
   };
 
-  useImperativeHandle(handleRef, () => ({ discard: handleDiscardDraft }));
+  const handleSaveDraft = async () => {
+    if (!dirty) return;
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    await saveDraft(postContent, visibility, attachments);
+    toast.success(tComposer('draftSaved'));
+    onDraftSaved?.();
+  };
+
+  useImperativeHandle(handleRef, () => ({ discard: handleDiscardDraft, saveDraft: handleSaveDraft }));
 
   const handleRemoveAttachment = (id: string) => {
     const attachment = attachments.find(a => a.id === id);
@@ -727,6 +745,7 @@ export function PostComposerForm({ variant = 'page', onPosted, onDirtyChange, ha
               value={postContent}
               onChange={setPostContent}
               onMentionsChange={setMentionedUsers}
+              hashtagSuggestions
               placeholder={t('placeholder', { name: userName.split(' ')[0] })}
               maxLength={charLimit}
               disabled={isPosting}
@@ -968,10 +987,21 @@ export function PostComposerForm({ variant = 'page', onPosted, onDirtyChange, ha
                 </div>
               </div>
 
-              {/* Character Count */}
-              <div className={`hidden md:flex items-center gap-2 caption-medium ${getCharCountColor()}`}>
-                <div className={`w-2 h-2 rounded-full ${getCharIndicatorColor()}`}></div>
-                <span>{charCount} / {charLimit}</span>
+              <div className="flex items-center gap-3">
+                {/* Character Count */}
+                <div className={`hidden md:flex items-center gap-2 caption-medium ${getCharCountColor()}`}>
+                  <div className={`w-2 h-2 rounded-full ${getCharIndicatorColor()}`}></div>
+                  <span>{charCount} / {charLimit}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSaveDraft}
+                  disabled={!dirty || isSubmitting}
+                  className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-border-subtle px-3 text-sm font-medium text-text-primary hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Save className="size-4 text-text-brand" aria-hidden />
+                  {tComposer('saveDraft')}
+                </button>
               </div>
             </div>
           </div>

@@ -112,6 +112,8 @@ test('the right rail offers only actions that exist, upcoming registrations and 
     await expect(rail.getByRole('link', { name: /Connect with people/ })).toBeVisible();
     // No request-type source exists for it yet: not shown.
     await expect(rail.getByText('Get something done')).toHaveCount(0);
+    // Owner 2026-10-27: the "You're part of something bigger" card is gone from the rail.
+    await expect(rail.getByText(/part of something bigger/)).toHaveCount(0);
     await expect(rail.getByTestId('home-upcoming')).toContainText('Networking Mixer');
     await expect(rail.getByTestId('home-circles')).toContainText('Accra Tech Hub');
     await expect(rail.getByTestId('home-circles')).toContainText('12 members');

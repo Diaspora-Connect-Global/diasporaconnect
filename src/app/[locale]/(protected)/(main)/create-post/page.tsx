@@ -11,5 +11,6 @@ export default function CreatePostPage() {
   const onPosted = useCallback(() => {
     setTimeout(() => router.push('/home'), 1000);
   }, [router]);
-  return <PostComposerForm variant="page" onPosted={onPosted} />;
+  // Saving a draft leaves the page the same way posting does; the feed offers "Continue your draft".
+  return <PostComposerForm variant="page" onPosted={onPosted} onDraftSaved={onPosted} />;
 }

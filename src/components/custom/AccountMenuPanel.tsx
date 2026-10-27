@@ -20,6 +20,7 @@ import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import LocaleSwitcher from '@/components/LocalSwitcher';
 import { LogoutConfirmModal } from '@/components/auth/LogoutConfirmModal';
 import { clearStorage } from '@/lib/logout';
+import { clearAllPostDrafts } from '@/hooks/usePostDraft';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useUserStore } from '@/store/useUserStore';
 import { useImageFallback } from '@/components/ui/ImageWithFallback';
@@ -131,6 +132,8 @@ export function AccountMenuPanel() {
   // app still treats the browser as signed in.
   const logout = () => {
     clearStorage();
+    // Unfinished posts (and their photos) must not wait in this browser for the next person.
+    void clearAllPostDrafts();
     useAuthStore.getState().clearAuth();
     useUserStore.getState().clearUser();
     router.replace('/signin');

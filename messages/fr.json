@@ -254,12 +254,16 @@
     "title": "Créer une publication",
     "description": "Rédigez une publication et choisissez qui peut la voir.",
     "close": "Fermer",
-    "discardTitle": "Abandonner cette publication ?",
-    "discardBody": "Votre texte ainsi que les photos ou fichiers ajoutés seront supprimés.",
     "discardConfirm": "Abandonner",
     "keepEditing": "Continuer à modifier",
     "draftRestored": "Brouillon restauré — reprenez là où vous vous étiez arrêté.",
-    "discard": "Abandonner"
+    "discard": "Abandonner",
+    "saveDraft": "Enregistrer le brouillon",
+    "draftSaved": "Brouillon enregistré — reprenez-le à tout moment depuis la zone de publication.",
+    "leaveTitle": "Enregistrer cette publication comme brouillon ?",
+    "leaveBody": "Conservez-la sur cet appareil pour la terminer plus tard, ou supprimez-la avec les photos ou fichiers ajoutés.",
+    "trendingHashtags": "Hashtags tendance",
+    "hashtagSuggestions": "Suggestions de hashtags"
   },
   "createPost": {
     "placeholder": "Qu'avez-vous en tête, {name} ?",
@@ -5423,8 +5427,6 @@
       "title": "Votre fil"
     },
     "rail": {
-      "ctaTitle": "Vous faites partie de quelque chose de plus grand",
-      "ctaBody": "Rejoignez une communauté, accédez à des opportunités et avancez — ensemble.",
       "quickActions": "Actions rapides",
       "getDone": "Faire avancer un dossier",
       "getDoneHint": "Envoyer une demande à une communauté ou organisation",
@@ -5475,9 +5477,7 @@
     },
     "composer": {
       "prompt": "Partagez une actualité, posez une question ou lancez une discussion…",
-      "post": "Publication",
-      "photo": "Ajouter une photo",
-      "group": "Groupe"
+      "continueDraft": "Reprendre votre brouillon"
     },
     "tabs": {
       "label": "Fil",

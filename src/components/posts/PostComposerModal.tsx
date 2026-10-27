@@ -15,7 +15,7 @@ interface Props {
 
 /**
  * The create-post form in a dialog. Esc / backdrop / X close it; with text or media in it
- * the user is asked before the draft is thrown away. Phones get a full-height sheet.
+ * the user chooses to save it as a draft, discard it or keep editing. Phones get a full-height sheet.
  */
 export default function PostComposerModal({ open, onOpenChange, returnFocusTo }: Props) {
   const t = useTranslations('composer');
@@ -48,6 +48,17 @@ export default function PostComposerModal({ open, onOpenChange, returnFocusTo }:
     }
   };
 
+  // The form closes the dialog through onDraftSaved once the draft is stored.
+  const saveDraft = async () => {
+    setBusy(true);
+    try {
+      await formRef.current?.saveDraft();
+    } finally {
+      setBusy(false);
+      setConfirming(false);
+    }
+  };
+
   return (
     <DialogPrimitive.Root
       open={open}
@@ -60,6 +71,10 @@ export default function PostComposerModal({ open, onOpenChange, returnFocusTo }:
         <DialogPrimitive.Content
           data-testid="post-composer-modal"
           onOpenAutoFocus={(e) => e.preventDefault()}
+          // Radix sees Esc before the text box does: while a suggestion list is open, Esc only closes the list.
+          onEscapeKeyDown={(e) => {
+            if ((e.target as HTMLElement | null)?.getAttribute?.('aria-expanded') === 'true') e.preventDefault();
+          }}
           onCloseAutoFocus={(e) => {
             e.preventDefault();
             returnFocusTo?.current?.focus();
@@ -88,20 +103,24 @@ export default function PostComposerModal({ open, onOpenChange, returnFocusTo }:
               autoFocus
               onDirtyChange={setDirty}
               onPosted={() => onOpenChange(false)}
+              onDraftSaved={() => onOpenChange(false)}
             />
           </div>
 
           {confirming && (
             <div className="absolute inset-0 z-10 grid place-items-center bg-black/40 p-4" onKeyDown={(e) => { if (e.key === 'Escape') { e.stopPropagation(); setConfirming(false); } }}>
               <div role="alertdialog" aria-modal="true" aria-labelledby="composer-discard-title" aria-describedby="composer-discard-desc" className="w-full max-w-sm rounded-2xl border border-border-subtle bg-surface-default p-5 shadow-xl">
-                <h3 id="composer-discard-title" className="text-base font-bold text-text-primary">{t('discardTitle')}</h3>
-                <p id="composer-discard-desc" className="mt-1 text-sm text-text-secondary">{t('discardBody')}</p>
+                <h3 id="composer-discard-title" className="text-base font-bold text-text-primary">{t('leaveTitle')}</h3>
+                <p id="composer-discard-desc" className="mt-1 text-sm text-text-secondary">{t('leaveBody')}</p>
                 <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                   <button type="button" onClick={discard} disabled={busy} className="rounded-full border border-border-subtle px-4 py-2 text-sm font-semibold text-text-danger hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand disabled:opacity-60">
                     {t('discardConfirm')}
                   </button>
-                  <button ref={keepRef} type="button" autoFocus onClick={() => setConfirming(false)} className="rounded-full bg-surface-brand px-4 py-2 text-sm font-semibold text-white hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand focus-visible:ring-offset-2">
+                  <button ref={keepRef} type="button" autoFocus onClick={() => setConfirming(false)} className="rounded-full border border-border-subtle px-4 py-2 text-sm font-semibold text-text-primary hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand">
                     {t('keepEditing')}
+                  </button>
+                  <button type="button" onClick={saveDraft} disabled={busy} className="rounded-full bg-surface-brand px-4 py-2 text-sm font-semibold text-white hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand focus-visible:ring-offset-2 disabled:opacity-60">
+                    {t('saveDraft')}
                   </button>
                 </div>
               </div>

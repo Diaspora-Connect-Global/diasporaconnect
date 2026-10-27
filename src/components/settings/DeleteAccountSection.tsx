@@ -28,6 +28,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { useRouter } from "next/navigation";
 import { Trash2, AlertTriangle, Loader2, RotateCcw } from "lucide-react";
+import { clearAllPostDrafts } from "@/hooks/usePostDraft";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
@@ -118,6 +119,7 @@ export default function DeleteAccountSection() {
       // in" here would just 401 on their next action. Sign out and send them to
       // sign-in, where logging back in is the documented undo path.
       setTimeout(() => {
+        void clearAllPostDrafts();
         clearAuth();
         router.push("/signin");
       }, SIGN_OUT_DELAY_MS);

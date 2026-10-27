@@ -254,12 +254,16 @@
     "title": "Bericht maken",
     "description": "Schrijf een bericht en kies wie het kan zien.",
     "close": "Sluiten",
-    "discardTitle": "Dit bericht weggooien?",
-    "discardBody": "Je tekst en de toegevoegde foto's of bestanden gaan verloren.",
     "discardConfirm": "Weggooien",
     "keepEditing": "Verder bewerken",
     "draftRestored": "Concept hersteld — ga verder waar je gebleven was.",
-    "discard": "Weggooien"
+    "discard": "Weggooien",
+    "saveDraft": "Concept opslaan",
+    "draftSaved": "Concept opgeslagen — ga er altijd mee verder via het berichtvak.",
+    "leaveTitle": "Dit bericht opslaan als concept?",
+    "leaveBody": "Bewaar het op dit apparaat om later af te maken, of verwijder het samen met de toegevoegde foto's of bestanden.",
+    "trendingHashtags": "Populaire hashtags",
+    "hashtagSuggestions": "Hashtagsuggesties"
   },
   "createPost": {
     "placeholder": "Wat denkt u, {name}?",
@@ -5423,8 +5427,6 @@
       "title": "Je feed"
     },
     "rail": {
-      "ctaTitle": "Je maakt deel uit van iets groters",
-      "ctaBody": "Word lid van een community, vind kansen en regel dingen — samen.",
       "quickActions": "Snelle acties",
       "getDone": "Iets geregeld krijgen",
       "getDoneHint": "Stuur een aanvraag naar een community of organisatie",
@@ -5475,9 +5477,7 @@
     },
     "composer": {
       "prompt": "Deel een update, stel een vraag of start een discussie…",
-      "post": "Bericht",
-      "photo": "Foto toevoegen",
-      "group": "Groep"
+      "continueDraft": "Ga verder met je concept"
     },
     "tabs": {
       "label": "Feed",

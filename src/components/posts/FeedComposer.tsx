@@ -1,36 +1,36 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { Image as ImageIcon, SquarePen, Users } from 'lucide-react';
+import { FilePen } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useImageFallback } from '@/components/ui/ImageWithFallback';
 import { toCdnUrl } from '@/lib/cdn';
-
-const CreateGroupDialog = dynamic(
-  () => import('@/components/groups/CreateGroupDialog').then((m) => m.CreateGroupDialog),
-  { ssr: false },
-);
+import { hasPostDraft } from '@/hooks/usePostDraft';
+import { useUserStore } from '@/store/useUserStore';
 
 const PostComposerModal = dynamic(() => import('@/components/posts/PostComposerModal'), { ssr: false });
 
 /**
- * "Share an update…" box at the top of the Home and Community feeds. The box, Post and
- * Add photo open the create-post modal; Group opens the create-group dialog.
+ * "Share an update…" box at the top of the Home feed; it opens the create-post modal.
+ * (The Post / Add photo / Group buttons under it were removed on 2026-10-27 at the owner's
+ * request: the first two opened this same modal, and groups are created from Chat.)
  */
 export function FeedComposer({ avatarUrl }: { avatarUrl?: string | null }) {
   const t = useTranslations('communityPage.composer');
   const { src, onError } = useImageFallback(avatarUrl ? toCdnUrl(avatarUrl) : undefined, '/PROFILE.png');
-  const [groupOpen, setGroupOpen] = useState(false);
   const [postOpen, setPostOpen] = useState(false);
+  const userId = useUserStore((s) => s.user?.userId ?? null);
+  // Re-checked whenever the composer closes: a saved draft turns the prompt into "Continue your draft".
+  const [hasDraft, setHasDraft] = useState(false);
+  useEffect(() => {
+    if (!postOpen) setHasDraft(hasPostDraft(userId));
+  }, [postOpen, userId]);
   const openerRef = useRef<HTMLElement | null>(null);
   const openPost = (e: React.MouseEvent<HTMLElement>) => {
     openerRef.current = e.currentTarget;
     setPostOpen(true);
   };
-
-  const btn =
-    'inline-flex items-center justify-center gap-2 rounded-full border border-border-subtle px-4 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand';
 
   return (
     <>
@@ -48,29 +48,23 @@ export function FeedComposer({ avatarUrl }: { avatarUrl?: string | null }) {
           <button
             type="button"
             onClick={openPost}
-            className="min-w-0 flex-1 truncate rounded-full border border-border-subtle bg-surface-subtle px-4 py-2.5 text-left text-sm text-muted-foreground hover:border-border-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
+            className={`min-w-0 flex-1 truncate rounded-full border px-4 py-2.5 text-left text-sm hover:border-border-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand ${
+              hasDraft ? 'border-border-brand bg-surface-info font-medium text-text-brand' : 'border-border-subtle bg-surface-subtle text-muted-foreground'
+            }`}
           >
-            {t('prompt')}
-          </button>
-        </div>
-        <div className="mt-3 grid grid-cols-3 gap-2">
-          <button type="button" onClick={openPost} className={btn}>
-            <SquarePen className="size-4 text-text-brand" aria-hidden />
-            {t('post')}
-          </button>
-          <button type="button" onClick={openPost} className={btn}>
-            <ImageIcon className="size-4 text-text-brand" aria-hidden />
-            {t('photo')}
-          </button>
-          <button type="button" onClick={() => setGroupOpen(true)} className={btn}>
-            <Users className="size-4 text-text-brand" aria-hidden />
-            {t('group')}
+            {hasDraft ? (
+              <span className="inline-flex items-center gap-2">
+                <FilePen className="size-4 shrink-0" aria-hidden />
+                {t('continueDraft')}
+              </span>
+            ) : (
+              t('prompt')
+            )}
           </button>
         </div>
       </section>
 
       {postOpen && <PostComposerModal open={postOpen} onOpenChange={setPostOpen} returnFocusTo={openerRef} />}
-      {groupOpen && <CreateGroupDialog onClose={() => setGroupOpen(false)} />}
     </>
   );
 }

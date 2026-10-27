@@ -254,12 +254,16 @@
     "title": "Beitrag erstellen",
     "description": "Schreibe einen Beitrag und lege fest, wer ihn sehen kann.",
     "close": "Schließen",
-    "discardTitle": "Beitrag verwerfen?",
-    "discardBody": "Dein Text sowie hinzugefügte Fotos oder Dateien gehen verloren.",
     "discardConfirm": "Verwerfen",
     "keepEditing": "Weiter bearbeiten",
     "draftRestored": "Entwurf wiederhergestellt – mach dort weiter, wo du aufgehört hast.",
-    "discard": "Verwerfen"
+    "discard": "Verwerfen",
+    "saveDraft": "Entwurf speichern",
+    "draftSaved": "Entwurf gespeichert – du kannst ihn jederzeit über das Beitragsfeld fortsetzen.",
+    "leaveTitle": "Diesen Beitrag als Entwurf speichern?",
+    "leaveBody": "Behalte ihn auf diesem Gerät, um ihn später fertigzustellen, oder verwirf ihn samt den hinzugefügten Fotos oder Dateien.",
+    "trendingHashtags": "Angesagte Hashtags",
+    "hashtagSuggestions": "Hashtag-Vorschläge"
   },
   "createPost": {
     "placeholder": "Was bewegt Sie, {name}?",
@@ -5423,8 +5427,6 @@
       "title": "Dein Feed"
     },
     "rail": {
-      "ctaTitle": "Du bist Teil von etwas Größerem",
-      "ctaBody": "Tritt einer Community bei, finde Chancen und erledige Dinge — gemeinsam.",
       "quickActions": "Schnellaktionen",
       "getDone": "Etwas erledigen lassen",
       "getDoneHint": "Eine Anfrage an eine Community oder Organisation senden",
@@ -5475,9 +5477,7 @@
     },
     "composer": {
       "prompt": "Teile ein Update, stelle eine Frage oder starte eine Diskussion …",
-      "post": "Beitrag",
-      "photo": "Foto hinzufügen",
-      "group": "Gruppe"
+      "continueDraft": "Entwurf fortsetzen"
     },
     "tabs": {
       "label": "Feed",

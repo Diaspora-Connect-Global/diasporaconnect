@@ -5,6 +5,7 @@
 import { test, expect, type Browser, type Page } from '@playwright/test';
 import { openBrowser } from '../support/browser';
 import { open, post } from './fixtures';
+import { draftMetaKey, draftOwnerKey } from '../../src/lib/postDraftKeys';
 
 let browser: Browser;
 test.beforeAll(async () => {
@@ -35,6 +36,8 @@ test('Home shows the composer above the feed tabs, and it opens the modal', asyn
     const c = await composer.boundingBox();
     const t = await tabs.boundingBox();
     expect(c!.y + c!.height).toBeLessThanOrEqual(t!.y);
+    // Owner 2026-10-27: no Post / Add photo / Group buttons under the box — the box is the only control.
+    await expect(composer.getByRole('button')).toHaveCount(1);
     await expect(modal(page)).toHaveCount(0);
     await promptBox(page).click();
     await expect(modal(page)).toBeVisible();
@@ -90,6 +93,115 @@ test('Esc closes an empty modal and returns focus to the composer; a draft asks 
     await page.getByRole('alertdialog').getByRole('button', { name: 'Discard' }).click();
     await expect(modal(page)).toHaveCount(0);
     await expect(opener).toBeFocused();
+    await page.context().close();
+});
+
+test('Save draft keeps the post: the prompt offers "Continue your draft", reopening restores it, posting clears it', async () => {
+    const { page } = await open(browser, '/home', OK);
+    await promptBox(page).click({ timeout: 90_000 });
+    await modal(page).locator('textarea').fill(NEW_TEXT);
+    await page.keyboard.press('Escape');
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Save draft' }).click();
+    await expect(modal(page)).toHaveCount(0);
+    await expect(page.getByText(/Draft saved/)).toBeVisible();
+
+    const resume = page.getByTestId('feed-composer').getByRole('button', { name: 'Continue your draft' });
+    await expect(resume).toBeVisible();
+    await resume.click();
+    await expect(modal(page).locator('textarea')).toHaveValue(NEW_TEXT);
+    await expect(modal(page).getByText(/Draft restored/)).toBeVisible();
+
+    await modal(page).getByRole('button', { name: 'Post', exact: true }).click();
+    await expect(modal(page)).toHaveCount(0);
+    await expect(promptBox(page)).toBeVisible();
+    expect(await page.evaluate(() => Object.keys(localStorage).filter((k) => k.startsWith('cpd:')))).toEqual([]);
+    await page.context().close();
+});
+
+test("a draft belongs to the person who wrote it: someone else's draft in the same browser is never shown", async () => {
+    const { page } = await open(browser, '/home', OK);
+    await promptBox(page).click({ timeout: 90_000 });
+    await expect(modal(page).getByRole('button', { name: 'Save draft' })).toBeDisabled();
+    await modal(page).locator('textarea').fill('mine');
+    await modal(page).getByRole('button', { name: 'Save draft' }).click();
+    await expect(modal(page)).toHaveCount(0);
+    const [mine] = await page.evaluate(() => Object.keys(localStorage).filter((k) => k.startsWith('cpd:')));
+    expect(mine).toBeTruthy();
+    expect(mine).not.toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-/i); // the user id is never in the key
+
+    // Another account used this browser earlier and left a draft behind; the signed-in user discards their own.
+    const theirs = draftMetaKey(draftOwnerKey('00000000-0000-4000-8000-00000000beef'));
+    await page.evaluate((key) => {
+        localStorage.setItem(key, JSON.stringify({ text: 'not yours', visibility: 'PRIVATE', hasMedia: false, savedAt: Date.now() }));
+    }, theirs);
+    await page.getByTestId('feed-composer').getByRole('button', { name: 'Continue your draft' }).click();
+    await expect(modal(page).locator('textarea')).toHaveValue('mine');
+    await modal(page).getByRole('button', { name: 'Discard' }).click();
+    await page.keyboard.press('Escape');
+    await expect(modal(page)).toHaveCount(0);
+
+    await page.reload();
+    await promptBox(page).click({ timeout: 90_000 });
+    await expect(modal(page).locator('textarea')).toHaveValue('');
+    await expect(modal(page).getByText(/Draft restored/)).toHaveCount(0);
+    // Not shown — and not touched either: it is theirs to resume or discard.
+    expect(await page.evaluate((key) => localStorage.getItem(key), theirs)).toContain('not yours');
+    await page.context().close();
+});
+
+test('typing # suggests trending hashtags; arrows + Enter complete the tag', async () => {
+    const { page } = await open(browser, '/home', {
+        ...OK,
+        GetTrendingHashtags: {
+            trendingHashtags: [
+                { __typename: 'TrendingHashtag', id: 't1', tag: '#Ghana', usageCount: 40 },
+                { __typename: 'TrendingHashtag', id: 't2', tag: 'GhanaJobs', usageCount: 12 },
+                { __typename: 'TrendingHashtag', id: 't3', tag: 'Diaspora', usageCount: 30 },
+            ],
+        },
+    });
+    await promptBox(page).click({ timeout: 90_000 });
+    const box = modal(page).locator('textarea');
+    await box.pressSequentially('Hello #gha');
+    const list = page.getByRole('listbox', { name: 'Hashtag suggestions' });
+    await expect(list).toBeVisible();
+    await expect(list.getByRole('option')).toHaveText(['Ghana', 'GhanaJobs']);
+    await page.keyboard.press('ArrowDown');
+    await expect(list.getByRole('option', { name: 'GhanaJobs' })).toHaveAttribute('aria-selected', 'true');
+    await page.keyboard.press('Enter');
+    await expect(box).toHaveValue('Hello #GhanaJobs ');
+    await expect(list).toHaveCount(0);
+
+    // Esc closes the list without closing the composer; a tag nobody used yet is simply typed.
+    await box.pressSequentially('#dia');
+    await expect(list).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(list).toHaveCount(0);
+    await expect(modal(page)).toBeVisible();
+    await box.pressSequentially('sporaWeek');
+    await expect(box).toHaveValue('Hello #GhanaJobs #diasporaWeek');
+    await page.context().close();
+});
+
+test('@mentions still work next to hashtags: the list opens under the @ and picking a person inserts the tag', async () => {
+    const kofi = {
+        userId: '00000000-0000-4000-8000-000000000f10',
+        username: 'kofi', firstName: 'Kofi', lastName: 'Boateng', sector: null, countryOfOrigin: null, residenceCountry: null,
+        bio: null, headline: 'Engineer', connectionCount: 1, avatarUrl: null, connectionStatus: 'connected', connectionId: 'c-1',
+        trustScore: null, trustTier: null,
+    };
+    const { page } = await open(browser, '/home', {
+        ...OK,
+        SearchUsers: { searchUsers: { success: true, message: 'ok', total: 1, hasMore: false, profiles: [kofi] } },
+    });
+    await promptBox(page).click({ timeout: 90_000 });
+    const box = modal(page).locator('textarea');
+    await box.pressSequentially('Thanks @Kof');
+    const option = modal(page).getByRole('button', { name: /Kofi Boateng/ });
+    await expect(option).toBeVisible();
+    await option.click();
+    await expect(box).toHaveValue(/^Thanks @KofiBoateng​ $/);
+    await expect(page.getByRole('listbox', { name: 'Hashtag suggestions' })).toHaveCount(0);
     await page.context().close();
 });
 
