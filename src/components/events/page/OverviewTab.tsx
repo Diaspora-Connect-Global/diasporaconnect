@@ -1,9 +1,10 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { ArrowRight, CalendarDays, ExternalLink, Globe2, Mail, MapPin, Phone, ShieldCheck, Sparkles, Ticket } from 'lucide-react';
+import { ArrowRight, CalendarDays, ExternalLink, Globe2, Mail, MapPin, Phone, ShieldCheck, Sparkles, Ticket, Users } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { ImageWithFallback } from '@/components/ui/ImageWithFallback';
+import { ICON_CHIP_CLASS } from '@/components/more/MoreLinkCard';
 import { getEventLocationDisplay } from '@/services/gql/events';
 import type { EventPageEvent, EventSpeaker, EventVenueInfo, ProgrammeSession } from '@/services/gql/eventsM2';
 import { formatInZone, formatTimeInZone, timezoneLabel, zoneDiffersFromViewer } from '@/lib/eventCalendar';
@@ -57,7 +58,7 @@ export function OverviewTab({
     { key: 'price', icon: Ticket, label: t('price'), lines: [priceLabel] },
   ];
   if (event.capacity) {
-    tiles.push({ key: 'capacity', icon: Sparkles, label: t('capacity'), lines: [event.availableSpots != null ? t('spotsLeft', { count: event.availableSpots }) : String(event.capacity)] });
+    tiles.push({ key: 'capacity', icon: Users, label: t('capacity'), lines: [event.availableSpots != null ? t('spotsLeft', { count: event.availableSpots }) : String(event.capacity)] });
   }
   const sortedSpeakers = [...speakers].sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name));
   const sortedSessions = [...sessions].sort((a, b) => a.startAt.localeCompare(b.startAt) || a.sortOrder - b.sortOrder);
@@ -121,18 +122,23 @@ export function OverviewTab({
 
       <section aria-labelledby="ov-facts" className={CARD}>
         <h2 id="ov-facts" className="text-lg font-bold text-text-primary">{t('facts')}</h2>
-        <dl className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-4">
-          {tiles.map(({ key, icon: Icon, label, lines }) => (
-            <div key={key} data-testid={`fact-${key}`} className="flex items-start gap-3 rounded-xl border border-border-subtle p-3">
-              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-surface-info text-text-brand"><Icon className="size-5" strokeWidth={1.75} aria-hidden /></span>
-              <div className="min-w-0">
-                <dt className="text-xs font-semibold text-text-primary">{label}</dt>
-                {lines.filter(Boolean).map((l, i) => (
-                  <dd key={i} className="break-words text-xs text-text-secondary">{l}</dd>
-                ))}
+        {/* A plain icon list, not boxed tiles: the value is the prominent line and the label sits small above it. */}
+        <dl className="mt-4 grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
+          {tiles.map(({ key, icon: Icon, label, lines }) => {
+            const [main, ...rest] = lines.filter(Boolean);
+            return (
+              <div key={key} data-testid={`fact-${key}`} className="flex min-w-0 items-start gap-3">
+                <span className={`grid size-9 shrink-0 place-items-center rounded-full ${ICON_CHIP_CLASS}`}><Icon className="size-[18px]" strokeWidth={1.75} aria-hidden /></span>
+                <div className="min-w-0">
+                  <dt className="text-xs text-text-secondary">{label}</dt>
+                  <dd className="break-words text-sm font-medium text-text-primary">{main}</dd>
+                  {rest.map((l, i) => (
+                    <dd key={i} className="break-words text-sm text-text-secondary">{l}</dd>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </dl>
         {zone && (
           <p className="pt-3 text-xs text-text-secondary">
