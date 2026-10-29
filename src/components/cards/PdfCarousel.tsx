@@ -107,7 +107,8 @@ export default function PdfCarousel({
         const pdfjs = await loadPdfjs();
         const task = pdfjs.getDocument({ url: proxied(url) });
         const pdf = await task.promise;
-        if (cancelled) { pdf.destroy(); return; }
+        // pdfjs v6: a document is torn down through its loading task.
+        if (cancelled) { void pdf.loadingTask.destroy(); return; }
         pdfRef.current = pdf;
         setNumPages(pdf.numPages);
         setPage(1);
@@ -129,7 +130,7 @@ export default function PdfCarousel({
       tasks.forEach((t) => t.cancel());
       tasks.clear();
       rendered.clear();
-      pdfRef.current?.destroy();
+      void pdfRef.current?.loadingTask.destroy();
       pdfRef.current = null;
     };
   }, [shouldLoad, url]);
