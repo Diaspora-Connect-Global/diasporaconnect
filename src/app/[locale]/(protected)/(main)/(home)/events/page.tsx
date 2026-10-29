@@ -39,12 +39,13 @@ import { PageHero } from '@/components/redesign/PageHero';
 import { EmptyState } from '@/components/feedback';
 import { CATEGORY_PHOTOS } from '@/lib/redesignImages';
 import { DateTile, EventListingCard } from '@/components/events/redesign/EventListingCard';
+import { eventFormat } from '@/lib/eventFormat';
 
 type Filter = 'all' | 'free' | 'paid' | 'inPerson' | 'online';
 const FILTERS: Filter[] = ['all', 'free', 'paid', 'inPerson', 'online'];
 
 function matchesFilter(e: Event, f: Filter) {
-    const where = String(e.locationType ?? '').toLowerCase();
+    const where = eventFormat(e.locationType);
     switch (f) {
         case 'free': return !e.isPaid;
         case 'paid': return !!e.isPaid;

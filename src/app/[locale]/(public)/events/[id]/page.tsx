@@ -7,6 +7,7 @@ import { eventSchema, breadcrumbSchema } from '@/lib/seoSchemas';
 import EventDetailClient from './EventDetailClient';
 
 import { countryName } from '@/lib/countryName';
+import { eventFormat } from '@/lib/eventFormat';
 const EVENT_SEO_QUERY = `
   query EventSeo($id: ID!) {
     getEvent(id: $id) {
@@ -123,7 +124,7 @@ export default async function EventPublicPage({
       /* keep raw ISO */
     }
     const locationStr =
-      event.locationType === 'virtual'
+      eventFormat(event.locationType) === 'virtual'
         ? 'Online event'
         : [event.locationDetails?.venueName, event.locationDetails?.city, countryName(event.locationDetails?.country, locale)]
             .filter(Boolean)

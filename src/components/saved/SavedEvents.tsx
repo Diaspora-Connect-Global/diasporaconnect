@@ -11,6 +11,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { toCdnUrl } from '@/lib/cdn';
 import { CATEGORY_PHOTOS } from '@/lib/redesignImages';
 import { useImageFallback } from '@/components/ui/ImageWithFallback';
+import { eventFormat } from '@/lib/eventFormat';
 
 const SILENT = { context: { silentErrors: true } } as const;
 
@@ -24,7 +25,7 @@ function EventRow({ event }: { event: Event }) {
   const timeStr = start.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 
   const location =
-    event.locationType === 'virtual'
+    eventFormat(event.locationType) === 'virtual'
       ? t('virtual')
       : event.locationDetails?.city
         ? `${event.locationDetails.city}${event.locationDetails.country ? `, ${countryName(event.locationDetails.country)}` : ''}`

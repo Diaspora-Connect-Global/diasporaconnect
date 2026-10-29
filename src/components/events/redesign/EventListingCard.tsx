@@ -7,6 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { CATEGORY_PHOTOS } from '@/lib/redesignImages';
 import { formatMoney } from '@/types/money';
 import { getEventCoverImage, getEventLocationDisplay, isEventSoldOut, type Event } from '@/services/gql/events';
+import { eventFormat } from '@/lib/eventFormat';
 
 /** "Free", one ticket price, or "From <lowest>" when tickets differ. Prices are integer minor units. */
 export function useEventPrice() {
@@ -68,7 +69,7 @@ export function EventListingCard({
   const start = new Date(event.startAt);
   const when = Number.isNaN(start.getTime()) ? '' : format.dateTime(start, { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
   const place = event.locationDetails || event.locationType ? getEventLocationDisplay(event) : '';
-  const online = String(event.locationType ?? '').toLowerCase() === 'virtual';
+  const online = eventFormat(event.locationType) === 'virtual';
   const soldOut = isEventSoldOut(event);
   const going = event.registrationCount ?? 0;
   const restricted = event.visibility && String(event.visibility).toLowerCase() !== 'public';

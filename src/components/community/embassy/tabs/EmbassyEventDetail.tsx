@@ -76,6 +76,7 @@ import type { EmbassyViewProps } from '../types';
 import { useIsEmbassy } from '../communityVariant';
 
 import { countryName } from '@/lib/countryName';
+import { eventFormat } from '@/lib/eventFormat';
 // ─── Sub-tabs ─────────────────────────────────────────────────────────────────
 
 type SubTabKey = 'about' | 'agenda' | 'speakers' | 'venue' | 'attendees' | 'faqs';
@@ -514,7 +515,7 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
   // ── Derived display values (all real) ──────────────────────────────────────
 
   const badge = badgeParts(event.startAt);
-  const isVirtual = event.locationType === 'virtual' || event.locationDetails?.type === 'virtual';
+  const isVirtual = eventFormat(event.locationType) === 'virtual' || eventFormat(event.locationDetails?.type) === 'virtual';
   const loc = event.locationDetails;
   const addressText =
     [loc?.venueName, loc?.address, loc?.city, countryName(loc?.country)].filter(Boolean).join(', ') ||
