@@ -8,6 +8,7 @@
 import { BASE, SITE_NAME } from './seo';
 
 import { compensationMajor } from '@/lib/compensation';
+import { eventFormat } from '@/lib/eventFormat';
 /** Home → Section → {title} breadcrumb. `section` e.g. { name: 'Events', path: '/events' }. */
 export function breadcrumbSchema(
   locale: string,
@@ -57,7 +58,7 @@ export function eventSchema(e: EventForSchema, url: string) {
   const mode = ATTENDANCE_MODE[(e.locationType || 'physical').toLowerCase()];
 
   const location =
-    e.locationType === 'virtual'
+    eventFormat(e.locationType) === 'virtual'
       ? { '@type': 'VirtualLocation', url: loc?.virtualLink || url }
       : {
           '@type': 'Place',

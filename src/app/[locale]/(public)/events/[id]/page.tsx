@@ -4,6 +4,7 @@ import { BASE, SITE_NAME, buildAlternates, publicRobots, privateRobots, ogImages
 import { seoGraphQL, truncate, plainText } from '@/lib/seoFetch';
 import { eventSchema, breadcrumbSchema } from '@/lib/seoSchemas';
 import EventDetailClient from './EventDetailClient';
+import { eventFormat } from '@/lib/eventFormat';
 
 const EVENT_SEO_QUERY = `
   query EventSeo($id: ID!) {
@@ -121,7 +122,7 @@ export default async function EventPublicPage({
       /* keep raw ISO */
     }
     const locationStr =
-      event.locationType === 'virtual'
+      eventFormat(event.locationType) === 'virtual'
         ? 'Online event'
         : [event.locationDetails?.venueName, event.locationDetails?.city, event.locationDetails?.country]
             .filter(Boolean)

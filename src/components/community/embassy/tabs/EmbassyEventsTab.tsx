@@ -33,6 +33,7 @@ import type { EmbassyViewProps } from '../types';
 import { getEmbassyProfile } from '../embassyData';
 import { EmbassyEventDetail } from './EmbassyEventDetail';
 import { EmbassyEventsCalendar } from './EmbassyEventsCalendar';
+import { eventFormat } from '@/lib/eventFormat';
 import { useOwnerKind } from '../communityVariant';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
@@ -112,14 +113,14 @@ function formatDateTimeRange(startIso: string, endIso?: string | null): string {
 function locationDisplay(evt: OwnerEvent): string {
   const loc = evt.locationDetails;
   if (loc) {
-    if (loc.type === 'virtual' || evt.locationType === 'virtual') {
+    if (eventFormat(loc.type) === 'virtual' || eventFormat(evt.locationType) === 'virtual') {
       return loc.platform || loc.virtualLink || 'Online';
     }
     const parts = [loc.venueName, loc.city, loc.country].filter(Boolean);
     if (parts.length) return parts.join(', ');
   }
-  if (evt.locationType === 'virtual') return 'Online';
-  if (evt.locationType === 'hybrid') return 'Hybrid';
+  if (eventFormat(evt.locationType) === 'virtual') return 'Online';
+  if (eventFormat(evt.locationType) === 'hybrid') return 'Hybrid';
   return 'Location to be announced';
 }
 
@@ -129,7 +130,7 @@ interface Badge {
   fg: string;
 }
 function statusBadge(evt: OwnerEvent): Badge {
-  const isVirtual = evt.locationType === 'virtual' || evt.locationDetails?.type === 'virtual';
+  const isVirtual = eventFormat(evt.locationType) === 'virtual' || eventFormat(evt.locationDetails?.type) === 'virtual';
   if (isVirtual) {
     return { label: 'Online', ring: 'bg-green-50', fg: 'text-green-600' };
   }

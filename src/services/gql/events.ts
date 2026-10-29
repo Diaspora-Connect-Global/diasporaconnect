@@ -1,5 +1,6 @@
 import { gql } from '@apollo/client';
 import { toCdnUrl } from '@/lib/cdn';
+import { eventFormat } from '@/lib/eventFormat';
 
 export interface EventLocation {
   type: 'physical' | 'virtual' | 'hybrid';
@@ -868,14 +869,16 @@ export enum RegistrationStatus {
 export function getEventLocationDisplay(event: Pick<Event, 'locationType' | 'locationDetails'>): string {
   const loc = event.locationDetails;
   if (!loc) {
-    if (event.locationType === 'physical') return 'Physical';
-    if (event.locationType === 'virtual') return 'Virtual';
+    const fmt = eventFormat(event.locationType);
+    if (fmt === 'physical') return 'Physical';
+    if (fmt === 'virtual') return 'Virtual';
     return 'Hybrid';
   }
-  if (loc.type === 'physical') {
+  const locFmt = eventFormat(loc.type);
+  if (locFmt === 'physical') {
     return [loc.venueName, loc.city, loc.country].filter(Boolean).join(', ') || 'Physical';
   }
-  if (loc.type === 'virtual') {
+  if (locFmt === 'virtual') {
     return loc.platform || loc.virtualLink || 'Virtual';
   }
   return 'Hybrid';
@@ -890,8 +893,9 @@ export function getEventVenueLines(
   event: Pick<Event, 'locationType' | 'locationDetails'>,
 ): { venueName?: string; addressLines: string[]; virtualLink?: string; platform?: string } {
   const loc = event.locationDetails;
-  const isPhysical = event.locationType === 'physical' || event.locationType === 'hybrid';
-  const isVirtual = event.locationType === 'virtual' || event.locationType === 'hybrid';
+  const fmt = eventFormat(event.locationType);
+  const isPhysical = fmt === 'physical' || fmt === 'hybrid';
+  const isVirtual = fmt === 'virtual' || fmt === 'hybrid';
 
   const addressLines: string[] = [];
   if (loc && isPhysical) {

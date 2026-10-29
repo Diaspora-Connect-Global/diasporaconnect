@@ -73,6 +73,7 @@ import {
 } from '@/services/gql/events';
 import type { EmbassyProfile } from '../embassyData';
 import type { EmbassyViewProps } from '../types';
+import { eventFormat } from '@/lib/eventFormat';
 import { useIsEmbassy } from '../communityVariant';
 
 // ─── Sub-tabs ─────────────────────────────────────────────────────────────────
@@ -513,7 +514,7 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
   // ── Derived display values (all real) ──────────────────────────────────────
 
   const badge = badgeParts(event.startAt);
-  const isVirtual = event.locationType === 'virtual' || event.locationDetails?.type === 'virtual';
+  const isVirtual = eventFormat(event.locationType) === 'virtual' || eventFormat(event.locationDetails?.type) === 'virtual';
   const loc = event.locationDetails;
   const addressText =
     [loc?.venueName, loc?.address, loc?.city, loc?.country].filter(Boolean).join(', ') ||
