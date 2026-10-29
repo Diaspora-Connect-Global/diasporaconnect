@@ -22,6 +22,7 @@ import type {
 } from "@/services/gql/types/opportunities";
 import type { Application } from "@/services/gql/types/opportunities";
 import PageLoader from "@/components/custom/PageLoader";
+import { ForYouRail } from "@/components/discover/DiscoverSections";
 
 
 
@@ -732,6 +733,7 @@ export default function Opportunities() {
         <div className="lg:w-[50rem] h-app-inner  p-4 overflow-y-auto scrollbar-hide ">
             {/* 885px equivalent, 64px header height */}
             <div className="mx-auto mb-h-app-down">
+                <ForYouRail kinds={['opportunities']} className="mb-4" />
                 {/* Toggle Buttons */}
                 <div className="flex lg:h-[3.25rem] justify-start border-b-2 border-border-subtle w-fit mb-[0.5rem]">
                     {/* 52px height, 8px margin */}

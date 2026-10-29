@@ -28,6 +28,7 @@ import { MarketplaceHeader } from "./MarketplaceHeader";
 import { ProductCard } from "./ProductCard";
 import { ProductDetail } from "./ProductDetail";
 import { ServiceDetail } from "./ServiceDetail";
+import { ForYouRail } from "@/components/discover/DiscoverSections";
 import { ShoppingCartModal } from "./ShoppingCartModal";
 import { Checkout } from "./Checkout";
 import { OrderSuccess } from "./OrderSuccess";
@@ -310,6 +311,7 @@ export default function MarketplaceContainer() {
 
           <div className="flex-1 overflow-y-auto scrollbar-hide py-6">
             <div className="max-w-7xl mx-auto">
+              <ForYouRail kinds={[activeTab === "products" ? "products" : "services"]} className="mb-6" />
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold">

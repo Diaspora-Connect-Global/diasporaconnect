@@ -40,6 +40,7 @@ import { EmptyState } from '@/components/feedback';
 import { CATEGORY_PHOTOS } from '@/lib/redesignImages';
 import { DateTile, EventListingCard } from '@/components/events/redesign/EventListingCard';
 import { eventFormat } from '@/lib/eventFormat';
+import { ForYouRail } from '@/components/discover/DiscoverSections';
 
 type Filter = 'all' | 'free' | 'paid' | 'inPerson' | 'online';
 const FILTERS: Filter[] = ['all', 'free', 'paid', 'inPerson', 'online'];
@@ -415,6 +416,8 @@ export default function Events() {
                         )}
                     </div>
                 </PageHero>
+
+                <ForYouRail kinds={['events']} />
 
                 <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
                     {/* Your events: first on phones, the right rail on desktop. */}

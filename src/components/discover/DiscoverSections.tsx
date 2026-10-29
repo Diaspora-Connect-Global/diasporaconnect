@@ -151,12 +151,16 @@ const SILENT = { context: { silentErrors: true } } as const;
  * busy kind cannot fill the row. Each card shows why it was picked. A failed
  * or empty query just contributes nothing (the row hides when all are empty).
  */
-export function useForYou(perKind: number, enabled: boolean): MixEntry[] {
-  const skip = !enabled;
-  const events = useQuery<RecommendedEventsData>(RECOMMENDED_EVENTS, { variables: { limit: perKind }, fetchPolicy: 'cache-first', skip, ...SILENT });
-  const opps = useQuery<RecommendedOpportunitiesData>(RECOMMENDED_OPPORTUNITIES, { variables: { limit: perKind }, fetchPolicy: 'cache-first', skip, ...SILENT });
-  const services = useQuery<RecommendedServicesData>(RECOMMENDED_SERVICES, { variables: { limit: perKind }, fetchPolicy: 'cache-first', skip, ...SILENT });
-  const products = useQuery<RecommendedProductsData>(RECOMMENDED_PRODUCTS, { variables: { limit: perKind }, fetchPolicy: 'cache-first', skip, ...SILENT });
+export type ForYouKind = 'events' | 'opportunities' | 'services' | 'products';
+const ALL_KINDS: readonly ForYouKind[] = ['events', 'opportunities', 'services', 'products'];
+
+export function useForYou(perKind: number, enabled: boolean, kinds: readonly ForYouKind[] = ALL_KINDS): MixEntry[] {
+  // A kind that is not asked for is skipped, so a page-level rail sends only its own query.
+  const skipFor = (k: ForYouKind) => !enabled || !kinds.includes(k);
+  const events = useQuery<RecommendedEventsData>(RECOMMENDED_EVENTS, { variables: { limit: perKind }, fetchPolicy: 'cache-first', skip: skipFor('events'), ...SILENT });
+  const opps = useQuery<RecommendedOpportunitiesData>(RECOMMENDED_OPPORTUNITIES, { variables: { limit: perKind }, fetchPolicy: 'cache-first', skip: skipFor('opportunities'), ...SILENT });
+  const services = useQuery<RecommendedServicesData>(RECOMMENDED_SERVICES, { variables: { limit: perKind }, fetchPolicy: 'cache-first', skip: skipFor('services'), ...SILENT });
+  const products = useQuery<RecommendedProductsData>(RECOMMENDED_PRODUCTS, { variables: { limit: perKind }, fetchPolicy: 'cache-first', skip: skipFor('products'), ...SILENT });
   return useMemo(() => {
     if (!enabled) return [];
     const withReasons = (node: ReactNode, reasons?: string[] | null) => (
@@ -193,6 +197,24 @@ export function ForYouSection({ entries }: { entries: MixEntry[] }) {
     <Frame k="forYou" count={entries.length} expanded={false}>
       <Grid overview>{entries.map((e) => e.node)}</Grid>
     </Frame>
+  );
+}
+
+const RAIL_SHOWN = 4;
+
+/**
+ * A "For you" rail for a listing page: only the given kinds are fetched
+ * (small limit, cache-first, errors silent). Renders nothing while loading,
+ * on error, or when there is nothing to recommend.
+ */
+export function ForYouRail({ kinds, className }: { kinds: readonly ForYouKind[]; className?: string }) {
+  const entries = useForYou(RAIL_SHOWN, true, kinds);
+  const shown = useMemo(() => entries.slice(0, RAIL_SHOWN), [entries]);
+  if (shown.length === 0) return null;
+  return (
+    <div data-testid="for-you-rail" className={className}>
+      <ForYouSection entries={shown} />
+    </div>
   );
 }
 

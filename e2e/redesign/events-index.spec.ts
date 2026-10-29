@@ -76,3 +76,22 @@ test('phone: your events first, no horizontal scroll', async () => {
     expect(overflow).toBeLessThanOrEqual(0);
     await page.context().close();
 });
+
+test('server-cased format: a HYBRID event matches Online; the For you rail shows picks with their reason', async () => {
+    const hybrid = event('evt-hyb', 'Hybrid Town Hall', LATER, { locationType: 'HYBRID', locationDetails: { __typename: 'EventLocationGQL', type: 'HYBRID', venueName: 'Hall', address: null, city: 'Accra', country: 'Ghana', virtualLink: null, platform: null } });
+    const pick = event('evt-rec', 'Recommended Meetup', LATER);
+    const data = {
+        ...DATA,
+        ListEvents: { listEvents: { __typename: 'EventList', total: 1, hasMore: false, events: [hybrid] } },
+        RecommendedEvents: { recommendedEvents: [{ __typename: 'RecommendedEventGQL', reasons: ['NEAR_YOU'], event: pick }] },
+    };
+    const { page } = await open(browser, '/events', data as never);
+    const rail = page.getByTestId('for-you-rail');
+    await expect(rail.getByRole('heading', { name: 'For you' })).toBeVisible({ timeout: 90_000 });
+    await expect(rail).toContainText('Recommended Meetup');
+    expect(await page.locator('body').innerText()).not.toMatch(UUID);
+    const grid = page.getByTestId('upcoming-events');
+    await grid.getByRole('button', { name: 'Online' }).click();
+    await expect(grid.getByTestId('event-card')).toHaveCount(1);
+    await page.context().close();
+});
