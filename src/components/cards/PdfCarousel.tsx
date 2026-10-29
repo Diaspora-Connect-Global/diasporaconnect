@@ -105,7 +105,7 @@ export default function PdfCarousel({
     (async () => {
       try {
         const pdfjs = await loadPdfjs();
-        const task = pdfjs.getDocument(proxied(url));
+        const task = pdfjs.getDocument({ url: proxied(url) });
         const pdf = await task.promise;
         if (cancelled) { pdf.destroy(); return; }
         pdfRef.current = pdf;
