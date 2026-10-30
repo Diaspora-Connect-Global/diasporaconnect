@@ -5,9 +5,9 @@ import { BASE, SITE_NAME, buildAlternates, publicRobots, privateRobots, ogImages
 import { seoGraphQL, truncate, plainText } from '@/lib/seoFetch';
 import { eventSchema, breadcrumbSchema } from '@/lib/seoSchemas';
 import EventDetailClient from './EventDetailClient';
+import { eventFormat } from '@/lib/eventFormat';
 
 import { countryName } from '@/lib/countryName';
-import { eventFormat } from '@/lib/eventFormat';
 const EVENT_SEO_QUERY = `
   query EventSeo($id: ID!) {
     getEvent(id: $id) {

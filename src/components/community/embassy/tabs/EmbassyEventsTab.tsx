@@ -33,10 +33,10 @@ import type { EmbassyViewProps } from '../types';
 import { getEmbassyProfile } from '../embassyData';
 import { EmbassyEventDetail } from './EmbassyEventDetail';
 import { EmbassyEventsCalendar } from './EmbassyEventsCalendar';
+import { eventFormat } from '@/lib/eventFormat';
 import { useOwnerKind } from '../communityVariant';
 
 import { countryName } from '@/lib/countryName';
-import { eventFormat } from '@/lib/eventFormat';
 // ─── Types ─────────────────────────────────────────────────────────────────
 
 interface OwnerEvent {

@@ -73,10 +73,10 @@ import {
 } from '@/services/gql/events';
 import type { EmbassyProfile } from '../embassyData';
 import type { EmbassyViewProps } from '../types';
+import { eventFormat } from '@/lib/eventFormat';
 import { useIsEmbassy } from '../communityVariant';
 
 import { countryName } from '@/lib/countryName';
-import { eventFormat } from '@/lib/eventFormat';
 // ─── Sub-tabs ─────────────────────────────────────────────────────────────────
 
 type SubTabKey = 'about' | 'agenda' | 'speakers' | 'venue' | 'attendees' | 'faqs';
