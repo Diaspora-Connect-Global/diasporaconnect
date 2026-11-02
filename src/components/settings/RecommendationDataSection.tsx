@@ -32,19 +32,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ERASE_MY_ACCOUNT_DATA } from "@/services/gql/postsFeed";
-import type {
-  EraseMyAccountDataData,
-  EraseUserDataRowCounts,
-} from "@/services/gql/types/recommendation";
+import type { EraseMyAccountDataData } from "@/services/gql/types/recommendation";
 
-/** Tables the mutation wipes, in plain English. */
-const ERASE_BULLET_KEYS: Array<keyof EraseUserDataRowCounts> = [
+/** Tables the mutation wipes, in plain English (keys under `settings.recommendationData.bullets`). */
+const ERASE_BULLET_KEYS = [
   "interest_profile",
   "interaction_log",
   "feed_impression",
   "user_block",
   "user_membership",
-];
+] as const;
 
 export default function RecommendationDataSection() {
   const t = useTranslations("settings.recommendationData");
