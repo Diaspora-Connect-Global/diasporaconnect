@@ -79,6 +79,7 @@ export function EmbassyFeedList({
             createdAt={post.createdAt}
             category={community.name}
             aiCategory={post.categories?.[0]}
+            linkedOpportunity={post.linkedOpportunity}
             postDate={formatDateProximity(post.createdAt)}
             visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}
             content={post.text}

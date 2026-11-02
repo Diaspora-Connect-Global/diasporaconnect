@@ -176,6 +176,7 @@ export function normalizeFeedPost(p: FeedPostFragment): Post {
     engagementCounts,
     userEngagement,
     categories: p.categories ?? undefined,
+    linkedOpportunity: p.linkedOpportunity ?? null,
     aiTopics: p.aiTopics ?? undefined,
     blurByUrl,
     dimsByUrl,

@@ -55,6 +55,8 @@ import { toast } from 'sonner';
 import { VideoPlayer } from '@/components/custom/VideoPlayer';
 import FileAttachmentCard from '@/components/cards/FileAttachmentCard';
 import { LinkPreviewCard } from '@/components/chats/LinkPreviewCard';
+import PostOpportunityCard from '@/components/cards/PostOpportunityCard';
+import type { LinkedOpportunity } from '@/services/gql/types/postsFeed';
 import { getFirstUrlInText } from '@/lib/urlPreview';
 import { truncateAtWord } from '@/lib/truncateText';
 import ImageGrid from '@/components/cards/media/ImageGrid';
@@ -108,6 +110,8 @@ interface FeedCardProps {
      * legacy author-type meta text rendered next to the date.
      */
     aiCategory?: string;
+    /** Listing attached to this post (job / opportunity card under the content). */
+    linkedOpportunity?: LinkedOpportunity | null;
     postDate: string;
     createdAt?: string;
     visibility?: 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE';
@@ -268,6 +272,7 @@ function FeedCard2Inner({
     profileTier,
     category,
     aiCategory,
+    linkedOpportunity,
     postDate,
     createdAt,
     visibility,
@@ -1690,6 +1695,8 @@ function FeedCard2Inner({
                         <LinkPreviewCard url={previewUrl} variant="feed" />
                     </div>
                 )}
+
+                {linkedOpportunity && <PostOpportunityCard opportunity={linkedOpportunity} />}
 
                 {/* Grouped reaction control + every interaction count in one row.
                     Always rendered (unlike the shared card's bar, which hid at

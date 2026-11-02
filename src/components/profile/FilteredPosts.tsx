@@ -471,6 +471,7 @@ export default function FilteredPosts({ userId, isOwnProfile }: FilteredPostsPro
                 authorEntityType={post.authorType}
                 category={profileData.type}
                 aiCategory={post.categories?.[0]}
+                linkedOpportunity={post.linkedOpportunity}
                 postDate={formatDateProximity(post.createdAt)}
                 createdAt={post.createdAt}
                 visibility={post.visibility as 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE'}

@@ -398,6 +398,7 @@ export default function PostPage() {
           profileTier={profileData.tier}
           category={profileData.type}
           aiCategory={normalizedPostResolved.categories?.[0]}
+          linkedOpportunity={normalizedPostResolved.linkedOpportunity}
           postDate={formatDateProximity(normalizedPostResolved.createdAt)}
           createdAt={normalizedPostResolved.createdAt}
           onDelete={() => router.push('/home')}

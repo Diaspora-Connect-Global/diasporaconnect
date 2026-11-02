@@ -49,6 +49,7 @@ function FeedPostCardInner({ post, index: _index, surface, handleReact, handleSh
       <FeedCardWithReply
         postId={post.id}
         aiCategory={post.categories?.[0]}
+        linkedOpportunity={post.linkedOpportunity}
         profileImage={profileData.avatar}
         profileName={profileData.name}
         authorUserId={post.authorType?.toUpperCase() === 'USER' ? post.authorId : undefined}

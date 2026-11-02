@@ -1,4 +1,4 @@
-import type { Attachment } from '@/services/gql/types/postsFeed';
+import type { Attachment, LinkedOpportunity } from '@/services/gql/types/postsFeed';
 import type { MentionInputItem } from '@/components/custom/richTextRenderer';
 import type { ReactionKind } from '@/components/reactions/reactionAdapter';
 import type { CommunityVariant, OwnerKind } from './communityVariant';
@@ -47,6 +47,7 @@ export interface EmbassyFeedPost {
     myReaction?: ReactionKind | null;
   };
   categories?: string[];
+  linkedOpportunity?: LinkedOpportunity | null;
   attachments?: Attachment[];
 }
 

@@ -34,6 +34,8 @@ import { toast } from 'sonner';
 import { VideoPlayer } from '@/components/custom/VideoPlayer';
 import FileAttachmentCard from '@/components/cards/FileAttachmentCard';
 import { LinkPreviewCard } from '@/components/chats/LinkPreviewCard';
+import PostOpportunityCard from '@/components/cards/PostOpportunityCard';
+import type { LinkedOpportunity } from '@/services/gql/types/postsFeed';
 import { getFirstUrlInText } from '@/lib/urlPreview';
 import { truncateAtWord } from '@/lib/truncateText';
 import ImageGrid from '@/components/cards/media/ImageGrid';
@@ -87,6 +89,8 @@ interface FeedCardProps {
      * legacy author-type meta text rendered next to the date.
      */
     aiCategory?: string;
+    /** Listing attached to this post (job / opportunity card under the content). */
+    linkedOpportunity?: LinkedOpportunity | null;
     postDate: string;
     createdAt?: string;
     visibility?: 'PUBLIC' | 'CONNECTIONS' | 'PRIVATE';
@@ -265,6 +269,7 @@ function FeedCardWithReplyInner({
     profileTier,
     category,
     aiCategory,
+    linkedOpportunity,
     postDate,
     createdAt,
     visibility,
@@ -1740,6 +1745,8 @@ function FeedCardWithReplyInner({
                         <LinkPreviewCard url={previewUrl} variant="feed" />
                     </div>
                 )}
+
+                {linkedOpportunity && <PostOpportunityCard opportunity={linkedOpportunity} />}
 
                 {/* ── THE COUNT ROW ───────────────────────────────────────
                      The COUNT SURVIVES in both modes; only its shape changes.

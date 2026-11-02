@@ -1570,6 +1570,7 @@ export default function HomeFeed2() {
                       <FeedCard2
                         postId={post.id}
                         aiCategory={post.categories?.[0]}
+                        linkedOpportunity={post.linkedOpportunity}
                         profileImage={profileData.avatar}
                         profileName={profileData.name}
                         authorUserId={post.authorType?.toUpperCase() === 'USER' ? post.authorId : undefined}
