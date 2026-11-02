@@ -60,6 +60,33 @@ test('posting sends the typed text, closes the modal and puts the post at the to
     await page.context().close();
 });
 
+// 1×1 transparent PNG.
+const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
+
+test('one attach button takes photos, videos and files, and sorts each file by its type', async () => {
+    const { page } = await open(browser, '/home', OK);
+    await promptBox(page).click({ timeout: 90_000 });
+    // Owner 2026-11-02: one paperclip instead of separate Photo / Video / File buttons.
+    const attach = modal(page).getByTestId('add-attachment-button');
+    await expect(attach).toBeVisible();
+    await expect(attach).toHaveAccessibleName('Add Attachment');
+    await expect(modal(page).getByRole('button', { name: /^Add (Photo|Video|File)$/ })).toHaveCount(0);
+
+    const chooserOpened = page.waitForEvent('filechooser');
+    await attach.click();
+    const chooser = await chooserOpened;
+    expect(chooser.isMultiple()).toBe(true);
+    await chooser.setFiles([
+        { name: 'flyer.png', mimeType: 'image/png', buffer: PNG },
+        { name: 'clip.mp4', mimeType: 'video/mp4', buffer: Buffer.from('not really a video') },
+        { name: 'brief.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4\n%%EOF') },
+    ]);
+    await expect(modal(page).getByRole('img', { name: 'flyer.png' })).toBeVisible();
+    await expect(modal(page).locator('video')).toHaveCount(1);
+    await expect(modal(page)).toContainText('brief.pdf');
+    await page.context().close();
+});
+
 test('a refused post keeps the modal open with an error and reports no success', async () => {
     const { page } = await open(browser, '/home', { CreatePost: { __errors: [{ message: 'Not allowed', code: 'BAD_USER_INPUT' }] } });
     await promptBox(page).click({ timeout: 90_000 });

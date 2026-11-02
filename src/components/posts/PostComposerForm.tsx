@@ -356,31 +356,22 @@ export function PostComposerForm({ variant = 'page', onPosted, onDraftSaved, onD
     toast.success(t('actions.locationAdded'));
   };
 
-  const handleAddAttachment = (type: AttachmentType) => {
+  /** One picker for photos, videos and documents; each file is typed by its MIME type. */
+  const handleAddAttachment = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.multiple = true;
-
-    switch (type) {
-      case 'Photo':
-        input.accept = 'image/*';
-        break;
-      case 'Video':
-        input.accept = 'video/*';
-        break;
-      case 'Document':
-        input.accept = '.pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx';
-        break;
-    }
+    input.accept = 'image/*,video/*,.pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx';
 
     input.onchange = (e) => {
       const files = (e.target as HTMLInputElement).files;
       if (!files || files.length === 0) return;
 
       Array.from(files).forEach(file => {
-        const preview = (file.type.startsWith('image/') || file.type.startsWith('video/'))
-          ? URL.createObjectURL(file)
-          : undefined;
+        const type: AttachmentType = file.type.startsWith('image/')
+          ? 'Photo'
+          : file.type.startsWith('video/') ? 'Video' : 'Document';
+        const preview = type === 'Document' ? undefined : URL.createObjectURL(file);
 
         const newAttachment: Attachment = {
           id: `${type}-${Date.now()}-${Math.random()}`,
@@ -1038,33 +1029,17 @@ export function PostComposerForm({ variant = 'page', onPosted, onDraftSaved, onD
                   )}
                 </div>
 
-                {/* Desktop - Separate Buttons */}
-                <div className="hidden md:flex items-center gap-2">
+                {/* Desktop - one button for photos, videos and files */}
+                <div className="hidden md:flex items-center">
                   <ButtonType3
-                    onClick={() => handleAddAttachment('Photo')}
+                    onClick={handleAddAttachment}
                     className="p-2 hover:bg-surface-brand/10 rounded-lg border-0 bg-transparent min-w-0"
-                    title={t('attachments.addPhoto')}
+                    title={t('attachments.addAttachment')}
+                    aria-label={t('attachments.addAttachment')}
+                    data-testid="add-attachment-button"
                   >
                     <div className="p-1.5 rounded-lg bg-surface-brand/10 group-hover:bg-surface-brand/20 transition-colors">
-                      <ImageIcon className="w-5 h-5 text-surface-brand" />
-                    </div>
-                  </ButtonType3>
-                  <ButtonType3
-                    onClick={() => handleAddAttachment('Video')}
-                    className="p-2 hover:bg-text-danger/10 rounded-lg border-0 bg-transparent min-w-0"
-                    title={t('attachments.addVideo')}
-                  >
-                    <div className="p-1.5 rounded-lg bg-text-danger/10 group-hover:bg-text-danger/20 transition-colors">
-                      <Video className="w-5 h-5 text-text-danger" />
-                    </div>
-                  </ButtonType3>
-                  <ButtonType3
-                    onClick={() => handleAddAttachment('Document')}
-                    className="p-2 hover:bg-[#cb3500]/10 rounded-lg border-0 bg-transparent min-w-0"
-                    title={t('attachments.addFile')}
-                  >
-                    <div className="p-1.5 rounded-lg bg-[#cb3500]/10 group-hover:bg-[#cb3500]/20 transition-colors">
-                      <FileText className="w-5 h-5 text-[#cb3500]" />
+                      <Paperclip className="w-5 h-5 text-surface-brand" aria-hidden />
                     </div>
                   </ButtonType3>
                 </div>
