@@ -321,6 +321,69 @@
     "proTips": {
       "title": "Pro Tips",
       "description": "Add images or videos to get more engagement. Use hashtags to reach a wider audience. Tag people to notify them."
+    },
+    "opportunity": {
+      "hint": {
+        "text": "Looks like you're sharing an opportunity. Add details so people can find it and apply.",
+        "add": "Add details",
+        "dismiss": "Not now"
+      },
+      "toolbarButton": "Add job or opportunity",
+      "chip": {
+        "label": "Job or opportunity attached",
+        "edit": "Edit job details",
+        "remove": "Remove job or opportunity"
+      },
+      "dialog": {
+        "title": "Opportunity details",
+        "description": "Tell people what this is and how to apply. It is published together with your post.",
+        "close": "Close",
+        "cancel": "Cancel",
+        "save": "Save details"
+      },
+      "fields": {
+        "type": "Type",
+        "title": "Title",
+        "location": "Location",
+        "deliveryMode": "Work mode",
+        "commitmentType": "Commitment",
+        "notSpecified": "Not specified",
+        "payLegend": "Pay (optional)",
+        "payMin": "From",
+        "payMax": "Up to",
+        "currency": "Currency",
+        "payHint": "Enter amounts as you would write them, for example 1500 or 1500.50.",
+        "deadline": "Application deadline (optional)",
+        "applyHow": "How to apply",
+        "externalLink": "Application link",
+        "applicationEmail": "Application email"
+      },
+      "deliveryModes": {
+        "REMOTE": "Remote",
+        "IN_PERSON": "In person",
+        "HYBRID": "Hybrid"
+      },
+      "apply": {
+        "IN_PLATFORM_FORM": "Apply on DiaspoPlug (in-platform form)",
+        "EXTERNAL_LINK": "Link to an external page",
+        "EMAIL_REQUEST": "By email"
+      },
+      "errors": {
+        "titleRequired": "Add a title.",
+        "titleTooLong": "The title is too long (200 characters at most).",
+        "payInvalid": "Enter a valid amount, such as 1500 or 1500.50.",
+        "payRange": "The minimum cannot be higher than the maximum.",
+        "deadlinePast": "The deadline cannot be in the past.",
+        "deadlineInvalid": "Enter a valid date.",
+        "linkInvalid": "Enter a link that starts with https:// or http://.",
+        "emailInvalid": "Enter a valid email address."
+      },
+      "toasts": {
+        "ownerMismatch": "That listing can't be linked to this post. Remove it and try again.",
+        "postFailed": "We couldn't publish your post with the listing. Nothing was posted, so you can try again.",
+        "rateLimited": "You're posting too quickly. Please wait a moment and try again.",
+        "selfApply": "You can't apply to your own listing."
+      }
     }
   },
   "wallet": {
@@ -663,7 +726,8 @@
         "withdrawing": "Withdrawing…",
         "withdrawApplication": "Withdraw application",
         "howToApply": "How to apply:",
-        "applyExternally": "Apply externally"
+        "applyExternally": "Apply externally",
+        "manageApplicants": "Manage applicants"
       },
       "toasts": {
         "withdrawSuccess": "Application withdrawn successfully",
@@ -4564,6 +4628,14 @@
       "post_deleted": "Post deleted successfully",
       "comment_updated": "Comment updated successfully",
       "comment_deleted": "Comment deleted successfully"
+    },
+    "opportunityCard": {
+      "open": "Open",
+      "closed": "Closed",
+      "viewAndApply": "View & apply",
+      "viewListing": "View listing",
+      "manage": "Manage",
+      "applicants": "{count, plural, one {# applicant} other {# applicants}}"
     }
   },
   "events": {
@@ -6889,7 +6961,8 @@
       "requests": "My requests",
       "wallet": "Wallet",
       "settings": "Settings & privacy",
-      "contact": "Contact us"
+      "contact": "Contact us",
+      "listings": "My listings"
     },
     "signOut": "Sign out",
     "confirm": {
@@ -7030,5 +7103,69 @@
     "TOP_RATED": "Top rated",
     "POPULAR": "Popular",
     "NEW": "New"
+  },
+  "opportunities": {
+    "mine": {
+      "title": "My listings",
+      "subtitle": "Jobs and opportunities you posted, and the people who applied.",
+      "filter": "Show",
+      "all": "All listings",
+      "status": {
+        "PUBLISHED": "Open",
+        "CLOSED": "Closed",
+        "DRAFT": "Draft",
+        "ARCHIVED": "Archived"
+      },
+      "loading": "Loading your listings…",
+      "loadFailed": "We couldn't load your listings.",
+      "retry": "Try again",
+      "emptyTitle": "No listings yet",
+      "emptyBody": "When you share a job or opportunity from the post composer, it shows up here.",
+      "deadline": "Deadline {date}",
+      "viewApplicants": "View applicants",
+      "close": "Close listing",
+      "closed": "The listing is closed.",
+      "closeFailed": "We couldn't close the listing. Please try again.",
+      "loadMore": "Show more",
+      "confirmTitle": "Close this listing?",
+      "confirmBody": "“{title}” will stop accepting applications. People who already applied are kept.",
+      "keepOpen": "Keep open",
+      "confirmClose": "Close listing",
+      "applicants": "{count, plural, one {# applicant} other {# applicants}}"
+    },
+    "applicants": {
+      "back": "My listings",
+      "title": "Applicants",
+      "listTitle": "{count} applications",
+      "unknownApplicant": "Applicant",
+      "loadFailed": "We couldn't load the applications.",
+      "retry": "Try again",
+      "loading": "Loading applications…",
+      "empty": "No applications yet.",
+      "loadMore": "Show more",
+      "status": {
+        "PENDING": "New",
+        "REVIEWING": "In review",
+        "ACCEPTED": "Accepted",
+        "REJECTED": "Rejected",
+        "WITHDRAWN": "Withdrawn"
+      },
+      "selectPrompt": "Select an application to read it.",
+      "appliedOn": "Applied on {date}",
+      "coverLetter": "Cover letter",
+      "answers": "Answers",
+      "files": "Documents",
+      "noFiles": "No documents attached.",
+      "opensInNewTab": "(opens in a new tab)",
+      "fileUnavailable": "link unavailable",
+      "yourNotes": "Your notes",
+      "notesLabel": "Notes for this decision (optional)",
+      "notesHint": "The applicant may see these notes.",
+      "accept": "Accept",
+      "reject": "Reject",
+      "accepted": "Application accepted.",
+      "rejected": "Application rejected.",
+      "decisionFailed": "We couldn't save your decision. Please try again."
+    }
   }
 }

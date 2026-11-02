@@ -61,6 +61,33 @@ export type {
 // QUERIES
 // ============================================================================
 
+/**
+ * Job card shown under a post that carries a listing (post -> opportunity link). Selected
+ * on EVERY post selection the feed / post / profile views use. Null when the post has no
+ * listing, or the listing is a draft / archived / deleted / members-only for this viewer.
+ * Compensation is integer MINOR units (display goes through compensationParts).
+ */
+export const LINKED_OPPORTUNITY_FIELDS = `
+  linkedOpportunity {
+    id
+    title
+    type
+    category
+    location
+    deliveryMode
+    commitmentType
+    compensationMin
+    compensationMax
+    compensationCurrency
+    deadline
+    status
+    ownerType
+    ownerId
+    applicationMethod
+    applicationCount
+  }
+`;
+
 export const FULL_POST_FRAGMENT = gql`
   fragment FullPost on Post {
     id
@@ -154,6 +181,7 @@ export const FULL_POST_FRAGMENT = gql`
     # that have not been classified yet (legacy + in-flight) — the badge
     # component hides itself in that case.
     categories
+    ${LINKED_OPPORTUNITY_FIELDS}
     aiTopics
     createdAt
     updatedAt
@@ -361,6 +389,22 @@ export const CREATE_POST = gql`
       id
       text
       authorType
+    }
+  }
+`;
+
+/**
+ * Publishes a post AND a real listing in one call (composer "job attached").
+ * `input.post` is exactly the CreatePostInput of CREATE_POST; `input.opportunity` is a
+ * CreateOpportunityInput with amounts already in integer MINOR units.
+ */
+export const CREATE_POST_WITH_OPPORTUNITY = gql`
+  mutation CreatePostWithOpportunity($input: CreatePostWithOpportunityInput!) {
+    createPostWithOpportunity(input: $input) {
+      id
+      text
+      authorType
+      linkedOpportunityId
     }
   }
 `;
@@ -578,6 +622,7 @@ export const GET_USER_POSTS = gql`
         myReaction
       }
       categories
+      ${LINKED_OPPORTUNITY_FIELDS}
       aiTopics
     }
   }
@@ -639,6 +684,7 @@ export const GET_SAVED_POSTS = gql`
           myReaction
         }
         categories
+        ${LINKED_OPPORTUNITY_FIELDS}
         aiTopics
       }
     }
@@ -701,6 +747,7 @@ export const GET_LIKED_POSTS = gql`
           myReaction
         }
         categories
+        ${LINKED_OPPORTUNITY_FIELDS}
         aiTopics
       }
     }
@@ -763,6 +810,7 @@ export const GET_COMMENTED_POSTS = gql`
           myReaction
         }
         categories
+        ${LINKED_OPPORTUNITY_FIELDS}
         aiTopics
       }
     }

@@ -321,6 +321,69 @@
     "proTips": {
       "title": "Conseils Pro",
       "description": "Ajoutez des images ou des vidéos pour plus d'engagement. Utilisez des hashtags pour toucher un public plus large. Identifiez des personnes pour les notifier."
+    },
+    "opportunity": {
+      "hint": {
+        "text": "On dirait que vous partagez une opportunité. Ajoutez des détails pour que l'on puisse la trouver et postuler.",
+        "add": "Ajouter des détails",
+        "dismiss": "Pas maintenant"
+      },
+      "toolbarButton": "Ajouter un emploi ou une opportunité",
+      "chip": {
+        "label": "Emploi ou opportunité joint(e)",
+        "edit": "Modifier les détails de l'offre",
+        "remove": "Retirer l'emploi ou l'opportunité"
+      },
+      "dialog": {
+        "title": "Détails de l'opportunité",
+        "description": "Dites de quoi il s'agit et comment postuler. Elle est publiée avec votre publication.",
+        "close": "Fermer",
+        "cancel": "Annuler",
+        "save": "Enregistrer les détails"
+      },
+      "fields": {
+        "type": "Type",
+        "title": "Titre",
+        "location": "Lieu",
+        "deliveryMode": "Mode de travail",
+        "commitmentType": "Engagement",
+        "notSpecified": "Non précisé",
+        "payLegend": "Rémunération (facultatif)",
+        "payMin": "De",
+        "payMax": "Jusqu'à",
+        "currency": "Devise",
+        "payHint": "Saisissez les montants comme vous les écririez, par exemple 1500 ou 1500,50.",
+        "deadline": "Date limite de candidature (facultatif)",
+        "applyHow": "Comment postuler",
+        "externalLink": "Lien de candidature",
+        "applicationEmail": "E-mail de candidature"
+      },
+      "deliveryModes": {
+        "REMOTE": "À distance",
+        "IN_PERSON": "Sur place",
+        "HYBRID": "Hybride"
+      },
+      "apply": {
+        "IN_PLATFORM_FORM": "Postuler sur DiaspoPlug (formulaire)",
+        "EXTERNAL_LINK": "Lien vers une page externe",
+        "EMAIL_REQUEST": "Par e-mail"
+      },
+      "errors": {
+        "titleRequired": "Ajoutez un titre.",
+        "titleTooLong": "Le titre est trop long (200 caractères maximum).",
+        "payInvalid": "Saisissez un montant valide, par exemple 1500 ou 1500,50.",
+        "payRange": "Le minimum ne peut pas dépasser le maximum.",
+        "deadlinePast": "La date limite ne peut pas être passée.",
+        "deadlineInvalid": "Saisissez une date valide.",
+        "linkInvalid": "Saisissez un lien commençant par https:// ou http://.",
+        "emailInvalid": "Saisissez une adresse e-mail valide."
+      },
+      "toasts": {
+        "ownerMismatch": "Cette offre ne peut pas être liée à cette publication. Retirez-la et réessayez.",
+        "postFailed": "Nous n'avons pas pu publier votre publication avec l'offre. Rien n'a été publié, vous pouvez réessayer.",
+        "rateLimited": "Vous publiez trop vite. Patientez un instant et réessayez.",
+        "selfApply": "Vous ne pouvez pas postuler à votre propre offre."
+      }
     }
   },
   "wallet": {
@@ -659,7 +722,8 @@
         "withdrawing": "Retrait en cours…",
         "withdrawApplication": "Retirer la candidature",
         "howToApply": "Comment postuler :",
-        "applyExternally": "Postuler en externe"
+        "applyExternally": "Postuler en externe",
+        "manageApplicants": "Gérer les candidatures"
       },
       "toasts": {
         "withdrawSuccess": "Candidature retirée avec succès",
@@ -4554,6 +4618,14 @@
       "post_deleted": "Publication supprimée avec succès",
       "comment_updated": "Commentaire mis à jour avec succès",
       "comment_deleted": "Commentaire supprimé avec succès"
+    },
+    "opportunityCard": {
+      "open": "Ouverte",
+      "closed": "Clôturée",
+      "viewAndApply": "Voir et postuler",
+      "viewListing": "Voir l'offre",
+      "manage": "Gérer",
+      "applicants": "{count, plural, one {# candidature} other {# candidatures}}"
     }
   },
   "requests": {
@@ -6889,7 +6961,8 @@
       "requests": "Mes demandes",
       "wallet": "Portefeuille",
       "settings": "Paramètres et confidentialité",
-      "contact": "Nous contacter"
+      "contact": "Nous contacter",
+      "listings": "Mes offres"
     },
     "signOut": "Se déconnecter",
     "confirm": {
@@ -7030,5 +7103,69 @@
     "TOP_RATED": "Très bien noté",
     "POPULAR": "Populaire",
     "NEW": "Nouveau"
+  },
+  "opportunities": {
+    "mine": {
+      "title": "Mes offres",
+      "subtitle": "Les emplois et opportunités que vous avez publiés, et les personnes qui ont postulé.",
+      "filter": "Afficher",
+      "all": "Toutes les offres",
+      "status": {
+        "PUBLISHED": "Ouverte",
+        "CLOSED": "Clôturée",
+        "DRAFT": "Brouillon",
+        "ARCHIVED": "Archivée"
+      },
+      "loading": "Chargement de vos offres…",
+      "loadFailed": "Impossible de charger vos offres.",
+      "retry": "Réessayer",
+      "emptyTitle": "Aucune offre pour l'instant",
+      "emptyBody": "Lorsque vous partagez un emploi ou une opportunité depuis l'éditeur de publication, il apparaît ici.",
+      "deadline": "Date limite {date}",
+      "viewApplicants": "Voir les candidatures",
+      "close": "Clôturer l'offre",
+      "closed": "L'offre est clôturée.",
+      "closeFailed": "Impossible de clôturer l'offre. Veuillez réessayer.",
+      "loadMore": "Afficher plus",
+      "confirmTitle": "Clôturer cette offre ?",
+      "confirmBody": "« {title} » n'acceptera plus de candidatures. Les candidatures déjà reçues sont conservées.",
+      "keepOpen": "Laisser ouverte",
+      "confirmClose": "Clôturer l'offre",
+      "applicants": "{count, plural, one {# candidature} other {# candidatures}}"
+    },
+    "applicants": {
+      "back": "Mes offres",
+      "title": "Candidatures",
+      "listTitle": "{count} candidatures",
+      "unknownApplicant": "Candidat(e)",
+      "loadFailed": "Impossible de charger les candidatures.",
+      "retry": "Réessayer",
+      "loading": "Chargement des candidatures…",
+      "empty": "Aucune candidature pour l'instant.",
+      "loadMore": "Afficher plus",
+      "status": {
+        "PENDING": "Nouvelle",
+        "REVIEWING": "En cours d'examen",
+        "ACCEPTED": "Acceptée",
+        "REJECTED": "Refusée",
+        "WITHDRAWN": "Retirée"
+      },
+      "selectPrompt": "Sélectionnez une candidature pour la lire.",
+      "appliedOn": "A postulé le {date}",
+      "coverLetter": "Lettre de motivation",
+      "answers": "Réponses",
+      "files": "Documents",
+      "noFiles": "Aucun document joint.",
+      "opensInNewTab": "(s'ouvre dans un nouvel onglet)",
+      "fileUnavailable": "lien indisponible",
+      "yourNotes": "Vos notes",
+      "notesLabel": "Notes pour cette décision (facultatif)",
+      "notesHint": "Le candidat peut voir ces notes.",
+      "accept": "Accepter",
+      "reject": "Refuser",
+      "accepted": "Candidature acceptée.",
+      "rejected": "Candidature refusée.",
+      "decisionFailed": "Impossible d'enregistrer votre décision. Veuillez réessayer."
+    }
   }
 }

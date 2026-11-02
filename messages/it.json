@@ -321,6 +321,69 @@
     "proTips": {
       "title": "Suggerimenti Pro",
       "description": "Aggiunga immagini o video per ottenere più coinvolgimento. Usi gli hashtag per raggiungere un pubblico più ampio. Tagghi le persone per notificarle."
+    },
+    "opportunity": {
+      "hint": {
+        "text": "Sembra che tu stia condividendo un'opportunità. Aggiungi i dettagli così che le persone possano trovarla e candidarsi.",
+        "add": "Aggiungi dettagli",
+        "dismiss": "Non ora"
+      },
+      "toolbarButton": "Aggiungi lavoro o opportunità",
+      "chip": {
+        "label": "Lavoro o opportunità allegati",
+        "edit": "Modifica i dettagli dell'offerta",
+        "remove": "Rimuovi lavoro o opportunità"
+      },
+      "dialog": {
+        "title": "Dettagli dell'opportunità",
+        "description": "Spiega di cosa si tratta e come candidarsi. Viene pubblicata insieme al tuo post.",
+        "close": "Chiudi",
+        "cancel": "Annulla",
+        "save": "Salva i dettagli"
+      },
+      "fields": {
+        "type": "Tipo",
+        "title": "Titolo",
+        "location": "Luogo",
+        "deliveryMode": "Modalità di lavoro",
+        "commitmentType": "Impegno",
+        "notSpecified": "Non specificato",
+        "payLegend": "Compenso (facoltativo)",
+        "payMin": "Da",
+        "payMax": "Fino a",
+        "currency": "Valuta",
+        "payHint": "Inserisci gli importi come li scriveresti, ad esempio 1500 o 1500,50.",
+        "deadline": "Scadenza per candidarsi (facoltativa)",
+        "applyHow": "Come candidarsi",
+        "externalLink": "Link per candidarsi",
+        "applicationEmail": "E-mail per le candidature"
+      },
+      "deliveryModes": {
+        "REMOTE": "Da remoto",
+        "IN_PERSON": "In presenza",
+        "HYBRID": "Ibrido"
+      },
+      "apply": {
+        "IN_PLATFORM_FORM": "Candidarsi su DiaspoPlug (modulo)",
+        "EXTERNAL_LINK": "Link a una pagina esterna",
+        "EMAIL_REQUEST": "Via e-mail"
+      },
+      "errors": {
+        "titleRequired": "Aggiungi un titolo.",
+        "titleTooLong": "Il titolo è troppo lungo (massimo 200 caratteri).",
+        "payInvalid": "Inserisci un importo valido, ad esempio 1500 o 1500,50.",
+        "payRange": "Il minimo non può superare il massimo.",
+        "deadlinePast": "La scadenza non può essere nel passato.",
+        "deadlineInvalid": "Inserisci una data valida.",
+        "linkInvalid": "Inserisci un link che inizi con https:// o http://.",
+        "emailInvalid": "Inserisci un indirizzo e-mail valido."
+      },
+      "toasts": {
+        "ownerMismatch": "Questa offerta non può essere collegata a questo post. Rimuovila e riprova.",
+        "postFailed": "Non siamo riusciti a pubblicare il post con l'offerta. Non è stato pubblicato nulla, puoi riprovare.",
+        "rateLimited": "Stai pubblicando troppo in fretta. Attendi un momento e riprova.",
+        "selfApply": "Non puoi candidarti alla tua stessa offerta."
+      }
     }
   },
   "wallet": {
@@ -659,7 +722,8 @@
         "withdrawing": "Ritiro in corso…",
         "withdrawApplication": "Ritira candidatura",
         "howToApply": "Come candidarsi:",
-        "applyExternally": "Candidati esternamente"
+        "applyExternally": "Candidati esternamente",
+        "manageApplicants": "Gestisci le candidature"
       },
       "toasts": {
         "withdrawSuccess": "Candidatura ritirata con successo",
@@ -4554,6 +4618,14 @@
       "post_deleted": "Post eliminato con successo",
       "comment_updated": "Commento aggiornato con successo",
       "comment_deleted": "Commento eliminato con successo"
+    },
+    "opportunityCard": {
+      "open": "Aperta",
+      "closed": "Chiusa",
+      "viewAndApply": "Vedi e candidati",
+      "viewListing": "Vedi l'offerta",
+      "manage": "Gestisci",
+      "applicants": "{count, plural, one {# candidatura} other {# candidature}}"
     }
   },
   "requests": {
@@ -6889,7 +6961,8 @@
       "requests": "Le mie richieste",
       "wallet": "Portafoglio",
       "settings": "Impostazioni e privacy",
-      "contact": "Contattaci"
+      "contact": "Contattaci",
+      "listings": "Le mie offerte"
     },
     "signOut": "Esci",
     "confirm": {
@@ -7030,5 +7103,69 @@
     "TOP_RATED": "Più votato",
     "POPULAR": "Popolare",
     "NEW": "Nuovo"
+  },
+  "opportunities": {
+    "mine": {
+      "title": "Le mie offerte",
+      "subtitle": "Lavori e opportunità che hai pubblicato e le persone che si sono candidate.",
+      "filter": "Mostra",
+      "all": "Tutte le offerte",
+      "status": {
+        "PUBLISHED": "Aperta",
+        "CLOSED": "Chiusa",
+        "DRAFT": "Bozza",
+        "ARCHIVED": "Archiviata"
+      },
+      "loading": "Caricamento delle tue offerte…",
+      "loadFailed": "Non siamo riusciti a caricare le tue offerte.",
+      "retry": "Riprova",
+      "emptyTitle": "Nessuna offerta per ora",
+      "emptyBody": "Quando condividi un lavoro o un'opportunità dall'editor dei post, compare qui.",
+      "deadline": "Scadenza {date}",
+      "viewApplicants": "Vedi le candidature",
+      "close": "Chiudi l'offerta",
+      "closed": "L'offerta è stata chiusa.",
+      "closeFailed": "Non siamo riusciti a chiudere l'offerta. Riprova.",
+      "loadMore": "Mostra altro",
+      "confirmTitle": "Chiudere questa offerta?",
+      "confirmBody": "«{title}» non accetterà più candidature. Quelle già ricevute vengono conservate.",
+      "keepOpen": "Lascia aperta",
+      "confirmClose": "Chiudi l'offerta",
+      "applicants": "{count, plural, one {# candidatura} other {# candidature}}"
+    },
+    "applicants": {
+      "back": "Le mie offerte",
+      "title": "Candidature",
+      "listTitle": "{count} candidature",
+      "unknownApplicant": "Candidato/a",
+      "loadFailed": "Non siamo riusciti a caricare le candidature.",
+      "retry": "Riprova",
+      "loading": "Caricamento delle candidature…",
+      "empty": "Nessuna candidatura per ora.",
+      "loadMore": "Mostra altro",
+      "status": {
+        "PENDING": "Nuova",
+        "REVIEWING": "In revisione",
+        "ACCEPTED": "Accettata",
+        "REJECTED": "Rifiutata",
+        "WITHDRAWN": "Ritirata"
+      },
+      "selectPrompt": "Seleziona una candidatura per leggerla.",
+      "appliedOn": "Candidatura del {date}",
+      "coverLetter": "Lettera di presentazione",
+      "answers": "Risposte",
+      "files": "Documenti",
+      "noFiles": "Nessun documento allegato.",
+      "opensInNewTab": "(si apre in una nuova scheda)",
+      "fileUnavailable": "link non disponibile",
+      "yourNotes": "Le tue note",
+      "notesLabel": "Note per questa decisione (facoltative)",
+      "notesHint": "Il candidato potrebbe vedere queste note.",
+      "accept": "Accetta",
+      "reject": "Rifiuta",
+      "accepted": "Candidatura accettata.",
+      "rejected": "Candidatura rifiutata.",
+      "decisionFailed": "Non siamo riusciti a salvare la tua decisione. Riprova."
+    }
   }
 }

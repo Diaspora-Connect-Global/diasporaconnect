@@ -321,6 +321,69 @@
     "proTips": {
       "title": "Profi-Tipps",
       "description": "Fügen Sie Bilder oder Videos hinzu, um mehr Engagement zu erzielen. Verwenden Sie Hashtags, um ein breiteres Publikum zu erreichen. Markieren Sie Personen, um sie zu benachrichtigen."
+    },
+    "opportunity": {
+      "hint": {
+        "text": "Das sieht nach einer Gelegenheit aus. Füge Details hinzu, damit Leute sie finden und sich bewerben können.",
+        "add": "Details hinzufügen",
+        "dismiss": "Jetzt nicht"
+      },
+      "toolbarButton": "Job oder Gelegenheit hinzufügen",
+      "chip": {
+        "label": "Job oder Gelegenheit angehängt",
+        "edit": "Job-Details bearbeiten",
+        "remove": "Job oder Gelegenheit entfernen"
+      },
+      "dialog": {
+        "title": "Details zur Gelegenheit",
+        "description": "Sag den Leuten, worum es geht und wie man sich bewirbt. Es wird zusammen mit deinem Beitrag veröffentlicht.",
+        "close": "Schließen",
+        "cancel": "Abbrechen",
+        "save": "Details speichern"
+      },
+      "fields": {
+        "type": "Art",
+        "title": "Titel",
+        "location": "Ort",
+        "deliveryMode": "Arbeitsweise",
+        "commitmentType": "Umfang",
+        "notSpecified": "Nicht angegeben",
+        "payLegend": "Vergütung (optional)",
+        "payMin": "Von",
+        "payMax": "Bis",
+        "currency": "Währung",
+        "payHint": "Gib Beträge so ein, wie du sie schreiben würdest, zum Beispiel 1500 oder 1500,50.",
+        "deadline": "Bewerbungsfrist (optional)",
+        "applyHow": "So bewirbt man sich",
+        "externalLink": "Link zur Bewerbung",
+        "applicationEmail": "E-Mail für Bewerbungen"
+      },
+      "deliveryModes": {
+        "REMOTE": "Remote",
+        "IN_PERSON": "Vor Ort",
+        "HYBRID": "Hybrid"
+      },
+      "apply": {
+        "IN_PLATFORM_FORM": "Auf DiaspoPlug bewerben (Formular)",
+        "EXTERNAL_LINK": "Link zu einer externen Seite",
+        "EMAIL_REQUEST": "Per E-Mail"
+      },
+      "errors": {
+        "titleRequired": "Gib einen Titel ein.",
+        "titleTooLong": "Der Titel ist zu lang (höchstens 200 Zeichen).",
+        "payInvalid": "Gib einen gültigen Betrag ein, z. B. 1500 oder 1500,50.",
+        "payRange": "Das Minimum darf nicht höher als das Maximum sein.",
+        "deadlinePast": "Die Frist darf nicht in der Vergangenheit liegen.",
+        "deadlineInvalid": "Gib ein gültiges Datum ein.",
+        "linkInvalid": "Gib einen Link ein, der mit https:// oder http:// beginnt.",
+        "emailInvalid": "Gib eine gültige E-Mail-Adresse ein."
+      },
+      "toasts": {
+        "ownerMismatch": "Dieses Inserat kann nicht mit diesem Beitrag verknüpft werden. Entferne es und versuche es erneut.",
+        "postFailed": "Dein Beitrag mit dem Inserat konnte nicht veröffentlicht werden. Es wurde nichts gepostet, du kannst es erneut versuchen.",
+        "rateLimited": "Du postest zu schnell. Bitte warte einen Moment und versuche es erneut.",
+        "selfApply": "Du kannst dich nicht auf dein eigenes Inserat bewerben."
+      }
     }
   },
   "wallet": {
@@ -659,7 +722,8 @@
         "withdrawing": "Wird zurückgezogen…",
         "withdrawApplication": "Bewerbung zurückziehen",
         "howToApply": "So bewerben Sie sich:",
-        "applyExternally": "Extern bewerben"
+        "applyExternally": "Extern bewerben",
+        "manageApplicants": "Bewerbungen verwalten"
       },
       "toasts": {
         "withdrawSuccess": "Bewerbung erfolgreich zurückgezogen",
@@ -4554,6 +4618,14 @@
       "post_deleted": "Beitrag erfolgreich gelöscht",
       "comment_updated": "Kommentar erfolgreich aktualisiert",
       "comment_deleted": "Kommentar erfolgreich gelöscht"
+    },
+    "opportunityCard": {
+      "open": "Offen",
+      "closed": "Geschlossen",
+      "viewAndApply": "Ansehen & bewerben",
+      "viewListing": "Inserat ansehen",
+      "manage": "Verwalten",
+      "applicants": "{count, plural, one {# Bewerbung} other {# Bewerbungen}}"
     }
   },
   "requests": {
@@ -6889,7 +6961,8 @@
       "requests": "Meine Anfragen",
       "wallet": "Wallet",
       "settings": "Einstellungen & Datenschutz",
-      "contact": "Kontakt"
+      "contact": "Kontakt",
+      "listings": "Meine Inserate"
     },
     "signOut": "Abmelden",
     "confirm": {
@@ -7030,5 +7103,69 @@
     "TOP_RATED": "Top bewertet",
     "POPULAR": "Beliebt",
     "NEW": "Neu"
+  },
+  "opportunities": {
+    "mine": {
+      "title": "Meine Inserate",
+      "subtitle": "Jobs und Gelegenheiten, die du veröffentlicht hast, und die Bewerbungen darauf.",
+      "filter": "Anzeigen",
+      "all": "Alle Inserate",
+      "status": {
+        "PUBLISHED": "Offen",
+        "CLOSED": "Geschlossen",
+        "DRAFT": "Entwurf",
+        "ARCHIVED": "Archiviert"
+      },
+      "loading": "Deine Inserate werden geladen …",
+      "loadFailed": "Deine Inserate konnten nicht geladen werden.",
+      "retry": "Erneut versuchen",
+      "emptyTitle": "Noch keine Inserate",
+      "emptyBody": "Wenn du im Beitragseditor einen Job oder eine Gelegenheit teilst, erscheint er hier.",
+      "deadline": "Frist {date}",
+      "viewApplicants": "Bewerbungen ansehen",
+      "close": "Inserat schließen",
+      "closed": "Das Inserat ist geschlossen.",
+      "closeFailed": "Das Inserat konnte nicht geschlossen werden. Bitte versuche es erneut.",
+      "loadMore": "Mehr anzeigen",
+      "confirmTitle": "Dieses Inserat schließen?",
+      "confirmBody": "„{title}“ nimmt keine Bewerbungen mehr an. Bestehende Bewerbungen bleiben erhalten.",
+      "keepOpen": "Offen lassen",
+      "confirmClose": "Inserat schließen",
+      "applicants": "{count, plural, one {# Bewerbung} other {# Bewerbungen}}"
+    },
+    "applicants": {
+      "back": "Meine Inserate",
+      "title": "Bewerbungen",
+      "listTitle": "{count} Bewerbungen",
+      "unknownApplicant": "Bewerber/in",
+      "loadFailed": "Die Bewerbungen konnten nicht geladen werden.",
+      "retry": "Erneut versuchen",
+      "loading": "Bewerbungen werden geladen …",
+      "empty": "Noch keine Bewerbungen.",
+      "loadMore": "Mehr anzeigen",
+      "status": {
+        "PENDING": "Neu",
+        "REVIEWING": "In Prüfung",
+        "ACCEPTED": "Angenommen",
+        "REJECTED": "Abgelehnt",
+        "WITHDRAWN": "Zurückgezogen"
+      },
+      "selectPrompt": "Wähle eine Bewerbung aus, um sie zu lesen.",
+      "appliedOn": "Beworben am {date}",
+      "coverLetter": "Anschreiben",
+      "answers": "Antworten",
+      "files": "Dokumente",
+      "noFiles": "Keine Dokumente angehängt.",
+      "opensInNewTab": "(öffnet in einem neuen Tab)",
+      "fileUnavailable": "Link nicht verfügbar",
+      "yourNotes": "Deine Notizen",
+      "notesLabel": "Notizen zu dieser Entscheidung (optional)",
+      "notesHint": "Der/die Bewerber/in kann diese Notizen sehen.",
+      "accept": "Annehmen",
+      "reject": "Ablehnen",
+      "accepted": "Bewerbung angenommen.",
+      "rejected": "Bewerbung abgelehnt.",
+      "decisionFailed": "Deine Entscheidung konnte nicht gespeichert werden. Bitte versuche es erneut."
+    }
   }
 }

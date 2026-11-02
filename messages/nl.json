@@ -321,6 +321,69 @@
     "proTips": {
       "title": "Pro tips",
       "description": "Voeg afbeeldingen of video's toe voor meer betrokkenheid. Gebruik hashtags om een breder publiek te bereiken. Tag mensen om hen te informeren."
+    },
+    "opportunity": {
+      "hint": {
+        "text": "Het lijkt erop dat je een kans deelt. Voeg details toe zodat mensen die kunnen vinden en solliciteren.",
+        "add": "Details toevoegen",
+        "dismiss": "Nu niet"
+      },
+      "toolbarButton": "Vacature of kans toevoegen",
+      "chip": {
+        "label": "Vacature of kans toegevoegd",
+        "edit": "Details van de vacature bewerken",
+        "remove": "Vacature of kans verwijderen"
+      },
+      "dialog": {
+        "title": "Details van de kans",
+        "description": "Vertel wat het is en hoe je kunt solliciteren. Het wordt samen met je bericht gepubliceerd.",
+        "close": "Sluiten",
+        "cancel": "Annuleren",
+        "save": "Details opslaan"
+      },
+      "fields": {
+        "type": "Type",
+        "title": "Titel",
+        "location": "Locatie",
+        "deliveryMode": "Werkwijze",
+        "commitmentType": "Inzet",
+        "notSpecified": "Niet opgegeven",
+        "payLegend": "Vergoeding (optioneel)",
+        "payMin": "Van",
+        "payMax": "Tot",
+        "currency": "Valuta",
+        "payHint": "Voer bedragen in zoals je ze zou schrijven, bijvoorbeeld 1500 of 1500,50.",
+        "deadline": "Sollicitatiedeadline (optioneel)",
+        "applyHow": "Hoe solliciteren",
+        "externalLink": "Sollicitatielink",
+        "applicationEmail": "E-mailadres voor sollicitaties"
+      },
+      "deliveryModes": {
+        "REMOTE": "Op afstand",
+        "IN_PERSON": "Ter plaatse",
+        "HYBRID": "Hybride"
+      },
+      "apply": {
+        "IN_PLATFORM_FORM": "Solliciteren via DiaspoPlug (formulier)",
+        "EXTERNAL_LINK": "Link naar een externe pagina",
+        "EMAIL_REQUEST": "Per e-mail"
+      },
+      "errors": {
+        "titleRequired": "Voeg een titel toe.",
+        "titleTooLong": "De titel is te lang (maximaal 200 tekens).",
+        "payInvalid": "Voer een geldig bedrag in, zoals 1500 of 1500,50.",
+        "payRange": "Het minimum mag niet hoger zijn dan het maximum.",
+        "deadlinePast": "De deadline mag niet in het verleden liggen.",
+        "deadlineInvalid": "Voer een geldige datum in.",
+        "linkInvalid": "Voer een link in die begint met https:// of http://.",
+        "emailInvalid": "Voer een geldig e-mailadres in."
+      },
+      "toasts": {
+        "ownerMismatch": "Die vacature kan niet aan dit bericht worden gekoppeld. Verwijder haar en probeer het opnieuw.",
+        "postFailed": "We konden je bericht met de vacature niet publiceren. Er is niets geplaatst, je kunt het opnieuw proberen.",
+        "rateLimited": "Je plaatst te snel. Wacht even en probeer het opnieuw.",
+        "selfApply": "Je kunt niet solliciteren op je eigen vacature."
+      }
     }
   },
   "wallet": {
@@ -663,7 +726,8 @@
         "withdrawing": "Intrekken…",
         "withdrawApplication": "Sollicitatie intrekken",
         "howToApply": "Hoe te solliciteren:",
-        "applyExternally": "Extern solliciteren"
+        "applyExternally": "Extern solliciteren",
+        "manageApplicants": "Sollicitaties beheren"
       },
       "toasts": {
         "withdrawSuccess": "Sollicitatie succesvol ingetrokken",
@@ -4554,6 +4618,14 @@
       "post_deleted": "Bericht succesvol verwijderd",
       "comment_updated": "Opmerking succesvol bijgewerkt",
       "comment_deleted": "Opmerking succesvol verwijderd"
+    },
+    "opportunityCard": {
+      "open": "Open",
+      "closed": "Gesloten",
+      "viewAndApply": "Bekijken en solliciteren",
+      "viewListing": "Vacature bekijken",
+      "manage": "Beheren",
+      "applicants": "{count, plural, one {# sollicitatie} other {# sollicitaties}}"
     }
   },
   "requests": {
@@ -6889,7 +6961,8 @@
       "requests": "Mijn aanvragen",
       "wallet": "Wallet",
       "settings": "Instellingen en privacy",
-      "contact": "Contact"
+      "contact": "Contact",
+      "listings": "Mijn vacatures"
     },
     "signOut": "Uitloggen",
     "confirm": {
@@ -7030,5 +7103,69 @@
     "TOP_RATED": "Best beoordeeld",
     "POPULAR": "Populair",
     "NEW": "Nieuw"
+  },
+  "opportunities": {
+    "mine": {
+      "title": "Mijn vacatures",
+      "subtitle": "Vacatures en kansen die je hebt geplaatst, en wie erop heeft gesolliciteerd.",
+      "filter": "Tonen",
+      "all": "Alle vacatures",
+      "status": {
+        "PUBLISHED": "Open",
+        "CLOSED": "Gesloten",
+        "DRAFT": "Concept",
+        "ARCHIVED": "Gearchiveerd"
+      },
+      "loading": "Je vacatures worden geladen…",
+      "loadFailed": "We konden je vacatures niet laden.",
+      "retry": "Opnieuw proberen",
+      "emptyTitle": "Nog geen vacatures",
+      "emptyBody": "Wanneer je in de berichteditor een vacature of kans deelt, verschijnt die hier.",
+      "deadline": "Deadline {date}",
+      "viewApplicants": "Sollicitaties bekijken",
+      "close": "Vacature sluiten",
+      "closed": "De vacature is gesloten.",
+      "closeFailed": "We konden de vacature niet sluiten. Probeer het opnieuw.",
+      "loadMore": "Meer tonen",
+      "confirmTitle": "Deze vacature sluiten?",
+      "confirmBody": "“{title}” neemt geen sollicitaties meer aan. Bestaande sollicitaties blijven bewaard.",
+      "keepOpen": "Open laten",
+      "confirmClose": "Vacature sluiten",
+      "applicants": "{count, plural, one {# sollicitatie} other {# sollicitaties}}"
+    },
+    "applicants": {
+      "back": "Mijn vacatures",
+      "title": "Sollicitaties",
+      "listTitle": "{count} sollicitaties",
+      "unknownApplicant": "Sollicitant",
+      "loadFailed": "We konden de sollicitaties niet laden.",
+      "retry": "Opnieuw proberen",
+      "loading": "Sollicitaties worden geladen…",
+      "empty": "Nog geen sollicitaties.",
+      "loadMore": "Meer tonen",
+      "status": {
+        "PENDING": "Nieuw",
+        "REVIEWING": "In beoordeling",
+        "ACCEPTED": "Geaccepteerd",
+        "REJECTED": "Afgewezen",
+        "WITHDRAWN": "Ingetrokken"
+      },
+      "selectPrompt": "Selecteer een sollicitatie om die te lezen.",
+      "appliedOn": "Gesolliciteerd op {date}",
+      "coverLetter": "Motivatiebrief",
+      "answers": "Antwoorden",
+      "files": "Documenten",
+      "noFiles": "Geen documenten bijgevoegd.",
+      "opensInNewTab": "(opent in een nieuw tabblad)",
+      "fileUnavailable": "link niet beschikbaar",
+      "yourNotes": "Je notities",
+      "notesLabel": "Notities bij deze beslissing (optioneel)",
+      "notesHint": "De sollicitant kan deze notities zien.",
+      "accept": "Accepteren",
+      "reject": "Afwijzen",
+      "accepted": "Sollicitatie geaccepteerd.",
+      "rejected": "Sollicitatie afgewezen.",
+      "decisionFailed": "We konden je beslissing niet opslaan. Probeer het opnieuw."
+    }
   }
 }

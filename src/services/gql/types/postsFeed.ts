@@ -194,6 +194,28 @@ export interface AttachmentInput {
   blurDataUrl?: string;
 }
 
+/** Listing attached to a post (`Post.linkedOpportunity`). Amounts are integer MINOR units. */
+export interface LinkedOpportunity {
+  id: string;
+  title: string;
+  type?: string | null;
+  category?: string | null;
+  location?: string | null;
+  deliveryMode?: string | null;
+  commitmentType?: string | null;
+  compensationMin?: number | null;
+  compensationMax?: number | null;
+  compensationCurrency?: string | null;
+  deadline?: string | null;
+  /** PUBLISHED | CLOSED (draft / archived listings are never returned). */
+  status?: string | null;
+  ownerType?: string | null;
+  /** Compared with the viewer to show "Manage"; never rendered. */
+  ownerId?: string | null;
+  applicationMethod?: string | null;
+  applicationCount?: number | null;
+}
+
 export interface Post {
   id: string;
   text: string;
@@ -215,6 +237,8 @@ export interface Post {
    */
   categories?: string[];
   aiTopics?: string[];
+  /** Job / opportunity card for this post, when it carries a listing. */
+  linkedOpportunity?: LinkedOpportunity | null;
   /**
    * Precomputed LQIP blur-up lookup: attachment URL → backend blurDataUrl.
    * Built once in `normalizeFeedPost` so the feed's `itemContent` doesn't
@@ -294,6 +318,7 @@ export interface FeedPostFragment {
   userEngagement?: Partial<UserEngagement> | null;
   categories?: string[] | null;
   aiTopics?: string[] | null;
+  linkedOpportunity?: LinkedOpportunity | null;
   createdAt: string;
 }
 
@@ -617,6 +642,15 @@ export interface RequestUploadUrlData {
   requestUploadUrl: {
     uploadUrl: string;
     objectKey: string;
+  };
+}
+
+export interface CreatePostWithOpportunityData {
+  createPostWithOpportunity: {
+    id: string;
+    text: string;
+    authorType: string;
+    linkedOpportunityId?: string | null;
   };
 }
 

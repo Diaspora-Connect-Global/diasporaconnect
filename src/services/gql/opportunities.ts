@@ -255,15 +255,14 @@ export const GET_APPLICATIONS = gql`
       applications {
         id
         opportunityId
-        applicantId
         status
         createdAt
         updatedAt
         reviewNotes
         coverLetter
-        applicationFiles { path filename mimeType sizeBytes }
+        customAnswers
+        applicationFiles { path filename mimeType sizeBytes url }
         applicantProfile {
-          userId
           firstName
           middleName
           lastName
@@ -288,6 +287,58 @@ export const GET_APPLICATIONS = gql`
         }
       }
     }
+  }
+`;
+
+/** Poster's own listings (all statuses, or one) with applicant counts. */
+export const MY_OPPORTUNITIES = gql`
+  query MyOpportunities($status: String, $limit: Int, $offset: Int) {
+    myOpportunities(status: $status, limit: $limit, offset: $offset) {
+      total
+      opportunities {
+        id
+        title
+        type
+        status
+        location
+        deadline
+        applicationCount
+        createdAt
+      }
+    }
+  }
+`;
+
+/** Header of the applicants page (title + status + count). */
+export const GET_OPPORTUNITY_HEADER = gql`
+  query GetOpportunityHeader($id: String!) {
+    getOpportunity(id: $id) {
+      id
+      title
+      status
+      ownerType
+      ownerId
+      applicationCount
+      applicationMethod
+    }
+  }
+`;
+
+export const CLOSE_OPPORTUNITY = gql`
+  mutation CloseOpportunity($id: String!, $reason: String) {
+    closeOpportunity(id: $id, reason: $reason)
+  }
+`;
+
+export const ACCEPT_APPLICATION = gql`
+  mutation AcceptApplication($id: String!, $notes: String) {
+    acceptApplication(id: $id, notes: $notes)
+  }
+`;
+
+export const REJECT_APPLICATION = gql`
+  mutation RejectApplication($id: String!, $reason: String) {
+    rejectApplication(id: $id, reason: $reason)
   }
 `;
 
