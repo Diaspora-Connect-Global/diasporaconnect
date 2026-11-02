@@ -21,6 +21,8 @@ import {
   FolderOpen,
   RotateCcw,
   Save,
+  Briefcase,
+  Pencil,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
@@ -29,7 +31,8 @@ import { toast } from 'sonner';
 import { useUserStore } from '@/store/useUserStore';
 import { MyAvatar } from '@/components/custom/header';
 import { useMutation } from '@apollo/client/react';
-import { CREATE_POST, CreatePostData, GET_FEED, REQUEST_UPLOAD_URL, RequestUploadUrlData } from '@/services/gql/postsFeed';
+import { CREATE_POST, CREATE_POST_WITH_OPPORTUNITY, GET_FEED, REQUEST_UPLOAD_URL } from '@/services/gql/postsFeed';
+import type { CreatePostData, CreatePostWithOpportunityData, RequestUploadUrlData } from '@/services/gql/types/postsFeed';
 import { canSubmitPost, isPostEmptyRefusal } from '@/lib/postContent';
 import RichTextarea, { type RichTextareaHandle, type MentionedUser } from '@/components/custom/RichTextarea';
 import { AttachmentInput } from '@/services/gql/types/postsFeed';
@@ -39,6 +42,9 @@ import { buildMentionInputsFromText } from '@/components/custom/richTextRenderer
 import { LinkPreviewCard } from '@/components/chats/LinkPreviewCard';
 import { getFirstUrlInText } from '@/lib/urlPreview';
 import { resizeImage } from '@/lib/resizeImage';
+import { detectOpportunity, type OpportunityDetection } from '@/lib/opportunityDetection';
+import { buildCreateOpportunityInput, opportunityRefusal, type AttachedOpportunity } from '@/lib/opportunityDraft';
+import OpportunityDetailsDialog from '@/components/posts/OpportunityDetailsDialog';
 
 // Types
 type Visibility = 'PUBLIC' | 'PRIVATE' | 'CONNECTIONS';
@@ -178,6 +184,13 @@ export function PostComposerForm({ variant = 'page', onPosted, onDraftSaved, onD
   // the start instead of shoving the composer down a moment later.
   const [draftChecked, setDraftChecked] = useState(false);
   const [dismissedPreviewUrl, setDismissedPreviewUrl] = useState<string | null>(null);
+  // Job / opportunity attached to this post (published together with it).
+  const [opportunity, setOpportunity] = useState<AttachedOpportunity | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  // "Not now" silences the hint for THIS draft only (reset on post / discard).
+  const [hintDismissed, setHintDismissed] = useState(false);
+  const [detection, setDetection] = useState<OpportunityDetection>({ match: false, suggestedType: null });
+  const jobButtonRef = React.useRef<HTMLButtonElement>(null);
   const textareaRef = React.useRef<RichTextareaHandle>(null);
   const submittingRef = React.useRef(false);
   const saveTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -186,6 +199,7 @@ export function PostComposerForm({ variant = 'page', onPosted, onDraftSaved, onD
   const { saveDraft, loadDraft, clearDraft } = usePostDraft();
 
   const t = useTranslations('createPost');
+  const tOpp = useTranslations('createPost.opportunity');
   const tComposer = useTranslations('composer');
   const tActions = useTranslations('actions');
   const currentUser = useUserStore(state => state.user);
@@ -218,6 +232,15 @@ export function PostComposerForm({ variant = 'page', onPosted, onDraftSaved, onD
     ]
   });
 
+  const [createPostWithOpportunity, { loading: isPostingWithJob }] = useMutation<CreatePostWithOpportunityData>(CREATE_POST_WITH_OPPORTUNITY, {
+    refetchQueries: [
+      {
+        query: GET_FEED,
+        variables: { input: { type: 'FOR_YOU', limit: 20, offset: 0, includeDiscovery: true } },
+      },
+    ],
+  });
+
   // Request Upload URL Mutation
   const [requestUploadUrl] = useMutation<RequestUploadUrlData>(REQUEST_UPLOAD_URL);
 
@@ -238,6 +261,7 @@ export function PostComposerForm({ variant = 'page', onPosted, onDraftSaved, onD
       setDraftChecked(true);
       if (!draft) return;
       if (draft.text) setPostContent(draft.text);
+      if (draft.opportunity) setOpportunity(draft.opportunity);
       // Stored data is untrusted: an unknown value would post with no visibility at all.
       if (draft.visibility === 'PUBLIC' || draft.visibility === 'CONNECTIONS' || draft.visibility === 'PRIVATE') {
         setVisibility(draft.visibility);
@@ -272,12 +296,24 @@ export function PostComposerForm({ variant = 'page', onPosted, onDraftSaved, onD
     if (!draftChecked) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
-      saveDraft(postContent, visibility, attachments);
+      saveDraft(postContent, visibility, attachments, opportunity);
     }, 600);
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [draftChecked, postContent, visibility, attachments, saveDraft]);
+  }, [draftChecked, postContent, visibility, attachments, opportunity, saveDraft]);
+
+  // Opportunity hint: look at the text 600 ms after typing stops (and only from 40 characters),
+  // entirely on this device. Nothing is sent anywhere.
+  React.useEffect(() => {
+    if (postContent.trim().length < 40) {
+      setDetection((d) => (d.match ? { match: false, suggestedType: null } : d));
+      return;
+    }
+    const timer = setTimeout(() => setDetection(detectOpportunity(postContent)), 600);
+    return () => clearTimeout(timer);
+  }, [postContent]);
+  const showOpportunityHint = detection.match && !opportunity && !hintDismissed && postContent.trim().length >= 40;
 
   // Function to insert text at cursor position
   const insertAtCursor = (textToInsert: string) => {
@@ -468,13 +504,15 @@ export function PostComposerForm({ variant = 'page', onPosted, onDraftSaved, onD
     setAttachments([]);
     setVisibility('PUBLIC');
     setMentionedUsers([]);
+    setOpportunity(null);
+    setHintDismissed(false);
     setDraftRestored(false);
   };
 
   const handleSaveDraft = async () => {
     if (!dirty) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-    await saveDraft(postContent, visibility, attachments);
+    await saveDraft(postContent, visibility, attachments, opportunity);
     toast.success(tComposer('draftSaved'));
     onDraftSaved?.();
   };
@@ -577,33 +615,50 @@ export function PostComposerForm({ variant = 'page', onPosted, onDraftSaved, onD
         PRIVATE: 'ONLY_ME',
       };
 
-      const result = await createPost({
-        variables: {
-          input: {
-            text: postContent,
-            visibility: visibilityMap[visibility],
-            idempotencyKey: crypto.randomUUID(),
-            ...(attachmentInputs.length > 0 && { attachments: attachmentInputs }),
-            ...(mentionedUsers.length > 0 && {
-              mentionedUserIds: mentionedUsers.map((m) => m.userId),
-            }),
-            ...(mentionedUsers.length > 0 && (() => {
-              const mentionMap = Object.fromEntries(mentionedUsers.map((m) => [m.name, m.userId]));
-              const mentions = buildMentionInputsFromText(postContent, mentionMap).map((mi) => ({
-                ...mi,
-                displayName: mentionedUsers.find((u) => u.userId === mi.entityId)?.displayName ?? mi.displayName,
-              }));
-              return mentions.length > 0 ? { mentions } : {};
-            })()),
-          }
-        }
-      });
+      const postInput = {
+        text: postContent,
+        visibility: visibilityMap[visibility],
+        idempotencyKey: crypto.randomUUID(),
+        ...(attachmentInputs.length > 0 && { attachments: attachmentInputs }),
+        ...(mentionedUsers.length > 0 && {
+          mentionedUserIds: mentionedUsers.map((m) => m.userId),
+        }),
+        ...(mentionedUsers.length > 0 && (() => {
+          const mentionMap = Object.fromEntries(mentionedUsers.map((m) => [m.name, m.userId]));
+          const mentions = buildMentionInputsFromText(postContent, mentionMap).map((mi) => ({
+            ...mi,
+            displayName: mentionedUsers.find((u) => u.userId === mi.entityId)?.displayName ?? mi.displayName,
+          }));
+          return mentions.length > 0 ? { mentions } : {};
+        })()),
+      };
+
+      // With a job attached the post and the listing are published together (one call, so
+      // neither can exist without the other); without one this is the unchanged createPost.
+      const jobUserId = currentUser?.userId;
+      if (opportunity && !jobUserId) {
+        setSubmitError(t('errorMessage'));
+        return;
+      }
+      const result = opportunity
+        ? await createPostWithOpportunity({
+            variables: {
+              input: {
+                post: postInput,
+                opportunity: buildCreateOpportunityInput(opportunity, postContent, jobUserId as string),
+              },
+            },
+          })
+        : await createPost({ variables: { input: postInput } });
 
       // errorPolicy 'all': a refused mutation RESOLVES with data null, so success is
       // only ever reported when the server really returned the new post.
-      const created = result.data?.createPost;
+      const data = result.data as Partial<CreatePostData & CreatePostWithOpportunityData> | null | undefined;
+      const created = data?.createPostWithOpportunity ?? data?.createPost;
       if (!created?.id) {
-        setSubmitError(isPostEmptyRefusal(result) ? t('postEmpty') : t('errorMessage'));
+        const refusal = opportunity ? opportunityRefusal(result) : null;
+        if (refusal) toast.error(tOpp(`toasts.${refusal}`));
+        setSubmitError(isPostEmptyRefusal(result) ? t('postEmpty') : refusal ? null : t('errorMessage'));
         return;
       }
       {
@@ -630,6 +685,8 @@ export function PostComposerForm({ variant = 'page', onPosted, onDraftSaved, onD
         setAttachments([]);
         setVisibility('PUBLIC');
         setMentionedUsers([]);
+        setOpportunity(null);
+        setHintDismissed(false);
         setDraftRestored(false);
 
         try {
@@ -641,7 +698,9 @@ export function PostComposerForm({ variant = 'page', onPosted, onDraftSaved, onD
       }
     } catch (error: any) {
       console.error('Failed to create post:', error);
-      setSubmitError(isPostEmptyRefusal(error) ? t('postEmpty') : t('errorMessage'));
+      const refusal = opportunity ? opportunityRefusal(error) : null;
+      if (refusal) toast.error(tOpp(`toasts.${refusal}`));
+      setSubmitError(isPostEmptyRefusal(error) ? t('postEmpty') : refusal ? null : t('errorMessage'));
     } finally {
       submittingRef.current = false;
       setIsSubmitting(false);
@@ -748,7 +807,7 @@ export function PostComposerForm({ variant = 'page', onPosted, onDraftSaved, onD
               hashtagSuggestions
               placeholder={t('placeholder', { name: userName.split(' ')[0] })}
               maxLength={charLimit}
-              disabled={isPosting}
+              disabled={isPosting || isPostingWithJob}
               className="body-large text-base leading-relaxed placeholder:text-text-secondary text-text-primary"
               minHeight={isModal ? '140px' : '200px'}
             />
@@ -756,6 +815,62 @@ export function PostComposerForm({ variant = 'page', onPosted, onDraftSaved, onD
 
           {!canPost && (
             <p id="post-empty-hint" className="sr-only">{t('emptyHint')}</p>
+          )}
+
+          {/* On-device hint: the text looks like a job / opportunity. The live region stays mounted so the change is announced. */}
+          <div role="status" aria-live="polite" className={showOpportunityHint ? 'px-6 pb-4' : undefined}>
+            {showOpportunityHint && (
+              <div data-testid="opportunity-hint" className="flex min-w-0 flex-col gap-3 rounded-xl border border-border-brand bg-surface-brand-light/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="flex min-w-0 items-start gap-2 text-sm text-text-primary">
+                  <Briefcase className="mt-0.5 size-4 shrink-0 text-text-brand" aria-hidden />
+                  <span className="min-w-0">{tOpp('hint.text')}</span>
+                </p>
+                <div className="flex shrink-0 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setDetailsOpen(true)}
+                    className="min-h-10 rounded-full bg-surface-brand px-4 text-sm font-semibold text-white hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand focus-visible:ring-offset-2"
+                  >
+                    {tOpp('hint.add')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setHintDismissed(true)}
+                    className="min-h-10 rounded-full border border-border-subtle px-4 text-sm font-semibold text-text-primary hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
+                  >
+                    {tOpp('hint.dismiss')}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {opportunity && (
+            <div className="px-6 pb-4">
+              <div data-testid="opportunity-chip" className="flex min-w-0 items-center gap-2 rounded-xl border border-border-subtle bg-surface-subtle px-3 py-2">
+                <Briefcase className="size-4 shrink-0 text-text-brand" aria-hidden />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium text-text-secondary">{tOpp('chip.label')}</p>
+                  <p className="truncate text-sm font-semibold text-text-primary">{opportunity.title}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDetailsOpen(true)}
+                  aria-label={tOpp('chip.edit')}
+                  className="grid size-9 shrink-0 place-items-center rounded-full text-text-secondary hover:bg-surface-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
+                >
+                  <Pencil className="size-4" aria-hidden />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOpportunity(null)}
+                  aria-label={tOpp('chip.remove')}
+                  className="grid size-9 shrink-0 place-items-center rounded-full text-text-secondary hover:bg-surface-default focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
+                >
+                  <X className="size-4" aria-hidden />
+                </button>
+              </div>
+            </div>
           )}
 
           {submitError && (
@@ -954,6 +1069,18 @@ export function PostComposerForm({ variant = 'page', onPosted, onDraftSaved, onD
                   </ButtonType3>
                 </div>
 
+                {/* Job or opportunity — always available, phone and desktop */}
+                <ButtonType3
+                  ref={jobButtonRef}
+                  onClick={() => setDetailsOpen(true)}
+                  className="p-2 hover:bg-surface-brand/10 rounded-lg border-0 bg-transparent min-w-0"
+                  title={tOpp('toolbarButton')}
+                  aria-label={tOpp('toolbarButton')}
+                  data-testid="add-opportunity-button"
+                >
+                  <Briefcase className="w-5 h-5 text-surface-brand" aria-hidden />
+                </ButtonType3>
+
                 {/* Secondary actions - hidden on mobile */}
                 <div className="hidden md:flex items-center gap-2 ml-2 pl-2 border-l border-border-subtle">
                   <ButtonType3
@@ -1026,6 +1153,23 @@ export function PostComposerForm({ variant = 'page', onPosted, onDraftSaved, onD
         </div>
         )}
       </div>
+
+      {detailsOpen && (
+        <OpportunityDetailsDialog
+          open
+          onOpenChange={(o) => {
+            if (!o) {
+              setDetailsOpen(false);
+              // Radix returns focus to the opener only when it has a Trigger; this one is opened from state.
+              setTimeout(() => jobButtonRef.current?.focus(), 0);
+            }
+          }}
+          postText={postContent}
+          suggestedType={detection.suggestedType}
+          initial={opportunity}
+          onSave={setOpportunity}
+        />
+      )}
 
       {/* CSS Animations */}
       <style jsx>{`

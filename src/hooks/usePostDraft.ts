@@ -12,6 +12,7 @@ import {
   draftMetaKey,
   draftOwnerKey,
 } from '@/lib/postDraftKeys';
+import { parseAttachedOpportunity, type AttachedOpportunity } from '@/lib/opportunityDraft';
 
 type AttachmentType = 'Photo' | 'Video' | 'Document';
 
@@ -26,6 +27,8 @@ export interface RestoredDraft {
   text: string;
   visibility: string;
   attachments: StoredAttachment[];
+  /** Job / opportunity the user attached in the composer (validated on load). */
+  opportunity: AttachedOpportunity | null;
 }
 
 interface DraftMeta {
@@ -33,6 +36,8 @@ interface DraftMeta {
   visibility: string;
   hasMedia: boolean;
   savedAt: number;
+  /** Untrusted until `parseAttachedOpportunity` has seen it. */
+  opportunity?: unknown;
 }
 
 const IDB_STORE = 'files';
@@ -81,6 +86,7 @@ function readMeta(owner: string): DraftMeta | null {
       visibility: typeof meta.visibility === 'string' ? meta.visibility : 'PUBLIC',
       hasMedia: meta.hasMedia === true,
       savedAt: typeof meta.savedAt === 'number' ? meta.savedAt : 0,
+      opportunity: meta.opportunity,
     };
   } catch {
     return null;
@@ -151,7 +157,8 @@ export function usePostDraft() {
   const saveDraft = useCallback(async (
     text: string,
     visibility: string,
-    attachments: Array<{ id: string; type: AttachmentType; name?: string; file?: File }>
+    attachments: Array<{ id: string; type: AttachmentType; name?: string; file?: File }>,
+    opportunity?: AttachedOpportunity | null,
   ) => {
     if (!owner) return;
     const files = attachments.filter((a): a is StoredAttachment => !!a.file);
@@ -160,7 +167,7 @@ export function usePostDraft() {
       if (!text.trim() && files.length === 0) {
         localStorage.removeItem(draftMetaKey(owner));
       } else {
-        const meta: DraftMeta = { text, visibility, hasMedia: files.length > 0, savedAt: Date.now() };
+        const meta: DraftMeta = { text, visibility, hasMedia: files.length > 0, savedAt: Date.now(), ...(opportunity && { opportunity }) };
         localStorage.setItem(draftMetaKey(owner), JSON.stringify(meta));
       }
     } catch {
@@ -217,7 +224,7 @@ export function usePostDraft() {
     savedFilesRef.current = filesSignature(attachments);
 
     if (!meta.text && attachments.length === 0) return null;
-    return { text: meta.text, visibility: meta.visibility, attachments };
+    return { text: meta.text, visibility: meta.visibility, attachments, opportunity: parseAttachedOpportunity(meta.opportunity) };
   }, [owner]);
 
   const clearDraft = useCallback(async () => {
