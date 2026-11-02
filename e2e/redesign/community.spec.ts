@@ -78,12 +78,12 @@ test('no composer, feed tabs and post cards that keep the Happy / Hopeful / Sad 
     await expect(page.getByTestId('feed-composer')).toHaveCount(0);
     await expect(page.getByRole('button', { name: /Share an update/ })).toHaveCount(0);
     const tabs = page.getByRole('tab');
-    expect((await tabs.allTextContents()).map((s) => s.trim())).toEqual(['For you', 'Latest', 'Following']);
+    expect((await tabs.allTextContents()).map((s) => s.trim())).toEqual(['For you', 'Following']);
     await expect(page.getByRole('tab', { name: 'For you' })).toHaveAttribute('aria-selected', 'true');
     await expect(page.locator('[id^="feed-post-"]')).toHaveCount(3);
     await expect(page.locator('[id^="feed-post-"]').getByRole('button', { name: /^Like$/ })).toHaveCount(0);
-    await page.getByRole('tab', { name: 'Latest' }).click();
-    await expect(page.getByRole('tab', { name: 'Latest' })).toHaveAttribute('aria-selected', 'true');
+    await page.getByRole('tab', { name: 'Following' }).click();
+    await expect(page.getByRole('tab', { name: 'Following' })).toHaveAttribute('aria-selected', 'true');
     await page.context().close();
 });
 
@@ -128,7 +128,7 @@ test('no communities grid in the middle column; communities to join sit in the r
     await page.context().close();
 });
 
-test('"All posts" filter narrows the feed to one category and selects Latest; For you clears it', async () => {
+test('"All posts" filter narrows the feed to one category (no Latest tab here); For you clears it', async () => {
     const asked: string[] = [];
     const byCategory = (v: Record<string, unknown>) => {
         const category = ((v.input ?? {}) as { category?: string }).category ?? '';
@@ -144,7 +144,7 @@ test('"All posts" filter narrows the feed to one category and selects Latest; Fo
     await expect(page.locator('[id^="feed-post-"]')).toHaveCount(3);
 
     await filter.selectOption('Business');
-    await expect(page.getByRole('tab', { name: 'Latest' })).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByRole('tab', { name: 'Latest' })).toHaveCount(0);
     await expect(page.locator('[id^="feed-post-"]')).toHaveCount(1);
     await expect(page.getByTestId('community-feed')).toContainText('Export partners wanted');
     expect(asked).toContain('Business');

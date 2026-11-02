@@ -28,7 +28,11 @@ export interface FeedSlotContext {
   handlers: ReturnType<typeof UsePostEngagementHandlers>;
   removePost: (postId: string) => void;
 }
-const TABS: Tab[] = ['forYou', 'latest', 'following'];
+/** Home keeps Latest (the viewer's network, newest-first); the community page shows For you and Following only. */
+const TABS_BY_SCOPE: Record<'community' | 'all', Tab[]> = {
+  all: ['forYou', 'latest', 'following'],
+  community: ['forYou', 'following'],
+};
 
 /**
  * The post categories ai-service assigns (its default taxonomy, minus "Other").
@@ -41,12 +45,13 @@ const CATEGORIES = [
 ] as const;
 
 /**
- * Feed tabs (For you / Latest / Following) over the same post cards Home uses,
- * so the Happy / Hopeful / Sad reactions are identical. `scrollRoot` is the
- * page's scroll container, which drives infinite scroll.
+ * Feed tabs (For you / Latest / Following on Home, For you / Following on the
+ * community page) over the same post cards Home uses, so the Happy / Hopeful /
+ * Sad reactions are identical. `scrollRoot` is the page's scroll container,
+ * which drives infinite scroll.
  *
  * The "All posts" filter narrows the feed to one category. A category feed is
- * newest-first, so picking one selects Latest; For you / Following clear it.
+ * newest-first, so on Home picking one selects Latest; picking a tab clears it.
  */
 export interface CommunityFeedProps {
   scrollRoot: Element | null;
@@ -71,18 +76,18 @@ const COMMUNITY_AUTHOR_TYPES = ['COMMUNITY', 'ASSOCIATION'];
 
 /**
  * Which feed each tab reads.
- *  - 'all' (Home): unchanged - ranked recommendations, newest-first ALL, joined-community feed.
+ *  - 'all' (Home): ranked recommendations; Latest is the viewer's network (friends, people they
+ *    follow, joined communities/associations, their own posts) newest-first; joined-community feed.
  *  - 'community': posts authored by communities/associations only. For you is the ranked
  *    COMMUNITIES_AND_ASSOCIATIONS feed (no recommender, so no NETWORK/ALL fallback can pull
- *    member posts in), Latest the same set newest-first, Following the membership-scoped
- *    joinedCommunityFeed (already community-only).
+ *    member posts in), Following the membership-scoped joinedCommunityFeed (already
+ *    community-only). There is no Latest tab here.
  */
 function feedOptions(scope: 'community' | 'all', tab: Tab, category: string): UseFeedOptions {
   if (scope === 'all') {
-    return category ? { category } : tab === 'latest' ? { feedType: 'ALL' } : { mode: tab === 'following' ? 'following' : 'you' };
+    return category ? { category } : tab === 'latest' ? { feedType: 'NETWORK', chronological: true } : { mode: tab === 'following' ? 'following' : 'you' };
   }
   if (category) return { category, authorTypes: COMMUNITY_AUTHOR_TYPES };
-  if (tab === 'latest') return { feedType: 'COMMUNITIES_AND_ASSOCIATIONS', chronological: true };
   if (tab === 'following') return { mode: 'following' };
   return { feedType: 'COMMUNITIES_AND_ASSOCIATIONS' };
 }
@@ -92,6 +97,7 @@ export function CommunityFeed({ scrollRoot, scope = 'community', onOpenMedia, re
   const tCategory = useTranslations('categoryBadge');
   const tFeedback = useTranslations('feedback');
   const router = useRouter();
+  const tabs = TABS_BY_SCOPE[scope];
   const [tab, setTabState] = useState<Tab>('forYou');
   const [category, setCategory] = useState('');
   const setTab = (next: Tab) => {
@@ -100,7 +106,7 @@ export function CommunityFeed({ scrollRoot, scope = 'community', onOpenMedia, re
   };
   const chooseCategory = (next: string) => {
     setCategory(next);
-    if (next) setTabState('latest');
+    if (next && tabs.includes('latest')) setTabState('latest');
   };
   const categoryOptions = useMemo(
     () => CATEGORIES.map((c) => ({ value: c, label: tCategory(c) })).sort((a, b) => a.label.localeCompare(b.label)),
@@ -138,7 +144,7 @@ export function CommunityFeed({ scrollRoot, scope = 'community', onOpenMedia, re
 
   const onKey = (e: React.KeyboardEvent, i: number) => {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-    const next = TABS[(i + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length];
+    const next = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
     setTab(next);
     (e.currentTarget.parentElement?.querySelector(`[data-tab="${next}"]`) as HTMLElement | null)?.focus();
   };
@@ -147,7 +153,7 @@ export function CommunityFeed({ scrollRoot, scope = 'community', onOpenMedia, re
     <section aria-label={t('tabs.label')} data-testid="community-feed">
       <div className="mb-3 flex items-end justify-between gap-3 border-b border-border-subtle">
       <div role="tablist" aria-label={t('tabs.label')} className="flex gap-6">
-        {TABS.map((k, i) => (
+        {tabs.map((k, i) => (
           <button
             key={k}
             type="button"

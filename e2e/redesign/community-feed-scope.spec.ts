@@ -35,21 +35,6 @@ test('For you reads the community-scoped feed and shows only community/associati
     await page.context().close();
 });
 
-test('Latest asks for the same community set, newest first (chronological)', async () => {
-    const asked: Array<Record<string, unknown>> = [];
-    const { page } = await open(browser, '/community', { GetFeed: feedByType(asked) });
-    await expect(page.locator('[id^="feed-post-"]')).toHaveCount(3, { timeout: 90_000 });
-    await page.getByRole('tab', { name: 'Latest' }).click();
-    await expect.poll(() => asked.some((i) => i.chronological === true)).toBe(true);
-    const latest = asked.find((i) => i.chronological === true)!;
-    expect(latest).toMatchObject({ type: 'COMMUNITIES_AND_ASSOCIATIONS', chronological: true });
-    // A chronological read must not wipe the viewer's seen history.
-    expect(latest.clearHistory).toBe(false);
-    await expect(page.getByTestId('community-feed')).not.toContainText('MEMBER POST');
-    await expect(page.locator('[id^="feed-post-"]')).toHaveCount(3);
-    await page.context().close();
-});
-
 test('Following stays on the membership-scoped community feed', async () => {
     const asked: Array<Record<string, unknown>> = [];
     const { page, graphql } = await open(browser, '/community', { GetFeed: feedByType(asked) });
@@ -88,15 +73,16 @@ test('an empty community feed shows the empty state and never falls back to memb
     await page.context().close();
 });
 
-test('Home is unchanged: the unfiltered recommender feed, Latest = platform-wide ALL', async () => {
+test('Home: the unfiltered recommender feed, Latest = the viewer network newest-first', async () => {
     const asked: Array<Record<string, unknown>> = [];
     const { page, graphql } = await open(browser, '/home', { GetFeed: feedByType(asked) });
     await expect(page.locator('[id^="feed-post-"]')).toHaveCount(3, { timeout: 90_000 });
     expect(graphql.ops).toContain('RecommendedPosts');
     expect(asked.some((i) => i.type === 'COMMUNITIES_AND_ASSOCIATIONS')).toBe(false);
     await page.getByRole('tab', { name: 'Latest' }).click();
-    await expect.poll(() => asked.some((i) => i.type === 'ALL')).toBe(true);
-    expect(asked.some((i) => i.chronological === true)).toBe(false);
+    await expect.poll(() => asked.some((i) => i.type === 'NETWORK' && i.chronological === true)).toBe(true);
+    // A chronological read must not wipe the viewer's seen history (For you relies on it).
+    expect(asked.find((i) => i.type === 'NETWORK' && i.chronological === true)!.clearHistory).toBe(false);
     await expect(page.getByTestId('community-feed')).toContainText('MEMBER POST');
     await page.context().close();
 });
