@@ -1087,11 +1087,11 @@ export const ERASE_MY_ACCOUNT_DATA = gql`
       success
       message
       rowsDeleted {
-        interest_profile
-        interaction_log
-        feed_impression
-        user_block
-        user_membership
+        interestProfile
+        interactionLog
+        feedImpression
+        userBlock
+        userMembership
       }
     }
   }

@@ -212,11 +212,11 @@ export interface MyInterestProfileData {
  * when the user has nothing left to erase (idempotent re-run).
  */
 export interface EraseUserDataRowCounts {
-  interest_profile: number;
-  interaction_log: number;
-  feed_impression: number;
-  user_block: number;
-  user_membership: number;
+  interestProfile: number;
+  interactionLog: number;
+  feedImpression: number;
+  userBlock: number;
+  userMembership: number;
 }
 
 /**
