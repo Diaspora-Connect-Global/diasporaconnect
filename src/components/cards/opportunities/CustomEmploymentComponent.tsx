@@ -37,6 +37,14 @@ import { UserBadge } from "@/components/custom/userBadge";
 import { resolveUserTier } from "@/lib/userTier";
 
 import { compensationText } from '@/lib/compensation';
+import { Link } from '@/i18n/navigation';
+
+/**
+ * Upload category for application documents (CV, cover letter, attachments). The backend
+ * accepts `application_document` for applicant uploads so the poster may read them via a
+ * signed link; it used to be 'chat', which the poster could not open. Change it here only.
+ */
+const APPLICATION_UPLOAD_CATEGORY = 'application_document';
 const isUUID = (s?: string | null) =>
     !!s && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 
@@ -346,6 +354,8 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
 
     const isSaved = savedOverride ?? !!item.isSavedByCurrentUser;
     const hasApplied = item.hasCurrentUserApplied ?? false;
+    // Your own listing: there is nothing to apply to — manage the applicants instead (ids are only compared, never shown).
+    const isOwner = item.ownerType === 'USER' && !!item.ownerId && item.ownerId === user?.userId;
     const applicationId = item.currentUserApplicationId ?? null;
     const isExternalLinkMethod = item.applicationMethod === "EXTERNAL_LINK";
     const isEmailRequestMethod = item.applicationMethod === "EMAIL_REQUEST";
@@ -611,7 +621,7 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
                 const { data: uploadData } = await getUploadUrl({
                     variables: {
                         contentType,
-                        category: 'chat',
+                        category: APPLICATION_UPLOAD_CATEGORY,
                     },
                 });
 
@@ -819,7 +829,7 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
                     </div>
 
                     {/* Application Form — IN_PLATFORM_FORM only */}
-                    {isInPlatformFormMethod && !hasApplied && (
+                    {isInPlatformFormMethod && !hasApplied && !isOwner && (
                         <section className="py-4" id="form-header">
                             <p className="heading-xsmall text-lg font-semibold mb-1">{t("labels.applyForOpportunity")}</p>
                             <p className="text-sm text-text-secondary mb-4">
@@ -864,7 +874,15 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
                         <div className="bg-surface-tertiary w-full rounded-lg p-4 border border-border-subtle space-y-4">
                             {/* Action buttons */}
                             <div className="flex flex-col gap-2">
-                                {isExternalLinkMethod && item.externalLink && (
+                                {isOwner && (
+                                    <Link
+                                        href={`/opportunities/${encodeURIComponent(item.id)}/applicants`}
+                                        className="w-full px-6 py-3 bg-surface-brand text-text-white font-medium hover:opacity-90 transition-opacity flex items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
+                                    >
+                                        {t("labels.manageApplicants")}
+                                    </Link>
+                                )}
+                                {!isOwner && isExternalLinkMethod && item.externalLink && (
                                     <button
                                         type="button"
                                         className="w-full px-6 py-3 text-text-white bg-surface-brand font-medium cursor-pointer flex items-center justify-center gap-2 rounded-full hover:opacity-90 transition-opacity"
@@ -874,7 +892,7 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
                                         <ExternalLink className="w-4 h-4" />
                                     </button>
                                 )}
-                                {isEmailRequestMethod && item.applicationEmail && (
+                                {!isOwner && isEmailRequestMethod && item.applicationEmail && (
                                     <a
                                         href={`mailto:${item.applicationEmail}`}
                                         className="w-full px-6 py-3 text-text-white bg-surface-brand font-medium cursor-pointer flex items-center justify-center gap-2 rounded-full hover:opacity-90 transition-opacity"
@@ -884,7 +902,7 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
                                         <Mail className="w-4 h-4" />
                                     </a>
                                 )}
-                                {isInPlatformFormMethod && !hasApplied && (
+                                {!isOwner && isInPlatformFormMethod && !hasApplied && (
                                     <button
                                         type="button"
                                         onClick={(e) => { e.stopPropagation(); scrollToForm(); }}
@@ -893,7 +911,7 @@ export const CustomEmploymentComponent = ({ item, displayMode = 'card' }: Opport
                                         {t("labels.applyNow")}
                                     </button>
                                 )}
-                                {hasApplied && (
+                                {!isOwner && hasApplied && (
                                     <div className="flex flex-col gap-2">
                                         <p className="text-sm text-text-secondary text-center">{t("labels.alreadyApplied")}</p>
                                         {applicationId && (

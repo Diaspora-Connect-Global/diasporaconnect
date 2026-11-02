@@ -75,6 +75,8 @@ export const APP_ROUTE_PATTERNS: readonly string[] = [
   '/opportunities',
   '/people',
   '/opportunities/[id]',
+  '/opportunities/[id]/applicants',
+  '/opportunities/mine',
   '/post/[id]',
   '/posts/[id]',
   '/privacy',

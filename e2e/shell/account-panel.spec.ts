@@ -79,7 +79,7 @@ test.describe('account panel', () => {
             }),
         );
         expect(hrefs).toEqual([
-            '/en/profile', '/en/friends?tab=friends', '/en/saved', '/en/requests', '/en/wallet', '/en/settings', '/en/contact',
+            '/en/profile', '/en/friends?tab=friends', '/en/saved', '/en/requests', '/en/opportunities/mine', '/en/wallet', '/en/settings', '/en/contact',
             '/en/about', '/en/terms', '/en/privacy',
         ]);
         for (const h of hrefs) expect(isKnownAppPath(h.replace(/^\/en/, '')), h).toBe(true);

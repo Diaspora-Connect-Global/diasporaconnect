@@ -5,6 +5,7 @@ import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { useTranslations } from 'next-intl';
 import {
   BookmarkSimple,
+  Briefcase,
   CaretRight,
   ClipboardText,
   EnvelopeSimple,
@@ -30,7 +31,7 @@ import { MyAvatar } from './MyAvatar';
 const NAVY = 'text-[#1B2A5E]';
 const MUTED = 'text-[#5B6BA8]';
 
-type ItemKey = 'profile' | 'network' | 'saved' | 'requests' | 'wallet' | 'settings' | 'contact';
+type ItemKey = 'profile' | 'network' | 'saved' | 'requests' | 'listings' | 'wallet' | 'settings' | 'contact';
 
 type NavItem = {
   key: ItemKey;
@@ -51,6 +52,7 @@ const ACCOUNT_PANEL_ITEMS: readonly NavItem[] = [
   { key: 'network', href: '/friends?tab=friends', icon: Users },
   { key: 'saved', href: '/saved', icon: BookmarkSimple, isActive: (p) => p.startsWith('/saved') },
   { key: 'requests', href: '/requests', icon: ClipboardText, isActive: (p) => p.startsWith('/requests') },
+  { key: 'listings', href: '/opportunities/mine', icon: Briefcase, isActive: (p) => p.startsWith('/opportunities/mine') },
   { key: 'wallet', href: '/wallet', icon: Wallet, isActive: (p) => p.startsWith('/wallet') },
   { key: 'settings', href: '/settings', icon: GearSix, isActive: (p) => p.startsWith('/settings') },
   { key: 'contact', href: '/contact', icon: EnvelopeSimple, isActive: (p) => p.startsWith('/contact') },
