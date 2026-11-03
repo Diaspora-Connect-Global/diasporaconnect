@@ -7289,5 +7289,56 @@
       "HONORARIUM": "Honorarium",
       "NONE": "Onbetaald"
     }
+  },
+  "opportunityCategory": {
+    "eyebrow": "Kansen",
+    "descriptions": {
+      "EMPLOYMENT_CAREER": "Banen, stages en loopbaanprogramma's, thuis en in het buitenland.",
+      "EDUCATION_TRAINING": "Cursussen, certificaten, workshops en trainingen om je vaardigheden te versterken.",
+      "FUNDING_GRANTS": "Subsidies, fondsen en financiële steun voor mensen, projecten en ondernemingen.",
+      "FELLOWSHIPS_LEADERSHIP": "Fellowships en programma's die huidige en toekomstige leiders vormen.",
+      "BUSINESS_INVESTMENT": "Zakelijke kansen, samenwerkingen en investeringen om te steunen of je bij aan te sluiten.",
+      "VOLUNTEERING_SOCIAL_IMPACT": "Manieren om je tijd en talent in te zetten voor een doel waar je om geeft.",
+      "EVENT_CREATIVE_INDUSTRY": "Kansen in evenementen, kunst, media, muziek, mode en de creatieve economie.",
+      "AGRICULTURE_SUSTAINABILITY": "Landbouw-, agribusiness- en duurzaamheidsprojecten die mensen en partners zoeken.",
+      "REAL_ESTATE_INFRASTRUCTURE": "Vastgoed-, bouw- en infrastructuurprojecten en -kansen.",
+      "GOVERNMENT_EMBASSY_INITIATIVES": "Programma's en initiatieven van overheden en ambassades voor de diaspora.",
+      "INNOVATION_RESEARCH": "Onderzoeks-, technologie- en innovatieprojecten, oproepen en samenwerkingen.",
+      "FINANCE_ECONOMICS": "Financiële, bancaire en economische kansen voor de diaspora.",
+      "RETURN_REINTEGRATION": "Programma's en ondersteuning voor mensen die naar huis terugkeren en zich er opnieuw vestigen."
+    },
+    "others": "Ontdek andere categorieën",
+    "filters": {
+      "title": "Verfijnen",
+      "clearAll": "Alles wissen",
+      "type": "Type",
+      "typeAll": "Alle types",
+      "location": "Locatie",
+      "locationPlaceholder": "Stad of land",
+      "sortBy": "Sorteren op",
+      "sort": {
+        "newest": "Nieuwste",
+        "closing": "Sluit binnenkort"
+      },
+      "active": "{count, plural, one {# filter actief} other {# filters actief}}"
+    },
+    "results": {
+      "title": "Kansen",
+      "count": "{count, plural, one {# kans} other {# kansen}}",
+      "loading": "Kansen laden",
+      "showMore": "Meer tonen"
+    },
+    "empty": {
+      "title": "Nog geen kansen in “{category}”",
+      "description": "Hier is nog niets geplaatst. Kom snel terug of bekijk een andere categorie.",
+      "filteredTitle": "Niets komt overeen met deze filters",
+      "filteredDescription": "Probeer een ander type of een andere plaats, of wis de filters.",
+      "clear": "Filters wissen"
+    },
+    "error": {
+      "title": "Deze kansen konden niet worden geladen",
+      "description": "Controleer je verbinding en probeer het opnieuw.",
+      "retry": "Opnieuw proberen"
+    }
   }
 }

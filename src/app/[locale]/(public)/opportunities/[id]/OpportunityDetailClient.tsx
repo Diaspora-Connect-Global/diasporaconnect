@@ -1,33 +1,15 @@
 'use client';
-import { FilterableList } from '@/components/custom/filterableList';
-import { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, SearchX } from 'lucide-react';
 import { useQuery } from '@apollo/client/react';
 import { moreOpportunitiesIDList } from './data';
 import { useTranslations } from 'next-intl';
-import { LIST_OPPORTUNITIES, GET_OPPORTUNITY } from '@/services/gql/opportunities';
-import type { ListOpportunitiesResponse, GetOpportunityData } from '@/services/gql/types/opportunities';
-import type { Opportunity } from '@/services/gql/types/opportunities';
+import { GET_OPPORTUNITY } from '@/services/gql/opportunities';
+import type { GetOpportunityData } from '@/services/gql/types/opportunities';
 import PageLoader from '@/components/custom/PageLoader';
 import OpportunityDetailView from '@/components/opportunities/page/OpportunityDetailView';
+import { OpportunityCategoryView } from '@/components/opportunities/category/OpportunityCategoryView';
 import { Link } from '@/i18n/navigation';
-
-const CATEGORY_SLUG_TO_API: Record<string, string> = {
-    'employment-career': 'EMPLOYMENT_CAREER',
-    'education-training': 'EDUCATION_TRAINING',
-    'funding-grants': 'FUNDING_GRANTS',
-    'fellowships-leadership': 'FELLOWSHIPS_LEADERSHIP',
-    'business-investment': 'BUSINESS_INVESTMENT',
-    'volunteering-social-impact': 'VOLUNTEERING_SOCIAL_IMPACT',
-    'event-creative-industry': 'EVENT_CREATIVE_INDUSTRY',
-    'agriculture-sustainability': 'AGRICULTURE_SUSTAINABILITY',
-    'real-estate-infrastructure': 'REAL_ESTATE_INFRASTRUCTURE',
-    'government-embassy-initiatives': 'GOVERNMENT_EMBASSY_INITIATIVES',
-    'innovation-research': 'INNOVATION_RESEARCH',
-    'finance-economics': 'FINANCE_ECONOMICS',
-    'return-reintegration': 'RETURN_REINTEGRATION',
-};
 
 export default function OpportunityId() {
     const t = useTranslations('home.opportunities.notFound');
@@ -39,33 +21,17 @@ export default function OpportunityId() {
     // Only a real id is looked up: anything else (a mistyped slug) is "not found" without a request,
     // since every failed lookup counts toward the gateway's circuit breaker for all users.
     const isOpportunityId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(opportunityId);
-    const apiCategory = listConfig ? CATEGORY_SLUG_TO_API[opportunityId] ?? undefined : undefined;
-
-    const [filteredItems, setFilteredItems] = useState<Opportunity[]>([]);
-
-    const { data: listData, loading: listLoading } = useQuery<ListOpportunitiesResponse>(LIST_OPPORTUNITIES, {
-        variables: {
-            input: apiCategory
-                ? { category: apiCategory, limit: 50, offset: 0 }
-                : undefined,
-        },
-        skip: !apiCategory,
-    });
 
     const { data: singleData, loading: singleLoading } = useQuery<GetOpportunityData>(GET_OPPORTUNITY, {
         variables: { id: opportunityId },
         skip: !!listConfig || !isOpportunityId,
     });
 
-    const items = useMemo<Opportunity[]>(
-        () => listData?.listOpportunities?.opportunities ?? [],
-        [listData?.listOpportunities?.opportunities]
-    );
     const singleOpportunity = singleData?.getOpportunity ?? null;
 
-    useEffect(() => {
-        setFilteredItems(items);
-    }, [items]);
+    if (listConfig) {
+        return <OpportunityCategoryView config={listConfig} />;
+    }
 
     if (!listConfig) {
         if (singleLoading) {
@@ -99,20 +65,4 @@ export default function OpportunityId() {
         }
         return <OpportunityDetailView item={singleOpportunity} />;
     }
-
-    if (listLoading && !listData) {
-        return <PageLoader />;
-    }
-
-    return (
-        <div className=' h-app-inner  overflow-y-auto scrollbar-hide '>
-            <FilterableList
-                items={items}
-                filteredItems={filteredItems}
-                setFilteredItems={setFilteredItems}
-                listConfig={listConfig}
-                title={listConfig.title}
-            />
-        </div>
-    );
 }
