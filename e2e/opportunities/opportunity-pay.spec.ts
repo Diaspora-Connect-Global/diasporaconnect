@@ -1,7 +1,7 @@
 /**
  * Opportunity pay (compensationMin / compensationMax) is INTEGER MINOR units (x100) on the
  * wire, 64-bit on the backend (GraphQL Float). Every live display divides by 100 exactly
- * once: the public opportunity page (CustomEmploymentComponent), the search results and the
+ * once: the public opportunity page (OpportunityDetailView), the search results and the
  * JobPosting structured data. The web has no salary input, so there is no x100 here.
  *
  *   E2E_BASE_URL=http://localhost:3112 npx playwright test e2e/opportunities
@@ -86,7 +86,7 @@ async function openOpportunity(o: Record<string, unknown>): Promise<Page> {
 test('opportunity page shows the pay divided by 100 once, past int32 (5e10 minor units = $500,000,000.00)', async () => {
     const page = await openOpportunity(opportunity());
     const body = page.locator('body');
-    await expect(body).toContainText(/\$500,000,000\.00\s*–\s*\$750,000,000\.00 \(salary\)/);
+    await expect(page.getByTestId('facts-card')).toContainText(/\$500,000,000\.00\s*–\s*\$750,000,000\.00 · Salary/);
     await expect(body).not.toContainText('50,000,000,000'); // never the raw minor-unit figure
     expect(await body.innerText()).not.toMatch(UUID_RE);
     await page.context().close();
@@ -94,11 +94,11 @@ test('opportunity page shows the pay divided by 100 once, past int32 (5e10 minor
 
 test('one bound, and no pay at all, on the opportunity page', async () => {
     const from = await openOpportunity(opportunity({ compensationMin: 150050, compensationMax: null }));
-    await expect(from.locator('body')).toContainText('$1,500.50+ (salary)');
+    await expect(from.getByTestId('facts-card')).toContainText('From $1,500.50 · Salary');
     await from.context().close();
 
     const none = await openOpportunity(opportunity({ compensationMin: null, compensationMax: null }));
-    await expect(none.locator('body')).not.toContainText('(salary)');
+    await expect(none.getByTestId('facts-card')).not.toContainText('Salary');
     await none.context().close();
 });
 

@@ -70,7 +70,8 @@ test('opportunity page shows the pay divided by 100 once, past int32 (5e10 minor
     const { page } = await open(browser, `/opportunities/${OPP_ID}`, { GetOpportunity: { getOpportunity: opportunity() } });
     await expect(page.getByText('Seed round for a cocoa processor').first()).toBeVisible({ timeout: 90_000 });
     const body = page.locator('body');
-    await expect(body).toContainText(/\$500,000,000\.00\s*–\s*\$750,000,000\.00 \(salary\)/);
+    // "At a glance" carries the amount and the kind of pay.
+    await expect(page.getByTestId('facts-card')).toContainText(/\$500,000,000\.00\s*–\s*\$750,000,000\.00 · Salary/);
     // Never the raw minor-unit figure, never x100 again.
     await expect(body).not.toContainText('50,000,000,000');
     await expect(body).not.toContainText('5,000,000,000');
@@ -82,14 +83,16 @@ test('one bound and no pay on the opportunity page', async () => {
     const from = await open(browser, `/opportunities/${OPP_ID}`, {
         GetOpportunity: { getOpportunity: opportunity({ compensationMax: null, compensationMin: 150050 }) },
     });
-    await expect(from.page.locator('body')).toContainText('$1,500.50+ (salary)', { timeout: 90_000 });
+    await expect(from.page.getByTestId('facts-card')).toContainText('From $1,500.50 · Salary', { timeout: 90_000 });
     await from.page.context().close();
 
     const none = await open(browser, `/opportunities/${OPP_ID}`, {
         GetOpportunity: { getOpportunity: opportunity({ compensationMin: null, compensationMax: null }) },
     });
     await expect(none.page.getByText('Seed round for a cocoa processor').first()).toBeVisible({ timeout: 90_000 });
-    await expect(none.page.locator('body')).not.toContainText('(salary)');
+    await expect(none.page.getByTestId('facts-card')).toBeVisible();
+    await expect(none.page.getByTestId('facts-card')).not.toContainText('Salary');
+    await expect(none.page.getByTestId('facts-card')).not.toContainText('Pay');
     await none.page.context().close();
 });
 
