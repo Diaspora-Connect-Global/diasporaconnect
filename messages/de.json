@@ -7419,5 +7419,56 @@
       "description": "Bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
       "retry": "Erneut versuchen"
     }
+  },
+  "walletPage": {
+    "title": "Wallet",
+    "subtitle": "Deine Zahlungen und ihr Status.",
+    "refresh": "Wallet aktualisieren",
+    "withdraw": "Abheben",
+    "withdrawNote": "Auszahlungen gelten für die Einnahmen von Verkäufern. Was du bezahlst, wird bis zum Abschluss der Bestellung treuhänderisch verwahrt – hier gibt es nichts abzuheben.",
+    "withdrawChecking": "Wir prüfen, ob du ein Verkäuferkonto hast…",
+    "summary": {
+      "label": "Zahlungsübersicht",
+      "totalPaid": "Insgesamt bezahlt",
+      "totalPaidHint": "Bestätigte Zahlungen",
+      "pending": "Zahlung ausstehend",
+      "pendingHint": "Gestartet, noch nicht bestätigt",
+      "hideAmounts": "Beträge ausblenden",
+      "showAmounts": "Beträge anzeigen",
+      "capped": "Basierend auf deinen letzten {count} Zahlungen."
+    },
+    "history": {
+      "title": "Zahlungsverlauf",
+      "filterLabel": "Nach Status filtern",
+      "filters": {
+        "all": "Alle",
+        "paid": "Bezahlt",
+        "pending": "Ausstehend",
+        "failed": "Fehlgeschlagen"
+      },
+      "status": {
+        "paid": "Bezahlt",
+        "pending": "Ausstehend",
+        "failed": "Fehlgeschlagen",
+        "cancelled": "Storniert"
+      },
+      "purposes": {
+        "PRODUCT_ORDER": "Produktbestellung",
+        "SERVICE_ORDER": "Dienstleistungsbestellung",
+        "EVENT_TICKET": "Event-Ticket",
+        "OTHER": "Zahlung"
+      },
+      "loading": "Zahlungen werden geladen",
+      "errorTitle": "Deine Zahlungen konnten nicht geladen werden",
+      "errorDescription": "Bitte prüfe deine Verbindung und versuche es erneut.",
+      "retry": "Erneut versuchen",
+      "emptyTitle": "Noch keine Zahlungen",
+      "emptyDescription": "Zahlungen für Bestellungen und Tickets erscheinen hier.",
+      "emptyFilteredTitle": "Keine Zahlungen mit diesem Status",
+      "pagination": "Zahlungsseiten",
+      "prev": "Zurück",
+      "next": "Weiter",
+      "pageOf": "Seite {page} von {total}"
+    }
   }
 }

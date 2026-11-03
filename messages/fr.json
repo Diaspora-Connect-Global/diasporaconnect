@@ -7419,5 +7419,56 @@
       "description": "Vérifiez votre connexion et réessayez.",
       "retry": "Réessayer"
     }
+  },
+  "walletPage": {
+    "title": "Portefeuille",
+    "subtitle": "Vos paiements et leur état.",
+    "refresh": "Actualiser le portefeuille",
+    "withdraw": "Retirer",
+    "withdrawNote": "Les retraits concernent les gains des vendeurs. Ce que vous payez est conservé sous séquestre jusqu'à la fin de la commande : il n'y a donc rien à retirer ici.",
+    "withdrawChecking": "Vérification de votre compte vendeur…",
+    "summary": {
+      "label": "Résumé des paiements",
+      "totalPaid": "Total payé",
+      "totalPaidHint": "Paiements confirmés",
+      "pending": "En attente de paiement",
+      "pendingHint": "Commencés, pas encore confirmés",
+      "hideAmounts": "Masquer les montants",
+      "showAmounts": "Afficher les montants",
+      "capped": "Basé sur vos {count} derniers paiements."
+    },
+    "history": {
+      "title": "Historique des paiements",
+      "filterLabel": "Filtrer par statut",
+      "filters": {
+        "all": "Tous",
+        "paid": "Payés",
+        "pending": "En attente",
+        "failed": "Échoués"
+      },
+      "status": {
+        "paid": "Payé",
+        "pending": "En attente",
+        "failed": "Échoué",
+        "cancelled": "Annulé"
+      },
+      "purposes": {
+        "PRODUCT_ORDER": "Commande de produit",
+        "SERVICE_ORDER": "Commande de service",
+        "EVENT_TICKET": "Billet d'événement",
+        "OTHER": "Paiement"
+      },
+      "loading": "Chargement des paiements",
+      "errorTitle": "Impossible de charger vos paiements",
+      "errorDescription": "Vérifiez votre connexion et réessayez.",
+      "retry": "Réessayer",
+      "emptyTitle": "Aucun paiement pour le moment",
+      "emptyDescription": "Les paiements de vos commandes et billets apparaîtront ici.",
+      "emptyFilteredTitle": "Aucun paiement avec ce statut",
+      "pagination": "Pages de paiements",
+      "prev": "Précédent",
+      "next": "Suivant",
+      "pageOf": "Page {page} sur {total}"
+    }
   }
 }

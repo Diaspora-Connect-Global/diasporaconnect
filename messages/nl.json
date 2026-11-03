@@ -7419,5 +7419,56 @@
       "description": "Controleer je verbinding en probeer het opnieuw.",
       "retry": "Opnieuw proberen"
     }
+  },
+  "walletPage": {
+    "title": "Portemonnee",
+    "subtitle": "Je betalingen en hun status.",
+    "refresh": "Portemonnee vernieuwen",
+    "withdraw": "Opnemen",
+    "withdrawNote": "Opnames zijn voor de verdiensten van verkopers. Wat je betaalt, wordt in escrow bewaard tot de bestelling is afgerond, dus hier valt niets op te nemen.",
+    "withdrawChecking": "We controleren of je een verkopersaccount hebt…",
+    "summary": {
+      "label": "Overzicht van betalingen",
+      "totalPaid": "Totaal betaald",
+      "totalPaidHint": "Bevestigde betalingen",
+      "pending": "Wacht op betaling",
+      "pendingHint": "Gestart, nog niet bevestigd",
+      "hideAmounts": "Bedragen verbergen",
+      "showAmounts": "Bedragen tonen",
+      "capped": "Gebaseerd op je laatste {count} betalingen."
+    },
+    "history": {
+      "title": "Betalingsgeschiedenis",
+      "filterLabel": "Filter op status",
+      "filters": {
+        "all": "Alle",
+        "paid": "Betaald",
+        "pending": "In behandeling",
+        "failed": "Mislukt"
+      },
+      "status": {
+        "paid": "Betaald",
+        "pending": "In behandeling",
+        "failed": "Mislukt",
+        "cancelled": "Geannuleerd"
+      },
+      "purposes": {
+        "PRODUCT_ORDER": "Productbestelling",
+        "SERVICE_ORDER": "Dienstbestelling",
+        "EVENT_TICKET": "Evenementticket",
+        "OTHER": "Betaling"
+      },
+      "loading": "Betalingen laden",
+      "errorTitle": "Je betalingen konden niet worden geladen",
+      "errorDescription": "Controleer je verbinding en probeer het opnieuw.",
+      "retry": "Opnieuw proberen",
+      "emptyTitle": "Nog geen betalingen",
+      "emptyDescription": "Betalingen voor bestellingen en tickets verschijnen hier.",
+      "emptyFilteredTitle": "Geen betalingen met deze status",
+      "pagination": "Betalingspagina's",
+      "prev": "Vorige",
+      "next": "Volgende",
+      "pageOf": "Pagina {page} van {total}"
+    }
   }
 }

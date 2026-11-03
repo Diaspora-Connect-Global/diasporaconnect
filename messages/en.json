@@ -7419,5 +7419,56 @@
       "description": "Please check your connection and try again.",
       "retry": "Try again"
     }
+  },
+  "walletPage": {
+    "title": "Wallet",
+    "subtitle": "Your payments and where they stand.",
+    "refresh": "Refresh wallet",
+    "withdraw": "Withdraw",
+    "withdrawNote": "Withdrawals are for sellers' earnings. What you pay is held in escrow until the order is complete, so there is nothing to withdraw here.",
+    "withdrawChecking": "Checking whether you have a seller account…",
+    "summary": {
+      "label": "Payment summary",
+      "totalPaid": "Total paid",
+      "totalPaidHint": "Confirmed payments",
+      "pending": "Awaiting payment",
+      "pendingHint": "Started, not yet confirmed",
+      "hideAmounts": "Hide amounts",
+      "showAmounts": "Show amounts",
+      "capped": "Based on your latest {count} payments."
+    },
+    "history": {
+      "title": "Payment history",
+      "filterLabel": "Filter by status",
+      "filters": {
+        "all": "All",
+        "paid": "Paid",
+        "pending": "Pending",
+        "failed": "Failed"
+      },
+      "status": {
+        "paid": "Paid",
+        "pending": "Pending",
+        "failed": "Failed",
+        "cancelled": "Cancelled"
+      },
+      "purposes": {
+        "PRODUCT_ORDER": "Product order",
+        "SERVICE_ORDER": "Service order",
+        "EVENT_TICKET": "Event ticket",
+        "OTHER": "Payment"
+      },
+      "loading": "Loading payments",
+      "errorTitle": "We couldn't load your payments",
+      "errorDescription": "Please check your connection and try again.",
+      "retry": "Try again",
+      "emptyTitle": "No payments yet",
+      "emptyDescription": "Payments you make for orders and tickets will appear here.",
+      "emptyFilteredTitle": "No payments with this status",
+      "pagination": "Payment pages",
+      "prev": "Previous",
+      "next": "Next",
+      "pageOf": "Page {page} of {total}"
+    }
   }
 }
