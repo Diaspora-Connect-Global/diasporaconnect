@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { ArrowRight, ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { ICON_CHIP_CLASS } from '@/components/more/MoreLinkCard';
 import { CATEGORY_PHOTOS } from '@/lib/redesignImages';
-import { DISCOVER_CATEGORY_KEYS, DISCOVER_ICONS, DISCOVER_TONES, type DiscoverCategoryKey, type DiscoverSort } from './discoverCategories';
+import { DISCOVER_CATEGORY_KEYS, DISCOVER_ICONS, DISCOVER_TONES, type DiscoverCategoryKey, type DiscoverSort, type DiscoverViewKey } from './discoverCategories';
 
 /**
  * "Refine your search": category checkboxes, a free-text location and the sort
@@ -22,7 +22,7 @@ export function RefinePanel({
   onSort,
   onClear,
 }: {
-  categories: readonly DiscoverCategoryKey[];
+  categories: readonly DiscoverViewKey[];
   location: string;
   sort: DiscoverSort;
   onToggleCategory: (key: DiscoverCategoryKey) => void;

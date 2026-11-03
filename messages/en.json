@@ -4843,6 +4843,10 @@
       "events": "Events",
       "products": "Products",
       "jobs": "Jobs",
+      "scholarships": "Scholarships",
+      "grants": "Grants",
+      "programs": "Programmes",
+      "volunteering": "Volunteering",
       "investments": "Investments",
       "realEstate": "Real estate"
     },
@@ -4853,7 +4857,23 @@
       },
       "jobs": {
         "title": "Newest jobs",
-        "subtitle": "Recently posted employment opportunities."
+        "subtitle": "Recently posted jobs and contract roles."
+      },
+      "scholarships": {
+        "title": "Scholarships & fellowships",
+        "subtitle": "Funded places to study, research and lead."
+      },
+      "grants": {
+        "title": "Grants",
+        "subtitle": "Funding you can apply for."
+      },
+      "programs": {
+        "title": "Programmes & initiatives",
+        "subtitle": "Programmes, accelerators and initiatives you can join."
+      },
+      "volunteering": {
+        "title": "Volunteering",
+        "subtitle": "Ways to give your time and skills."
       },
       "services": {
         "title": "Services",
@@ -4881,7 +4901,7 @@
       },
       "forYou": {
         "title": "For you",
-        "subtitle": "Picked from your communities, interests, skills and where you live."
+        "subtitle": "Opportunities of every kind, picked from your communities, interests, skills and where you live."
       }
     },
     "refine": {

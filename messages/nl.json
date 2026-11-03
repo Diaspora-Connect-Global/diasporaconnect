@@ -4843,6 +4843,10 @@
       "events": "Evenementen",
       "products": "Producten",
       "jobs": "Banen",
+      "scholarships": "Beurzen",
+      "grants": "Subsidies",
+      "programs": "Programma’s",
+      "volunteering": "Vrijwilligerswerk",
       "investments": "Investeringen",
       "realEstate": "Vastgoed"
     },
@@ -4853,7 +4857,23 @@
       },
       "jobs": {
         "title": "Nieuwste banen",
-        "subtitle": "Recent geplaatste vacatures."
+        "subtitle": "Recent geplaatste banen en opdrachten."
+      },
+      "scholarships": {
+        "title": "Beurzen & fellowships",
+        "subtitle": "Gefinancierde plekken om te studeren, onderzoek te doen en leiding te geven."
+      },
+      "grants": {
+        "title": "Subsidies",
+        "subtitle": "Financiering waarvoor je kunt aanvragen."
+      },
+      "programs": {
+        "title": "Programma’s & initiatieven",
+        "subtitle": "Programma’s, accelerators en initiatieven om aan mee te doen."
+      },
+      "volunteering": {
+        "title": "Vrijwilligerswerk",
+        "subtitle": "Manieren om je tijd en vaardigheden te geven."
       },
       "services": {
         "title": "Diensten",
@@ -4881,7 +4901,7 @@
       },
       "forYou": {
         "title": "Voor jou",
-        "subtitle": "Gekozen op basis van je community’s, interesses, vaardigheden en waar je woont."
+        "subtitle": "Allerlei kansen, gekozen op basis van je community’s, interesses, vaardigheden en waar je woont."
       }
     },
     "refine": {

@@ -4843,6 +4843,10 @@
       "events": "Veranstaltungen",
       "products": "Produkte",
       "jobs": "Jobs",
+      "scholarships": "Stipendien",
+      "grants": "Förderungen",
+      "programs": "Programme",
+      "volunteering": "Ehrenamt",
       "investments": "Investitionen",
       "realEstate": "Immobilien"
     },
@@ -4853,7 +4857,23 @@
       },
       "jobs": {
         "title": "Neueste Jobs",
-        "subtitle": "Kürzlich veröffentlichte Stellenangebote."
+        "subtitle": "Kürzlich veröffentlichte Stellen und Aufträge."
+      },
+      "scholarships": {
+        "title": "Stipendien & Fellowships",
+        "subtitle": "Geförderte Plätze für Studium, Forschung und Führung."
+      },
+      "grants": {
+        "title": "Förderungen",
+        "subtitle": "Fördermittel, auf die du dich bewerben kannst."
+      },
+      "programs": {
+        "title": "Programme & Initiativen",
+        "subtitle": "Programme, Accelerators und Initiativen zum Mitmachen."
+      },
+      "volunteering": {
+        "title": "Ehrenamt",
+        "subtitle": "Möglichkeiten, deine Zeit und Fähigkeiten einzubringen."
       },
       "services": {
         "title": "Dienste",
@@ -4881,7 +4901,7 @@
       },
       "forYou": {
         "title": "Für dich",
-        "subtitle": "Ausgewählt nach deinen Communities, Interessen, Fähigkeiten und deinem Wohnort."
+        "subtitle": "Möglichkeiten aller Art, ausgewählt nach deinen Communities, Interessen, Fähigkeiten und deinem Wohnort."
       }
     },
     "refine": {

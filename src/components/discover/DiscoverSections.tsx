@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
+import { Fragment, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
 import { useQuery } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
 import { Section } from '@/components/redesign/Section';
@@ -19,7 +19,7 @@ import {
   type RecommendedServicesData,
 } from '@/services/gql/recommendations';
 import { RecommendationReasons } from '@/components/redesign/RecommendationReasons';
-import type { DiscoverCategoryKey, DiscoverSort } from './discoverCategories';
+import { OPPORTUNITY_SOURCES, type DiscoverCategoryKey, type DiscoverSort, type OpportunityKey } from './discoverCategories';
 
 // opportunity-service accepts only CREATED_AT | DEADLINE | COMPENSATION | RELEVANCE and refuses
 // anything else with an INTERNAL error, which the gateway's circuit breaker counts as an outage.
@@ -28,16 +28,34 @@ const SORT_INPUT: Record<DiscoverSort, { sortBy: OpportunitySortBy; sortOrder: '
   closing: { sortBy: 'DEADLINE', sortOrder: 'ASC' },
 };
 
-type OppKey = 'jobs' | 'investments' | 'realEstate';
-const OPP_SOURCE: Record<OppKey, { type?: string; category?: string }> = {
-  jobs: { type: 'EMPLOYMENT' },
-  investments: { type: 'INVESTMENT' },
-  realEstate: { category: 'REAL_ESTATE_INFRASTRUCTURE' },
+const time = (iso?: string | null) => {
+  const t = iso ? new Date(iso).getTime() : NaN;
+  return Number.isNaN(t) ? null : t;
 };
+const byNewest = (a: OpportunityItem, b: OpportunityItem) => (time(b.createdAt) ?? 0) - (time(a.createdAt) ?? 0);
+// Same order as the server's DEADLINE ASC: soonest first, no deadline last.
+const byClosing = (a: OpportunityItem, b: OpportunityItem) => (time(a.deadline) ?? Infinity) - (time(b.deadline) ?? Infinity);
 
-/** One place builds the opportunity query, so the "Latest" row and the sections share Apollo's cache (one request each). */
-function oppInput(k: OppKey, location: string, sort: DiscoverSort, limit: number) {
-  return { ...OPP_SOURCE[k], location: location || undefined, limit, ...SORT_INPUT[sort] };
+/**
+ * The opportunities one row lists. The query takes one `type` at a time, so a
+ * two-type row (jobs = EMPLOYMENT + CONTRACT) sends two requests and merges them
+ * in the row's order. One place builds the input, so the "Latest" row and the
+ * sections share Apollo's cache (one request per type).
+ */
+function useOpportunityRow(k: OpportunityKey, location: string, sort: DiscoverSort, limit: number, skip = false): OpportunityItem[] {
+  const { types = [], category } = OPPORTUNITY_SOURCES[k];
+  const base = { ...(category ? { category } : {}), location: location || undefined, limit, ...SORT_INPUT[sort] };
+  const first = useOpportunities(types[0] ? { ...base, type: types[0] } : base, skip);
+  const second = useOpportunities({ ...base, type: types[1] ?? types[0] }, skip || types.length < 2);
+  const pair = types.length > 1;
+  return useMemo(() => {
+    if (!pair) return first.items;
+    const seen = new Set<string>();
+    return [...first.items, ...second.items]
+      .filter((o) => !seen.has(o.id) && !!seen.add(o.id))
+      .sort(sort === 'closing' ? byClosing : byNewest)
+      .slice(0, limit);
+  }, [pair, first.items, second.items, sort, limit]);
 }
 
 /**
@@ -90,13 +108,44 @@ function Frame({ k, count, onViewAll, expanded, children }: { k: DiscoverCategor
   );
 }
 
-export function OpportunitySection({ k, location, sort, limit, shown, expanded, onViewAll, exclude }: Common & { k: OppKey; location: string; sort: DiscoverSort }) {
-  const { items: all } = useOpportunities(oppInput(k, location, sort, limit));
+export function OpportunitySection({ k, location, sort, limit, shown, expanded, onViewAll, exclude }: Common & { k: OpportunityKey; location: string; sort: DiscoverSort }) {
+  const all = useOpportunityRow(k, location, sort, limit);
   const items = keep(all, exclude, shown);
   const Card = k === 'jobs' ? JobCard : OpportunityCard;
   return (
     <Frame k={k} count={items.length} onViewAll={onViewAll} expanded={expanded}>
       <Grid overview={!expanded} listRows={k === 'jobs'}>{items.map((o) => <Card key={o.id} item={o} testId={`discover-card-${k}`} />)}</Grid>
+    </Frame>
+  );
+}
+
+export type RecommendedOpportunity = OpportunityItem & { reasons?: string[] | null };
+
+/**
+ * The viewer's recommended opportunities, every type, ranked on the server
+ * (`[]` while loading, on error or when not asked for). Read at page level so
+ * the cards it shows can be left out of the rows below.
+ */
+export function useRecommendedOpportunities(limit: number, enabled: boolean): RecommendedOpportunity[] {
+  const { data } = useQuery<RecommendedOpportunitiesData>(RECOMMENDED_OPPORTUNITIES, { variables: { limit }, fetchPolicy: 'cache-first', skip: !enabled, ...SILENT });
+  return useMemo(
+    () => (enabled ? (data?.recommendedOpportunities?.opportunities ?? []).filter((o): o is RecommendedOpportunity => !!o?.id && !!o.title) : []),
+    [data, enabled],
+  );
+}
+
+/** Discover's "For you": the viewer's recommended opportunities — jobs, scholarships, grants… — each saying why. Hidden when empty. */
+export function RecommendedOpportunitiesSection({ items, expanded, onViewAll }: { items: RecommendedOpportunity[]; expanded: boolean; onViewAll: () => void }) {
+  return (
+    <Frame k="forYou" count={items.length} onViewAll={onViewAll} expanded={expanded}>
+      <Grid overview={!expanded}>
+        {items.map((o) => (
+          <Fragment key={o.id}>
+            <OpportunityCard item={o} testId="discover-foryou-opportunities" />
+            <RecommendationReasons codes={o.reasons} />
+          </Fragment>
+        ))}
+      </Grid>
     </Frame>
   );
 }
@@ -226,22 +275,22 @@ export function ForYouRail({ kinds, className }: { kinds: readonly ForYouKind[];
  * sections, so a card never appears twice — and never disappears either.
  */
 export function useLatestMix(limit: number, enabled: boolean): MixEntry[] {
-  const realEstate = useOpportunities(oppInput('realEstate', '', 'newest', limit), !enabled);
+  const realEstate = useOpportunityRow('realEstate', '', 'newest', limit, !enabled);
   const services = useFeaturedServices(limit, !enabled);
-  const investments = useOpportunities(oppInput('investments', '', 'newest', limit), !enabled);
-  const jobs = useOpportunities(oppInput('jobs', '', 'newest', limit), !enabled);
+  const investments = useOpportunityRow('investments', '', 'newest', limit, !enabled);
+  const jobs = useOpportunityRow('jobs', '', 'newest', limit, !enabled);
   return useMemo(() => {
     if (!enabled) return [];
-    const opp = (o: OpportunityItem | undefined, k: OppKey): MixEntry | null => (o ? { id: o.id, node: <OpportunityCard item={o} testId={`discover-latest-${k}`} /> } : null);
+    const opp = (o: OpportunityItem | undefined, k: OpportunityKey): MixEntry | null => (o ? { id: o.id, node: <OpportunityCard item={o} testId={`discover-latest-${k}`} /> } : null);
     const s = services.items[0];
     const entries = [
-      opp(realEstate.items[0], 'realEstate'),
+      opp(realEstate[0], 'realEstate'),
       s ? { id: s.id, node: <ServiceCard item={s} testId="discover-latest-services" /> } : null,
-      opp(investments.items[0], 'investments'),
-      opp(jobs.items[0], 'jobs'),
+      opp(investments[0], 'investments'),
+      opp(jobs[0], 'jobs'),
     ].filter((e): e is MixEntry => e !== null);
     return entries;
-  }, [enabled, realEstate.items, services.items, investments.items, jobs.items]);
+  }, [enabled, realEstate, services.items, investments, jobs]);
 }
 
 /** Cards the Latest row can show without hiding any: 2×2 on phones, one row of 3 or 4 beside the rail. */

@@ -4843,6 +4843,10 @@
       "events": "Eventi",
       "products": "Prodotti",
       "jobs": "Lavoro",
+      "scholarships": "Borse di studio",
+      "grants": "Sovvenzioni",
+      "programs": "Programmi",
+      "volunteering": "Volontariato",
       "investments": "Investimenti",
       "realEstate": "Immobiliare"
     },
@@ -4853,7 +4857,23 @@
       },
       "jobs": {
         "title": "Ultimi lavori",
-        "subtitle": "Opportunità di lavoro pubblicate di recente."
+        "subtitle": "Lavori e incarichi pubblicati di recente."
+      },
+      "scholarships": {
+        "title": "Borse di studio & fellowship",
+        "subtitle": "Posti finanziati per studiare, fare ricerca e guidare."
+      },
+      "grants": {
+        "title": "Sovvenzioni",
+        "subtitle": "Finanziamenti a cui puoi candidarti."
+      },
+      "programs": {
+        "title": "Programmi & iniziative",
+        "subtitle": "Programmi, acceleratori e iniziative a cui partecipare."
+      },
+      "volunteering": {
+        "title": "Volontariato",
+        "subtitle": "Modi per donare il tuo tempo e le tue competenze."
       },
       "services": {
         "title": "Servizi",
@@ -4881,7 +4901,7 @@
       },
       "forYou": {
         "title": "Per te",
-        "subtitle": "Scelti in base alle tue comunità, ai tuoi interessi, alle tue competenze e a dove vivi."
+        "subtitle": "Opportunità di ogni tipo, scelte in base alle tue comunità, ai tuoi interessi, alle tue competenze e a dove vivi."
       }
     },
     "refine": {

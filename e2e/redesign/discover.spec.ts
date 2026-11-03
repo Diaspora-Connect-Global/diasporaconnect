@@ -151,7 +151,11 @@ test('Refine: location and sort change the real query', async () => {
     await page.getByLabel('Location').fill('Accra');
     await page.getByLabel('Location').press('Enter');
     await expect(page).toHaveURL(/loc=Accra/);
-    await expect.poll(() => [...graphql.calls].reverse().find((c) => c.name === 'ListOpportunities')?.variables).toMatchObject({ input: { type: 'EMPLOYMENT', location: 'Accra', sortBy: 'DEADLINE', sortOrder: 'ASC' } });
+    // Jobs = EMPLOYMENT + CONTRACT: one request per type, both carrying the filters.
+    const last = (type: string) => [...graphql.calls].reverse().find((c) => c.name === 'ListOpportunities' && (c.variables.input as { type?: string })?.type === type)?.variables;
+    for (const type of ['EMPLOYMENT', 'CONTRACT']) {
+        await expect.poll(() => last(type)).toMatchObject({ input: { type, location: 'Accra', sortBy: 'DEADLINE', sortOrder: 'ASC' } });
+    }
     await page.context().close();
 });
 
@@ -186,25 +190,52 @@ const recEvent = {
     locationDetails: { __typename: 'EventLocationDetails', type: 'physical', venueName: 'Hub', city: 'Accra', country: 'Ghana', virtualLink: null },
 };
 const FOR_YOU = {
-    RecommendedEvents: { recommendedEvents: [{ __typename: 'RecommendedEventGQL', reasons: ['NEAR_YOU', 'STARTING_SOON'], event: recEvent }] },
-    RecommendedOpportunities: { recommendedOpportunities: { __typename: 'OpportunityList', opportunities: [{ ...job(9), isSavedByCurrentUser: false, compensationMin: null, compensationMax: null, compensationCurrency: null, commitmentType: null, reasons: ['MATCHES_SKILLS', 'NOT_A_REAL_CODE'] }] } },
+    // Job 2 is also in Newest jobs: shown here, it must not repeat there.
+    RecommendedOpportunities: {
+        recommendedOpportunities: {
+            __typename: 'OpportunityList',
+            opportunities: [
+                { ...job(2), isSavedByCurrentUser: false, compensationMin: null, compensationMax: null, compensationCurrency: null, commitmentType: null, reasons: ['MATCHES_SKILLS', 'NOT_A_REAL_CODE'] },
+                { ...job(9, { title: 'Chevening scholarship', type: 'SCHOLARSHIP', category: 'EDUCATION_TRAINING' }), isSavedByCurrentUser: false, reasons: ['NEAR_YOU'] },
+            ],
+        },
+    },
+    // Discover's For you is opportunities only: the other recommenders are not shown (or asked) here.
+    RecommendedEvents: { recommendedEvents: [{ __typename: 'RecommendedEventGQL', reasons: ['NEAR_YOU'], event: recEvent }] },
     RecommendedMarketplaceServices: { recommendedMarketplaceServices: { __typename: 'ServiceList', services: [{ ...svc(1), reasons: ['TOP_RATED'] }] } },
-    RecommendedProducts: { getRecommendedProducts: { __typename: 'ProductList', products: [] } },
 };
 
-test('"For you" leads the overview with ranked picks, says why, and those cards leave the rows below', async () => {
-    const { page } = await open(browser, '/discover', { ...MANY, ...FOR_YOU }, { width: 1280, height: 900 });
+test('"For you" is the recommended opportunities: every type, each says why, and none repeats below', async () => {
+    const { page, graphql } = await open(browser, '/discover', { ...MANY, ...FOR_YOU }, { width: 1280, height: 900 });
     const forYou = page.getByTestId('discover-section-forYou');
     await expect(forYou.getByRole('heading', { name: 'For you' })).toBeVisible({ timeout: 90_000 });
-    for (const name of ['Diaspora founders meetup', 'Job number 9', 'Service number 1']) await expect(forYou.getByText(name)).toBeVisible();
+    await expect(forYou.getByText('Job number 2')).toBeVisible();
+    await expect(forYou.getByText('Chevening scholarship')).toBeVisible();
+    await expect(forYou.getByText('Scholarship', { exact: true })).toBeVisible();
     // Reasons are translated codes; an unknown code is dropped, never shown raw.
-    await expect(forYou.getByText('Near you · Starting soon')).toBeVisible();
     await expect(forYou.getByText('Matches your skills', { exact: true })).toBeVisible();
-    await expect(forYou.getByText('Top rated')).toBeVisible();
     await expect(forYou).not.toContainText('NOT_A_REAL_CODE');
-    // A picked service is not repeated in the Latest row or the Services section.
-    await expect(page.locator(':text-is("Service number 1"):visible')).toHaveCount(1);
+    await expect(forYou).not.toContainText('Diaspora founders meetup');
+    await expect(forYou).not.toContainText('Service number 1');
+    expect(graphql.calls.some((c) => c.name === 'RecommendedEvents' || c.name === 'RecommendedMarketplaceServices')).toBe(false);
+    // A picked job is not repeated in Newest jobs.
+    await expect(page.locator(':text-is("Job number 2"):visible')).toHaveCount(1);
     expect(await page.locator('body').innerText()).not.toMatch(UUID);
+    await page.context().close();
+});
+
+test('"View all" on For you lists more picks on their own; a location filter hides the row (the recommender cannot filter by place)', async () => {
+    const { page } = await open(browser, '/discover', { ...MANY, ...FOR_YOU }, { width: 1280, height: 900 });
+    const forYou = page.getByTestId('discover-section-forYou');
+    await expect(forYou).toBeVisible({ timeout: 90_000 });
+    await forYou.getByRole('button', { name: 'View all' }).click();
+    await expect(page).toHaveURL(/cat=forYou/);
+    await expect(page.getByTestId('discover-section-forYou')).toBeVisible();
+    await expect(page.getByTestId('discover-section-jobs')).toHaveCount(0);
+    await expect(page.getByTestId('discover-section-latest')).toHaveCount(0);
+    await page.goto(page.url().replace('cat=forYou', 'loc=Accra'));
+    await expect(page.getByTestId('discover-section-jobs')).toBeVisible({ timeout: 90_000 });
+    await expect(page.getByTestId('discover-section-forYou')).toHaveCount(0);
     await page.context().close();
 });
 
@@ -212,5 +243,54 @@ test('"For you" is hidden when nothing is recommended', async () => {
     const { page } = await open(browser, '/discover');
     await expect(page.getByTestId('discover-section-latest')).toBeVisible({ timeout: 90_000 });
     await expect(page.getByTestId('discover-section-forYou')).toHaveCount(0);
+    await page.context().close();
+});
+
+const typed = (id: string, title: string, type: string) => job(0, { id, title, type, category: 'EMPLOYMENT_CAREER' });
+const EVERY_TYPE = {
+    ListOpportunities: (v: Record<string, unknown>) => {
+        const input = (v.input ?? {}) as { type?: string };
+        const all = [
+            typed('t-emp', 'Accountant in Accra', 'EMPLOYMENT'),
+            typed('t-con', 'Six-month audit contract', 'CONTRACT'),
+            typed('t-sch', 'Masters scholarship', 'SCHOLARSHIP'),
+            typed('t-fel', 'Leadership fellowship', 'FELLOWSHIP'),
+            typed('t-gra', 'Small business grant', 'GRANT'),
+            typed('t-pro', 'Founders programme', 'PROGRAM'),
+            typed('t-ini', 'Clean water initiative', 'INITIATIVE'),
+            typed('t-vol', 'Weekend tutoring volunteers', 'VOLUNTEER'),
+            typed('t-inv', 'Cocoa farm investment', 'INVESTMENT'),
+        ];
+        const rows = all.filter((o) => !input.type || o.type === input.type);
+        return { listOpportunities: { __typename: 'OpportunityList', total: rows.length, opportunities: rows } };
+    },
+};
+
+test('every opportunity type has a place: a row per kind, each a real query, empty kinds hidden', async () => {
+    const rows: Record<string, { title: string; items: string[] }> = {
+        jobs: { title: 'Newest jobs', items: ['Accountant in Accra', 'Six-month audit contract'] },
+        scholarships: { title: 'Scholarships & fellowships', items: ['Masters scholarship', 'Leadership fellowship'] },
+        grants: { title: 'Grants', items: ['Small business grant'] },
+        programs: { title: 'Programmes & initiatives', items: ['Founders programme', 'Clean water initiative'] },
+        volunteering: { title: 'Volunteering', items: ['Weekend tutoring volunteers'] },
+        investments: { title: 'Newest investments', items: ['Cocoa farm investment'] },
+    };
+    const { page } = await open(browser, `/discover?cat=${Object.keys(rows).join(',')}`, EVERY_TYPE, { width: 1280, height: 900 });
+    for (const [key, row] of Object.entries(rows)) {
+        const section = page.getByTestId(`discover-section-${key}`);
+        await expect(section.getByRole('heading', { name: row.title, exact: true })).toBeVisible({ timeout: 90_000 });
+        for (const item of row.items) await expect(section.getByText(item, { exact: true })).toBeVisible();
+    }
+    // The refine panel offers the same kinds.
+    for (const name of ['Jobs', 'Scholarships', 'Grants', 'Programmes', 'Volunteering', 'Investments']) {
+        await expect(page.getByRole('checkbox', { name })).toBeChecked();
+    }
+    await page.context().close();
+});
+
+test('a kind with nothing posted has no row', async () => {
+    const { page } = await open(browser, '/discover?cat=jobs,grants', MANY);
+    await expect(page.getByTestId('discover-section-jobs')).toBeVisible({ timeout: 90_000 });
+    await expect(page.getByTestId('discover-section-grants')).toHaveCount(0);
     await page.context().close();
 });

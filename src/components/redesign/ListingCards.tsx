@@ -1,7 +1,7 @@
 'use client';
 
 import type { LucideIcon } from 'lucide-react';
-import { Briefcase, Building2, CalendarDays, GraduationCap, HandHeart, Landmark, MapPin, Package, TrendingUp, Wrench } from 'lucide-react';
+import { Briefcase, Building2, CalendarDays, GraduationCap, HandHeart, Landmark, MapPin, Package, Rocket, TrendingUp, Wrench } from 'lucide-react';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { ICON_CHIP_CLASS, TONE_CLASS } from '@/components/more/MoreLinkCard';
@@ -17,6 +17,9 @@ import type { MoreTone } from '@/components/more/moreLinks';
 
 const OPPORTUNITY_LOOK: Record<string, { icon: LucideIcon; tone: MoreTone }> = {
   EMPLOYMENT: { icon: Briefcase, tone: 'warning' },
+  CONTRACT: { icon: Briefcase, tone: 'warning' },
+  PROGRAM: { icon: Rocket, tone: 'success' },
+  INITIATIVE: { icon: Rocket, tone: 'success' },
   INVESTMENT: { icon: TrendingUp, tone: 'success' },
   SCHOLARSHIP: { icon: GraduationCap, tone: 'info' },
   FELLOWSHIP: { icon: GraduationCap, tone: 'info' },
