@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { ButtonType2, ButtonType3, ButtonType4Pill } from "@/components/custom/button";
 import { formatAmountWithCurrency } from "@/lib/displayCurrency";
 import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
+import { readableSeller } from "@/components/marketplace/DetailParts";
 import type { CartItem } from "./types";
 
 export function ShoppingCartModal({
@@ -23,6 +24,7 @@ export function ShoppingCartModal({
   onCheckout: () => void;
 }) {
   const t = useTranslations("marketplace");
+  const tCommon = useTranslations("common");
   const locale = useLocale();
   const { currency } = useDisplayCurrency();
   const formatAmount = (value: number) =>
@@ -38,10 +40,10 @@ export function ShoppingCartModal({
   );
 
   return (
-    <div className="fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-surface-default rounded-lg max-w-2xl w-full max-h-[90vh] overflow-auto">
-        <div className="p-6 border-b flex items-center justify-between">
-          <h2 className="text-xl font-bold">{t("shoppingCart")}</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onKeyDown={(e) => e.key === "Escape" && onClose()}>
+      <div role="dialog" aria-modal="true" aria-labelledby="mp-cart-title" className="bg-surface-default rounded-2xl border border-border-subtle shadow-lg max-w-2xl w-full max-h-[90vh] overflow-auto">
+        <div className="p-4 sm:p-6 border-b border-border-subtle flex items-center justify-between">
+          <h2 id="mp-cart-title" className="text-xl font-bold text-text-primary">{t("shoppingCart")}</h2>
           <ButtonType3
             onClick={onClose}
             className="p-0 min-w-0 border-0 bg-transparent text-text-secondary hover:text-text-primary text-2xl"
@@ -50,7 +52,7 @@ export function ShoppingCartModal({
             <X className="w-5 h-5" />
           </ButtonType3>
         </div>
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold">{t("itemsInCart")}</h3>
             <span className="text-sm text-text-secondary">
@@ -70,7 +72,7 @@ export function ShoppingCartModal({
             const lineTotal =
               item.price * item.quantity + (item.extrasTotal ?? 0);
             return (
-              <div key={lineKey} className="flex gap-4 mb-4 pb-4 border-b">
+              <div key={lineKey} className="flex gap-4 mb-4 pb-4 border-b border-border-subtle">
                 <div className="relative w-20 h-20 rounded overflow-hidden flex-shrink-0 bg-surface-subtle">
                   {typeof item.image === "string" && item.image.startsWith("http") ? (
                     <Image src={item.image} alt={item.name} fill className="object-cover" sizes="80px" />
@@ -80,7 +82,9 @@ export function ShoppingCartModal({
                 </div>
                 <div className="flex-1">
                   <h4 className="font-semibold mb-1">{item.name}</h4>
-                  <p className="text-sm text-text-secondary mb-2">{item.seller}</p>
+                  {readableSeller(item.seller) && (
+                    <p className="text-sm text-text-secondary mb-2">{readableSeller(item.seller)}</p>
+                  )}
                   {item.extras && item.extras.length > 0 && (
                     <ul className="text-xs text-text-tertiary space-y-0.5 mb-1">
                       {(item.serviceExtras
@@ -107,14 +111,16 @@ export function ShoppingCartModal({
                       onClick={() =>
                         onUpdateQuantity(lineKey, Math.max(1, item.quantity - 1))
                       }
-                      className="p-1 border rounded bg-transparent min-w-0"
+                      className="grid size-9 place-items-center border border-border-subtle rounded-lg bg-transparent p-0 min-w-0"
+                      aria-label={t("decreaseQuantity")}
                     >
                       <Minus className="w-4 h-4" />
                     </ButtonType3>
                     <span className="font-medium">{item.quantity}</span>
                     <ButtonType3
                       onClick={() => onUpdateQuantity(lineKey, item.quantity + 1)}
-                      className="p-1 border rounded bg-transparent min-w-0"
+                      className="grid size-9 place-items-center border border-border-subtle rounded-lg bg-transparent p-0 min-w-0"
+                      aria-label={t("increaseQuantity")}
                     >
                       <Plus className="w-4 h-4" />
                     </ButtonType3>
@@ -127,6 +133,7 @@ export function ShoppingCartModal({
                   <ButtonType4Pill
                     onClick={() => onRemoveItem(lineKey)}
                     className="p-0 min-w-0 bg-transparent hover:bg-transparent"
+                    aria-label={tCommon("remove")}
                   >
                     <Trash2 className="w-4 h-4" />
                   </ButtonType4Pill>

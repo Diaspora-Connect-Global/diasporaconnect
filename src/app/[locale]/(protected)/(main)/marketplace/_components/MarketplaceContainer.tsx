@@ -2,14 +2,10 @@
 
 import { useSearchParams } from "next/navigation";
 
-import React, { useEffect, useMemo, useState } from "react";
-import { Briefcase, ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
+import React, { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useLazyQuery, useQuery } from "@apollo/client/react";
-import { EmptyState, ErrorState, NoResults } from "@/components/feedback";
 import { ConfirmationModal } from "@/components/custom/confirmationModal";
-import { ButtonType3 } from "@/components/custom/button";
-import PageLoader from "@/components/custom/PageLoader";
 import {
   GET_MARKETPLACE_SERVICE,
   GET_PRODUCT,
@@ -23,12 +19,16 @@ import type {
   SearchProductsResponse,
 } from "@/services/gql/types/marketplace";
 import { toMajorUnits } from "@/types/money";
-import type { CartItem, MarketplaceTab, MarketplaceView, Product } from "./types";
-import { MarketplaceHeader } from "./MarketplaceHeader";
-import { ProductCard } from "./ProductCard";
+import type { CartItem, MarketplaceView, Product } from "./types";
+import { MarketplaceBrowse, type BrowseItem } from "@/components/marketplace/MarketplaceBrowse";
+import {
+  PAGE_SIZE,
+  parseMarketplaceQuery,
+  productSearchInput,
+  serviceSearchInput,
+} from "@/components/marketplace/filters";
 import { ProductDetail } from "./ProductDetail";
 import { ServiceDetail } from "./ServiceDetail";
-import { ForYouRail } from "@/components/discover/DiscoverSections";
 import { ShoppingCartModal } from "./ShoppingCartModal";
 import { Checkout } from "./Checkout";
 import { OrderSuccess } from "./OrderSuccess";
@@ -39,8 +39,10 @@ function toUiProductFromProductApi(item: {
   id: string;
   vendor_id: string;
   title: string;
+  description?: string;
   price: number;
   currency?: string;
+  inventory_count?: number;
   images?: string[];
   tags?: string[];
 }): Product {
@@ -53,13 +55,15 @@ function toUiProductFromProductApi(item: {
     // Per-listing settlement currency (the platform settles in this currency,
     // no FX). Default GHS when the API omits it.
     currency: item.currency ?? "GHS",
-    rating: 5,
-    reviews: 0,
     // Render-time CDN rewrite: stored GCS media served via the CDN when
     // NEXT_PUBLIC_CDN_URL is set (no-op otherwise).
     image: toCdnUrl(item.images?.[0] ?? ""),
     images: (item.images ?? []).map(toCdnUrl),
+    // The vendor id: the order mutations need it. It is never shown as text.
     seller: item.vendor_id,
+    description: item.description || undefined,
+    tags: item.tags ?? [],
+    inventoryCount: item.inventory_count,
     category: item.tags?.[0] ?? "products",
     isService: false,
   };
@@ -69,6 +73,7 @@ function toUiProductFromServiceApi(item: {
   id: string;
   vendor_id: string;
   title: string;
+  description?: string;
   base_price: number;
   currency?: string;
   tags?: string[];
@@ -79,11 +84,11 @@ function toUiProductFromServiceApi(item: {
     // API sends integer minor units; convert minor→major once here.
     price: toMajorUnits(item.base_price),
     currency: item.currency ?? "GHS",
-    rating: 5,
-    reviews: 0,
     image: "",
     images: [],
     seller: item.vendor_id,
+    description: item.description || undefined,
+    tags: item.tags ?? [],
     category: item.tags?.[0] ?? "services",
     isService: true,
     priceType: "fixed",
@@ -93,21 +98,24 @@ function toUiProductFromServiceApi(item: {
 export default function MarketplaceContainer() {
   const t = useTranslations("marketplace");
   const tCommon = useTranslations("common");
-  const tFeedback = useTranslations("feedback");
   const { pay, isPaying } = useMarketplacePayment();
 
   const [currentView, setCurrentView] = useState<MarketplaceView>("home");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [showCart, setShowCart] = useState(false);
-  // `?tab=services` opens the Services tab directly (linked from More/Discover).
-  const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState<MarketplaceTab>(() =>
-    searchParams.get("tab") === "services" ? "services" : "products",
-  );
-  const [searchValue, setSearchValue] = useState("");
   const [removeCartItemModalOpen, setRemoveCartItemModalOpen] = useState(false);
   const [cartItemIdToRemove, setCartItemIdToRemove] = useState<string | null>(null);
+
+  // The URL is the source of truth for the listing filters
+  // (`?tab=services&q=…&tag=…&cur=USD&min=10&max=200`).
+  const searchParams = useSearchParams();
+  const query = useMemo(() => parseMarketplaceQuery(searchParams), [searchParams]);
+  const activeTab = query.tab;
+  const filterKey = JSON.stringify(query);
+  // "Show more" widens the page; any change of tab / filter starts again at one page.
+  const [more, setMore] = useState({ key: filterKey, limit: PAGE_SIZE });
+  const limit = more.key === filterKey ? more.limit : PAGE_SIZE;
 
   const {
     data: productsData,
@@ -115,7 +123,7 @@ export default function MarketplaceContainer() {
     error: productsError,
     refetch: refetchProducts,
   } = useQuery<SearchProductsResponse>(SEARCH_PRODUCTS, {
-    variables: { input: { query: searchValue || undefined, page: 1, limit: 20 } },
+    variables: { input: productSearchInput(query, limit) },
     skip: activeTab !== "products",
     fetchPolicy: "cache-and-network",
   });
@@ -126,7 +134,7 @@ export default function MarketplaceContainer() {
     error: servicesError,
     refetch: refetchServices,
   } = useQuery<SearchMarketplaceServicesResponse>(SEARCH_MARKETPLACE_SERVICES, {
-    variables: { input: { query: searchValue || undefined, page: 1, limit: 20 } },
+    variables: { input: serviceSearchInput(query, limit) },
     skip: activeTab !== "services",
     fetchPolicy: "cache-and-network",
   });
@@ -143,22 +151,29 @@ export default function MarketplaceContainer() {
     );
   }, [activeTab, productsData, servicesData]);
 
+  const total =
+    activeTab === "products"
+      ? (productsData?.searchProducts.total ?? 0)
+      : (servicesData?.searchMarketplaceServices.total ?? 0);
   const isLoading =
     (activeTab === "products" && productsLoading) ||
     (activeTab === "services" && servicesLoading);
-  // "Nothing to show yet" — the only state that gets a loader. A background
-  // cache-and-network refresh over existing items renders the items as-is.
+  // "Nothing to show yet" gets skeletons. A background cache-and-network
+  // refresh over existing items keeps rendering the items (dimmed).
   const activeHasData = activeTab === "products" ? !!productsData : !!servicesData;
   const listingPending = isLoading && !activeHasData;
-  // First visit: the whole page waits for the listing; later tab switches /
-  // searches show the loader inside the listing panel only.
-  const [pageShown, setPageShown] = useState(false);
-  useEffect(() => {
-    if (!listingPending) setPageShown(true);
-  }, [listingPending]);
   const listingError = activeTab === "products" ? productsError : servicesError;
   const refetch = activeTab === "products" ? refetchProducts : refetchServices;
-  const hasActiveQuery = searchValue.trim().length > 0;
+
+  // Tag chips come from what the seller set on real listings; once seen they stay
+  // offered while a tag filter narrows the results (adjusting state while rendering).
+  const [knownTags, setKnownTags] = useState<string[]>([]);
+  const seenTags = listingItems.flatMap((i) => (i.isService ? [] : (i.tags ?? [])));
+  const wanted = [...knownTags];
+  for (const tag of [...seenTags, ...(query.tag ? [query.tag] : [])]) {
+    if (tag && !wanted.includes(tag) && wanted.length < 12) wanted.push(tag);
+  }
+  if (wanted.length !== knownTags.length) setKnownTags(wanted);
 
   const handleProductClick = (product: Product) => {
     const openWith = (item: Product) => {
@@ -279,118 +294,52 @@ export default function MarketplaceContainer() {
     setSelectedProduct(null);
   };
 
-  const handleSearch = () => {
-    if (activeTab === "products") {
-      void refetchProducts({ input: { query: searchValue || undefined, page: 1, limit: 20 } });
-      return;
-    }
-    void refetchServices({ input: { query: searchValue || undefined, page: 1, limit: 20 } });
-  };
-
-  if (currentView === "home" && !pageShown && listingPending) {
-    return (
-      <div className="h-app-inner flex flex-col px-[10%]">
-        <PageLoader />
-      </div>
-    );
-  }
+  const browseItems: BrowseItem[] = listingItems.map((i) => ({
+    id: i.id,
+    name: i.name,
+    price: i.price,
+    currency: i.currency,
+    image: i.image,
+    tags: i.tags,
+    isService: i.isService,
+  }));
+  const byId = (id: string) => listingItems.find((i) => i.id === id);
 
   return (
-    <div className="h-app-inner flex flex-col px-[10%]">
+    <>
       {currentView === "home" && (
-        <>
-          <MarketplaceHeader
-            cartCount={cart.length}
-            onCartClick={() => setShowCart(true)}
-            setActiveTab={setActiveTab}
-            activeTab={activeTab}
-            searchValue={searchValue}
-            onSearchValueChange={setSearchValue}
-            onSearch={handleSearch}
-          />
-
-          <div className="flex-1 overflow-y-auto scrollbar-hide py-6">
-            <div className="max-w-7xl mx-auto">
-              <ForYouRail kinds={[activeTab === "products" ? "products" : "services"]} className="mb-6" />
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold">
-                    {activeTab === "products" ? t("trending") : t("servicesYouMayLike")}
-                  </h2>
-                  <div className="flex gap-2">
-                    <ButtonType3
-                      className="p-2 border rounded-full hover:bg-gray-100 bg-transparent min-w-0"
-                      aria-label={t("scrollLeft")}
-                    >
-                      <ChevronLeft className="w-5 h-5" />
-                    </ButtonType3>
-                    <ButtonType3
-                      className="p-2 border rounded-full hover:bg-gray-100 bg-transparent min-w-0"
-                      aria-label={t("scrollRight")}
-                    >
-                      <ChevronRight className="w-5 h-5" />
-                    </ButtonType3>
-                  </div>
-                </div>
-                {listingItems.length > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
-                    {listingItems.map((item) => (
-                      <div key={item.id} onClick={() => handleProductClick(item)} className="cursor-pointer">
-                        <ProductCard product={item} onAddToCart={handleAddToCart} />
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {listingPending && <PageLoader />}
-                {!isLoading && listingItems.length === 0 && (
-                  <>
-                    {listingError ? (
-                      <ErrorState
-                        title={tFeedback("error.title")}
-                        description={tFeedback("error.description")}
-                        retryLabel={tFeedback("error.retry")}
-                        onRetry={() => {
-                          void refetch();
-                        }}
-                      />
-                    ) : hasActiveQuery ? (
-                      <NoResults
-                        query={searchValue}
-                        title={tFeedback("noResults.title", { query: searchValue })}
-                        description={tFeedback("noResults.description")}
-                      />
-                    ) : (
-                      <EmptyState
-                        icon={activeTab === "products" ? ShoppingBag : Briefcase}
-                        title={tFeedback(
-                          activeTab === "products"
-                            ? "empty.marketplaceProducts.title"
-                            : "empty.marketplaceServices.title"
-                        )}
-                        description={tFeedback(
-                          activeTab === "products"
-                            ? "empty.marketplaceProducts.description"
-                            : "empty.marketplaceServices.description"
-                        )}
-                      />
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </>
+        <MarketplaceBrowse
+          query={query}
+          items={browseItems}
+          total={total}
+          pending={listingPending}
+          refreshing={isLoading && activeHasData}
+          error={!!listingError}
+          onRetry={() => {
+            void refetch();
+          }}
+          onShowMore={() => setMore({ key: filterKey, limit: limit + PAGE_SIZE })}
+          knownTags={knownTags}
+          cartCount={cart.length}
+          onCart={() => setShowCart(true)}
+          onOpen={(item) => {
+            const full = byId(item.id);
+            if (full) handleProductClick(full);
+          }}
+          onAdd={(item) => {
+            const full = byId(item.id);
+            if (full) handleAddToCart(full);
+          }}
+        />
       )}
 
       {currentView === "product" && selectedProduct && (
-        <div className="h-full flex flex-col">
-          <ProductDetail
-            product={selectedProduct}
-            onBack={() => setCurrentView("home")}
-            onAddToCart={handleAddToCart}
-            onBuyNow={handleBuyNow}
-          />
-        </div>
+        <ProductDetail
+          product={selectedProduct}
+          onBack={() => setCurrentView("home")}
+          onAddToCart={handleAddToCart}
+          onBuyNow={handleBuyNow}
+        />
       )}
 
       {currentView === "service" && selectedProduct && (
@@ -402,6 +351,7 @@ export default function MarketplaceContainer() {
       )}
 
       {currentView === "checkout" && (
+        <div className="h-app-inner flex flex-col px-[10%]">
         <Checkout
           cart={cart}
           onBack={() => setCurrentView("home")}
@@ -415,9 +365,14 @@ export default function MarketplaceContainer() {
           }
           onComplete={handleOrderComplete}
         />
+        </div>
       )}
 
-      {currentView === "success" && <OrderSuccess cart={cart} onBackToHome={handleBackToHome} />}
+      {currentView === "success" && (
+        <div className="h-app-inner flex flex-col px-[10%]">
+          <OrderSuccess cart={cart} onBackToHome={handleBackToHome} />
+        </div>
+      )}
 
       {showCart && (
         <ShoppingCartModal
@@ -441,7 +396,6 @@ export default function MarketplaceContainer() {
         confirmText={tCommon("remove") || "Remove"}
         confirmVariant="destructive"
       />
-    </div>
+    </>
   );
 }
-

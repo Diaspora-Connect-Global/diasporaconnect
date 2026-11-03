@@ -5,7 +5,12 @@ import Image from "next/image";
 import { CheckCircle, ShoppingBag } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { ButtonType2 } from "@/components/custom/button";
+import { formatAmountWithCurrency } from "@/lib/displayCurrency";
+import { readableSeller } from "@/components/marketplace/DetailParts";
 import type { CartItem } from "./types";
+
+// Same flat fee Checkout shows; kept so the two screens agree.
+const SHIPPING_FEE = 20;
 
 export function OrderSuccess({
   cart,
@@ -16,124 +21,82 @@ export function OrderSuccess({
 }) {
   const t = useTranslations("marketplace");
   const locale = useLocale();
+  // Orders are single-currency; the cart's own listing currency is the one to show.
+  const currency = (cart[0]?.currency ?? "GHS").toUpperCase();
   const formatAmount = (value: number) =>
-    new Intl.NumberFormat(locale, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  const total = useMemo(
+    formatAmountWithCurrency(value, currency, locale);
+  const subtotal = useMemo(
     () =>
       cart.reduce(
         (sum, item) =>
           sum + item.price * item.quantity + (item.extrasTotal ?? 0),
         0
-      ) + 20,
+      ),
     [cart]
   );
+  const total = subtotal + SHIPPING_FEE;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-12 text-center">
-      <div className="bg-white rounded-lg shadow p-8">
-        <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6">
-          <CheckCircle className="w-12 h-12 text-green-600" />
-        </div>
-        <h2 className="text-2xl font-bold mb-2">{t("orderSuccess")}</h2>
-        <p className="text-gray-600 mb-8">{t("orderDetails")}</p>
-
-        <div className="text-left mb-8">
-          {cart.map((item) => {
-            const lineTotal =
-              item.price * item.quantity + (item.extrasTotal ?? 0);
-            return (
-              <div
-                key={item.lineId ?? item.id}
-                className="flex gap-3 mb-4"
-              >
-                <div className="relative w-16 h-16 rounded overflow-hidden flex-shrink-0 bg-surface-subtle">
-                  {typeof item.image === "string" && item.image.startsWith("http") ? (
-                    <Image src={item.image} alt={item.name} fill className="object-cover" sizes="64px" />
-                  ) : (
-                    <span className="absolute inset-0 flex items-center justify-center text-text-tertiary"><ShoppingBag className="w-6 h-6" /></span>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium">{item.name}</p>
-                  <p className="text-sm text-text-secondary">{item.seller}</p>
-                  {item.extras && item.extras.length > 0 && (
-                    <ul className="text-xs text-text-tertiary space-y-0.5 mt-1">
-                      {(item.serviceExtras
-                        ? item.extras
-                            .map((id) =>
-                              item.serviceExtras!.find((e) => e.id === id)
-                            )
-                            .filter(Boolean) as {
-                            id: string;
-                            name: string;
-                            price: number;
-                          }[]
-                        : []
-                      ).map((extra) => (
-                        <li key={extra.id}>
-                          {extra.name} — GH₵{formatAmount(extra.price)}
-                        </li>
-                      ))}
-                      {(!item.serviceExtras ||
-                        item.serviceExtras.length === 0) &&
-                        item.extrasTotal != null &&
-                        item.extrasTotal > 0 && (
-                          <li>Extras — GH₵{formatAmount(item.extrasTotal)}</li>
-                        )}
-                    </ul>
-                  )}
-                </div>
-                <p className="font-bold">GH₵{formatAmount(lineTotal)}</p>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="border-t pt-6 mb-8">
-          <div className="grid grid-cols-2 gap-4 text-sm mb-2">
-            <div className="text-left">
-              <p className="text-gray-600 mb-4">{t("shippingAddress")}</p>
-              <p>Jane Doe</p>
-              <p>Kumasi, Ghana - Danyame-Nhyianso</p>
-              <p>PO 233-543-8392</p>
-            </div>
-            <div className="text-left">
-              <p className="text-gray-600 mb-4">{t("billingAddress")}</p>
-              <p>Jane Doe</p>
-              <p>Kumasi, Ghana - Danyame-Nhyianso</p>
-              <p>PO 233-543-8392</p>
-            </div>
+    <div className="h-app-inner overflow-y-auto scrollbar-hide bg-background">
+      <div className="mx-auto w-full max-w-3xl px-4 py-8 pb-24 text-center lg:px-0">
+        <div className="rounded-2xl border border-border-subtle bg-surface-default p-5 shadow-sm sm:p-8">
+          <div className="mb-6 inline-flex size-20 items-center justify-center rounded-full bg-surface-success">
+            <CheckCircle className="size-12 text-text-success" aria-hidden />
           </div>
-          <div className="grid grid-cols-2 gap-4 text-sm mt-6">
-            <div className="text-left">
-              <p className="text-gray-600">{t("paymentMethod")}</p>
-              <p>{t("visaEnding", { digits: "1234" })}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-gray-600">{t("subtotal")}:</p>
-              <p className="text-gray-600">{t("shippingFee")}:</p>
-              <p className="font-bold text-lg">{t("total")}:</p>
-            </div>
-            <div />
-            <div className="text-right">
-              <p>GH₵{formatAmount(total - 20)}</p>
-              <p>GH₵{formatAmount(20)}</p>
-              <p className="font-bold text-lg">GH₵{formatAmount(total)}</p>
-            </div>
-          </div>
-        </div>
+          <h1 className="mb-2 text-2xl font-bold text-text-primary">{t("orderSuccess")}</h1>
+          <p className="mb-8 text-text-secondary">{t("orderDetails")}</p>
 
-        <ButtonType2
-          onClick={onBackToHome}
-          className="bg-surface-brand text-white px-8 py-3 rounded-lg hover:bg-surface-brand/90"
-        >
-          {t("doneOrder")}
-        </ButtonType2>
+          <ul className="mb-8 space-y-4 text-left">
+            {cart.map((item) => {
+              const lineTotal =
+                item.price * item.quantity + (item.extrasTotal ?? 0);
+              const seller = readableSeller(item.seller);
+              return (
+                <li key={item.lineId ?? item.id} className="flex gap-3">
+                  <div className="relative size-16 shrink-0 overflow-hidden rounded-lg bg-surface-subtle">
+                    {typeof item.image === "string" && item.image.startsWith("http") ? (
+                      <Image src={item.image} alt="" fill className="object-cover" sizes="64px" />
+                    ) : (
+                      <span className="absolute inset-0 flex items-center justify-center text-text-tertiary"><ShoppingBag className="size-6" aria-hidden /></span>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-text-primary">{item.name}</p>
+                    {seller && <p className="text-sm text-text-secondary">{seller}</p>}
+                    {item.quantity > 1 && <p className="text-xs text-muted-foreground">× {item.quantity}</p>}
+                    {item.extrasTotal != null && item.extrasTotal > 0 && (
+                      <p className="mt-1 text-xs text-text-tertiary">Extras — {formatAmount(item.extrasTotal)}</p>
+                    )}
+                  </div>
+                  <p className="font-bold text-text-primary">{formatAmount(lineTotal)}</p>
+                </li>
+              );
+            })}
+          </ul>
+
+          <dl className="mb-8 space-y-2 border-t border-border-subtle pt-6 text-sm">
+            <div className="flex justify-between">
+              <dt className="text-text-secondary">{t("subtotal")}</dt>
+              <dd className="text-text-primary">{formatAmount(subtotal)}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-text-secondary">{t("shippingFee")}</dt>
+              <dd className="text-text-primary">{formatAmount(SHIPPING_FEE)}</dd>
+            </div>
+            <div className="flex justify-between text-lg font-bold text-text-primary">
+              <dt>{t("total")}</dt>
+              <dd>{formatAmount(total)}</dd>
+            </div>
+          </dl>
+
+          <ButtonType2
+            onClick={onBackToHome}
+            className="min-h-11 rounded-full bg-surface-brand px-8 py-3 text-white hover:bg-surface-brand/90"
+          >
+            {t("doneOrder")}
+          </ButtonType2>
+        </div>
       </div>
     </div>
   );
 }
-

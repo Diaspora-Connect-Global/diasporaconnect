@@ -28,24 +28,24 @@ function ReviewRow({
   });
 
   return (
-    <li className="border-b border-gray-100 py-4 last:border-b-0">
+    <li className="border-b border-border-subtle py-4 last:border-b-0">
       <div className="flex items-center gap-2">
         <StarRating value={review.rating} size={14} />
-        <time dateTime={review.created_at} className="text-xs text-gray-500">
+        <time dateTime={review.created_at} className="text-xs text-muted-foreground">
           {posted}
         </time>
       </div>
 
       {review.text && (
-        <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-gray-700">
+        <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-text-primary">
           {review.text}
         </p>
       )}
 
       {review.reply && (
-        <div className="mt-3 rounded-md border-l-2 border-gray-300 bg-gray-50 px-3 py-2">
-          <p className="text-xs font-medium text-gray-600">{vendorRepliedLabel}</p>
-          <p className="mt-1 whitespace-pre-line text-sm text-gray-700">{review.reply}</p>
+        <div className="mt-3 rounded-lg bg-surface-subtle px-3 py-2">
+          <p className="text-xs font-medium text-text-secondary">{vendorRepliedLabel}</p>
+          <p className="mt-1 whitespace-pre-line text-sm text-text-primary">{review.reply}</p>
         </div>
       )}
     </li>
@@ -100,19 +100,19 @@ export function ProductReviews({ productId }: { productId: string }) {
   if (error && reviews.length === 0) return null;
 
   return (
-    <section className="mt-8" aria-labelledby="product-reviews-heading">
+    <section className="rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm sm:p-5" aria-labelledby="product-reviews-heading" data-testid="mp-reviews">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 id="product-reviews-heading" className="text-lg font-semibold text-gray-900">
+        <h2 id="product-reviews-heading" className="text-lg font-bold text-text-primary">
           {t("reviews")}
         </h2>
 
         {total > 0 && (
           <div className="flex items-center gap-2">
             <StarRating value={average} size={16} />
-            <span className="text-sm font-medium text-gray-900">
+            <span className="text-sm font-medium text-text-primary">
               {t("averageRating", { rating: average.toFixed(1) })}
             </span>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-muted-foreground">
               {total === 1 ? t("reviewsCountOne") : t("reviewsCount", { count: total })}
             </span>
           </div>
@@ -122,13 +122,13 @@ export function ProductReviews({ productId }: { productId: string }) {
       {loading && reviews.length === 0 ? (
         <div className="mt-4 space-y-3" aria-hidden="true">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="h-16 animate-pulse rounded-md bg-gray-100" />
+            <div key={i} className="h-16 animate-pulse rounded-lg bg-surface-subtle" />
           ))}
         </div>
       ) : reviews.length === 0 ? (
-        <div className="mt-4 rounded-md border border-dashed border-gray-200 px-4 py-6 text-center">
-          <p className="text-sm font-medium text-gray-700">{t("noReviewsYet")}</p>
-          <p className="mt-1 text-sm text-gray-500">{t("beFirstToReview")}</p>
+        <div className="mt-4 rounded-xl border border-dashed border-border-subtle px-4 py-6 text-center">
+          <p className="text-sm font-medium text-text-primary">{t("noReviewsYet")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("beFirstToReview")}</p>
         </div>
       ) : (
         <>
@@ -148,7 +148,7 @@ export function ProductReviews({ productId }: { productId: string }) {
               type="button"
               onClick={loadMore}
               disabled={loading}
-              className="mt-3 w-full rounded-md border border-gray-300 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-60"
+              className="mt-3 min-h-11 w-full rounded-full border border-border-subtle py-2 text-sm font-medium text-text-primary transition hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand disabled:opacity-60"
             >
               {t("loadMoreReviews")}
             </button>
