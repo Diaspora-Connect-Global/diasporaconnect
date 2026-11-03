@@ -7368,5 +7368,56 @@
       "HONORARIUM": "Honorarium",
       "NONE": "Unpaid"
     }
+  },
+  "opportunityCategory": {
+    "eyebrow": "Opportunities",
+    "descriptions": {
+      "EMPLOYMENT_CAREER": "Jobs, internships and career programmes, at home and abroad.",
+      "EDUCATION_TRAINING": "Courses, certifications, workshops and training to build your skills.",
+      "FUNDING_GRANTS": "Grants, funds and financial support for people, projects and ventures.",
+      "FELLOWSHIPS_LEADERSHIP": "Fellowships and programmes that develop leaders and future leaders.",
+      "BUSINESS_INVESTMENT": "Business opportunities, partnerships and investments to back or join.",
+      "VOLUNTEERING_SOCIAL_IMPACT": "Ways to give your time and skills for a cause you care about.",
+      "EVENT_CREATIVE_INDUSTRY": "Opportunities in events, arts, media, music, fashion and the creative economy.",
+      "AGRICULTURE_SUSTAINABILITY": "Farming, agribusiness and sustainability projects looking for people and partners.",
+      "REAL_ESTATE_INFRASTRUCTURE": "Property, construction and infrastructure projects and opportunities.",
+      "GOVERNMENT_EMBASSY_INITIATIVES": "Programmes and initiatives run by governments and embassies for the diaspora.",
+      "INNOVATION_RESEARCH": "Research, technology and innovation projects, calls and collaborations.",
+      "FINANCE_ECONOMICS": "Finance, banking and economic opportunities for the diaspora.",
+      "RETURN_REINTEGRATION": "Programmes and support for people returning home and settling back in."
+    },
+    "others": "Explore other categories",
+    "filters": {
+      "title": "Refine",
+      "clearAll": "Clear all",
+      "type": "Type",
+      "typeAll": "All types",
+      "location": "Location",
+      "locationPlaceholder": "City or country",
+      "sortBy": "Sort by",
+      "sort": {
+        "newest": "Newest",
+        "closing": "Closing soon"
+      },
+      "active": "{count, plural, one {# filter on} other {# filters on}}"
+    },
+    "results": {
+      "title": "Opportunities",
+      "count": "{count, plural, one {# opportunity} other {# opportunities}}",
+      "loading": "Loading opportunities",
+      "showMore": "Show more"
+    },
+    "empty": {
+      "title": "No {category} opportunities yet",
+      "description": "Nothing has been posted here yet. Check back soon or browse another category.",
+      "filteredTitle": "Nothing matches these filters",
+      "filteredDescription": "Try a different type or place, or clear the filters.",
+      "clear": "Clear filters"
+    },
+    "error": {
+      "title": "We couldn't load these opportunities",
+      "description": "Please check your connection and try again.",
+      "retry": "Try again"
+    }
   }
 }

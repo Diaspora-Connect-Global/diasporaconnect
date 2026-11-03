@@ -7368,5 +7368,56 @@
       "HONORARIUM": "Honoraires",
       "NONE": "Non rémunéré"
     }
+  },
+  "opportunityCategory": {
+    "eyebrow": "Opportunités",
+    "descriptions": {
+      "EMPLOYMENT_CAREER": "Emplois, stages et programmes de carrière, ici et à l'étranger.",
+      "EDUCATION_TRAINING": "Cours, certifications, ateliers et formations pour développer vos compétences.",
+      "FUNDING_GRANTS": "Subventions, fonds et aides financières pour les personnes, les projets et les entreprises.",
+      "FELLOWSHIPS_LEADERSHIP": "Fellowships et programmes qui forment les leaders d'aujourd'hui et de demain.",
+      "BUSINESS_INVESTMENT": "Opportunités d'affaires, partenariats et investissements à soutenir ou à rejoindre.",
+      "VOLUNTEERING_SOCIAL_IMPACT": "Des façons de donner votre temps et vos compétences pour une cause qui vous tient à cœur.",
+      "EVENT_CREATIVE_INDUSTRY": "Opportunités dans l'événementiel, les arts, les médias, la musique, la mode et l'économie créative.",
+      "AGRICULTURE_SUSTAINABILITY": "Projets d'agriculture, d'agrobusiness et de durabilité qui recherchent des personnes et des partenaires.",
+      "REAL_ESTATE_INFRASTRUCTURE": "Projets et opportunités dans l'immobilier, la construction et les infrastructures.",
+      "GOVERNMENT_EMBASSY_INITIATIVES": "Programmes et initiatives menés par des gouvernements et des ambassades pour la diaspora.",
+      "INNOVATION_RESEARCH": "Projets, appels et collaborations en recherche, technologie et innovation.",
+      "FINANCE_ECONOMICS": "Opportunités dans la finance, la banque et l'économie pour la diaspora.",
+      "RETURN_REINTEGRATION": "Programmes et soutien pour celles et ceux qui rentrent au pays et s'y réinstallent."
+    },
+    "others": "Découvrir d'autres catégories",
+    "filters": {
+      "title": "Affiner",
+      "clearAll": "Tout effacer",
+      "type": "Type",
+      "typeAll": "Tous les types",
+      "location": "Lieu",
+      "locationPlaceholder": "Ville ou pays",
+      "sortBy": "Trier par",
+      "sort": {
+        "newest": "Plus récentes",
+        "closing": "Bientôt clôturées"
+      },
+      "active": "{count, plural, one {# filtre actif} other {# filtres actifs}}"
+    },
+    "results": {
+      "title": "Opportunités",
+      "count": "{count, plural, one {# opportunité} other {# opportunités}}",
+      "loading": "Chargement des opportunités",
+      "showMore": "Afficher plus"
+    },
+    "empty": {
+      "title": "Aucune opportunité « {category} » pour le moment",
+      "description": "Rien n'a encore été publié ici. Revenez bientôt ou parcourez une autre catégorie.",
+      "filteredTitle": "Rien ne correspond à ces filtres",
+      "filteredDescription": "Essayez un autre type ou un autre lieu, ou effacez les filtres.",
+      "clear": "Effacer les filtres"
+    },
+    "error": {
+      "title": "Impossible de charger ces opportunités",
+      "description": "Vérifiez votre connexion et réessayez.",
+      "retry": "Réessayer"
+    }
   }
 }

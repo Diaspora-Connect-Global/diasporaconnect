@@ -7368,5 +7368,56 @@
       "HONORARIUM": "Honorar",
       "NONE": "Unbezahlt"
     }
+  },
+  "opportunityCategory": {
+    "eyebrow": "Möglichkeiten",
+    "descriptions": {
+      "EMPLOYMENT_CAREER": "Stellen, Praktika und Karriereprogramme, im In- und Ausland.",
+      "EDUCATION_TRAINING": "Kurse, Zertifikate, Workshops und Weiterbildungen für Ihre Fähigkeiten.",
+      "FUNDING_GRANTS": "Förderungen, Fonds und finanzielle Unterstützung für Menschen, Projekte und Vorhaben.",
+      "FELLOWSHIPS_LEADERSHIP": "Fellowships und Programme, die heutige und künftige Führungskräfte fördern.",
+      "BUSINESS_INVESTMENT": "Geschäftsmöglichkeiten, Partnerschaften und Investitionen zum Unterstützen oder Mitmachen.",
+      "VOLUNTEERING_SOCIAL_IMPACT": "Möglichkeiten, Zeit und Fähigkeiten für ein Anliegen einzusetzen, das Ihnen wichtig ist.",
+      "EVENT_CREATIVE_INDUSTRY": "Chancen in Veranstaltungen, Kunst, Medien, Musik, Mode und der Kreativwirtschaft.",
+      "AGRICULTURE_SUSTAINABILITY": "Landwirtschafts-, Agrarwirtschafts- und Nachhaltigkeitsprojekte auf der Suche nach Menschen und Partnern.",
+      "REAL_ESTATE_INFRASTRUCTURE": "Immobilien-, Bau- und Infrastrukturprojekte und -chancen.",
+      "GOVERNMENT_EMBASSY_INITIATIVES": "Programme und Initiativen von Regierungen und Botschaften für die Diaspora.",
+      "INNOVATION_RESEARCH": "Forschungs-, Technologie- und Innovationsprojekte, Ausschreibungen und Kooperationen.",
+      "FINANCE_ECONOMICS": "Finanz-, Bank- und Wirtschaftschancen für die Diaspora.",
+      "RETURN_REINTEGRATION": "Programme und Unterstützung für Menschen, die in die Heimat zurückkehren und dort neu ankommen."
+    },
+    "others": "Weitere Kategorien entdecken",
+    "filters": {
+      "title": "Verfeinern",
+      "clearAll": "Alle löschen",
+      "type": "Art",
+      "typeAll": "Alle Arten",
+      "location": "Ort",
+      "locationPlaceholder": "Stadt oder Land",
+      "sortBy": "Sortieren nach",
+      "sort": {
+        "newest": "Neueste",
+        "closing": "Bald endend"
+      },
+      "active": "{count, plural, one {# Filter aktiv} other {# Filter aktiv}}"
+    },
+    "results": {
+      "title": "Möglichkeiten",
+      "count": "{count, plural, one {# Möglichkeit} other {# Möglichkeiten}}",
+      "loading": "Möglichkeiten werden geladen",
+      "showMore": "Mehr anzeigen"
+    },
+    "empty": {
+      "title": "Noch keine Möglichkeiten in „{category}“",
+      "description": "Hier wurde noch nichts veröffentlicht. Schauen Sie bald wieder vorbei oder stöbern Sie in einer anderen Kategorie.",
+      "filteredTitle": "Nichts passt zu diesen Filtern",
+      "filteredDescription": "Probieren Sie eine andere Art oder einen anderen Ort, oder löschen Sie die Filter.",
+      "clear": "Filter löschen"
+    },
+    "error": {
+      "title": "Diese Möglichkeiten konnten nicht geladen werden",
+      "description": "Bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+      "retry": "Erneut versuchen"
+    }
   }
 }

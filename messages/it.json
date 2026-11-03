@@ -7368,5 +7368,56 @@
       "HONORARIUM": "Onorario",
       "NONE": "Non retribuita"
     }
+  },
+  "opportunityCategory": {
+    "eyebrow": "Opportunità",
+    "descriptions": {
+      "EMPLOYMENT_CAREER": "Lavori, tirocini e programmi di carriera, in patria e all'estero.",
+      "EDUCATION_TRAINING": "Corsi, certificazioni, workshop e formazione per far crescere le tue competenze.",
+      "FUNDING_GRANTS": "Finanziamenti, fondi e sostegno economico per persone, progetti e iniziative.",
+      "FELLOWSHIPS_LEADERSHIP": "Fellowship e programmi che formano i leader di oggi e di domani.",
+      "BUSINESS_INVESTMENT": "Opportunità d'affari, partnership e investimenti da sostenere o a cui unirsi.",
+      "VOLUNTEERING_SOCIAL_IMPACT": "Modi per dedicare tempo e competenze a una causa che ti sta a cuore.",
+      "EVENT_CREATIVE_INDUSTRY": "Opportunità negli eventi, nell'arte, nei media, nella musica, nella moda e nell'economia creativa.",
+      "AGRICULTURE_SUSTAINABILITY": "Progetti di agricoltura, agribusiness e sostenibilità in cerca di persone e partner.",
+      "REAL_ESTATE_INFRASTRUCTURE": "Progetti e opportunità nell'immobiliare, nelle costruzioni e nelle infrastrutture.",
+      "GOVERNMENT_EMBASSY_INITIATIVES": "Programmi e iniziative di governi e ambasciate per la diaspora.",
+      "INNOVATION_RESEARCH": "Progetti, bandi e collaborazioni di ricerca, tecnologia e innovazione.",
+      "FINANCE_ECONOMICS": "Opportunità di finanza, banche ed economia per la diaspora.",
+      "RETURN_REINTEGRATION": "Programmi e sostegno per chi torna a casa e si reinserisce."
+    },
+    "others": "Esplora altre categorie",
+    "filters": {
+      "title": "Affina",
+      "clearAll": "Cancella tutto",
+      "type": "Tipo",
+      "typeAll": "Tutti i tipi",
+      "location": "Luogo",
+      "locationPlaceholder": "Città o paese",
+      "sortBy": "Ordina per",
+      "sort": {
+        "newest": "Più recenti",
+        "closing": "In scadenza"
+      },
+      "active": "{count, plural, one {# filtro attivo} other {# filtri attivi}}"
+    },
+    "results": {
+      "title": "Opportunità",
+      "count": "{count, plural, one {# opportunità} other {# opportunità}}",
+      "loading": "Caricamento delle opportunità",
+      "showMore": "Mostra altro"
+    },
+    "empty": {
+      "title": "Nessuna opportunità in «{category}» per ora",
+      "description": "Qui non è ancora stato pubblicato nulla. Torna presto o sfoglia un'altra categoria.",
+      "filteredTitle": "Nessun risultato per questi filtri",
+      "filteredDescription": "Prova un altro tipo o un altro luogo, oppure cancella i filtri.",
+      "clear": "Cancella i filtri"
+    },
+    "error": {
+      "title": "Impossibile caricare queste opportunità",
+      "description": "Controlla la connessione e riprova.",
+      "retry": "Riprova"
+    }
   }
 }
