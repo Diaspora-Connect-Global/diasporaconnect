@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { MultiStep } from '@/components/custom/multistep';
 import { useTranslations } from 'next-intl';
-import { FileArrowUpIcon, InfoIcon } from '@phosphor-icons/react';
-
+import { FileUp, Info } from 'lucide-react';
+import { StepFrame } from '@/components/vendor-onboarding/StepFrame';
 
 import React, { useState } from "react";
 
 const PdfUpload: React.FC = () => {
+  const t = useTranslations('vendorOnboarding.documents');
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,7 +15,7 @@ const PdfUpload: React.FC = () => {
 
     if (selectedFile) {
       if (selectedFile.type !== "application/pdf") {
-        setError("Only PDF files are supported.");
+        setError(t('errorPdf'));
         setFile(null);
       } else {
         setError(null);
@@ -24,30 +24,26 @@ const PdfUpload: React.FC = () => {
     }
   };
 
-
-
   return (
-    <div className="">
-      <label
-        htmlFor="file-upload"
-        className="cursor-pointer text-text-brand underline pl-4"
-      >
-        <FileArrowUpIcon size={18} className="inline-block mr-2 text-text-secondary" />
-        Upload document
+    <div className="space-y-2">
+      <label htmlFor="file-upload" className="relative block cursor-pointer">
+        <input
+          id="file-upload"
+          type="file"
+          accept="application/pdf"
+          onChange={handleFileChange}
+          className="peer sr-only"
+          aria-describedby="file-upload-hint"
+        />
+        <span className="flex min-h-24 flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-border-brand bg-surface-brand-subtle p-4 text-center transition-colors hover:bg-surface-info peer-focus-visible:ring-2 peer-focus-visible:ring-text-brand peer-focus-visible:ring-offset-2">
+          <FileUp className="size-6 text-text-brand" strokeWidth={1.75} aria-hidden />
+          <span className="text-sm font-semibold text-text-brand">{t('upload')}</span>
+          <span id="file-upload-hint" className="text-xs text-muted-foreground">{t('supported')}</span>
+        </span>
       </label>
-      <input
-        id="file-upload"
-        type="file"
-        accept="application/pdf"
-        onChange={handleFileChange}
-        className="hidden"
-      />
-      <p className="text-sm text-text-secondary my-5">Supported files - pdf</p>
 
-      {file && <p className="my-2 text-text-success">Selected: {file.name}</p>}
-      {error && <p className="my-2 text-text-danger">{error}</p>}
-
-      
+      {file && <p className="break-words text-sm text-text-success">{t('selected', { name: file.name })}</p>}
+      {error && <p role="alert" className="text-sm text-text-danger">{error}</p>}
     </div>
   );
 };
@@ -65,22 +61,19 @@ interface Step2Props {
 }
 
 export const Step2: React.FC<Step2Props> = ({ nextStep, prevStep, onSubmit, isSubmitting = false }) => {
-    const t = useTranslations('passwordReset');
+    const t = useTranslations('vendorOnboarding.documents');
     const tActions = useTranslations('actions');
-
 
     const isNextDisabled = isSubmitting;
 
     return (
-        <MultiStep
-            stepNumber={2}
-            totalSteps={3}
-            title={"Add business documents"}
-            subtitle={"Upload documents relating to your business.  Vendors adding documents has more credibility and trust on the marketplace"}
+        <StepFrame
+            id="vendor-documents-title"
+            number={3}
+            title={t('title')}
+            subtitle={t('subtitle')}
             isNextDisabled={isNextDisabled}
-            nextButtonText={tActions('submit')}
-            showBackButton={true}
-            showSkipButton={false}
+            nextText={tActions('submit')}
             onNext={() => {
                 if (onSubmit) {
                     onSubmit();
@@ -89,32 +82,17 @@ export const Step2: React.FC<Step2Props> = ({ nextStep, prevStep, onSubmit, isSu
                 nextStep();
             }}
             onBack={() => prevStep()}
-            showStepLabel={false}
         >
-            <div className="w-full">
+            <PdfUpload />
 
-
-
-         <PdfUpload />
-
-
-
-
-                <div className="bg-surface-info text-text-info flex p-2 space-x-2 rounded-md">
-                    <div>
-
-                        <InfoIcon size={20} />
-                    </div>
-                    <div>
-                    <p>All documents should be put together and uploaded as one file.
-                    </p>
-                    <p>Supported document upload is pdf.
-                    </p>
-                    <p>File size must not be more than 1Mb.</p>
-
-                    </div>
-                </div>
+            <div className="flex items-start gap-2 rounded-xl bg-surface-info p-3 text-sm text-text-info">
+                <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
+                <ul className="space-y-1">
+                    <li>{t('noteOneFile')}</li>
+                    <li>{t('notePdf')}</li>
+                    <li>{t('noteSize')}</li>
+                </ul>
             </div>
-        </MultiStep>
+        </StepFrame>
     );
 };

@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
-import { MultiStep } from '@/components/custom/multistep';
+import { Briefcase, Check, ShoppingBag } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { StepFrame } from '@/components/vendor-onboarding/StepFrame';
+import { ICON_CHIP_CLASS } from '@/components/more/MoreLinkCard';
 
 interface Step1Props {
     data: any;
@@ -10,48 +12,63 @@ interface Step1Props {
     prevStep?: () => void;
 }
 
+const OPTIONS = [
+    { value: 'products', key: 'products', icon: ShoppingBag },
+    { value: 'services', key: 'services', icon: Briefcase },
+] as const;
+
 export const Step1: React.FC<Step1Props> = ({ data, updateData, nextStep, prevStep }) => {
-    const t = useTranslations('onboarding');
+    const t = useTranslations('vendorOnboarding.choose');
 
     const isNextDisabled = !data.communityType?.trim();
 
-    const options = [
-        { label: "Sell products", value: 'products' },
-        { label: "Provide services", value: 'services' },
-    ];
-
     return (
-        <MultiStep
-            stepNumber={2}
-            totalSteps={7}
-            title={"Become a vendor"}
-            subtitle={"Join thousands of businesses selling to customers worldwide"}
-            showSkipButton={false}
+        <StepFrame
+            id="vendor-choose-title"
+            number={2}
+            title={t('title')}
+            subtitle={t('subtitle')}
             isNextDisabled={isNextDisabled}
-            showBackButton={true}
             onNext={() => nextStep()}
-            onBack={prevStep}
-            onSkip={() => nextStep()}
-            showStepLabel={false}
-
+            onBack={() => prevStep?.()}
         >
-            <div className="grid grid-cols-2 gap-4 w-full">
-                {options.map((option) => (
-                    <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => updateData({ communityType: option.value })}
-                        className={`px-6 py-3 label-large   h-20 rounded-md border flex items-center  transition-all cursor-pointer
-              ${data.communityType === option.value
-                                ? ' border-border-brand text-text-primary'
-                                : 'bg-surface-brand-subtle  text-text-primary '
-                            }`}
-                    >
-                        <div className="w-10 h-10 mr-4 bg-surface-disabled border border-surface-brand-light rounded-xl" />
-                        {option.label}
-                    </button>
-                ))}
-            </div>
-        </MultiStep>
+            <fieldset className="min-w-0">
+                <legend className="sr-only">{t('legend')}</legend>
+                <div className="grid gap-3 sm:grid-cols-2">
+                    {OPTIONS.map(({ value, key, icon: Icon }) => {
+                        const selected = data.communityType === value;
+                        return (
+                            <label key={value} className="relative block cursor-pointer">
+                                <input
+                                    type="radio"
+                                    name="vendor-offer"
+                                    value={value}
+                                    checked={selected}
+                                    onChange={() => updateData({ communityType: value })}
+                                    className="peer sr-only"
+                                />
+                                <span
+                                    className={`flex min-h-24 items-start gap-3 rounded-xl border p-4 transition-[border-color,box-shadow,background-color] peer-focus-visible:ring-2 peer-focus-visible:ring-text-brand peer-focus-visible:ring-offset-2 ${selected ? 'border-border-brand bg-surface-brand-subtle shadow-sm' : 'border-border-subtle bg-surface-default hover:border-border-brand'}`}
+                                >
+                                    <span className={`grid size-11 shrink-0 place-items-center rounded-full ${ICON_CHIP_CLASS}`}>
+                                        <Icon className="size-5" strokeWidth={1.75} aria-hidden />
+                                    </span>
+                                    <span className="min-w-0 flex-1">
+                                        <span className="block text-sm font-semibold text-text-primary">{t(`${key}.title`)}</span>
+                                        <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{t(`${key}.description`)}</span>
+                                    </span>
+                                    <span
+                                        aria-hidden
+                                        className={`grid size-5 shrink-0 place-items-center rounded-full border ${selected ? 'border-border-brand bg-surface-brand text-white' : 'border-border-subtle bg-surface-default'}`}
+                                    >
+                                        {selected && <Check className="size-3" strokeWidth={3} />}
+                                    </span>
+                                </span>
+                            </label>
+                        );
+                    })}
+                </div>
+            </fieldset>
+        </StepFrame>
     );
 };

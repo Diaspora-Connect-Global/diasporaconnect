@@ -1,22 +1,28 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import Onboarding from '@/components/vendors/OnboardingVendor';
 import React, { useState } from 'react';
 import { Step1 } from '../steps/Step1';
 import { Step2 } from '../steps/Step2';
 import { useMutation } from '@apollo/client/react';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useUserStore } from '@/store/useUserStore';
 import { toast } from 'sonner';
 import { CREATE_VENDOR } from '@/services/gql/vendor';
 import { handleVendorError } from '@/lib/vendor-error-mapper';
+import { PageHero } from '@/components/redesign/PageHero';
+import { CATEGORY_PHOTOS } from '@/lib/redesignImages';
+import { PageShell, ContentWithRail } from '@/components/vendor-onboarding/PageShell';
+import { StepIndicator } from '@/components/vendor-onboarding/StepIndicator';
+import { BenefitsRail } from '@/components/vendor-onboarding/BenefitsRail';
+import { IntroCard } from '@/components/vendor-onboarding/IntroCard';
 
 
 export default function OnboardingView() {
     const router = useRouter();
     const locale = useLocale();
+    const t = useTranslations('vendorOnboarding.hero');
     const currentUser = useUserStore((state) => state.user);
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState<any>({
@@ -76,7 +82,7 @@ export default function OnboardingView() {
             case 1:
                 return (
 
-                        <Onboarding onFinish={() => {
+                        <IntroCard onFinish={() => {
                             nextStep();
                         }} />
                 );
@@ -109,10 +115,10 @@ export default function OnboardingView() {
     };
 
     return (
-        <div className='lg:w-[40vw] h-[calc(100vh-4rem)] m-auto  overflow-auto scrollbar-hide'>
-            <div className='py-2 lg:py-4 '>
-            {renderStep()}
-            </div>
-        </div>
+        <PageShell>
+            <PageHero id="vendor-onboarding-title" eyebrow={t('eyebrow')} title={t('title')} subtitle={t('subtitle')} image={CATEGORY_PHOTOS.product} priority />
+            <StepIndicator current={currentStep as 1 | 2 | 3} />
+            <ContentWithRail rail={<BenefitsRail />}>{renderStep()}</ContentWithRail>
+        </PageShell>
     );
 }

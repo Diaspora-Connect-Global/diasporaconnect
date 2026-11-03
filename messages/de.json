@@ -2628,6 +2628,85 @@
     "averageRating": "{rating} von 5",
     "ratingRequired": "Bitte zuerst eine Bewertung auswählen."
   },
+  "vendorOnboarding": {
+    "hero": {
+      "eyebrow": "Marktplatz",
+      "title": "Verkäufer werden",
+      "subtitle": "Richte dein Verkäuferkonto in wenigen Schritten ein und erreiche Kundinnen und Kunden in der lokalen Community und in der Diaspora."
+    },
+    "steps": {
+      "label": "Fortschritt der Verkäufer-Einrichtung",
+      "welcome": "Willkommen",
+      "offer": "Dein Angebot",
+      "documents": "Dokumente",
+      "stepOf": "Schritt {current} von {total}"
+    },
+    "common": {
+      "back": "Zurück",
+      "next": "Weiter",
+      "finish": "Fertig",
+      "skip": "Überspringen",
+      "continue": "Weiter"
+    },
+    "intro": {
+      "progress": "Folie {current} von {total}",
+      "slide1": {
+        "title": "Bring dein Geschäft online",
+        "description": "Ob du Produkte verkaufst oder Dienstleistungen anbietest: Wir helfen dir, dein Verkäuferkonto in wenigen Minuten einzurichten, damit du Kundschaft in der lokalen Community und in der Diaspora erreichst."
+      },
+      "slide2": {
+        "title": "Gewinne neue Kundschaft",
+        "description": "Zeige, was du anbietest, und werde von Menschen gefunden, die deine Produkte kaufen oder deine Dienstleistungen buchen möchten."
+      },
+      "slide3": {
+        "title": "Sicher verkaufen mit Treuhand",
+        "description": "Unser Treuhandsystem schützt dich und deine Kundschaft. Zahlungen werden sicher verwahrt, bis die Käuferin oder der Käufer die Bestellung bzw. Lieferung bestätigt."
+      }
+    },
+    "choose": {
+      "title": "Was möchtest du anbieten?",
+      "subtitle": "Wähle, wie du starten möchtest. Aus deiner Wahl richten wir dein Verkäuferprofil ein.",
+      "legend": "Was möchtest du auf DiasporaConnect anbieten?",
+      "products": {
+        "title": "Produkte verkaufen",
+        "description": "Biete physische oder digitale Waren auf dem Marktplatz an."
+      },
+      "services": {
+        "title": "Dienstleistungen anbieten",
+        "description": "Biete deine Fähigkeiten und deine Zeit zur Buchung an."
+      }
+    },
+    "documents": {
+      "title": "Geschäftsunterlagen hinzufügen",
+      "subtitle": "Lade Unterlagen zu deinem Unternehmen als eine PDF-Datei hoch.",
+      "upload": "Dokument hochladen",
+      "supported": "Unterstützter Dateityp: PDF",
+      "selected": "Ausgewählt: {name}",
+      "errorPdf": "Es werden nur PDF-Dateien unterstützt.",
+      "noteOneFile": "Alle Dokumente sollten zusammengefasst und als eine Datei hochgeladen werden.",
+      "notePdf": "Unterstützt wird nur der Upload im PDF-Format.",
+      "noteSize": "Die Dateigröße darf höchstens 1 MB betragen."
+    },
+    "rail": {
+      "title": "Das bekommst du",
+      "start": {
+        "title": "Sofort Angebote einstellen",
+        "description": "Dein Verkäuferkonto ist nach der Einrichtung sofort aktiv, sodass du direkt Produkte und Dienstleistungen einstellen kannst."
+      },
+      "escrow": {
+        "title": "Zahlungen in Treuhand",
+        "description": "Zahlungen von Käufern werden treuhänderisch verwahrt, bis die Lieferung bestätigt wurde."
+      },
+      "payouts": {
+        "title": "Auszahlung auf dein Konto",
+        "description": "Deine Einnahmen werden auf dein Auszahlungskonto für Verkäufer überwiesen."
+      },
+      "verification": {
+        "title": "Verifizierung ist optional",
+        "description": "Die Identitätsprüfung schaltet höhere Limits und ein Verifiziert-Abzeichen frei. Sie hindert dich nie am Verkaufen."
+      }
+    }
+  },
   "vendors": {
     "dashboard": "Verkäufer-Dashboard",
     "addNewService": "Neue Dienstleistung hinzufügen",

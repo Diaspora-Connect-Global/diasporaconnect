@@ -2628,6 +2628,85 @@
     "averageRating": "{rating} su 5",
     "ratingRequired": "Scegli prima una valutazione."
   },
+  "vendorOnboarding": {
+    "hero": {
+      "eyebrow": "Marketplace",
+      "title": "Diventa venditore",
+      "subtitle": "Configura il tuo account venditore in pochi passaggi e raggiungi clienti nelle comunità locali e nella diaspora."
+    },
+    "steps": {
+      "label": "Avanzamento della configurazione venditore",
+      "welcome": "Benvenuto",
+      "offer": "La tua offerta",
+      "documents": "Documenti",
+      "stepOf": "Passaggio {current} di {total}"
+    },
+    "common": {
+      "back": "Indietro",
+      "next": "Avanti",
+      "finish": "Fine",
+      "skip": "Salta",
+      "continue": "Continua"
+    },
+    "intro": {
+      "progress": "Diapositiva {current} di {total}",
+      "slide1": {
+        "title": "Porta la tua attività online",
+        "description": "Che tu venda prodotti o offra servizi, ti aiutiamo a configurare il tuo account venditore in pochi minuti per raggiungere clienti nelle comunità locali e nella diaspora."
+      },
+      "slide2": {
+        "title": "Fai crescere la tua attività con nuovi clienti",
+        "description": "Mostra ciò che offri e fatti trovare da chi è pronto ad acquistare i tuoi prodotti o a prenotare i tuoi servizi."
+      },
+      "slide3": {
+        "title": "Vendite sicure con l'escrow",
+        "description": "Il nostro sistema escrow protegge te e i tuoi clienti. I pagamenti vengono custoditi in sicurezza finché l'acquirente non conferma l'ordine o la consegna."
+      }
+    },
+    "choose": {
+      "title": "Cosa vuoi offrire?",
+      "subtitle": "Scegli come iniziare. Configureremo il tuo profilo venditore in base alla tua scelta.",
+      "legend": "Cosa vuoi offrire su DiasporaConnect?",
+      "products": {
+        "title": "Vendere prodotti",
+        "description": "Pubblica beni fisici o digitali nel marketplace."
+      },
+      "services": {
+        "title": "Offrire servizi",
+        "description": "Offri le tue competenze e il tuo tempo da prenotare."
+      }
+    },
+    "documents": {
+      "title": "Aggiungi documenti aziendali",
+      "subtitle": "Carica i documenti relativi alla tua attività in un unico file PDF.",
+      "upload": "Carica documento",
+      "supported": "Tipo di file supportato: PDF",
+      "selected": "Selezionato: {name}",
+      "errorPdf": "Sono supportati solo file PDF.",
+      "noteOneFile": "Tutti i documenti devono essere riuniti e caricati come un unico file.",
+      "notePdf": "Il caricamento supportato è solo in formato PDF.",
+      "noteSize": "La dimensione del file non deve superare 1 MB."
+    },
+    "rail": {
+      "title": "Cosa ottieni",
+      "start": {
+        "title": "Inizia subito a pubblicare",
+        "description": "Il tuo account venditore è attivo appena finisci, così puoi pubblicare subito prodotti e servizi."
+      },
+      "escrow": {
+        "title": "Pagamenti custoditi in escrow",
+        "description": "I pagamenti degli acquirenti restano in escrow finché la consegna non viene confermata."
+      },
+      "payouts": {
+        "title": "Pagamenti sul tuo conto",
+        "description": "I tuoi guadagni vengono accreditati sul tuo conto di pagamento venditore."
+      },
+      "verification": {
+        "title": "La verifica è facoltativa",
+        "description": "La verifica dell'identità sblocca limiti più alti e un badge Verificato. Non ti impedisce mai di vendere."
+      }
+    }
+  },
   "vendors": {
     "dashboard": "Dashboard venditore",
     "addNewService": "Aggiungi nuovo servizio",

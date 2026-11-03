@@ -1,5 +1,9 @@
 "use client"
+import { CheckCircle2 } from "lucide-react";
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
+import { PageShell, ContentWithRail } from "@/components/vendor-onboarding/PageShell";
+import { BenefitsRail } from "@/components/vendor-onboarding/BenefitsRail";
+import { Section } from "@/components/redesign/Section";
 import React from "react";
 import { useTranslations } from "next-intl";
 
@@ -24,64 +28,51 @@ export default function VendorReadyPage() {
 
     if (!accountType) {
         return (
-            <div className="min-h-screen  flex items-center justify-center p-6">
-                <div className="bg-white rounded-lg shadow-sm p-8 max-w-md w-full">
-                    <h1 className="text-2xl font-semibold mb-4">{t("linkBroken")}</h1>
-                </div>
-            </div>
+            <PageShell>
+                <Section labelledBy="vendor-status-title" className="mx-auto max-w-xl">
+                    <h1 id="vendor-status-title" className="text-xl font-bold text-text-primary">{t("linkBroken")}</h1>
+                </Section>
+            </PageShell>
         );
     }
 
     const isService = accountType === 'service';
 
     return (
-        <div className="min-h-screen  p-6">
-            <div className="max-w-2xl mx-auto ">
-                {/* Success Header */}
-                <div className="p-6 border-b ">
-                    <div className="">
-                        <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                            <svg 
-                                className="w-7 h-7 text-green-600" 
-                                fill="none" 
-                                stroke="currentColor" 
-                                viewBox="0 0 24 24"
-                            >
-                                <path 
-                                    strokeLinecap="round" 
-                                    strokeLinejoin="round" 
-                                    strokeWidth={2.5} 
-                                    d="M5 13l4 4L19 7" 
-                                />
-                            </svg>
-                        </div>
-                        <h1 className="heading-xsmall text-primary">
+        <PageShell>
+            <ContentWithRail rail={<BenefitsRail />}>
+                <Section labelledBy="vendor-status-title" testId="vendor-ready" className="sm:p-6">
+                    <div className="flex items-start gap-4">
+                        <span className="grid size-12 shrink-0 place-items-center rounded-full bg-surface-success text-text-success">
+                            <CheckCircle2 className="size-6" aria-hidden />
+                        </span>
+                        <h1 id="vendor-status-title" className="min-w-0 pt-2 text-xl font-bold leading-tight text-text-primary sm:text-2xl">
                             {t("accountReady")}
                         </h1>
                     </div>
-                </div>
 
-                {/* Main Card */}
-                <div className="py-6">
-                    <h2 className="heading-medium text-primary mb-3">
-                        {isService ? t("listFirstService") : t("listFirstProduct")}
-                    </h2>
-                    <p className="body-large text-secondary mb-8">
-                        {isService ? t("listFirstServiceDescription") : t("listFirstProductDescription")}
-                    </p>
+                    <div className="mt-5 border-t border-border-subtle pt-5">
+                        <h2 className="text-lg font-bold text-text-primary">
+                            {isService ? t("listFirstService") : t("listFirstProduct")}
+                        </h2>
+                        <p className="mt-2 text-sm leading-relaxed text-text-secondary sm:text-base">
+                            {isService ? t("listFirstServiceDescription") : t("listFirstProductDescription")}
+                        </p>
 
-                    <div className="flex items-center justify-between">
-                        <ButtonType3
-                            onClick={handleChangeAccountType}
-                        >
-                            {t("goToDashboard")}
-                        </ButtonType3>
-                        <ButtonType2 size="lg">
-                            {isService ? t("listService") : t("listProduct")}
-                        </ButtonType2>
+                        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+                            <ButtonType3
+                                onClick={handleChangeAccountType}
+                                className="min-h-11 focus-visible:outline-none focus-visible:ring-2"
+                            >
+                                {t("goToDashboard")}
+                            </ButtonType3>
+                            <ButtonType2 size="lg" className="min-h-11 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand focus-visible:ring-offset-2">
+                                {isService ? t("listService") : t("listProduct")}
+                            </ButtonType2>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
+                </Section>
+            </ContentWithRail>
+        </PageShell>
     );
 }
