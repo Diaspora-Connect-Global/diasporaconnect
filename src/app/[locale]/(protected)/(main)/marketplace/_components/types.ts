@@ -14,8 +14,9 @@ export interface Product {
   name: string;
   price: number;
   currency?: string;
-  rating: number;
-  reviews: number;
+  /** Not populated: the listing APIs carry no rating, and reviews are read from their own query. */
+  rating?: number;
+  reviews?: number;
   image: string;
   /** Optional gallery images for product detail (first used as main image if present) */
   images?: string[];
@@ -30,6 +31,12 @@ export interface Product {
   sellerTrustTier?: string;
   colors?: string[];
   category: string;
+  /** Seller-written description from the listing (absent on list rows that omit it). */
+  description?: string;
+  /** Seller-set tags of the listing. */
+  tags?: string[];
+  /** Units in stock, when the listing reports it (products only). */
+  inventoryCount?: number;
   isService?: boolean;
   priceType?: "fixed" | "hourly";
   /** Optional extras for services (e.g. add-ons); when set, Continue shows extras modal */

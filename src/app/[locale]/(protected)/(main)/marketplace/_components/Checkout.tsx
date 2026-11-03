@@ -11,6 +11,7 @@ import { formatAmountWithCurrency } from "@/lib/displayCurrency";
 import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 import { CONVERT_CURRENCY } from "@/services/gql/marketplace";
 import { isMobileMoneySupported } from "@/types/money";
+import { readableSeller } from "@/components/marketplace/DetailParts";
 import type { CartItem, PaymentMethod, PaymentResult, ShippingAddress } from "./types";
 
 type ConvertCurrencyData = {
@@ -39,6 +40,7 @@ export function Checkout({
   onComplete: () => void;
 }) {
   const t = useTranslations("marketplace");
+  const tp = useTranslations("marketplacePage");
   const locale = useLocale();
   const apolloClient = useApolloClient();
   const { currency: displayCurrency } = useDisplayCurrency();
@@ -143,18 +145,20 @@ export function Checkout({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="h-app-inner overflow-y-auto scrollbar-hide bg-background">
+     <div className="mx-auto w-full space-y-4 px-4 pb-24 pt-4 lg:w-[80vw] lg:px-0 lg:pb-10">
       <ButtonType3
         onClick={onBack}
-        className="p-0 min-w-0 border-0 bg-transparent flex items-center gap-2 text-text-secondary mb-4 hover:text-text-primary"
+        className="min-h-11 p-0 min-w-0 border-0 bg-transparent flex items-center gap-2 text-text-secondary hover:text-text-primary"
       >
         <ChevronLeft className="w-5 h-5" />
         <span>{t("checkout")}</span>
       </ButtonType3>
-      <div className="grid md:grid-cols-3 gap-8">
-        <div className="md:col-span-2">
+      <h1 className="text-2xl font-bold text-text-primary">{tp("checkoutHeading")}</h1>
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="min-w-0">
           <div>
-            <div className="bg-surface-default rounded-lg border border-border-subtle p-6 mb-6">
+            <div className="bg-surface-default rounded-2xl border border-border-subtle p-4 shadow-sm sm:p-5 mb-6">
               <h3 className="font-semibold mb-4 text-text-primary">{t("orderDetails")}</h3>
               {cart.map((item) => {
                 const lineTotal =
@@ -173,7 +177,9 @@ export function Checkout({
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-text-primary">{item.name}</p>
-                      <p className="text-sm text-text-secondary">{item.seller}</p>
+                      {readableSeller(item.seller) && (
+                        <p className="text-sm text-text-secondary">{readableSeller(item.seller)}</p>
+                      )}
                       {item.extras && item.extras.length > 0 && (
                         <ul className="text-xs text-text-tertiary space-y-0.5 mt-0.5">
                           {(item.serviceExtras
@@ -209,7 +215,7 @@ export function Checkout({
               })}
             </div>
 
-            <div className="bg-surface-default rounded-lg border border-border-subtle p-6 mb-6">
+            <div className="bg-surface-default rounded-2xl border border-border-subtle p-4 shadow-sm sm:p-5 mb-6">
               <h3 className="font-semibold mb-4 text-text-primary">{t("paymentMethod")}</h3>
               <div className="space-y-3">
                 <button
@@ -250,7 +256,7 @@ export function Checkout({
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-text-primary text-sm">{t("mobilePayment")}</p>
-                      <p className="text-xs text-text-secondary mt-0.5">Powered by Paystack · Complete in Paystack's secure popup</p>
+                      <p className="text-xs text-text-secondary mt-0.5">Powered by Paystack · Complete in Paystack&apos;s secure popup</p>
                     </div>
                     {paymentMethod === "mobile" && <CheckCircle2 className="w-5 h-5 text-text-brand flex-shrink-0" />}
                   </button>
@@ -264,7 +270,7 @@ export function Checkout({
               </div>
             </div>
 
-            <div className="bg-surface-default rounded-lg border border-border-subtle p-6 mb-6">
+            <div className="bg-surface-default rounded-2xl border border-border-subtle p-4 shadow-sm sm:p-5 mb-6">
               <h3 className="font-semibold mb-4 text-text-primary">{t("shippingAddress")}</h3>
               <div className="space-y-4">
                 <input
@@ -274,7 +280,7 @@ export function Checkout({
                   onChange={(e) =>
                     setShippingAddress({ ...shippingAddress, name: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
+                  className="w-full px-4 py-2 text-base md:text-sm border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
                   required
                 />
                 <input
@@ -284,7 +290,7 @@ export function Checkout({
                   onChange={(e) =>
                     setShippingAddress({ ...shippingAddress, address: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
+                  className="w-full px-4 py-2 text-base md:text-sm border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
                   required
                 />
                 <div className="grid grid-cols-2 gap-4">
@@ -295,7 +301,7 @@ export function Checkout({
                     onChange={(e) =>
                       setShippingAddress({ ...shippingAddress, city: e.target.value })
                     }
-                    className="px-4 py-2 border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
+                    className="px-4 py-2 text-base md:text-sm border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
                     required
                   />
                   <CountrySelect
@@ -317,13 +323,13 @@ export function Checkout({
                       phoneNumber: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-2 border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
+                  className="w-full px-4 py-2 text-base md:text-sm border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
                   required
                 />
               </div>
             </div>
 
-            <div className="bg-surface-default rounded-lg border border-border-subtle p-6">
+            <div className="bg-surface-default rounded-2xl border border-border-subtle p-4 shadow-sm sm:p-5">
               <h3 className="font-semibold mb-4 text-text-primary">{t("billingAddress")}</h3>
               <label className="flex items-center gap-2 cursor-pointer mb-4">
                 <input
@@ -343,7 +349,7 @@ export function Checkout({
                     onChange={(e) =>
                       setBillingAddress({ ...billingAddress, name: e.target.value })
                     }
-                    className="w-full px-4 py-2 border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
+                    className="w-full px-4 py-2 text-base md:text-sm border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
                   />
                   <input
                     type="text"
@@ -352,7 +358,7 @@ export function Checkout({
                     onChange={(e) =>
                       setBillingAddress({ ...billingAddress, address: e.target.value })
                     }
-                    className="w-full px-4 py-2 border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
+                    className="w-full px-4 py-2 text-base md:text-sm border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
                   />
                   <div className="grid grid-cols-2 gap-4">
                     <input
@@ -362,7 +368,7 @@ export function Checkout({
                       onChange={(e) =>
                         setBillingAddress({ ...billingAddress, city: e.target.value })
                       }
-                      className="px-4 py-2 border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
+                      className="px-4 py-2 text-base md:text-sm border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
                     />
                     <CountrySelect
                       value={billingAddress.country}
@@ -382,7 +388,7 @@ export function Checkout({
                         phoneNumber: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-2 border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
+                    className="w-full px-4 py-2 text-base md:text-sm border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
                   />
                 </div>
               )}
@@ -390,8 +396,8 @@ export function Checkout({
           </div>
         </div>
 
-        <div className="md:col-span-1">
-          <div className="bg-surface-default rounded-lg border border-border-subtle p-6 sticky top-24">
+        <div className="min-w-0">
+          <div className="bg-surface-default rounded-2xl border border-border-subtle p-4 shadow-sm sm:p-5 lg:sticky lg:top-4">
             <h3 className="font-semibold mb-4 text-text-primary">{t("priceSummary")}</h3>
             <div className="space-y-2 mb-4">
               <div className="flex justify-between text-sm">
@@ -431,6 +437,7 @@ export function Checkout({
           </div>
         </div>
       </div>
+     </div>
     </div>
   );
 }
