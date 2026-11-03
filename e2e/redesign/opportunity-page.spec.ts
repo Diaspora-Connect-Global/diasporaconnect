@@ -127,6 +127,17 @@ test('a javascript: application link is never a link', async () => {
     await page.context().close();
 });
 
+test('an email with smuggled headers is not a mailto: link; a plain one is', async () => {
+    const bad = await openOpp({ applicationMethod: 'EMAIL_REQUEST', externalLink: null, applicationEmail: 'jobs@example.com?bcc=evil@example.net' });
+    await expect(bad.page.getByTestId('apply-card')).toContainText('The poster hasn’t said how to apply yet.', { timeout: 90_000 });
+    await expect(bad.page.locator('a[href^="mailto:"]')).toHaveCount(0);
+    await bad.page.context().close();
+
+    const good = await openOpp({ applicationMethod: 'EMAIL_REQUEST', externalLink: null, applicationEmail: 'jobs@example.com' });
+    await expect(good.page.getByTestId('apply-card').getByTestId('apply-primary')).toHaveAttribute('href', 'mailto:jobs@example.com', { timeout: 90_000 });
+    await good.page.context().close();
+});
+
 test('an in-platform listing shows its own questions, CV included, and Apply now jumps to them', async () => {
     const { page } = await openOpp({
         applicationMethod: 'IN_PLATFORM_FORM',
@@ -140,7 +151,7 @@ test('an in-platform listing shows its own questions, CV included, and Apply now
     });
     const form = page.getByTestId('apply-form');
     await expect(form.getByRole('heading', { name: 'Your application' })).toBeVisible({ timeout: 90_000 });
-    await expect(form.getByText('CV', { exact: true })).toBeVisible();
+    await expect(form.getByText(/^CV\s*\*?$/)).toBeVisible(); // a required field's label reads "CV*"
     await expect(form.getByLabel('Why this role?')).toBeVisible();
     await page.getByTestId('apply-card').getByRole('button', { name: 'Apply now' }).click();
     await expect(form.getByLabel(/Full Name/)).toBeFocused();

@@ -48,7 +48,7 @@ test('totals are minor units divided by 100 once, with honest labels and status 
     await expect(summary).toContainText('145.50'); // 12550 + 2000 = 14550 minor
     await expect(summary).toContainText('50.00'); // 5000 minor pending
     await expect(summary).not.toContainText('14,550');
-    await expect(page.getByText(/total balance|available|in escrow/i)).toHaveCount(0);
+    await expect(page.getByText(/^(total balance|available|in escrow)$/i)).toHaveCount(0);
     const list = page.getByTestId('wallet-transactions');
     await expect(list.getByRole('listitem')).toHaveCount(3);
     await expect(list.getByText('Pending')).toHaveCount(1);

@@ -62,8 +62,9 @@ test('tab, tag, currency and price filters live in the URL and change the real q
     // Open the refine panel on phones; on desktop it is already open.
     await page.getByRole('button', { name: 'fabric' }).click();
     await expect.poll(() => graphql.calls.filter((c) => c.name === 'SearchProducts').some((c) => (c.variables as { input: { tags?: string[] } }).input.tags?.[0] === 'fabric')).toBe(true);
-    expect(page.url()).toContain('tag=fabric');
+    await expect(page).toHaveURL(/tag=fabric/);
     await page.getByLabel('Currency').selectOption('USD');
+    await expect(page).toHaveURL(/cur=USD/); // a person's next change comes after this one has landed
     await page.getByPlaceholder('Minimum').fill('10.50');
     await page.getByPlaceholder('Minimum').blur();
     await expect.poll(() => {
@@ -75,7 +76,7 @@ test('tab, tag, currency and price filters live in the URL and change the real q
     await page.getByRole('tab', { name: 'Services' }).click();
     await expect(page.getByTestId('mp-card').first()).toContainText('Tax filing help');
     await expect(page.getByTestId('mp-card').first()).toContainText('From');
-    expect(page.url()).toContain('tab=services');
+    await expect(page).toHaveURL(/tab=services/);
     await page.context().close();
 });
 

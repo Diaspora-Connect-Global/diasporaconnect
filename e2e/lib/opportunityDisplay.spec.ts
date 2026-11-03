@@ -1,6 +1,6 @@
 /** Display rules for an opportunity (pure, no browser). */
 import { test, expect } from '@playwright/test';
-import { aboutText, daysUntil, externalHost, opportunityPhase, readableOwnerName, safeExternalUrl } from '../../src/lib/opportunityDisplay';
+import { aboutText, daysUntil, externalHost, opportunityPhase, readableOwnerName, safeEmail, safeExternalUrl } from '../../src/lib/opportunityDisplay';
 
 const NOW = new Date('2026-11-03T10:00:00.000Z');
 const DAY = 86_400_000;
@@ -21,6 +21,14 @@ test('only http(s) application links are links', () => {
         expect(safeExternalUrl(bad)).toBeNull();
     }
     expect(externalHost('https://www.example.com/a?b=1')).toBe('example.com');
+});
+
+test('only a plain address becomes a mailto: link', () => {
+    expect(safeEmail(' jobs@example.com ')).toBe('jobs@example.com');
+    expect(safeEmail('first.last+tag@sub.example.org')).toBe('first.last+tag@sub.example.org');
+    for (const bad of ['a@b.com?bcc=x@y.com', 'a@b.com&cc=x@y.com', 'a@b.com,x@y.com', 'a b@c.com', 'a@b', 'not-an-email', 'a@b.com%0Abcc:x@y.com', '', null]) {
+        expect(safeEmail(bad)).toBeNull();
+    }
 });
 
 test('open, closing soon (last 7 days) and closed', () => {

@@ -27,6 +27,16 @@ export function safeExternalUrl(raw?: string | null): string | null {
   }
 }
 
+/**
+ * The application email, only when it is a plain address. It is typed by the
+ * poster and becomes a `mailto:` link, so `a@b.com?bcc=x@y.com` would silently
+ * copy someone else on the applicant's message.
+ */
+export function safeEmail(raw?: string | null): string | null {
+  const v = raw?.trim();
+  return v && /^[^\s@?&#%,;:<>()]+@[^\s@?&#%,;:<>()]+\.[^\s@?&#%,;:<>()]+$/.test(v) ? v : null;
+}
+
 /** The host to name next to "Apply on website", without a leading `www.`. */
 export function externalHost(url: string): string {
   try {

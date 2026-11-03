@@ -18,7 +18,8 @@ test('shows the category as the one h1, with cards that link to the opportunity 
     const { page, graphql } = await open(browser, '/opportunities/employment-career');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Employment & career', { timeout: 90_000 });
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
-    await expect(page.getByText('Jobs, internships and career programmes, at home and abroad.')).toBeVisible();
+    // .first(): the loading placeholder repeats the hero text for an instant.
+    await expect(page.getByText('Jobs, internships and career programmes, at home and abroad.').first()).toBeVisible();
     // The fixture has two jobs in this category; the other categories' listings are not shown.
     const cards = page.getByTestId('opp-category-card');
     await expect(cards).toHaveCount(2);
@@ -43,7 +44,8 @@ test('filters change the real query and live in the URL', async () => {
     const { page, graphql } = await open(browser, '/opportunities/employment-career');
     await expect(page.getByTestId('opp-category-card')).toHaveCount(2, { timeout: 90_000 });
     // Type: a radio group, sent to the server as `type`.
-    await page.getByRole('radio', { name: 'Job', exact: true }).check();
+    await page.getByRole('radio', { name: 'Job', exact: true }).click(); // URL-driven: the state follows the navigation
+    await expect(page.getByRole('radio', { name: 'Job', exact: true })).toBeChecked();
     await expect(page).toHaveURL(/type=EMPLOYMENT/);
     await expect.poll(() => lastList(graphql.calls)).toMatchObject({ category: 'EMPLOYMENT_CAREER', type: 'EMPLOYMENT' });
     await expect(page.getByTestId('opp-category-card')).toHaveCount(2);
@@ -56,7 +58,8 @@ test('filters change the real query and live in the URL', async () => {
     await expect(page).toHaveURL(/loc=Accra/);
     await expect.poll(() => lastList(graphql.calls)).toMatchObject({ type: 'EMPLOYMENT', location: 'Accra', sortBy: 'DEADLINE' });
     // A type with no match: a filtered empty state that can be cleared.
-    await page.getByRole('radio', { name: 'Grant', exact: true }).check();
+    await page.getByRole('radio', { name: 'Grant', exact: true }).click(); // URL-driven: the state follows the navigation
+    await expect(page.getByRole('radio', { name: 'Grant', exact: true })).toBeChecked();
     await expect(page.getByTestId('opp-category-empty')).toContainText('Nothing matches these filters');
     await page.getByTestId('opp-category-empty').getByRole('button', { name: 'Clear filters' }).click();
     await expect(page).not.toHaveURL(/type=|loc=|sort=/);

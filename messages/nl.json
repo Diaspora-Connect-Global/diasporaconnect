@@ -2930,7 +2930,8 @@
     "verifiedPurchase": "Geverifieerde aankoop",
     "loadMoreReviews": "Meer beoordelingen tonen",
     "averageRating": "{rating} van 5",
-    "ratingRequired": "Kies eerst een beoordeling."
+    "ratingRequired": "Kies eerst een beoordeling.",
+    "processing": "Bezig met verwerken…"
   },
   "vendorOnboarding": {
     "hero": {

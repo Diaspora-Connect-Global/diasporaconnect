@@ -8,7 +8,7 @@ import { Link } from '@/i18n/navigation';
 import { UserBadge } from '@/components/custom/userBadge';
 import { resolveUserTier } from '@/lib/userTier';
 import { compensationParts } from '@/lib/compensation';
-import { externalHost, safeExternalUrl, toDate, type OpportunityPhase } from '@/lib/opportunityDisplay';
+import { externalHost, safeEmail, safeExternalUrl, toDate, type OpportunityPhase } from '@/lib/opportunityDisplay';
 import { GET_OPPORTUNITY, GET_USER_APPLICATIONS, WITHDRAW_APPLICATION } from '@/services/gql/opportunities';
 import type { Opportunity } from '@/services/gql/types/opportunities';
 import { useOpportunityLabels } from './useOpportunityLabels';
@@ -38,7 +38,7 @@ export function applyState(item: Opportunity, phase: OpportunityPhase, viewerId:
     return url ? { kind: 'external', url } : { kind: 'none' };
   }
   if (method === 'EMAIL_REQUEST') {
-    const email = item.applicationEmail?.trim();
+    const email = safeEmail(item.applicationEmail);
     return email ? { kind: 'email', email } : { kind: 'none' };
   }
   // In-platform (or unset, which the backend treats as in-platform) needs an account.

@@ -161,6 +161,8 @@ test('Refine: location and sort change the real query', async () => {
 
 test('the hero search goes to the global search', async () => {
     const { page } = await open(browser, '/discover');
+    // Wait for data on screen: typing before hydration fills the DOM but not React's state.
+    await expect(page.getByTestId('discover-section-jobs')).toBeVisible({ timeout: 90_000 });
     await page.getByLabel('Search DiaspoPlug').fill('cocoa');
     await page.getByRole('search').getByRole('button', { name: 'Search', exact: true }).click(); // the header has its own Search button
     await expect(page).toHaveURL(/\/search\?q=cocoa/);

@@ -2930,7 +2930,8 @@
     "verifiedPurchase": "Verified purchase",
     "loadMoreReviews": "Show more reviews",
     "averageRating": "{rating} out of 5",
-    "ratingRequired": "Pick a rating first."
+    "ratingRequired": "Pick a rating first.",
+    "processing": "Processing…"
   },
   "vendorOnboarding": {
     "hero": {

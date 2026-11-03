@@ -280,9 +280,8 @@ const DynamicField = ({ field, value, onChange, onFileChange }: DynamicFieldProp
  * The in-platform application form (IN_PLATFORM_FORM listings): the listing's own
  * questions, standard ones first, prefilled from the signed-in user. Files are
  * uploaded privately first; the application carries only their object keys.
- * Shared by the opportunity page and the opportunity card's details dialog.
  */
-export function OpportunityApplicationForm({ item, onSubmitted }: { item: Opportunity; onSubmitted?: () => void }) {
+export function OpportunityApplicationForm({ item }: { item: Opportunity }) {
     const t = useTranslations("home.opportunities");
     const user = useUserStore((state) => state.user);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -544,7 +543,6 @@ export function OpportunityApplicationForm({ item, onSubmitted }: { item: Opport
             setFieldValues({});
             setFilesByField({});
             setAgreedToTerms(false);
-            onSubmitted?.();
         } catch {
             toast.error(t("toasts.submitError"));
         }

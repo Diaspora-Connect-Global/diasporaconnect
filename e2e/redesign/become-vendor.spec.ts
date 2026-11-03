@@ -32,7 +32,7 @@ test('renders the hero, the step indicator and the benefits rail', async () => {
     await expect(page.getByText(/thousands|trusted by|rated|\d+\s*vendors/i)).toHaveCount(0);
     // Intro: Next advances a slide, Skip jumps to the last one, Finish moves to step 2.
     await expect(page.getByRole('heading', { level: 2, name: "Let's get your business online" })).toBeVisible();
-    await page.getByRole('button', { name: 'Next' }).click();
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
     await expect(page.getByRole('heading', { level: 2, name: 'Grow your business with new customers' })).toBeVisible();
     await page.getByRole('button', { name: 'Skip' }).click();
     await expect(page.getByRole('heading', { level: 2, name: 'Secure sales with escrow' })).toBeVisible();

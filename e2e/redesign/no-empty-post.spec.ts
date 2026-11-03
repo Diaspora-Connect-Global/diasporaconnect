@@ -52,7 +52,7 @@ test('Post is enabled with an attachment and no text', async () => {
     await expect(postBtn(page)).toBeDisabled();
     const [chooser] = await Promise.all([
         page.waitForEvent('filechooser'),
-        modal(page).getByTitle('Add Photo').click(),
+        modal(page).getByTestId('add-attachment-button').click(),
     ]);
     await chooser.setFiles({ name: 'a.png', mimeType: 'image/png', buffer: PNG });
     await expect(postBtn(page)).toBeEnabled();

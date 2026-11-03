@@ -2626,7 +2626,8 @@
     "verifiedPurchase": "Achat vérifié",
     "loadMoreReviews": "Afficher plus d'avis",
     "averageRating": "{rating} sur 5",
-    "ratingRequired": "Choisissez d'abord une note."
+    "ratingRequired": "Choisissez d'abord une note.",
+    "processing": "Traitement en cours…"
   },
   "vendorOnboarding": {
     "hero": {
