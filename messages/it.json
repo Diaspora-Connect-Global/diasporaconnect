@@ -7187,5 +7187,107 @@
       "rejected": "Candidatura rifiutata.",
       "decisionFailed": "Non siamo riusciti a salvare la tua decisione. Riprova."
     }
+  },
+  "opportunityPage": {
+    "postedBy": "Pubblicato da {name}",
+    "payFrom": "Da {amount}",
+    "payUpTo": "Fino a {amount}",
+    "railLabel": "Candidatura e dettagli",
+    "status": {
+      "open": "Aperta",
+      "closingSoon": "In scadenza",
+      "closed": "Chiusa"
+    },
+    "deadline": {
+      "by": "Candidati entro il {date}",
+      "daysLeft": "{count, plural, =0 {Scade oggi} one {Manca # giorno} other {Mancano # giorni}}",
+      "none": "Nessuna scadenza"
+    },
+    "facts": {
+      "title": "In breve",
+      "type": "Tipo",
+      "category": "Settore",
+      "workMode": "Modalità di lavoro",
+      "commitment": "Impegno",
+      "pay": "Retribuzione",
+      "location": "Luogo",
+      "duration": "Durata",
+      "deadline": "Scadenza",
+      "posted": "Pubblicata",
+      "applicants": "Candidature",
+      "applicantsCount": "{count, plural, one {# candidatura} other {# candidature}}"
+    },
+    "sections": {
+      "about": "Informazioni su questa opportunità",
+      "scope": "Di cosa ti occuperai",
+      "eligibility": "Chi può candidarsi",
+      "regions": "Aperta a persone in",
+      "benefits": "Cosa viene offerto",
+      "skills": "Competenze",
+      "tags": "Argomenti"
+    },
+    "apply": {
+      "title": "Come candidarsi",
+      "ownerTitle": "Il tuo annuncio",
+      "formTitle": "La tua candidatura",
+      "applyNow": "Candidati ora",
+      "applyOnSite": "Candidati sul sito",
+      "opensInNewTab": "(si apre in una nuova scheda)",
+      "applyByEmail": "Candidati via e-mail",
+      "manage": "Gestisci le candidature",
+      "signIn": "Accedi per candidarti",
+      "applied": "Ti sei candidato",
+      "closed": "Candidature chiuse",
+      "withdraw": "Ritira la candidatura",
+      "withdrawing": "Ritiro in corso…",
+      "ownerNote": "Guarda chi si è candidato e accetta o rifiuta ogni candidatura.",
+      "closedNote": "Questa opportunità non accetta più candidature.",
+      "appliedNote": "Chi ha pubblicato ti contatterà se la tua candidatura va avanti.",
+      "signInNote": "Accedi per candidarti qui su DiaspoPlug.",
+      "formNote": "Candidati qui su DiaspoPlug. La tua candidatura arriva direttamente a chi ha pubblicato.",
+      "externalNote": "Ti candiderai su {host}.",
+      "emailNote": "Invia la tua candidatura a {email}.",
+      "noneNote": "Non è ancora stato indicato come candidarsi."
+    },
+    "poster": {
+      "title": "Pubblicato da",
+      "fallback": "Un membro di DiaspoPlug",
+      "kinds": {
+        "USER": "Membro",
+        "COMMUNITY": "Comunità",
+        "ASSOCIATION": "Associazione"
+      }
+    },
+    "categories": {
+      "EMPLOYMENT_CAREER": "Lavoro & carriera",
+      "EDUCATION_TRAINING": "Istruzione & formazione",
+      "FUNDING_GRANTS": "Finanziamenti & sovvenzioni",
+      "FELLOWSHIPS_LEADERSHIP": "Fellowship & leadership",
+      "BUSINESS_INVESTMENT": "Impresa & investimenti",
+      "VOLUNTEERING_SOCIAL_IMPACT": "Volontariato & impatto sociale",
+      "EVENT_CREATIVE_INDUSTRY": "Eventi & industrie creative",
+      "AGRICULTURE_SUSTAINABILITY": "Agricoltura & sostenibilità",
+      "REAL_ESTATE_INFRASTRUCTURE": "Immobiliare & infrastrutture",
+      "GOVERNMENT_EMBASSY_INITIATIVES": "Iniziative di governo & ambasciate",
+      "INNOVATION_RESEARCH": "Innovazione & ricerca",
+      "FINANCE_ECONOMICS": "Finanza & economia",
+      "RETURN_REINTEGRATION": "Rientro & reinserimento"
+    },
+    "deliveryModes": {
+      "REMOTE": "Da remoto",
+      "IN_PERSON": "In presenza",
+      "HYBRID": "Ibrida",
+      "ONLINE": "Online"
+    },
+    "compensationTypes": {
+      "SALARY": "Stipendio",
+      "GRANT": "Sovvenzione",
+      "STIPEND": "Borsa",
+      "INVESTMENT": "Investimento",
+      "PRIZE": "Premio",
+      "EQUITY": "Partecipazione",
+      "HONORARIUM": "Onorario",
+      "NONE": "Non retribuita"
+    }
   }
 }

@@ -7187,5 +7187,107 @@
       "rejected": "Sollicitatie afgewezen.",
       "decisionFailed": "We konden je beslissing niet opslaan. Probeer het opnieuw."
     }
+  },
+  "opportunityPage": {
+    "postedBy": "Geplaatst door {name}",
+    "payFrom": "Vanaf {amount}",
+    "payUpTo": "Tot {amount}",
+    "railLabel": "Solliciteren en details",
+    "status": {
+      "open": "Open",
+      "closingSoon": "Sluit binnenkort",
+      "closed": "Gesloten"
+    },
+    "deadline": {
+      "by": "Reageer vóór {date}",
+      "daysLeft": "{count, plural, =0 {Sluit vandaag} one {Nog # dag} other {Nog # dagen}}",
+      "none": "Geen deadline"
+    },
+    "facts": {
+      "title": "In het kort",
+      "type": "Soort",
+      "category": "Vakgebied",
+      "workMode": "Werkvorm",
+      "commitment": "Omvang",
+      "pay": "Vergoeding",
+      "location": "Locatie",
+      "duration": "Duur",
+      "deadline": "Deadline",
+      "posted": "Geplaatst",
+      "applicants": "Reacties",
+      "applicantsCount": "{count, plural, one {# reactie} other {# reacties}}"
+    },
+    "sections": {
+      "about": "Over deze kans",
+      "scope": "Wat je gaat doen",
+      "eligibility": "Wie kan reageren",
+      "regions": "Open voor mensen in",
+      "benefits": "Wat er geboden wordt",
+      "skills": "Vaardigheden",
+      "tags": "Onderwerpen"
+    },
+    "apply": {
+      "title": "Zo reageer je",
+      "ownerTitle": "Jouw vacature",
+      "formTitle": "Jouw sollicitatie",
+      "applyNow": "Nu reageren",
+      "applyOnSite": "Reageren op de website",
+      "opensInNewTab": "(opent in een nieuw tabblad)",
+      "applyByEmail": "Reageren per e-mail",
+      "manage": "Reacties beheren",
+      "signIn": "Log in om te reageren",
+      "applied": "Je hebt gereageerd",
+      "closed": "Reageren is gesloten",
+      "withdraw": "Sollicitatie intrekken",
+      "withdrawing": "Bezig met intrekken…",
+      "ownerNote": "Bekijk wie heeft gereageerd en accepteer of wijs elke sollicitatie af.",
+      "closedNote": "Voor deze kans kun je niet meer reageren.",
+      "appliedNote": "De plaatser neemt contact op als je sollicitatie verder gaat.",
+      "signInNote": "Log in om hier op DiaspoPlug te reageren.",
+      "formNote": "Reageer hier op DiaspoPlug. Je sollicitatie gaat rechtstreeks naar de plaatser.",
+      "externalNote": "Je reageert op {host}.",
+      "emailNote": "Stuur je sollicitatie naar {email}.",
+      "noneNote": "Er staat nog niet bij hoe je kunt reageren."
+    },
+    "poster": {
+      "title": "Geplaatst door",
+      "fallback": "Een DiaspoPlug-lid",
+      "kinds": {
+        "USER": "Lid",
+        "COMMUNITY": "Community",
+        "ASSOCIATION": "Vereniging"
+      }
+    },
+    "categories": {
+      "EMPLOYMENT_CAREER": "Werk & carrière",
+      "EDUCATION_TRAINING": "Onderwijs & training",
+      "FUNDING_GRANTS": "Financiering & subsidies",
+      "FELLOWSHIPS_LEADERSHIP": "Fellowships & leiderschap",
+      "BUSINESS_INVESTMENT": "Ondernemen & investeren",
+      "VOLUNTEERING_SOCIAL_IMPACT": "Vrijwilligerswerk & maatschappelijke impact",
+      "EVENT_CREATIVE_INDUSTRY": "Evenementen & creatieve sector",
+      "AGRICULTURE_SUSTAINABILITY": "Landbouw & duurzaamheid",
+      "REAL_ESTATE_INFRASTRUCTURE": "Vastgoed & infrastructuur",
+      "GOVERNMENT_EMBASSY_INITIATIVES": "Initiatieven van overheden & ambassades",
+      "INNOVATION_RESEARCH": "Innovatie & onderzoek",
+      "FINANCE_ECONOMICS": "Financiën & economie",
+      "RETURN_REINTEGRATION": "Terugkeer & re-integratie"
+    },
+    "deliveryModes": {
+      "REMOTE": "Op afstand",
+      "IN_PERSON": "Op locatie",
+      "HYBRID": "Hybride",
+      "ONLINE": "Online"
+    },
+    "compensationTypes": {
+      "SALARY": "Salaris",
+      "GRANT": "Subsidie",
+      "STIPEND": "Toelage",
+      "INVESTMENT": "Investering",
+      "PRIZE": "Prijs",
+      "EQUITY": "Aandelen",
+      "HONORARIUM": "Honorarium",
+      "NONE": "Onbetaald"
+    }
   }
 }

@@ -7187,5 +7187,107 @@
       "rejected": "Application rejected.",
       "decisionFailed": "We couldn't save your decision. Please try again."
     }
+  },
+  "opportunityPage": {
+    "postedBy": "Posted by {name}",
+    "payFrom": "From {amount}",
+    "payUpTo": "Up to {amount}",
+    "railLabel": "Applying and details",
+    "status": {
+      "open": "Open",
+      "closingSoon": "Closing soon",
+      "closed": "Closed"
+    },
+    "deadline": {
+      "by": "Apply by {date}",
+      "daysLeft": "{count, plural, =0 {Closes today} one {# day left} other {# days left}}",
+      "none": "No deadline"
+    },
+    "facts": {
+      "title": "At a glance",
+      "type": "Type",
+      "category": "Field",
+      "workMode": "Work mode",
+      "commitment": "Commitment",
+      "pay": "Pay",
+      "location": "Location",
+      "duration": "Duration",
+      "deadline": "Deadline",
+      "posted": "Posted",
+      "applicants": "Applicants",
+      "applicantsCount": "{count, plural, one {# applicant} other {# applicants}}"
+    },
+    "sections": {
+      "about": "About this opportunity",
+      "scope": "What you’ll do",
+      "eligibility": "Who can apply",
+      "regions": "Open to people in",
+      "benefits": "What’s offered",
+      "skills": "Skills",
+      "tags": "Topics"
+    },
+    "apply": {
+      "title": "How to apply",
+      "ownerTitle": "Your listing",
+      "formTitle": "Your application",
+      "applyNow": "Apply now",
+      "applyOnSite": "Apply on website",
+      "opensInNewTab": "(opens in a new tab)",
+      "applyByEmail": "Apply by email",
+      "manage": "Manage applicants",
+      "signIn": "Sign in to apply",
+      "applied": "You’ve applied",
+      "closed": "Applications are closed",
+      "withdraw": "Withdraw application",
+      "withdrawing": "Withdrawing…",
+      "ownerNote": "See who has applied and accept or decline each application.",
+      "closedNote": "This opportunity is no longer taking applications.",
+      "appliedNote": "The poster will be in touch if your application moves forward.",
+      "signInNote": "Sign in to apply here on DiaspoPlug.",
+      "formNote": "Apply here on DiaspoPlug. Your application goes straight to the poster.",
+      "externalNote": "You’ll apply on {host}.",
+      "emailNote": "Send your application to {email}.",
+      "noneNote": "The poster hasn’t said how to apply yet."
+    },
+    "poster": {
+      "title": "Posted by",
+      "fallback": "A DiaspoPlug member",
+      "kinds": {
+        "USER": "Member",
+        "COMMUNITY": "Community",
+        "ASSOCIATION": "Association"
+      }
+    },
+    "categories": {
+      "EMPLOYMENT_CAREER": "Employment & career",
+      "EDUCATION_TRAINING": "Education & training",
+      "FUNDING_GRANTS": "Funding & grants",
+      "FELLOWSHIPS_LEADERSHIP": "Fellowships & leadership",
+      "BUSINESS_INVESTMENT": "Business & investment",
+      "VOLUNTEERING_SOCIAL_IMPACT": "Volunteering & social impact",
+      "EVENT_CREATIVE_INDUSTRY": "Events & creative industries",
+      "AGRICULTURE_SUSTAINABILITY": "Agriculture & sustainability",
+      "REAL_ESTATE_INFRASTRUCTURE": "Real estate & infrastructure",
+      "GOVERNMENT_EMBASSY_INITIATIVES": "Government & embassy initiatives",
+      "INNOVATION_RESEARCH": "Innovation & research",
+      "FINANCE_ECONOMICS": "Finance & economics",
+      "RETURN_REINTEGRATION": "Return & reintegration"
+    },
+    "deliveryModes": {
+      "REMOTE": "Remote",
+      "IN_PERSON": "In person",
+      "HYBRID": "Hybrid",
+      "ONLINE": "Online"
+    },
+    "compensationTypes": {
+      "SALARY": "Salary",
+      "GRANT": "Grant",
+      "STIPEND": "Stipend",
+      "INVESTMENT": "Investment",
+      "PRIZE": "Prize",
+      "EQUITY": "Equity",
+      "HONORARIUM": "Honorarium",
+      "NONE": "Unpaid"
+    }
   }
 }

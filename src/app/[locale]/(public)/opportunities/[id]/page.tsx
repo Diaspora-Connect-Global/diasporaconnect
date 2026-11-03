@@ -43,7 +43,13 @@ type SeoOpportunity = {
   owner?: { name?: string | null } | null;
 };
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 async function fetchPublicOpportunity(id: string, revalidate = 300): Promise<SeoOpportunity | null> {
+  // Category pages share this route (`/opportunities/education-training`). Never send a slug as an id:
+  // opportunity-service fails it as a database error, and five in a row open the gateway's circuit
+  // breaker for EVERY Opportunities call (2026-11-03: browsing three category pages did exactly that).
+  if (!UUID.test(id)) return null;
   const data = await seoGraphQL<{ getOpportunity: SeoOpportunity | null }>(
     OPPORTUNITY_SEO_QUERY,
     { id },

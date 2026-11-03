@@ -7187,5 +7187,107 @@
       "rejected": "Candidature refusée.",
       "decisionFailed": "Impossible d'enregistrer votre décision. Veuillez réessayer."
     }
+  },
+  "opportunityPage": {
+    "postedBy": "Publié par {name}",
+    "payFrom": "À partir de {amount}",
+    "payUpTo": "Jusqu’à {amount}",
+    "railLabel": "Candidature et détails",
+    "status": {
+      "open": "Ouvert",
+      "closingSoon": "Bientôt clos",
+      "closed": "Clos"
+    },
+    "deadline": {
+      "by": "Postulez avant le {date}",
+      "daysLeft": "{count, plural, =0 {Se termine aujourd’hui} one {# jour restant} other {# jours restants}}",
+      "none": "Pas de date limite"
+    },
+    "facts": {
+      "title": "En bref",
+      "type": "Type",
+      "category": "Domaine",
+      "workMode": "Mode de travail",
+      "commitment": "Engagement",
+      "pay": "Rémunération",
+      "location": "Lieu",
+      "duration": "Durée",
+      "deadline": "Date limite",
+      "posted": "Publié",
+      "applicants": "Candidatures",
+      "applicantsCount": "{count, plural, one {# candidature} other {# candidatures}}"
+    },
+    "sections": {
+      "about": "À propos de cette opportunité",
+      "scope": "Vos missions",
+      "eligibility": "Qui peut postuler",
+      "regions": "Ouvert aux personnes de",
+      "benefits": "Ce qui est proposé",
+      "skills": "Compétences",
+      "tags": "Thèmes"
+    },
+    "apply": {
+      "title": "Comment postuler",
+      "ownerTitle": "Votre annonce",
+      "formTitle": "Votre candidature",
+      "applyNow": "Postuler",
+      "applyOnSite": "Postuler sur le site",
+      "opensInNewTab": "(s’ouvre dans un nouvel onglet)",
+      "applyByEmail": "Postuler par e-mail",
+      "manage": "Gérer les candidatures",
+      "signIn": "Connectez-vous pour postuler",
+      "applied": "Vous avez postulé",
+      "closed": "Candidatures closes",
+      "withdraw": "Retirer ma candidature",
+      "withdrawing": "Retrait en cours…",
+      "ownerNote": "Voyez qui a postulé et acceptez ou refusez chaque candidature.",
+      "closedNote": "Cette opportunité n’accepte plus de candidatures.",
+      "appliedNote": "La personne qui publie vous contactera si votre candidature avance.",
+      "signInNote": "Connectez-vous pour postuler ici sur DiaspoPlug.",
+      "formNote": "Postulez ici sur DiaspoPlug. Votre candidature va directement à la personne qui publie.",
+      "externalNote": "Vous postulerez sur {host}.",
+      "emailNote": "Envoyez votre candidature à {email}.",
+      "noneNote": "La manière de postuler n’a pas encore été précisée."
+    },
+    "poster": {
+      "title": "Publié par",
+      "fallback": "Un membre de DiaspoPlug",
+      "kinds": {
+        "USER": "Membre",
+        "COMMUNITY": "Communauté",
+        "ASSOCIATION": "Association"
+      }
+    },
+    "categories": {
+      "EMPLOYMENT_CAREER": "Emploi & carrière",
+      "EDUCATION_TRAINING": "Éducation & formation",
+      "FUNDING_GRANTS": "Financements & subventions",
+      "FELLOWSHIPS_LEADERSHIP": "Fellowships & leadership",
+      "BUSINESS_INVESTMENT": "Entreprise & investissement",
+      "VOLUNTEERING_SOCIAL_IMPACT": "Bénévolat & impact social",
+      "EVENT_CREATIVE_INDUSTRY": "Événements & industries créatives",
+      "AGRICULTURE_SUSTAINABILITY": "Agriculture & durabilité",
+      "REAL_ESTATE_INFRASTRUCTURE": "Immobilier & infrastructures",
+      "GOVERNMENT_EMBASSY_INITIATIVES": "Initiatives gouvernementales & d’ambassades",
+      "INNOVATION_RESEARCH": "Innovation & recherche",
+      "FINANCE_ECONOMICS": "Finance & économie",
+      "RETURN_REINTEGRATION": "Retour & réintégration"
+    },
+    "deliveryModes": {
+      "REMOTE": "À distance",
+      "IN_PERSON": "Sur place",
+      "HYBRID": "Hybride",
+      "ONLINE": "En ligne"
+    },
+    "compensationTypes": {
+      "SALARY": "Salaire",
+      "GRANT": "Subvention",
+      "STIPEND": "Allocation",
+      "INVESTMENT": "Investissement",
+      "PRIZE": "Prix",
+      "EQUITY": "Participation",
+      "HONORARIUM": "Honoraires",
+      "NONE": "Non rémunéré"
+    }
   }
 }

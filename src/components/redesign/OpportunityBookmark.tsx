@@ -11,7 +11,13 @@ import { SAVE_OPPORTUNITY, UNSAVE_OPPORTUNITY } from '@/services/gql/opportuniti
  * a refused or failed write (Apollo resolves refusals with `data: null`) puts the
  * icon back, so it never claims a save that did not happen.
  */
-export function OpportunityBookmark({ id, saved: initial }: { id: string; saved: boolean }) {
+const LOOK = {
+  card: 'size-8 text-muted-foreground hover:bg-surface-subtle hover:text-text-brand focus-visible:ring-text-brand',
+  // On a photo (the opportunity page hero): white on a dark glass circle, a 44px target.
+  photo: 'size-11 bg-black/35 text-white backdrop-blur hover:bg-black/55 focus-visible:ring-white',
+} as const;
+
+export function OpportunityBookmark({ id, saved: initial, look = 'card' }: { id: string; saved: boolean; look?: keyof typeof LOOK }) {
   const t = useTranslations('redesign');
   const [saved, setSaved] = useState(initial);
   const [save] = useMutation<{ saveOpportunity?: boolean | null }>(SAVE_OPPORTUNITY, { context: { silentErrors: true } });
@@ -35,9 +41,9 @@ export function OpportunityBookmark({ id, saved: initial }: { id: string; saved:
       onClick={toggle}
       aria-pressed={saved}
       aria-label={saved ? t('unsaveItem') : t('saveItem')}
-      className="grid size-8 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-surface-subtle hover:text-text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
+      className={`grid place-items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 ${LOOK[look]}`}
     >
-      <Bookmark className={`size-4 ${saved ? 'fill-current text-text-brand' : ''}`} aria-hidden />
+      <Bookmark className={`${look === 'photo' ? 'size-5' : 'size-4'} ${saved ? (look === 'photo' ? 'fill-current' : 'fill-current text-text-brand') : ''}`} aria-hidden />
     </button>
   );
 }

@@ -37,6 +37,7 @@ export const GET_OPPORTUNITY = gql`
       applicationCount
       skills
       tags
+      formFields { key label type required }
       currentUserApplicationId
       isSavedByCurrentUser
       hasCurrentUserApplied

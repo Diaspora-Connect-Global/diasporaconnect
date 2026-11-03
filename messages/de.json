@@ -7187,5 +7187,107 @@
       "rejected": "Bewerbung abgelehnt.",
       "decisionFailed": "Deine Entscheidung konnte nicht gespeichert werden. Bitte versuche es erneut."
     }
+  },
+  "opportunityPage": {
+    "postedBy": "Veröffentlicht von {name}",
+    "payFrom": "Ab {amount}",
+    "payUpTo": "Bis zu {amount}",
+    "railLabel": "Bewerbung und Details",
+    "status": {
+      "open": "Offen",
+      "closingSoon": "Endet bald",
+      "closed": "Geschlossen"
+    },
+    "deadline": {
+      "by": "Bewerben bis {date}",
+      "daysLeft": "{count, plural, =0 {Endet heute} one {Noch # Tag} other {Noch # Tage}}",
+      "none": "Keine Frist"
+    },
+    "facts": {
+      "title": "Auf einen Blick",
+      "type": "Art",
+      "category": "Bereich",
+      "workMode": "Arbeitsweise",
+      "commitment": "Umfang",
+      "pay": "Vergütung",
+      "location": "Ort",
+      "duration": "Dauer",
+      "deadline": "Frist",
+      "posted": "Veröffentlicht",
+      "applicants": "Bewerbungen",
+      "applicantsCount": "{count, plural, one {# Bewerbung} other {# Bewerbungen}}"
+    },
+    "sections": {
+      "about": "Über diese Möglichkeit",
+      "scope": "Deine Aufgaben",
+      "eligibility": "Wer sich bewerben kann",
+      "regions": "Offen für Menschen in",
+      "benefits": "Was geboten wird",
+      "skills": "Fähigkeiten",
+      "tags": "Themen"
+    },
+    "apply": {
+      "title": "So bewirbst du dich",
+      "ownerTitle": "Deine Anzeige",
+      "formTitle": "Deine Bewerbung",
+      "applyNow": "Jetzt bewerben",
+      "applyOnSite": "Auf der Website bewerben",
+      "opensInNewTab": "(öffnet in einem neuen Tab)",
+      "applyByEmail": "Per E-Mail bewerben",
+      "manage": "Bewerbungen verwalten",
+      "signIn": "Zum Bewerben anmelden",
+      "applied": "Du hast dich beworben",
+      "closed": "Bewerbungen geschlossen",
+      "withdraw": "Bewerbung zurückziehen",
+      "withdrawing": "Wird zurückgezogen…",
+      "ownerNote": "Sieh dir an, wer sich beworben hat, und nimm jede Bewerbung an oder lehne sie ab.",
+      "closedNote": "Für diese Möglichkeit werden keine Bewerbungen mehr angenommen.",
+      "appliedNote": "Die anbietende Person meldet sich, wenn deine Bewerbung weiterkommt.",
+      "signInNote": "Melde dich an, um dich hier auf DiaspoPlug zu bewerben.",
+      "formNote": "Bewirb dich hier auf DiaspoPlug. Deine Bewerbung geht direkt an die anbietende Person.",
+      "externalNote": "Du bewirbst dich auf {host}.",
+      "emailNote": "Sende deine Bewerbung an {email}.",
+      "noneNote": "Es wurde noch nicht angegeben, wie man sich bewirbt."
+    },
+    "poster": {
+      "title": "Veröffentlicht von",
+      "fallback": "Ein DiaspoPlug-Mitglied",
+      "kinds": {
+        "USER": "Mitglied",
+        "COMMUNITY": "Community",
+        "ASSOCIATION": "Verband"
+      }
+    },
+    "categories": {
+      "EMPLOYMENT_CAREER": "Beschäftigung & Karriere",
+      "EDUCATION_TRAINING": "Bildung & Weiterbildung",
+      "FUNDING_GRANTS": "Finanzierung & Förderung",
+      "FELLOWSHIPS_LEADERSHIP": "Fellowships & Führung",
+      "BUSINESS_INVESTMENT": "Unternehmen & Investitionen",
+      "VOLUNTEERING_SOCIAL_IMPACT": "Ehrenamt & soziale Wirkung",
+      "EVENT_CREATIVE_INDUSTRY": "Events & Kreativwirtschaft",
+      "AGRICULTURE_SUSTAINABILITY": "Landwirtschaft & Nachhaltigkeit",
+      "REAL_ESTATE_INFRASTRUCTURE": "Immobilien & Infrastruktur",
+      "GOVERNMENT_EMBASSY_INITIATIVES": "Regierungs- & Botschaftsinitiativen",
+      "INNOVATION_RESEARCH": "Innovation & Forschung",
+      "FINANCE_ECONOMICS": "Finanzen & Wirtschaft",
+      "RETURN_REINTEGRATION": "Rückkehr & Reintegration"
+    },
+    "deliveryModes": {
+      "REMOTE": "Remote",
+      "IN_PERSON": "Vor Ort",
+      "HYBRID": "Hybrid",
+      "ONLINE": "Online"
+    },
+    "compensationTypes": {
+      "SALARY": "Gehalt",
+      "GRANT": "Förderung",
+      "STIPEND": "Stipendium",
+      "INVESTMENT": "Investition",
+      "PRIZE": "Preis",
+      "EQUITY": "Beteiligung",
+      "HONORARIUM": "Honorar",
+      "NONE": "Unbezahlt"
+    }
   }
 }
