@@ -7419,5 +7419,56 @@
       "description": "Controlla la connessione e riprova.",
       "retry": "Riprova"
     }
+  },
+  "walletPage": {
+    "title": "Portafoglio",
+    "subtitle": "I tuoi pagamenti e il loro stato.",
+    "refresh": "Aggiorna portafoglio",
+    "withdraw": "Preleva",
+    "withdrawNote": "I prelievi riguardano i guadagni dei venditori. Quanto paghi resta in deposito a garanzia fino al completamento dell'ordine, quindi qui non c'è nulla da prelevare.",
+    "withdrawChecking": "Verifica del tuo account venditore…",
+    "summary": {
+      "label": "Riepilogo pagamenti",
+      "totalPaid": "Totale pagato",
+      "totalPaidHint": "Pagamenti confermati",
+      "pending": "In attesa di pagamento",
+      "pendingHint": "Avviati, non ancora confermati",
+      "hideAmounts": "Nascondi importi",
+      "showAmounts": "Mostra importi",
+      "capped": "Basato sui tuoi ultimi {count} pagamenti."
+    },
+    "history": {
+      "title": "Storico pagamenti",
+      "filterLabel": "Filtra per stato",
+      "filters": {
+        "all": "Tutti",
+        "paid": "Pagati",
+        "pending": "In attesa",
+        "failed": "Falliti"
+      },
+      "status": {
+        "paid": "Pagato",
+        "pending": "In attesa",
+        "failed": "Fallito",
+        "cancelled": "Annullato"
+      },
+      "purposes": {
+        "PRODUCT_ORDER": "Ordine di prodotto",
+        "SERVICE_ORDER": "Ordine di servizio",
+        "EVENT_TICKET": "Biglietto evento",
+        "OTHER": "Pagamento"
+      },
+      "loading": "Caricamento dei pagamenti",
+      "errorTitle": "Impossibile caricare i tuoi pagamenti",
+      "errorDescription": "Controlla la connessione e riprova.",
+      "retry": "Riprova",
+      "emptyTitle": "Ancora nessun pagamento",
+      "emptyDescription": "I pagamenti per ordini e biglietti compariranno qui.",
+      "emptyFilteredTitle": "Nessun pagamento con questo stato",
+      "pagination": "Pagine dei pagamenti",
+      "prev": "Precedente",
+      "next": "Successiva",
+      "pageOf": "Pagina {page} di {total}"
+    }
   }
 }

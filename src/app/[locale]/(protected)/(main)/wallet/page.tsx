@@ -28,24 +28,12 @@ export default function WalletPage() {
       {/* Children stay mounted (hidden) so their queries start in parallel. */}
       {!ready && <PageLoader />}
       <div
-        className={`h-app-inner overflow-y-auto ${ready ? '' : 'hidden'}`}
-        style={{ backgroundColor: '#F5F7FA' }}
+        className={`h-app-inner overflow-y-auto scrollbar-hide bg-background ${ready ? '' : 'hidden'}`}
         aria-hidden={!ready}
       >
-        <div className="max-w-7xl mx-auto p-4 space-y-6">
-          {/* Header */}
+        <div className="mx-auto w-full space-y-5 px-4 py-4 pb-10 lg:w-[80vw] lg:px-0 lg:py-6">
           <WalletHeader />
-
-          {/* Balance Card - Half width on desktop, full on mobile */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="w-full">
-              <BalanceCard />
-            </div>
-            {/* Empty div for spacing on desktop */}
-            <div className="hidden lg:block"></div>
-          </div>
-
-          {/* Transaction History - Full Width */}
+          <BalanceCard />
           <TransactionHistory />
         </div>
       </div>

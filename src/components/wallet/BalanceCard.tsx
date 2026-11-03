@@ -1,91 +1,95 @@
 'use client';
 
-import { useState } from 'react';
-import { EyeIcon, EyeOffIcon, LockIcon, WalletIcon } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { useTranslations } from 'next-intl';
-import { ButtonType3 } from '@/components/custom/button';
+import { useMemo, useState } from 'react';
+import { Clock, Eye, EyeOff, ReceiptText } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
 import { useQuery } from '@apollo/client/react';
 import { MY_PAYMENT_INTENTS } from '@/services/gql/payments';
 import type { MyPaymentIntentsResponse } from '@/services/gql/types/payments';
+import { formatMoney } from '@/types/money';
+import { ICON_CHIP_CLASS, TONE_CLASS } from '@/components/more/MoreLinkCard';
 
+const WINDOW = 100;
+
+/** Sum gross_amount (integer minor units) per currency; a payment is single-currency. */
+function sumByCurrency(rows: { currency?: string | null; gross_amount?: number | null }[]) {
+  const m = new Map<string, number>();
+  for (const r of rows) {
+    const c = (r.currency || 'GHS').toUpperCase();
+    m.set(c, (m.get(c) ?? 0) + (r.gross_amount ?? 0));
+  }
+  return [...m.entries()];
+}
+
+/**
+ * What this page can honestly total: the viewer's own payment intents. There is
+ * no wallet balance in the API, so these are "total paid" (CONFIRMED) and
+ * "awaiting payment" (PENDING) - never a balance. Minor units are formatted by
+ * formatMoney (the single division by 100).
+ */
 export default function BalanceCard() {
-  const [showBalance, setShowBalance] = useState(true);
-  const t = useTranslations('wallet.balance');
+  const t = useTranslations('walletPage.summary');
+  const locale = useLocale();
+  const [hidden, setHidden] = useState(false);
 
   const { data } = useQuery<MyPaymentIntentsResponse>(MY_PAYMENT_INTENTS, {
-    variables: { page: 1, limit: 100 },
+    variables: { page: 1, limit: WINDOW },
     fetchPolicy: 'cache-and-network',
   });
 
-  const intents = data?.myPaymentIntents?.payment_intents ?? [];
+  const intents = useMemo(() => data?.myPaymentIntents?.payment_intents ?? [], [data]);
+  const total = data?.myPaymentIntents?.total ?? 0;
+  const paid = useMemo(() => sumByCurrency(intents.filter((i) => i.status === 'CONFIRMED')), [intents]);
+  const pending = useMemo(() => sumByCurrency(intents.filter((i) => i.status === 'PENDING')), [intents]);
 
-  const totalSpent = intents
-    .filter((i) => i.status === 'CONFIRMED')
-    .reduce((sum, i) => sum + (i.gross_amount ?? 0), 0) / 100;
+  const render = (rows: [string, number][]) =>
+    rows.length === 0 ? (
+      <p className="text-2xl font-bold text-text-primary">{hidden ? '••••' : formatMoney(0, 'GHS', locale)}</p>
+    ) : (
+      rows.map(([cur, amt]) => (
+        <p key={cur} className="text-2xl font-bold text-text-primary">
+          {hidden ? '••••' : formatMoney(amt, cur, locale)}
+        </p>
+      ))
+    );
 
-  const inEscrow = intents
-    .filter((i) => i.status === 'PENDING')
-    .reduce((sum, i) => sum + (i.gross_amount ?? 0), 0) / 100;
-
-  const currency = intents[0]?.currency ?? 'GHS';
-
-  const formatCurrency = (amount: number) => {
-    if (!showBalance) return '••••••';
-    return `${currency} ${amount.toFixed(2)}`;
-  };
+  const cards = [
+    { key: 'paid', icon: ReceiptText, tone: ICON_CHIP_CLASS, label: t('totalPaid'), hint: t('totalPaidHint'), rows: paid },
+    { key: 'pending', icon: Clock, tone: TONE_CLASS.warning, label: t('pending'), hint: t('pendingHint'), rows: pending },
+  ];
 
   return (
-    <Card className="bg-[#0D1B2A] border-none shadow-lg h-[200px]">
-      <CardContent className="p-6 h-full flex flex-col justify-between relative">
-        <div className="flex justify-between items-start">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <p className="body-small text-white/70">{t('totalBalance')}</p>
-              <ButtonType3
-                onClick={() => setShowBalance(!showBalance)}
-                className="p-1 hover:bg-white/10 rounded transition-colors border-0 bg-transparent min-w-0 text-white/70"
-                aria-label={showBalance ? t('hideBalance') : t('showBalance')}
-              >
-                {showBalance ? (
-                  <EyeOffIcon className="w-4 h-4 text-white/70" />
-                ) : (
-                  <EyeIcon className="w-4 h-4 text-white/70" />
-                )}
-              </ButtonType3>
+    <section aria-label={t('label')} className="space-y-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2" data-testid="wallet-summary">
+        {cards.map(({ key, icon: Icon, tone, label, hint, rows }) => (
+          <div key={key} className="rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <span className={`grid size-11 shrink-0 place-items-center rounded-full ${tone}`}>
+                <Icon className="size-5" aria-hidden />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-text-secondary">{label}</p>
+                <p className="text-xs text-muted-foreground">{hint}</p>
+              </div>
+              {key === 'paid' && (
+                <button
+                  type="button"
+                  onClick={() => setHidden((h) => !h)}
+                  aria-pressed={hidden}
+                  aria-label={hidden ? t('showAmounts') : t('hideAmounts')}
+                  className="grid size-11 shrink-0 place-items-center rounded-full text-text-secondary hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
+                >
+                  {hidden ? <Eye className="size-5" aria-hidden /> : <EyeOff className="size-5" aria-hidden />}
+                </button>
+              )}
             </div>
-            <h2 className="text-[36px] font-bold text-white leading-tight">
-              {formatCurrency(totalSpent)}
-            </h2>
+            <div className="mt-3 break-words">{render(rows)}</div>
           </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/10 rounded-lg">
-              <LockIcon className="w-4 h-4 text-white" />
-            </div>
-            <div>
-              <p className="caption-small text-white/60">{t('inEscrow')}</p>
-              <p className="body-medium font-semibold text-white">
-                {formatCurrency(inEscrow)}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/10 rounded-lg">
-              <WalletIcon className="w-4 h-4 text-white" />
-            </div>
-            <div>
-              <p className="caption-small text-white/60">{t('available')}</p>
-              <p className="body-medium font-semibold text-white">
-                {formatCurrency(Math.max(0, totalSpent - inEscrow))}
-              </p>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        ))}
+      </div>
+      {total > WINDOW && (
+        <p className="text-xs text-muted-foreground">{t('capped', { count: WINDOW })}</p>
+      )}
+    </section>
   );
 }

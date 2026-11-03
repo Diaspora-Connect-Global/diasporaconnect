@@ -1,207 +1,160 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDownIcon, FilterIcon, ArrowDownIcon, ArrowUpIcon, RefreshCwIcon, Receipt } from 'lucide-react';
-import { EmptyState } from '@/components/feedback';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { useTranslations } from 'next-intl';
+import { Receipt } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
 import { useQuery } from '@apollo/client/react';
-import PageLoader from '@/components/custom/PageLoader';
+import { EmptyState, ErrorState } from '@/components/feedback';
 import { MY_PAYMENT_INTENTS } from '@/services/gql/payments';
 import type { MyPaymentIntentsResponse, PaymentIntentRecord } from '@/services/gql/types/payments';
+import { formatMoney } from '@/types/money';
 
-type StatusFilter = 'all' | 'completed' | 'pending' | 'failed';
+type StatusFilter = 'all' | 'paid' | 'pending' | 'failed';
+type BadgeKey = 'paid' | 'pending' | 'failed' | 'cancelled';
 
-function intentToTransactionType(intent: PaymentIntentRecord): 'deposit' | 'withdrawal' | 'refund' {
-  if (intent.status === 'CONFIRMED') return 'deposit';
-  if (intent.status === 'FAILED' || intent.status === 'CANCELLED') return 'refund';
-  return 'withdrawal';
-}
+const LIMIT = 20;
+const FILTERS: StatusFilter[] = ['all', 'paid', 'pending', 'failed'];
+const BADGE_CLASS: Record<BadgeKey, string> = {
+  paid: 'bg-surface-success text-text-success',
+  pending: 'bg-surface-warning text-text-warning',
+  failed: 'bg-surface-danger text-text-danger',
+  cancelled: 'bg-surface-subtle text-text-secondary',
+};
 
-function intentToStatus(intent: PaymentIntentRecord): 'completed' | 'pending' | 'failed' {
-  if (intent.status === 'CONFIRMED') return 'completed';
-  if (intent.status === 'FAILED' || intent.status === 'CANCELLED') return 'failed';
+function badgeOf(i: PaymentIntentRecord): BadgeKey {
+  if (i.status === 'CONFIRMED') return 'paid';
+  if (i.status === 'FAILED') return 'failed';
+  if (i.status === 'CANCELLED') return 'cancelled';
   return 'pending';
 }
 
-export interface Transaction {
-  id: string;
-  type: 'deposit' | 'withdrawal' | 'refund';
-  amount: number;
-  currency: string;
-  date: string;
-  status: 'completed' | 'pending' | 'failed';
-  description?: string;
-}
+const PURPOSES = ['PRODUCT_ORDER', 'SERVICE_ORDER', 'EVENT_TICKET'] as const;
 
 export default function TransactionHistory() {
+  const t = useTranslations('walletPage.history');
+  const locale = useLocale();
   const [filter, setFilter] = useState<StatusFilter>('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const limit = 20;
-  const t = useTranslations('wallet.transactions');
-  const tFeedback = useTranslations('feedback');
+  const [page, setPage] = useState(1);
 
-  const { data, loading } = useQuery<MyPaymentIntentsResponse>(MY_PAYMENT_INTENTS, {
-    variables: { page: currentPage, limit },
+  const { data, loading, error, refetch } = useQuery<MyPaymentIntentsResponse>(MY_PAYMENT_INTENTS, {
+    variables: { page, limit: LIMIT },
     fetchPolicy: 'cache-and-network',
   });
 
-  // Only a page with nothing to show yet waits; a background refresh of a
-  // page already on screen keeps it visible.
-  const listLoading = loading && !data;
-  const intents = data?.myPaymentIntents?.payment_intents ?? [];
+  const initialLoading = loading && !data;
+  const rows = data?.myPaymentIntents?.payment_intents ?? [];
   const total = data?.myPaymentIntents?.total ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const totalPages = Math.max(1, Math.ceil(total / LIMIT));
+  const visible = filter === 'all' ? rows : rows.filter((r) => {
+    const b = badgeOf(r);
+    return filter === 'failed' ? b === 'failed' || b === 'cancelled' : b === filter;
+  });
 
-  const transactions: Transaction[] = intents.map((intent) => ({
-    id: intent.id,
-    type: intentToTransactionType(intent),
-    amount: (intent.gross_amount ?? 0) / 100,
-    currency: intent.currency ?? 'GHS',
-    date: intent.created_at
-      ? new Date(intent.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-      : '—',
-    status: intentToStatus(intent),
-    description: intent.description ?? intent.purpose ?? undefined,
-  }));
-
-  const filteredTransactions =
-    filter === 'all' ? transactions : transactions.filter((tx) => tx.status === filter);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'bg-[#3CCF4E]/10 text-[#3CCF4E]';
-      case 'pending': return 'bg-[#F4C542]/10 text-[#F4C542]';
-      case 'failed': return 'bg-[#E74C3C]/10 text-[#E74C3C]';
-      default: return 'bg-gray-100 text-gray-600';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'completed': return t('completed');
-      case 'pending': return t('pending');
-      case 'failed': return t('failed');
-      default: return status;
-    }
-  };
-
-  const getTypeLabel = (type: string) => {
-    switch (type) {
-      case 'deposit': return t('types.deposit');
-      case 'withdrawal': return t('types.withdrawal');
-      case 'refund': return t('types.refund');
-      default: return type;
-    }
-  };
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'deposit': return <ArrowDownIcon className="w-4 h-4 text-[#3CCF4E]" />;
-      case 'withdrawal': return <ArrowUpIcon className="w-4 h-4 text-[#3CCF4E]" />;
-      case 'refund': return <RefreshCwIcon className="w-4 h-4 text-[#F4C542]" />;
-      default: return null;
-    }
-  };
+  const purposeLabel = (p?: string | null) =>
+    PURPOSES.includes(p as (typeof PURPOSES)[number]) ? t(`purposes.${p as (typeof PURPOSES)[number]}`) : t('purposes.OTHER');
+  const dateLabel = (d?: string | null) =>
+    d ? new Date(d).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-      <div className="flex justify-between items-center p-6 border-b border-gray-200">
-        <h3 className="text-xl font-semibold text-[#1A1A1A]">{t('title')}</h3>
-
-        <div className="flex items-center gap-3">
-          <Select value={filter} onValueChange={(value: StatusFilter) => { setFilter(value); setCurrentPage(1); }}>
-            <SelectTrigger className="w-[180px] border-gray-300">
-              <div className="flex items-center gap-2">
-                <SelectValue placeholder={t('allTransactions')} />
-                <ChevronDownIcon className="w-4 h-4" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">{t('allTransactions')}</SelectItem>
-              <SelectItem value="completed">{t('completed')}</SelectItem>
-              <SelectItem value="pending">{t('pending')}</SelectItem>
-              <SelectItem value="failed">{t('failed')}</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <FilterIcon className="w-5 h-5 text-gray-600" />
-          </button>
+    <section aria-labelledby="wallet-history-title" className="rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 id="wallet-history-title" className="text-lg font-semibold text-text-primary">{t('title')}</h2>
+        <div role="group" aria-label={t('filterLabel')} className="flex flex-wrap gap-2">
+          {FILTERS.map((f) => (
+            <button
+              key={f}
+              type="button"
+              aria-pressed={filter === f}
+              onClick={() => setFilter(f)}
+              className={`min-h-11 rounded-full border px-4 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand ${
+                filter === f
+                  ? 'border-transparent bg-surface-brand text-white'
+                  : 'border-border-subtle bg-surface-default text-text-secondary hover:bg-surface-subtle'
+              }`}
+            >
+              {t(`filters.${f}`)}
+            </button>
+          ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200">
-        <p className="text-sm font-medium text-gray-600">{t('columns.date')}</p>
-        <p className="text-sm font-medium text-gray-600">{t('columns.type')}</p>
-        <p className="text-sm font-medium text-gray-600">{t('columns.amount')}</p>
-        <p className="text-sm font-medium text-gray-600 text-right">{t('columns.status')}</p>
-      </div>
+      <div className="mt-4" aria-busy={initialLoading}>
+        {initialLoading && (
+          <ul className="space-y-2" aria-label={t('loading')}>
+            {[0, 1, 2].map((n) => (
+              <li key={n} className="h-16 animate-pulse rounded-xl bg-surface-subtle" />
+            ))}
+          </ul>
+        )}
 
-      <div className="divide-y divide-gray-200">
-        {listLoading && <PageLoader />}
-        {!listLoading && filteredTransactions.length > 0 ? (
-          filteredTransactions.map((tx) => (
-            <div key={tx.id} className="grid grid-cols-4 gap-4 px-6 py-4 hover:bg-gray-50 transition-colors">
-              <div className="flex items-center">
-                <p className="text-sm text-[#1A1A1A]">{tx.date}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                {getTypeIcon(tx.type)}
-                <p className="text-sm text-[#1A1A1A]">{getTypeLabel(tx.type)}</p>
-              </div>
-              <div className="flex items-center">
-                <p className="text-sm font-semibold text-[#1A1A1A]">
-                  {tx.currency} {tx.amount.toFixed(2)}
-                </p>
-              </div>
-              <div className="flex items-center justify-end">
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(tx.status)}`}>
-                  {getStatusLabel(tx.status)}
-                </span>
-              </div>
-            </div>
-          ))
-        ) : !listLoading ? (
-          <div className="px-6 py-12">
-            <EmptyState
-              icon={Receipt}
-              title={
-                filter !== 'all'
-                  ? t('noFilteredTransactions', { filter: getStatusLabel(filter) })
-                  : tFeedback('empty.transactions.title')
-              }
-              description={filter === 'all' ? tFeedback('empty.transactions.description') : undefined}
-            />
-          </div>
-        ) : null}
+        {!initialLoading && error && !data && (
+          <ErrorState
+            size="sm"
+            title={t('errorTitle')}
+            description={t('errorDescription')}
+            retryLabel={t('retry')}
+            onRetry={() => { void refetch(); }}
+          />
+        )}
+
+        {!initialLoading && !(error && !data) && visible.length === 0 && (
+          <EmptyState
+            icon={Receipt}
+            size="sm"
+            title={filter === 'all' ? t('emptyTitle') : t('emptyFilteredTitle')}
+            description={filter === 'all' ? t('emptyDescription') : undefined}
+          />
+        )}
+
+        {visible.length > 0 && (
+          <ul className="space-y-2" data-testid="wallet-transactions">
+            {visible.map((r) => {
+              const b = badgeOf(r);
+              return (
+                <li
+                  key={r.id}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-border-subtle bg-surface-default p-3"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-text-primary">{purposeLabel(r.purpose)}</p>
+                    <p className="text-xs text-muted-foreground">{dateLabel(r.created_at)}</p>
+                  </div>
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    <p className="text-sm font-semibold text-text-primary">
+                      {formatMoney(r.gross_amount ?? 0, r.currency, locale)}
+                    </p>
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${BADGE_CLASS[b]}`}>
+                      {t(`status.${b}`)}
+                    </span>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-end gap-4 px-6 py-4 border-t border-gray-200">
+        <nav aria-label={t('pagination')} className="mt-4 flex items-center justify-end gap-3">
           <button
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            className="px-3 py-1 text-sm border rounded disabled:opacity-40"
+            type="button"
+            disabled={page <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            className="min-h-11 rounded-full border border-border-subtle px-4 text-sm font-medium text-text-secondary hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand disabled:opacity-40"
           >
-            Prev
+            {t('prev')}
           </button>
-          <span className="text-sm text-gray-500">{currentPage} / {totalPages}</span>
+          <span className="text-sm text-muted-foreground">{t('pageOf', { page, total: totalPages })}</span>
           <button
-            disabled={currentPage >= totalPages}
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            className="px-3 py-1 text-sm border rounded disabled:opacity-40"
+            type="button"
+            disabled={page >= totalPages}
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            className="min-h-11 rounded-full border border-border-subtle px-4 text-sm font-medium text-text-secondary hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand disabled:opacity-40"
           >
-            Next
+            {t('next')}
           </button>
-        </div>
+        </nav>
       )}
-    </div>
+    </section>
   );
 }
