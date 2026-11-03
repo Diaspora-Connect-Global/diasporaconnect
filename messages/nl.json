@@ -2932,6 +2932,85 @@
     "averageRating": "{rating} van 5",
     "ratingRequired": "Kies eerst een beoordeling."
   },
+  "vendorOnboarding": {
+    "hero": {
+      "eyebrow": "Marktplaats",
+      "title": "Word verkoper",
+      "subtitle": "Maak je verkopersaccount aan in een paar stappen en bereik klanten in zowel lokale als diaspora-gemeenschappen."
+    },
+    "steps": {
+      "label": "Voortgang van de verkopersinstelling",
+      "welcome": "Welkom",
+      "offer": "Wat je aanbiedt",
+      "documents": "Documenten",
+      "stepOf": "Stap {current} van {total}"
+    },
+    "common": {
+      "back": "Terug",
+      "next": "Volgende",
+      "finish": "Voltooien",
+      "skip": "Overslaan",
+      "continue": "Doorgaan"
+    },
+    "intro": {
+      "progress": "Dia {current} van {total}",
+      "slide1": {
+        "title": "Breng je bedrijf online",
+        "description": "Of je nu producten verkoopt of diensten aanbiedt, we helpen je je verkopersaccount in enkele minuten in te stellen, zodat je klanten bereikt in lokale en diaspora-gemeenschappen."
+      },
+      "slide2": {
+        "title": "Laat je bedrijf groeien met nieuwe klanten",
+        "description": "Toon wat je aanbiedt en word gevonden door mensen die klaar zijn om je producten te kopen of je diensten te boeken."
+      },
+      "slide3": {
+        "title": "Veilig verkopen met escrow",
+        "description": "Ons escrowsysteem beschermt jou en je klanten. Betalingen worden veilig bewaard totdat de koper de bestelling of levering bevestigt."
+      }
+    },
+    "choose": {
+      "title": "Wat wil je aanbieden?",
+      "subtitle": "Kies hoe je wilt beginnen. We stellen je verkopersprofiel in op basis van je keuze.",
+      "legend": "Wat wil je aanbieden op DiasporaConnect?",
+      "products": {
+        "title": "Producten verkopen",
+        "description": "Zet fysieke of digitale goederen op de marktplaats."
+      },
+      "services": {
+        "title": "Diensten aanbieden",
+        "description": "Bied je vaardigheden en tijd aan om te boeken."
+      }
+    },
+    "documents": {
+      "title": "Bedrijfsdocumenten toevoegen",
+      "subtitle": "Upload documenten over je bedrijf als één pdf-bestand.",
+      "upload": "Document uploaden",
+      "supported": "Ondersteund bestandstype: pdf",
+      "selected": "Geselecteerd: {name}",
+      "errorPdf": "Alleen pdf-bestanden worden ondersteund.",
+      "noteOneFile": "Alle documenten moeten samen als één bestand worden geüpload.",
+      "notePdf": "Alleen uploaden als pdf wordt ondersteund.",
+      "noteSize": "De bestandsgrootte mag niet meer dan 1 MB zijn."
+    },
+    "rail": {
+      "title": "Dit krijg je",
+      "start": {
+        "title": "Meteen aanbod plaatsen",
+        "description": "Je verkopersaccount is actief zodra je klaar bent, zodat je direct producten en diensten kunt plaatsen."
+      },
+      "escrow": {
+        "title": "Betalingen in escrow",
+        "description": "Betalingen van kopers worden in escrow bewaard totdat de koper de levering bevestigt."
+      },
+      "payouts": {
+        "title": "Uitbetaling naar je rekening",
+        "description": "Je inkomsten worden uitbetaald op je uitbetalingsrekening voor verkopers."
+      },
+      "verification": {
+        "title": "Verificatie is optioneel",
+        "description": "Identiteitsverificatie ontgrendelt hogere limieten en een Geverifieerd-badge. Het houdt je nooit tegen om te verkopen."
+      }
+    }
+  },
   "vendors": {
     "dashboard": "Verkopersdashboard",
     "addNewService": "Nieuwe dienst toevoegen",

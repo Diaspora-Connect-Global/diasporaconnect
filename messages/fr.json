@@ -2628,6 +2628,85 @@
     "averageRating": "{rating} sur 5",
     "ratingRequired": "Choisissez d'abord une note."
   },
+  "vendorOnboarding": {
+    "hero": {
+      "eyebrow": "Marketplace",
+      "title": "Devenir vendeur",
+      "subtitle": "Créez votre compte vendeur en quelques étapes et touchez des clients dans les communautés locales comme dans la diaspora."
+    },
+    "steps": {
+      "label": "Progression de la création du compte vendeur",
+      "welcome": "Bienvenue",
+      "offer": "Votre offre",
+      "documents": "Documents",
+      "stepOf": "Étape {current} sur {total}"
+    },
+    "common": {
+      "back": "Retour",
+      "next": "Suivant",
+      "finish": "Terminer",
+      "skip": "Passer",
+      "continue": "Continuer"
+    },
+    "intro": {
+      "progress": "Diapositive {current} sur {total}",
+      "slide1": {
+        "title": "Mettons votre activité en ligne",
+        "description": "Que vous vendiez des produits ou proposiez des services, nous vous aidons à créer votre compte vendeur en quelques minutes pour toucher des clients dans les communautés locales et dans la diaspora."
+      },
+      "slide2": {
+        "title": "Développez votre activité avec de nouveaux clients",
+        "description": "Présentez votre offre et soyez trouvé par des personnes prêtes à acheter vos produits ou à réserver vos services."
+      },
+      "slide3": {
+        "title": "Des ventes sécurisées grâce au séquestre",
+        "description": "Notre système de séquestre protège vous et vos clients. Les paiements sont conservés en sécurité jusqu'à ce que l'acheteur confirme la commande ou la livraison."
+      }
+    },
+    "choose": {
+      "title": "Que souhaitez-vous proposer ?",
+      "subtitle": "Choisissez comment commencer. Nous préparerons votre profil vendeur à partir de votre choix.",
+      "legend": "Que souhaitez-vous proposer sur DiasporaConnect ?",
+      "products": {
+        "title": "Vendre des produits",
+        "description": "Proposez des biens physiques ou numériques sur la marketplace."
+      },
+      "services": {
+        "title": "Proposer des services",
+        "description": "Proposez vos compétences et votre temps à la réservation."
+      }
+    },
+    "documents": {
+      "title": "Ajouter des documents d'entreprise",
+      "subtitle": "Importez les documents relatifs à votre entreprise dans un seul fichier PDF.",
+      "upload": "Importer un document",
+      "supported": "Type de fichier pris en charge : PDF",
+      "selected": "Sélectionné : {name}",
+      "errorPdf": "Seuls les fichiers PDF sont pris en charge.",
+      "noteOneFile": "Tous les documents doivent être regroupés et importés dans un seul fichier.",
+      "notePdf": "Seul le format PDF est pris en charge.",
+      "noteSize": "La taille du fichier ne doit pas dépasser 1 Mo."
+    },
+    "rail": {
+      "title": "Ce que vous obtenez",
+      "start": {
+        "title": "Publiez vos annonces tout de suite",
+        "description": "Votre compte vendeur est actif dès que vous terminez : vous pouvez publier produits et services immédiatement."
+      },
+      "escrow": {
+        "title": "Paiements conservés sous séquestre",
+        "description": "Les paiements des acheteurs sont conservés sous séquestre jusqu'à la confirmation de la livraison."
+      },
+      "payouts": {
+        "title": "Versements sur votre compte",
+        "description": "Vos gains sont versés sur votre compte de versement vendeur."
+      },
+      "verification": {
+        "title": "La vérification est facultative",
+        "description": "La vérification d'identité débloque des plafonds plus élevés et un badge Vérifié. Elle ne vous empêche jamais de vendre."
+      }
+    }
+  },
   "vendors": {
     "dashboard": "Tableau de bord vendeur",
     "addNewService": "Ajouter un nouveau service",

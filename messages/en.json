@@ -2932,6 +2932,85 @@
     "averageRating": "{rating} out of 5",
     "ratingRequired": "Pick a rating first."
   },
+  "vendorOnboarding": {
+    "hero": {
+      "eyebrow": "Marketplace",
+      "title": "Become a vendor",
+      "subtitle": "Set up your vendor account in a few steps and reach customers in both local and diaspora communities."
+    },
+    "steps": {
+      "label": "Vendor setup progress",
+      "welcome": "Welcome",
+      "offer": "What you offer",
+      "documents": "Documents",
+      "stepOf": "Step {current} of {total}"
+    },
+    "common": {
+      "back": "Back",
+      "next": "Next",
+      "finish": "Finish",
+      "skip": "Skip",
+      "continue": "Continue"
+    },
+    "intro": {
+      "progress": "Slide {current} of {total}",
+      "slide1": {
+        "title": "Let's get your business online",
+        "description": "Whether you sell products or provide services, we'll help you set up your vendor account in minutes so you can reach customers in both local and diaspora communities."
+      },
+      "slide2": {
+        "title": "Grow your business with new customers",
+        "description": "Showcase what you offer and be found by people ready to buy your products or book your services."
+      },
+      "slide3": {
+        "title": "Secure sales with escrow",
+        "description": "Our escrow system protects you and your customers. Payments are held safely until the buyer confirms the order or delivery."
+      }
+    },
+    "choose": {
+      "title": "What do you want to offer?",
+      "subtitle": "Choose how you want to start. We'll set up your vendor profile from your choice.",
+      "legend": "What do you want to offer on DiasporaConnect?",
+      "products": {
+        "title": "Sell products",
+        "description": "List physical or digital goods in the marketplace."
+      },
+      "services": {
+        "title": "Provide services",
+        "description": "Offer your skills and time for customers to book."
+      }
+    },
+    "documents": {
+      "title": "Add business documents",
+      "subtitle": "Upload documents relating to your business, as one PDF file.",
+      "upload": "Upload document",
+      "supported": "Supported file type: PDF",
+      "selected": "Selected: {name}",
+      "errorPdf": "Only PDF files are supported.",
+      "noteOneFile": "All documents should be put together and uploaded as one file.",
+      "notePdf": "Supported document upload is PDF.",
+      "noteSize": "File size must not be more than 1 MB."
+    },
+    "rail": {
+      "title": "What you get",
+      "start": {
+        "title": "Start listing right away",
+        "description": "Your vendor account is active as soon as you finish, so you can list products and services straight away."
+      },
+      "escrow": {
+        "title": "Payments held in escrow",
+        "description": "Buyer payments are held in escrow until the buyer confirms delivery."
+      },
+      "payouts": {
+        "title": "Payouts to your account",
+        "description": "Your earnings are paid out to your vendor payout account."
+      },
+      "verification": {
+        "title": "Verification is optional",
+        "description": "Identity verification unlocks higher limits and a Verified badge. It never stops you from selling."
+      }
+    }
+  },
   "vendors": {
     "dashboard": "Vendor dashboard",
     "addNewService": "Add new service",
