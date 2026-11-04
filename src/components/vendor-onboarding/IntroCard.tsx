@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowRight, ShieldCheck, Sparkles, Users } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Store, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Section } from '@/components/redesign/Section';
@@ -9,7 +9,7 @@ import { ICON_CHIP_CLASS } from '@/components/more/MoreLinkCard';
 import { PRIMARY_BUTTON_CLASS } from './StepFrame';
 
 const SLIDES: Array<{ key: 'slide1' | 'slide2' | 'slide3'; icon: LucideIcon }> = [
-  { key: 'slide1', icon: Sparkles },
+  { key: 'slide1', icon: Store },
   { key: 'slide2', icon: Users },
   { key: 'slide3', icon: ShieldCheck },
 ];
