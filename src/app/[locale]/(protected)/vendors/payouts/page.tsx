@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react';
-import { Search, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@apollo/client/react';
@@ -35,9 +35,15 @@ import { handleVendorError } from '@/lib/vendor-error-mapper';
 import VendorKycRequiredModal from '@/components/vendors/VendorKycRequiredModal';
 import PageLoader from '@/components/custom/PageLoader';
 
+// Purposes payment-service can record on a payment intent. These rows are
+// payments the signed-in user MADE (payer), never payouts or withdrawals.
+const PURPOSE_KEYS = new Set([
+  'PRODUCT_PURCHASE', 'SERVICE_PURCHASE', 'MEMBERSHIP_FEE', 'EVENT_TICKET', 'DONATION',
+  'DUES', 'CONTRIBUTION', 'PROJECT_FUNDING', 'MILESTONE_PAYMENT', 'SERVICE_REQUEST_FEE',
+]);
+
 interface Transaction {
   id: string;
-  transactionId: string;
   date: string;
   type: string;
   amount: string;
@@ -48,7 +54,6 @@ const PayoutsDashboard = () => {
   const tCommon = useTranslations('common');
   const locale = useLocale();
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState('');
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [payoutAmount, setPayoutAmount] = useState('');
@@ -87,16 +92,13 @@ const PayoutsDashboard = () => {
   const totalIntentCount = paymentIntentsData?.myPaymentIntents?.total ?? 0;
   const transactions: Transaction[] = rawIntents.map((intent) => ({
     id: intent.id,
-    transactionId: intent.id.slice(0, 8),
     date: intent.created_at ? new Date(intent.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—',
-    type: intent.purpose === 'SERVICE_ORDER' ? 'Escrow to wallet' : 'Withdrawal',
+    type: intent.purpose && PURPOSE_KEYS.has(intent.purpose) ? intent.purpose : 'other',
     amount: `${intent.currency} ${(intent.gross_amount / 100).toFixed(2)}`,
   }));
   const totalPages = Math.max(1, Math.ceil(totalIntentCount / rowsPerPage));
 
-  const getLocalizedType = (type: string): string => {
-    return type === 'Withdrawal' ? t('withdrawal') : t('escrowToWallet');
-  };
+  const getLocalizedType = (type: string): string => t(`purpose.${type}`);
 
   const executePayout = async (vendorId: string, amountMajor: number, payoutCurrency: string) => {
     const amount = Math.round(amountMajor * 100);
@@ -357,16 +359,7 @@ const PayoutsDashboard = () => {
 
             {/* Search and Filter */}
             <div className="flex gap-4 mb-6">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-tertiary w-5 h-5" aria-hidden="true" />
-                <input
-                  type="text"
-                  placeholder={t('searchPlaceholder')}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-border-brand bg-surface-default"
-                />
-              </div>
+              <div className="flex-1" />
 
               <button className="flex items-center gap-2 px-4 py-2.5 border border-border-subtle rounded-lg hover:bg-surface-subtle transition-colors bg-surface-default" aria-label={t('allTime')}>
                 <Calendar className="w-5 h-5 text-text-secondary" aria-hidden="true" />
@@ -379,7 +372,6 @@ const PayoutsDashboard = () => {
               <table className="w-full">
                 <thead className="bg-surface-subtle border-b border-border-subtle">
                   <tr>
-                    <th className="text-left px-6 py-4 text-sm font-semibold text-text-primary">{t('transactionId')}</th>
                     <th className="text-left px-6 py-4 text-sm font-semibold text-text-primary">{t('date')}</th>
                     <th className="text-left px-6 py-4 text-sm font-semibold text-text-primary">{t('transactionType')}</th>
                     <th className="text-right px-6 py-4 text-sm font-semibold text-text-primary">{t('amount')}</th>
@@ -388,7 +380,6 @@ const PayoutsDashboard = () => {
                 <tbody>
                   {transactions.map((transaction) => (
                     <tr key={transaction.id} className="border-b border-border-subtle hover:bg-surface-subtle transition-colors">
-                      <td className="px-6 py-4 text-sm text-text-primary">{transaction.transactionId}</td>
                       <td className="px-6 py-4 text-sm text-text-secondary">{transaction.date}</td>
                       <td className="px-6 py-4 text-sm text-text-primary">{getLocalizedType(transaction.type)}</td>
                       <td className="px-6 py-4 text-sm text-text-primary font-medium text-right">{transaction.amount}</td>

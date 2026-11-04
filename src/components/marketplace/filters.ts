@@ -41,6 +41,31 @@ export function marketplaceQueryString(q: MarketplaceQuery): string {
   return p.toString();
 }
 
+/**
+ * Filter changes can arrive faster than the router re-renders the page with the
+ * new URL. Building each URL from props would let the second change overwrite
+ * the first, so the next URL is built from the latest query we have already
+ * issued (`pending`) until the URL catches up. The URL stays the source of truth:
+ * any URL we did not issue (back, forward, a shared link) discards `pending`.
+ */
+export type PendingMarketplaceQuery = { latest: string; merged: MarketplaceQuery; issued: string[] };
+
+export function nextMarketplaceUrl(
+  current: MarketplaceQuery,
+  pending: PendingMarketplaceQuery | null,
+  change: Partial<MarketplaceQuery>,
+): { qs: string; pending: PendingMarketplaceQuery } {
+  const merged = { ...(pending?.merged ?? current), ...change };
+  const qs = marketplaceQueryString(merged);
+  return { qs, pending: { latest: qs, merged, issued: [...(pending?.issued ?? []), qs] } };
+}
+
+/** Called when the URL the page renders changes: drop `pending` once it has landed or been bypassed. */
+export function reconcilePendingQuery(pending: PendingMarketplaceQuery | null, renderedQs: string): PendingMarketplaceQuery | null {
+  if (!pending || renderedQs === pending.latest) return null;
+  return pending.issued.includes(renderedQs) ? pending : null;
+}
+
 // The price boxes hold major units; the API takes integer minor units, so the
 // ×100 happens here, once, at the UI input boundary.
 const minor = (v: string): number | undefined => (v ? toMinorUnits(Number(v)) : undefined);

@@ -375,7 +375,7 @@
         "payRange": "Le minimum ne peut pas dépasser le maximum.",
         "deadlinePast": "La date limite ne peut pas être passée.",
         "deadlineInvalid": "Saisissez une date valide.",
-        "linkInvalid": "Saisissez un lien commençant par https:// ou http://.",
+        "linkInvalid": "Saisissez un lien web public commençant par https:// ou http://. Les adresses comme localhost ou d’un réseau privé ne sont pas acceptées.",
         "emailInvalid": "Saisissez une adresse e-mail valide."
       },
       "toasts": {
@@ -2053,6 +2053,10 @@
     "postDrafts": {
       "title": "Publications non terminées sur votre appareil",
       "body": "Lorsque vous rédigez une publication sans la publier tout de suite, nous la conservons comme brouillon dans votre navigateur, sur cet appareil, afin que vous puissiez la terminer plus tard, y compris les photos ou fichiers joints. Un brouillon ne nous est envoyé qu’au moment où vous le publiez. Les brouillons de chaque compte sont conservés séparément. Un brouillon est supprimé lorsque vous le publiez ou l’abandonnez, lorsque vous vous déconnectez, ou automatiquement après 30 jours (14 jours dans les consoles d’administration des communautés et des associations). Toute personne pouvant utiliser ce navigateur pourrait lire ce qui y est stocké : déconnectez-vous donc sur un ordinateur partagé."
+    },
+    "applications": {
+      "title": "Lorsque vous postulez à une opportunité",
+      "body": "Lorsque vous postulez à une opportunité sur DiaspoPlug, votre candidature est transmise à la personne ou à l’organisation qui l’a publiée, qui peut être une organisation ou un membre à titre individuel. Elle comprend votre nom et vos coordonnées, votre lettre de motivation et vos réponses, les liens que vous ajoutez, ainsi que le CV ou les documents que vous joignez."
     }
   },
   "friends": {
@@ -2882,15 +2886,11 @@
       "payoutMethod": "Méthode de paiement",
       "payoutMethodDescription": "Dites-nous comment vous souhaitez recevoir vos fonds de votre portefeuille",
       "addPayoutMethod": "Ajouter une méthode de paiement",
-      "history": "Historique",
-      "searchPlaceholder": "Rechercher dans l'historique par ID de transaction",
+      "history": "Paiements que vous avez effectués",
       "allTime": "Tout le temps",
-      "transactionId": "ID de transaction",
       "date": "Date",
-      "transactionType": "Type de transaction",
+      "transactionType": "Paiement pour",
       "amount": "Montant",
-      "withdrawal": "Retrait",
-      "escrowToWallet": "Séquestre vers portefeuille",
       "rowsPerPage": "Lignes par page :",
       "page": "Page {current} sur {total}",
       "momo": {
@@ -2906,6 +2906,19 @@
         "accountName": "Nom du compte",
         "accountNamePlaceholder": "Jean Dupont",
         "savePayoutMethod": "Enregistrer la méthode de paiement"
+      },
+      "purpose": {
+        "PRODUCT_PURCHASE": "Achat de produit",
+        "SERVICE_PURCHASE": "Achat de service",
+        "MEMBERSHIP_FEE": "Cotisation d'adhésion",
+        "EVENT_TICKET": "Billet d'événement",
+        "DONATION": "Don",
+        "DUES": "Cotisations",
+        "CONTRIBUTION": "Contribution",
+        "PROJECT_FUNDING": "Financement de projet",
+        "MILESTONE_PAYMENT": "Paiement d'étape",
+        "SERVICE_REQUEST_FEE": "Frais de demande de service",
+        "other": "Paiement"
       }
     },
     "errors": {

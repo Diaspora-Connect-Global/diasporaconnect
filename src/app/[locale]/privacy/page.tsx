@@ -114,18 +114,23 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
     title: t('searchVisibility.title'),
     body: t('searchVisibility.body'),
   };
+  const applicationsSection: PolicySection = {
+    id: 'applications',
+    title: t('applications.title'),
+    body: t('applications.body'),
+  };
   // Added 2026-10-27 with browser-stored post drafts (web app and both admin consoles).
   const postDraftsSection: PolicySection = {
     id: 'post-drafts',
     title: t('postDrafts.title'),
     body: t('postDrafts.body'),
   };
-  // After "How we use information" / "Sharing of information" / "Cookies and tracking" respectively.
+  // After "How we use information" / "Sharing of information" (applications, then search visibility) / "Cookies and tracking" respectively.
   const allSections: PolicySection[] = sections.flatMap((s) =>
     s.id === 'use'
       ? [s, notificationsSection]
       : s.id === 'sharing'
-        ? [s, searchVisibilitySection]
+        ? [s, applicationsSection, searchVisibilitySection]
         : s.id === 'cookies'
           ? [s, postDraftsSection]
           : [s],

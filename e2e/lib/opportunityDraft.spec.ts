@@ -73,6 +73,8 @@ test.describe('validation', () => {
     test('link must be http(s), email must be an address, only for their method', () => {
         expect(validateOpportunityForm(base({ applicationMethod: 'EXTERNAL_LINK', externalLink: 'javascript:alert(1)' }), NOW).externalLink).toBe('linkInvalid');
         expect(validateOpportunityForm(base({ applicationMethod: 'EXTERNAL_LINK', externalLink: 'ftp://x.org' }), NOW).externalLink).toBe('linkInvalid');
+        expect(validateOpportunityForm(base({ applicationMethod: 'EXTERNAL_LINK', externalLink: 'https://localhost/index' }), NOW).externalLink).toBe('linkInvalid');
+        expect(validateOpportunityForm(base({ applicationMethod: 'EXTERNAL_LINK', externalLink: 'http://192.168.0.5/apply' }), NOW).externalLink).toBe('linkInvalid');
         expect(validateOpportunityForm(base({ applicationMethod: 'EXTERNAL_LINK', externalLink: 'https://jobs.example.org/1' }), NOW)).toEqual({});
         expect(validateOpportunityForm(base({ applicationMethod: 'EMAIL_REQUEST', applicationEmail: 'nope' }), NOW).applicationEmail).toBe('emailInvalid');
         expect(validateOpportunityForm(base({ applicationMethod: 'EMAIL_REQUEST', applicationEmail: 'hr@example.org' }), NOW)).toEqual({});
@@ -113,7 +115,7 @@ test('no pay means no compensation fields at all', () => {
 });
 
 test('an attached job survives the draft round trip and edit form', () => {
-    const att = toAttached(base({ payMin: '10.5', applicationMethod: 'EXTERNAL_LINK', externalLink: 'https://a.example/x' }));
+    const att = toAttached(base({ payMin: '10.5', applicationMethod: 'EXTERNAL_LINK', externalLink: 'https://jobs.example.org/x' }));
     expect(parseAttachedOpportunity(JSON.parse(JSON.stringify(att)))).toEqual(att);
     expect(toAttached(toFormValues(att))).toEqual(att);
 });
@@ -151,4 +153,12 @@ test('custom answers parse to label/value rows and tolerate junk', () => {
     expect(parseCustomAnswers('[1,2]')).toEqual([]);
     expect(parseCustomAnswers(null)).toEqual([]);
     expect(humaniseKey('yearsOfExperience')).toBe('Years of experience');
+});
+
+test('a blank link or email is left out of the create input, never sent as an empty string', () => {
+    const att = toAttached(base({ applicationMethod: 'EXTERNAL_LINK', externalLink: 'https://jobs.example.org/1' }));
+    const blank = buildCreateOpportunityInput({ ...att, externalLink: '  ' }, 'text', 'u1');
+    expect(blank).not.toHaveProperty('externalLink');
+    const noMail = buildCreateOpportunityInput({ ...att, applicationMethod: 'EMAIL_REQUEST', applicationEmail: '' }, 'text', 'u1');
+    expect(noMail).not.toHaveProperty('applicationEmail');
 });

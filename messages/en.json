@@ -375,7 +375,7 @@
         "payRange": "The minimum cannot be higher than the maximum.",
         "deadlinePast": "The deadline cannot be in the past.",
         "deadlineInvalid": "Enter a valid date.",
-        "linkInvalid": "Enter a link that starts with https:// or http://.",
+        "linkInvalid": "Enter a public web link that starts with https:// or http://. Addresses such as localhost or a private network can’t be used.",
         "emailInvalid": "Enter a valid email address."
       },
       "toasts": {
@@ -2053,6 +2053,10 @@
     "postDrafts": {
       "title": "Unfinished posts on your device",
       "body": "When you write a post and don’t publish it straight away, we keep it as a draft in your browser on this device so you can finish it later, including any photos or files you attached. A draft is not sent to us until you publish it. Each account’s drafts are kept separately. A draft is deleted when you publish or discard it, when you sign out, or automatically after 30 days (14 days in the community and association admin consoles). Anyone who can use this browser could read what is stored in it, so sign out when you use a shared computer."
+    },
+    "applications": {
+      "title": "When you apply to an opportunity",
+      "body": "When you apply to an opportunity on DiaspoPlug, your application goes to whoever posted it, which can be an organisation or an individual member. It includes your name and contact details, your cover letter and answers, any links you add, and any CV or documents you attach."
     }
   },
   "friends": {
@@ -3186,15 +3190,11 @@
       "payoutMethod": "Payout method",
       "payoutMethodDescription": "Tell us how you want to get your funds from your wallet",
       "addPayoutMethod": "Add payout method",
-      "history": "History",
-      "searchPlaceholder": "Search history by transaction ID",
+      "history": "Payments you made",
       "allTime": "All time",
-      "transactionId": "Transaction ID",
       "date": "Date",
-      "transactionType": "Transaction type",
+      "transactionType": "Payment for",
       "amount": "Amount",
-      "withdrawal": "Withdrawal",
-      "escrowToWallet": "Escrow to wallet",
       "rowsPerPage": "Rows per page:",
       "page": "Page {current} of {total}",
       "momo": {
@@ -3210,6 +3210,19 @@
         "accountName": "Account name",
         "accountNamePlaceholder": "John Doe",
         "savePayoutMethod": "Save payout method"
+      },
+      "purpose": {
+        "PRODUCT_PURCHASE": "Product purchase",
+        "SERVICE_PURCHASE": "Service purchase",
+        "MEMBERSHIP_FEE": "Membership fee",
+        "EVENT_TICKET": "Event ticket",
+        "DONATION": "Donation",
+        "DUES": "Dues",
+        "CONTRIBUTION": "Contribution",
+        "PROJECT_FUNDING": "Project funding",
+        "MILESTONE_PAYMENT": "Milestone payment",
+        "SERVICE_REQUEST_FEE": "Service request fee",
+        "other": "Payment"
       }
     },
     "errors": {

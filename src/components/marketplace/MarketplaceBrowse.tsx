@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Briefcase, Search, ShoppingBag, ShoppingCart } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/navigation';
@@ -11,7 +11,7 @@ import { ForYouRail } from '@/components/discover/DiscoverSections';
 import { EmptyState, ErrorState, NoResults } from '@/components/feedback';
 import { ListingCard, ListingCardSkeleton } from './ListingCard';
 import { MarketplaceRefinePanel } from './RefinePanel';
-import { marketplaceQueryString, type MarketplaceQuery, type MarketplaceTab } from './filters';
+import { marketplaceQueryString, nextMarketplaceUrl, reconcilePendingQuery, type MarketplaceQuery, type MarketplaceTab, type PendingMarketplaceQuery } from './filters';
 
 /** What the browse view needs of a listing. Prices are MAJOR units here (the ÷100 happened once, on mapping). */
 export type BrowseItem = {
@@ -75,9 +75,16 @@ export function MarketplaceBrowse({
     setDraft(query.q);
   }
 
+  // Latest URL we issued but the page has not rendered yet (see nextMarketplaceUrl).
+  const pendingRef = useRef<PendingMarketplaceQuery | null>(null);
+  const renderedQs = marketplaceQueryString(query);
+  useEffect(() => {
+    pendingRef.current = reconcilePendingQuery(pendingRef.current, renderedQs);
+  }, [renderedQs]);
+
   const go = (next: Partial<MarketplaceQuery>) => {
-    const merged = { ...query, ...next };
-    const qs = marketplaceQueryString(merged);
+    const { qs, pending } = nextMarketplaceUrl(query, pendingRef.current, next);
+    pendingRef.current = pending;
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   };
   const isProducts = query.tab === 'products';

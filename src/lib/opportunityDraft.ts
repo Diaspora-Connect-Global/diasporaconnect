@@ -1,4 +1,4 @@
-import { httpUrlOrNull } from '@/lib/safeUrl';
+import { safeEmail, safeExternalUrl } from '@/lib/opportunityDisplay';
 import { toMajorUnits, toMinorUnits, DEFAULT_CURRENCY } from '@/types/money';
 import type { OpportunitySuggestedType } from '@/lib/opportunityDetection';
 
@@ -137,7 +137,6 @@ export function minorToMajorInput(minor: number | null): string {
   return Number.isInteger(major) ? String(major) : major.toFixed(2);
 }
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 /** Local calendar date as YYYY-MM-DD (for the `min` of the deadline field). */
@@ -163,8 +162,8 @@ export function validateOpportunityForm(v: OpportunityFormValues, now: Date = ne
     else if (v.deadline < todayIso(now)) errors.deadline = 'deadlinePast';
   }
 
-  if (v.applicationMethod === 'EXTERNAL_LINK' && !httpUrlOrNull(v.externalLink)) errors.externalLink = 'linkInvalid';
-  if (v.applicationMethod === 'EMAIL_REQUEST' && !EMAIL_RE.test(v.applicationEmail.trim())) errors.applicationEmail = 'emailInvalid';
+  if (v.applicationMethod === 'EXTERNAL_LINK' && !safeExternalUrl(v.externalLink)) errors.externalLink = 'linkInvalid';
+  if (v.applicationMethod === 'EMAIL_REQUEST' && !safeEmail(v.applicationEmail)) errors.applicationEmail = 'emailInvalid';
   return errors;
 }
 
@@ -181,7 +180,7 @@ export function toAttached(v: OpportunityFormValues): AttachedOpportunity {
     compensationCurrency: v.currency,
     deadline: v.deadline,
     applicationMethod: v.applicationMethod,
-    externalLink: v.applicationMethod === 'EXTERNAL_LINK' ? (httpUrlOrNull(v.externalLink) ?? '') : '',
+    externalLink: v.applicationMethod === 'EXTERNAL_LINK' ? (safeExternalUrl(v.externalLink) ?? '') : '',
     applicationEmail: v.applicationMethod === 'EMAIL_REQUEST' ? v.applicationEmail.trim() : '',
   };
 }
@@ -231,8 +230,8 @@ export function parseAttachedOpportunity(raw: unknown): AttachedOpportunity | nu
     compensationCurrency: currency,
     deadline,
     applicationMethod: method,
-    externalLink: httpUrlOrNull(str(r.externalLink)) ?? '',
-    applicationEmail: EMAIL_RE.test(str(r.applicationEmail)) ? str(r.applicationEmail) : '',
+    externalLink: safeExternalUrl(str(r.externalLink)) ?? '',
+    applicationEmail: safeEmail(str(r.applicationEmail)) ?? '',
   };
   if (method === 'EXTERNAL_LINK' && !result.externalLink) return null;
   if (method === 'EMAIL_REQUEST' && !result.applicationEmail) return null;
@@ -254,8 +253,9 @@ export function buildCreateOpportunityInput(a: AttachedOpportunity, postText: st
     ...(a.location && { location: a.location }),
     ...(a.deliveryMode && { deliveryMode: a.deliveryMode }),
     ...(a.commitmentType && { commitmentType: a.commitmentType }),
-    ...(a.applicationMethod === 'EXTERNAL_LINK' && { externalLink: a.externalLink }),
-    ...(a.applicationMethod === 'EMAIL_REQUEST' && { applicationEmail: a.applicationEmail }),
+    // A blank link or email is left out (undefined), never sent as an empty string.
+    ...(a.applicationMethod === 'EXTERNAL_LINK' && a.externalLink.trim() && { externalLink: a.externalLink.trim() }),
+    ...(a.applicationMethod === 'EMAIL_REQUEST' && a.applicationEmail.trim() && { applicationEmail: a.applicationEmail.trim() }),
     ...(a.compensationMin != null && { compensationMin: a.compensationMin }),
     ...(a.compensationMax != null && { compensationMax: a.compensationMax }),
     ...(hasPay && { compensationCurrency: a.compensationCurrency, compensationType: COMPENSATION_TYPE_BY_TYPE[a.type] }),

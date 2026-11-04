@@ -375,7 +375,7 @@
         "payRange": "Het minimum mag niet hoger zijn dan het maximum.",
         "deadlinePast": "De deadline mag niet in het verleden liggen.",
         "deadlineInvalid": "Voer een geldige datum in.",
-        "linkInvalid": "Voer een link in die begint met https:// of http://.",
+        "linkInvalid": "Voer een openbare weblink in die begint met https:// of http://. Adressen zoals localhost of van een privénetwerk kunnen niet worden gebruikt.",
         "emailInvalid": "Voer een geldig e-mailadres in."
       },
       "toasts": {
@@ -2053,6 +2053,10 @@
     "postDrafts": {
       "title": "Onvoltooide berichten op je apparaat",
       "body": "Als je een bericht schrijft en het niet meteen plaatst, bewaren we het als concept in je browser op dit apparaat, zodat je het later kunt afmaken, inclusief eventuele foto's of bestanden die je hebt toegevoegd. Een concept wordt pas naar ons verstuurd als je het plaatst. De concepten van elk account worden apart bewaard. Een concept wordt verwijderd als je het plaatst of weggooit, als je uitlogt of automatisch na 30 dagen (14 dagen in de beheerconsoles voor gemeenschappen en verenigingen). Iedereen die deze browser kan gebruiken, kan lezen wat erin is opgeslagen, dus log uit op een gedeelde computer."
+    },
+    "applications": {
+      "title": "Wanneer je reageert op een kans",
+      "body": "Wanneer je op DiaspoPlug reageert op een kans, gaat je sollicitatie naar degene die de kans heeft geplaatst; dat kan een organisatie of een individueel lid zijn. Je sollicitatie bevat je naam en contactgegevens, je motivatiebrief en antwoorden, alle links die je toevoegt en het cv of de documenten die je bijvoegt."
     }
   },
   "friends": {
@@ -3186,15 +3190,11 @@
       "payoutMethod": "Uitbetalingsmethode",
       "payoutMethodDescription": "Vertel ons hoe u uw fondsen uit uw portemonnee wilt ontvangen",
       "addPayoutMethod": "Uitbetalingsmethode toevoegen",
-      "history": "Geschiedenis",
-      "searchPlaceholder": "Geschiedenis zoeken op transactie-ID",
+      "history": "Betalingen die je hebt gedaan",
       "allTime": "Altijd",
-      "transactionId": "Transactie-ID",
       "date": "Datum",
-      "transactionType": "Transactietype",
+      "transactionType": "Betaling voor",
       "amount": "Bedrag",
-      "withdrawal": "Opname",
-      "escrowToWallet": "Bewaring naar portemonnee",
       "rowsPerPage": "Rijen per pagina:",
       "page": "Pagina {current} van {total}",
       "momo": {
@@ -3210,6 +3210,19 @@
         "accountName": "Accountnaam",
         "accountNamePlaceholder": "Jan de Vries",
         "savePayoutMethod": "Uitbetalingsmethode opslaan"
+      },
+      "purpose": {
+        "PRODUCT_PURCHASE": "Productaankoop",
+        "SERVICE_PURCHASE": "Dienstaankoop",
+        "MEMBERSHIP_FEE": "Lidmaatschapsbijdrage",
+        "EVENT_TICKET": "Evenementticket",
+        "DONATION": "Donatie",
+        "DUES": "Contributie",
+        "CONTRIBUTION": "Bijdrage",
+        "PROJECT_FUNDING": "Projectfinanciering",
+        "MILESTONE_PAYMENT": "Mijlpaalbetaling",
+        "SERVICE_REQUEST_FEE": "Kosten serviceaanvraag",
+        "other": "Betaling"
       }
     },
     "errors": {

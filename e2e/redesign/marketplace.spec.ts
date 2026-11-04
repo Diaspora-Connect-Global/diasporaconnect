@@ -80,6 +80,21 @@ test('tab, tag, currency and price filters live in the URL and change the real q
     await page.context().close();
 });
 
+test('two filter changes applied with no wait between them are both kept in the URL and the query', async () => {
+    const { page, graphql } = await open(browser, '/marketplace', OVERRIDES);
+    await expect(page.getByTestId('mp-card').first()).toBeVisible({ timeout: 90_000 });
+    // No waiting between the two changes: the second must not overwrite the first.
+    await Promise.all([page.getByRole('button', { name: 'fabric' }).click(), page.getByLabel('Currency').selectOption('USD')]);
+    await expect(page).toHaveURL(/tag=fabric/);
+    await expect(page).toHaveURL(/cur=USD/);
+    await expect.poll(() => {
+        const last = graphql.calls.filter((c) => c.name === 'SearchProducts').at(-1);
+        const input = (last?.variables as { input: { tags?: string[]; currency?: string } }).input;
+        return input.tags?.[0] === 'fabric' && input.currency === 'USD';
+    }).toBe(true);
+    await page.context().close();
+});
+
 test('the product page shows the price once ÷100, the seller description, and "No reviews yet" instead of stars', async () => {
     const { page } = await open(browser, '/marketplace', OVERRIDES);
     await page.getByTestId('mp-card').first().click();

@@ -375,7 +375,7 @@
         "payRange": "Das Minimum darf nicht höher als das Maximum sein.",
         "deadlinePast": "Die Frist darf nicht in der Vergangenheit liegen.",
         "deadlineInvalid": "Gib ein gültiges Datum ein.",
-        "linkInvalid": "Gib einen Link ein, der mit https:// oder http:// beginnt.",
+        "linkInvalid": "Gib einen öffentlichen Weblink ein, der mit https:// oder http:// beginnt. Adressen wie localhost oder aus einem privaten Netzwerk sind nicht möglich.",
         "emailInvalid": "Gib eine gültige E-Mail-Adresse ein."
       },
       "toasts": {
@@ -2053,6 +2053,10 @@
     "postDrafts": {
       "title": "Unveröffentlichte Beiträge auf deinem Gerät",
       "body": "Wenn du einen Beitrag schreibst und ihn nicht sofort veröffentlichst, speichern wir ihn als Entwurf in deinem Browser auf diesem Gerät, damit du ihn später fertigstellen kannst – einschließlich angehängter Fotos oder Dateien. Ein Entwurf wird erst an uns gesendet, wenn du ihn veröffentlichst. Die Entwürfe jedes Kontos werden getrennt gespeichert. Ein Entwurf wird gelöscht, wenn du ihn veröffentlichst oder verwirfst, wenn du dich abmeldest oder automatisch nach 30 Tagen (in den Admin-Konsolen für Communitys und Vereine nach 14 Tagen). Jede Person, die diesen Browser benutzen kann, könnte lesen, was darin gespeichert ist – melde dich daher an gemeinsam genutzten Computern ab."
+    },
+    "applications": {
+      "title": "Wenn du dich auf eine Gelegenheit bewirbst",
+      "body": "Wenn du dich auf DiaspoPlug auf eine Gelegenheit bewirbst, geht deine Bewerbung an die Person oder Organisation, die sie veröffentlicht hat; das kann eine Organisation oder ein einzelnes Mitglied sein. Sie enthält deinen Namen und deine Kontaktdaten, dein Anschreiben und deine Antworten, alle Links, die du hinzufügst, sowie einen Lebenslauf oder Dokumente, die du anhängst."
     }
   },
   "friends": {
@@ -2882,15 +2886,11 @@
       "payoutMethod": "Auszahlungsmethode",
       "payoutMethodDescription": "Teilen Sie uns mit, wie Sie Ihr Geld aus Ihrem Guthaben erhalten möchten",
       "addPayoutMethod": "Auszahlungsmethode hinzufügen",
-      "history": "Verlauf",
-      "searchPlaceholder": "Verlauf nach Transaktions-ID suchen",
+      "history": "Zahlungen, die du geleistet hast",
       "allTime": "Gesamte Zeit",
-      "transactionId": "Transaktions-ID",
       "date": "Datum",
-      "transactionType": "Transaktionsart",
+      "transactionType": "Zahlung für",
       "amount": "Betrag",
-      "withdrawal": "Auszahlung",
-      "escrowToWallet": "Treuhand zu Guthaben",
       "rowsPerPage": "Zeilen pro Seite:",
       "page": "Seite {current} von {total}",
       "momo": {
@@ -2906,6 +2906,19 @@
         "accountName": "Kontoname",
         "accountNamePlaceholder": "Max Mustermann",
         "savePayoutMethod": "Auszahlungsmethode speichern"
+      },
+      "purpose": {
+        "PRODUCT_PURCHASE": "Produktkauf",
+        "SERVICE_PURCHASE": "Dienstleistungskauf",
+        "MEMBERSHIP_FEE": "Mitgliedsbeitrag",
+        "EVENT_TICKET": "Veranstaltungsticket",
+        "DONATION": "Spende",
+        "DUES": "Beiträge",
+        "CONTRIBUTION": "Beitrag",
+        "PROJECT_FUNDING": "Projektfinanzierung",
+        "MILESTONE_PAYMENT": "Meilensteinzahlung",
+        "SERVICE_REQUEST_FEE": "Gebühr für Serviceanfrage",
+        "other": "Zahlung"
       }
     },
     "errors": {

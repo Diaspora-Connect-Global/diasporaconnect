@@ -14,6 +14,20 @@ test('a poster name is shown only when it is a name, never an id', () => {
     expect(readableOwnerName(null)).toBeNull();
 });
 
+test('links to IP addresses, single-label and local-only hosts, or with credentials, are refused', () => {
+    for (const bad of [
+        'https://localhost/index', 'http://LOCALHOST:3000', 'https://localhost./x', 'https://app.localhost/', 'https://printer.local/', 'https://intranet/apply', 'https://devbox',
+        'http://127.0.0.1/', 'http://127.1.2.3', 'http://0.0.0.0', 'http://10.1.2.3/a', 'http://192.168.1.10', 'http://172.16.0.1', 'http://172.31.255.1', 'http://169.254.169.254/latest',
+        'http://[::1]/', 'http://[fe80::1]/', 'http://[::ffff:127.0.0.1]/', 'http://2130706433/', 'http://0x7f.1/',
+        'http://8.8.8.8/apply', 'http://172.15.0.1/', 'https://hr.internal/apply', 'https://acme.com@evil.example.org/apply', 'https://user:pass@acme.com/apply',
+    ]) {
+        expect(safeExternalUrl(bad), bad).toBeNull();
+    }
+    for (const ok of ['https://example.com/apply', 'https://jobs.example.co.uk/a?b=1']) {
+        expect(safeExternalUrl(ok), ok).not.toBeNull();
+    }
+});
+
 test('only http(s) application links are links', () => {
     expect(safeExternalUrl(' https://example.com/apply ')).toBe('https://example.com/apply');
     expect(safeExternalUrl('http://example.com')).toBe('http://example.com/');
