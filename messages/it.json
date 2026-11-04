@@ -2885,15 +2885,11 @@
       "payoutMethod": "Metodo di pagamento",
       "payoutMethodDescription": "Dicci come vuoi ricevere i tuoi fondi dal tuo portafoglio",
       "addPayoutMethod": "Aggiungi metodo di pagamento",
-      "history": "Cronologia",
-      "searchPlaceholder": "Cerca nella cronologia per ID transazione",
+      "history": "Pagamenti che hai effettuato",
       "allTime": "Tutto il tempo",
-      "transactionId": "ID transazione",
       "date": "Data",
-      "transactionType": "Tipo di transazione",
+      "transactionType": "Pagamento per",
       "amount": "Importo",
-      "withdrawal": "Prelievo",
-      "escrowToWallet": "Garanzia a portafoglio",
       "rowsPerPage": "Righe per pagina:",
       "page": "Pagina {current} di {total}",
       "momo": {
@@ -2909,6 +2905,19 @@
         "accountName": "Nome conto",
         "accountNamePlaceholder": "Mario Rossi",
         "savePayoutMethod": "Salva metodo di pagamento"
+      },
+      "purpose": {
+        "PRODUCT_PURCHASE": "Acquisto di prodotto",
+        "SERVICE_PURCHASE": "Acquisto di servizio",
+        "MEMBERSHIP_FEE": "Quota associativa",
+        "EVENT_TICKET": "Biglietto evento",
+        "DONATION": "Donazione",
+        "DUES": "Quote",
+        "CONTRIBUTION": "Contributo",
+        "PROJECT_FUNDING": "Finanziamento di progetto",
+        "MILESTONE_PAYMENT": "Pagamento di tappa",
+        "SERVICE_REQUEST_FEE": "Costo della richiesta di servizio",
+        "other": "Pagamento"
       }
     },
     "errors": {

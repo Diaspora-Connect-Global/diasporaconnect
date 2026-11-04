@@ -3189,15 +3189,11 @@
       "payoutMethod": "Payout method",
       "payoutMethodDescription": "Tell us how you want to get your funds from your wallet",
       "addPayoutMethod": "Add payout method",
-      "history": "History",
-      "searchPlaceholder": "Search history by transaction ID",
+      "history": "Payments you made",
       "allTime": "All time",
-      "transactionId": "Transaction ID",
       "date": "Date",
-      "transactionType": "Transaction type",
+      "transactionType": "Payment for",
       "amount": "Amount",
-      "withdrawal": "Withdrawal",
-      "escrowToWallet": "Escrow to wallet",
       "rowsPerPage": "Rows per page:",
       "page": "Page {current} of {total}",
       "momo": {
@@ -3213,6 +3209,19 @@
         "accountName": "Account name",
         "accountNamePlaceholder": "John Doe",
         "savePayoutMethod": "Save payout method"
+      },
+      "purpose": {
+        "PRODUCT_PURCHASE": "Product purchase",
+        "SERVICE_PURCHASE": "Service purchase",
+        "MEMBERSHIP_FEE": "Membership fee",
+        "EVENT_TICKET": "Event ticket",
+        "DONATION": "Donation",
+        "DUES": "Dues",
+        "CONTRIBUTION": "Contribution",
+        "PROJECT_FUNDING": "Project funding",
+        "MILESTONE_PAYMENT": "Milestone payment",
+        "SERVICE_REQUEST_FEE": "Service request fee",
+        "other": "Payment"
       }
     },
     "errors": {

@@ -3189,15 +3189,11 @@
       "payoutMethod": "Uitbetalingsmethode",
       "payoutMethodDescription": "Vertel ons hoe u uw fondsen uit uw portemonnee wilt ontvangen",
       "addPayoutMethod": "Uitbetalingsmethode toevoegen",
-      "history": "Geschiedenis",
-      "searchPlaceholder": "Geschiedenis zoeken op transactie-ID",
+      "history": "Betalingen die je hebt gedaan",
       "allTime": "Altijd",
-      "transactionId": "Transactie-ID",
       "date": "Datum",
-      "transactionType": "Transactietype",
+      "transactionType": "Betaling voor",
       "amount": "Bedrag",
-      "withdrawal": "Opname",
-      "escrowToWallet": "Bewaring naar portemonnee",
       "rowsPerPage": "Rijen per pagina:",
       "page": "Pagina {current} van {total}",
       "momo": {
@@ -3213,6 +3209,19 @@
         "accountName": "Accountnaam",
         "accountNamePlaceholder": "Jan de Vries",
         "savePayoutMethod": "Uitbetalingsmethode opslaan"
+      },
+      "purpose": {
+        "PRODUCT_PURCHASE": "Productaankoop",
+        "SERVICE_PURCHASE": "Dienstaankoop",
+        "MEMBERSHIP_FEE": "Lidmaatschapsbijdrage",
+        "EVENT_TICKET": "Evenementticket",
+        "DONATION": "Donatie",
+        "DUES": "Contributie",
+        "CONTRIBUTION": "Bijdrage",
+        "PROJECT_FUNDING": "Projectfinanciering",
+        "MILESTONE_PAYMENT": "Mijlpaalbetaling",
+        "SERVICE_REQUEST_FEE": "Kosten servicedienst-aanvraag",
+        "other": "Betaling"
       }
     },
     "errors": {

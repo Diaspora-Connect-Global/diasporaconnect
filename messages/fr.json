@@ -2885,15 +2885,11 @@
       "payoutMethod": "Méthode de paiement",
       "payoutMethodDescription": "Dites-nous comment vous souhaitez recevoir vos fonds de votre portefeuille",
       "addPayoutMethod": "Ajouter une méthode de paiement",
-      "history": "Historique",
-      "searchPlaceholder": "Rechercher dans l'historique par ID de transaction",
+      "history": "Paiements que vous avez effectués",
       "allTime": "Tout le temps",
-      "transactionId": "ID de transaction",
       "date": "Date",
-      "transactionType": "Type de transaction",
+      "transactionType": "Paiement pour",
       "amount": "Montant",
-      "withdrawal": "Retrait",
-      "escrowToWallet": "Séquestre vers portefeuille",
       "rowsPerPage": "Lignes par page :",
       "page": "Page {current} sur {total}",
       "momo": {
@@ -2909,6 +2905,19 @@
         "accountName": "Nom du compte",
         "accountNamePlaceholder": "Jean Dupont",
         "savePayoutMethod": "Enregistrer la méthode de paiement"
+      },
+      "purpose": {
+        "PRODUCT_PURCHASE": "Achat de produit",
+        "SERVICE_PURCHASE": "Achat de service",
+        "MEMBERSHIP_FEE": "Cotisation d'adhésion",
+        "EVENT_TICKET": "Billet d'événement",
+        "DONATION": "Don",
+        "DUES": "Cotisations",
+        "CONTRIBUTION": "Contribution",
+        "PROJECT_FUNDING": "Financement de projet",
+        "MILESTONE_PAYMENT": "Paiement d'étape",
+        "SERVICE_REQUEST_FEE": "Frais de demande de service",
+        "other": "Paiement"
       }
     },
     "errors": {
