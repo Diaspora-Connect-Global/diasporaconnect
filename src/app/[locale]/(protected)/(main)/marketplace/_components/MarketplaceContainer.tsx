@@ -34,7 +34,11 @@ import { Checkout } from "./Checkout";
 import { OrderSuccess } from "./OrderSuccess";
 import { useMarketplacePayment } from "./payments/useMarketplacePayment";
 import { toCdnUrl } from "@/lib/cdn";
-import { cartNeedsShipping, formatShippingAddress } from "@/lib/marketplaceCheckout";
+import {
+  cartNeedsShipping,
+  formatShippingAddress,
+  settlePaidLines,
+} from "@/lib/marketplaceCheckout";
 
 function toUiProductFromProductApi(item: {
   id: string;
@@ -104,6 +108,9 @@ export default function MarketplaceContainer() {
   const [currentView, setCurrentView] = useState<MarketplaceView>("home");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
+  // Lines paid in the current checkout. They leave the cart the moment they are
+  // paid, so that pressing Pay again after a failure cannot charge them again.
+  const [paidLines, setPaidLines] = useState<CartItem[]>([]);
   const [showCart, setShowCart] = useState(false);
   const [removeCartItemModalOpen, setRemoveCartItemModalOpen] = useState(false);
   const [cartItemIdToRemove, setCartItemIdToRemove] = useState<string | null>(null);
@@ -286,11 +293,13 @@ export default function MarketplaceContainer() {
   };
 
   const handleOrderComplete = () => {
+    setCart([]);
     setCurrentView("success");
   };
 
   const handleBackToHome = () => {
     setCart([]);
+    setPaidLines([]);
     setCurrentView("home");
     setSelectedProduct(null);
   };
@@ -355,15 +364,23 @@ export default function MarketplaceContainer() {
         <div className="h-app-inner flex flex-col px-[10%]">
         <Checkout
           cart={cart}
-          onBack={() => setCurrentView("home")}
+          paidLines={paidLines}
+          onBack={() => {
+            setPaidLines([]);
+            setCurrentView("home");
+          }}
           isPaying={isPaying}
-          onPay={async ({ cart: c, method, shippingAddress }) =>
-            pay(
+          onPay={async ({ cart: c, method, shippingAddress }) => {
+            const result = await pay(
               { kind: "cart", cart: c },
               method,
               cartNeedsShipping(c) ? formatShippingAddress(shippingAddress) : undefined
-            )
-          }
+            );
+            const paid = result.paid ?? [];
+            setPaidLines((prev) => settlePaidLines(c, paid, prev).paidLines);
+            if (!result.success) setCart(settlePaidLines(c, paid).remaining);
+            return result;
+          }}
           onComplete={handleOrderComplete}
         />
         </div>
@@ -371,7 +388,7 @@ export default function MarketplaceContainer() {
 
       {currentView === "success" && (
         <div className="h-app-inner flex flex-col px-[10%]">
-          <OrderSuccess cart={cart} onBackToHome={handleBackToHome} />
+          <OrderSuccess cart={paidLines} onBackToHome={handleBackToHome} />
         </div>
       )}
 

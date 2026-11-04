@@ -2,9 +2,10 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, CreditCard, ShoppingBag, Smartphone, CheckCircle2 } from "lucide-react";
+import { AlertCircle, ChevronLeft, CreditCard, ShoppingBag, Smartphone, CheckCircle2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useApolloClient } from "@apollo/client/react";
+import { Link } from "@/i18n/navigation";
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
 import { CountrySelect } from "@/components/custom/input";
 import { formatAmountWithCurrency } from "@/lib/displayCurrency";
@@ -15,6 +16,7 @@ import {
   cartTotalMinor,
   isShippingComplete,
   lineAmountMinor,
+  type CheckoutFailure,
 } from "@/lib/marketplaceCheckout";
 import { isMobileMoneySupported, toMajorUnits } from "@/types/money";
 import { readableSeller } from "@/components/marketplace/DetailParts";
@@ -34,8 +36,11 @@ export function Checkout({
   onPay,
   isPaying = false,
   onComplete,
+  paidLines = [],
 }: {
   cart: CartItem[];
+  /** Lines already paid in this checkout, after part of it failed. No longer in `cart`. */
+  paidLines?: CartItem[];
   onBack: () => void;
   onPay: (args: {
     cart: CartItem[];
@@ -133,10 +138,27 @@ export function Checkout({
     };
   }, [apolloClient, displayCurrency, listingCurrency, total, totalMinor, locale]);
 
+  const [failure, setFailure] = useState<CheckoutFailure | null>(null);
+
   const handleSubmit = async () => {
     if (missingAddress) return;
+    setFailure(null);
     const res = await onPay({ cart, method: paymentMethod, shippingAddress });
-    if (res.success) onComplete();
+    if (res.success) {
+      onComplete();
+      return;
+    }
+    setFailure(res.failure ?? null);
+  };
+
+  const failureMessages: Record<CheckoutFailure, string> = {
+    mixed_currency: tp("checkoutFailure.mixedCurrency"),
+    order_refused: tp("checkoutFailure.orderRefused"),
+    payment_cancelled: tp("checkoutFailure.paymentCancelled"),
+    payment_refused: tp("checkoutFailure.paymentRefused"),
+    payment_unavailable: tp("checkoutFailure.paymentUnavailable"),
+    payment_unconfirmed: tp("checkoutFailure.paymentUnconfirmed"),
+    no_saved_card: tp("checkoutFailure.noSavedCard"),
   };
 
   return (
@@ -326,6 +348,44 @@ export function Checkout({
                   : ""}
               </p>
             </div>
+            {paidLines.length > 0 && (
+              <section
+                aria-labelledby="mp-checkout-paid-heading"
+                className="mb-4 rounded-xl bg-surface-success p-3 text-sm text-text-primary"
+                data-testid="mp-checkout-paid"
+              >
+                <h4 id="mp-checkout-paid-heading" className="flex items-center gap-2 font-semibold">
+                  <CheckCircle2 className="size-4 shrink-0 text-text-success" aria-hidden />
+                  {tp("checkoutPaidHeading")}
+                </h4>
+                <ul className="mt-2 space-y-1">
+                  {paidLines.map((item) => (
+                    <li key={item.lineId ?? item.id} className="flex justify-between gap-3">
+                      <span className="min-w-0 break-words">
+                        {item.name}
+                        {item.quantity > 1 ? ` × ${item.quantity}` : ""}
+                      </span>
+                      <span className="whitespace-nowrap">
+                        {formatAmount(toMajorUnits(lineAmountMinor(item)))}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/wallet" className="mt-2 inline-block underline">
+                  {tp("checkoutPaidWalletLink")}
+                </Link>
+              </section>
+            )}
+            {failure && (
+              <p
+                role="alert"
+                className="mb-4 flex gap-2 rounded-xl bg-surface-subtle p-3 text-sm text-text-primary"
+                data-testid="mp-checkout-failure"
+              >
+                <AlertCircle className="mt-0.5 size-4 shrink-0 text-text-danger" aria-hidden />
+                <span className="min-w-0 break-words">{failureMessages[failure]}</span>
+              </p>
+            )}
             <ButtonType2
               onClick={handleSubmit}
               disabled={isPaying || cart.length === 0 || missingAddress}

@@ -7531,6 +7531,17 @@
     "serviceFrom": "Prezzo di partenza",
     "checkoutHeading": "Pagamento",
     "checkoutAddressHint": "Inserisci nome, indirizzo, città, paese e numero di telefono per continuare.",
+    "checkoutPaidHeading": "Questa parte del tuo ordine è pagata",
+    "checkoutPaidWalletLink": "Vedi i tuoi pagamenti nel portafoglio",
+    "checkoutFailure": {
+      "mixedCurrency": "Il tuo carrello contiene articoli in valute diverse. Paga ogni valuta separatamente.",
+      "orderRefused": "Non siamo riusciti a effettuare questo ordine. Gli articoli ancora elencati qui non ti sono stati addebitati. Riprova.",
+      "paymentCancelled": "Hai annullato il pagamento. Gli articoli ancora elencati qui non ti sono stati addebitati.",
+      "paymentRefused": "Questo pagamento non è andato a buon fine. Gli articoli ancora elencati qui non ti sono stati addebitati. Riprova.",
+      "paymentUnavailable": "Non siamo riusciti ad avviare il pagamento di questo ordine. Gli articoli ancora elencati qui non ti sono stati addebitati. Riprova più tardi.",
+      "paymentUnconfirmed": "Non siamo ancora riusciti a confermare il tuo pagamento. Non pagare di nuovo in un altro modo. Premi Paga per controllarlo di nuovo: non ti verrà chiesto di pagare una seconda volta.",
+      "noSavedCard": "Non abbiamo trovato una carta salvata sul tuo account, quindi non ti è stato addebitato nulla. Scegli un altro metodo di pagamento, se disponibile."
+    },
     "successHeading": "Ordine effettuato"
   }
 }

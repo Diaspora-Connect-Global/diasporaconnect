@@ -7531,6 +7531,17 @@
     "serviceFrom": "Starting price",
     "checkoutHeading": "Checkout",
     "checkoutAddressHint": "Enter your name, address, city, country and phone number to continue.",
+    "checkoutPaidHeading": "This part of your order is paid",
+    "checkoutPaidWalletLink": "See your payments in your wallet",
+    "checkoutFailure": {
+      "mixedCurrency": "Your cart has items in different currencies. Please pay for each currency separately.",
+      "orderRefused": "We could not place this order. You have not been charged for the items still listed here. Please try again.",
+      "paymentCancelled": "You cancelled the payment. You have not been charged for the items still listed here.",
+      "paymentRefused": "This payment did not go through. You have not been charged for the items still listed here. Please try again.",
+      "paymentUnavailable": "We could not start the payment for this order. You have not been charged for the items still listed here. Please try again later.",
+      "paymentUnconfirmed": "We could not confirm your payment yet. Please do not pay again another way. Press Pay to check it again: you will not be asked to pay a second time.",
+      "noSavedCard": "We could not find a saved card on your account, so you have not been charged. Please choose another payment method if one is offered."
+    },
     "successHeading": "Order placed"
   }
 }
