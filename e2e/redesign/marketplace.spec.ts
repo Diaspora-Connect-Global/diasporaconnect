@@ -111,7 +111,11 @@ test('the product page shows the price once ÷100, the seller description, and "
 });
 
 test('checkout still sends the same order mutation: vendor, product, quantity, price in minor units, currency, notes', async () => {
-    const over = { ...OVERRIDES, CreateProductOrder: { createProductOrder: { __typename: 'OrderResponse', success: false, message: 'e2e stop', order: null } } };
+    const over = {
+        ...OVERRIDES,
+        // GHS cards go through a saved Stripe card, and checkout stops before creating an order without one.
+        MyPaymentMethods: { myPaymentMethods: { __typename: 'PaymentMethodList', success: true, payment_methods: [{ __typename: 'PaymentMethod', id: 'card-1', provider: 'STRIPE', type: 'card', last4: '4242', brand: 'visa', expiry_month: 12, expiry_year: 2030, is_primary: true }] } },
+        CreateProductOrder: { createProductOrder: { __typename: 'OrderResponse', success: false, message: 'e2e stop', order: null } } };
     const { page, graphql } = await open(browser, '/marketplace', over);
     await page.getByTestId('mp-card').first().click();
     await page.getByRole('button', { name: 'Buy now' }).click();
