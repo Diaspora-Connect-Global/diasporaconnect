@@ -287,11 +287,11 @@ export function withoutRepeats(entries: MixEntry[], shownAbove: ReadonlySet<stri
   return [...fresh, ...entries.filter((e) => shownAbove.has(e.id)).slice(0, minimum - fresh.length)];
 }
 
-/** The "Latest opportunities" section: every card it was given, in as many rows as they take. */
-export function LatestSection({ entries }: { entries: MixEntry[] }) {
+/** The "Latest opportunities" section: one row, or every card it was given on its own "View all". */
+export function LatestSection({ entries, expanded, onViewAll }: { entries: MixEntry[]; expanded: boolean; onViewAll?: () => void }) {
   return (
-    <Frame k="latest" count={entries.length} expanded={false}>
-      <Grid overview={false}>{entries.map((e) => e.node)}</Grid>
+    <Frame k="latest" count={entries.length} onViewAll={onViewAll} expanded={expanded}>
+      <Grid overview={!expanded}>{entries.map((e) => e.node)}</Grid>
     </Frame>
   );
 }

@@ -13,8 +13,8 @@ import type { MoreTone } from '@/components/more/moreLinks';
 export const DISCOVER_CATEGORY_KEYS = ['services', 'products', 'jobs', 'scholarships', 'grants', 'programs', 'volunteering', 'investments', 'realEstate', 'events'] as const;
 export type DiscoverCategoryKey = (typeof DISCOVER_CATEGORY_KEYS)[number];
 
-/** What `?cat=` may hold: a category, or "For you" — the viewer's recommended opportunities ("View all" on that row; not a tile). */
-export type DiscoverViewKey = DiscoverCategoryKey | 'forYou';
+/** What `?cat=` may hold: a category, or the "View all" of a row that is not a tile: "For you" (recommended opportunities) or Latest. */
+export type DiscoverViewKey = DiscoverCategoryKey | 'forYou' | 'latest';
 
 /** Order of the sections on the page (the mockup leads with services, then jobs). */
 export const DISCOVER_SECTION_ORDER: readonly DiscoverCategoryKey[] = ['services', 'jobs', 'scholarships', 'grants', 'programs', 'volunteering', 'investments', 'realEstate', 'products', 'events'];
@@ -68,7 +68,7 @@ export const DISCOVER_TONES: Record<DiscoverCategoryKey, MoreTone> = {
 export function parseCategories(raw: string | null): DiscoverViewKey[] {
   if (!raw) return [];
   const wanted = new Set(raw.split(','));
-  return (['forYou', ...DISCOVER_CATEGORY_KEYS] as const).filter((k) => wanted.has(k));
+  return (['forYou', 'latest', ...DISCOVER_CATEGORY_KEYS] as const).filter((k) => wanted.has(k));
 }
 
 // No "most applications" sort: opportunity-service cannot sort by it, and a label must describe the real order.
