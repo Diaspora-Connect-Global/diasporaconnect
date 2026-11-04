@@ -93,7 +93,7 @@ const PayoutsDashboard = () => {
   const transactions: Transaction[] = rawIntents.map((intent) => ({
     id: intent.id,
     date: intent.created_at ? new Date(intent.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—',
-    type: PURPOSE_KEYS.has(intent.purpose) ? intent.purpose : 'other',
+    type: intent.purpose && PURPOSE_KEYS.has(intent.purpose) ? intent.purpose : 'other',
     amount: `${intent.currency} ${(intent.gross_amount / 100).toFixed(2)}`,
   }));
   const totalPages = Math.max(1, Math.ceil(totalIntentCount / rowsPerPage));
