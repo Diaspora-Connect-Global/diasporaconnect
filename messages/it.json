@@ -2596,7 +2596,6 @@
     "payAmount": "Paga GH₵ {amount}",
     "subtotalAmount": "Importo subtotale",
     "subtotal": "Subtotale",
-    "shippingFee": "Spese di spedizione",
     "discount": "Sconto",
     "sameAsShipping": "Uguale all'indirizzo di spedizione",
     "orderSuccess": "Il pagamento dell'ordine è stato effettuato con successo",

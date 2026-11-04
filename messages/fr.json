@@ -2596,7 +2596,6 @@
     "payAmount": "Payer GH₵ {amount}",
     "subtotalAmount": "Montant du sous-total",
     "subtotal": "Sous-total",
-    "shippingFee": "Frais de livraison",
     "discount": "Réduction",
     "sameAsShipping": "Identique à l'adresse de livraison",
     "orderSuccess": "Votre paiement de commande a réussi",

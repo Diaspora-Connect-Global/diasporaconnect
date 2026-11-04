@@ -2900,7 +2900,6 @@
     "payAmount": "Pay GH₵ {amount}",
     "subtotalAmount": "Subtotal amount",
     "subtotal": "Subtotal",
-    "shippingFee": "Shipping fee",
     "discount": "Discount",
     "sameAsShipping": "Same as shipping address",
     "orderSuccess": "Your order payment successfully",

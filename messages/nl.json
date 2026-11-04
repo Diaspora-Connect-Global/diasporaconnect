@@ -2900,7 +2900,6 @@
     "payAmount": "Betaal GH₵ {amount}",
     "subtotalAmount": "Subtotaalbedrag",
     "subtotal": "Subtotaal",
-    "shippingFee": "Verzendkosten",
     "discount": "Korting",
     "sameAsShipping": "Hetzelfde als verzendadres",
     "orderSuccess": "Uw bestelling is succesvol betaald",

@@ -10,7 +10,8 @@ import { CountrySelect } from "@/components/custom/input";
 import { formatAmountWithCurrency } from "@/lib/displayCurrency";
 import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 import { CONVERT_CURRENCY } from "@/services/gql/marketplace";
-import { isMobileMoneySupported } from "@/types/money";
+import { cartTotalMinor, lineAmountMinor } from "@/lib/marketplaceCheckout";
+import { isMobileMoneySupported, toMajorUnits } from "@/types/money";
 import { readableSeller } from "@/components/marketplace/DetailParts";
 import type { CartItem, PaymentMethod, PaymentResult, ShippingAddress } from "./types";
 
@@ -81,17 +82,10 @@ export function Checkout({
     phoneNumber: "",
   });
 
-  const subtotal = useMemo(
-    () =>
-      cart.reduce(
-        (sum, item) =>
-          sum + item.price * item.quantity + (item.extrasTotal ?? 0),
-        0
-      ),
-    [cart]
-  );
-  const shippingFee = 20;
-  const total = subtotal + shippingFee;
+  // Exactly what the order mutations send: unit price x quantity. Neither order
+  // input takes a shipping fee or extras, so the screen shows neither.
+  const totalMinor = useMemo(() => cartTotalMinor(cart), [cart]);
+  const total = toMajorUnits(totalMinor);
 
   // P2 display conversion: show the viewer's display currency alongside the
   // listing currency. Non-blocking — falls back to the listing-currency amount
@@ -109,7 +103,7 @@ export function Checkout({
           query: CONVERT_CURRENCY,
           variables: {
             // convertCurrency speaks integer minor units in AND out.
-            amount: Math.round(total * 100),
+            amount: totalMinor,
             from_currency: listingCurrency,
             to_currency: displayCurrency,
           },
@@ -137,7 +131,7 @@ export function Checkout({
     return () => {
       cancelled = true;
     };
-  }, [apolloClient, displayCurrency, listingCurrency, total, locale]);
+  }, [apolloClient, displayCurrency, listingCurrency, total, totalMinor, locale]);
 
   const handleSubmit = async () => {
     const res = await onPay({ cart, method: paymentMethod, shippingAddress });
@@ -161,8 +155,7 @@ export function Checkout({
             <div className="bg-surface-default rounded-2xl border border-border-subtle p-4 shadow-sm sm:p-5 mb-6">
               <h3 className="font-semibold mb-4 text-text-primary">{t("orderDetails")}</h3>
               {cart.map((item) => {
-                const lineTotal =
-                  item.price * item.quantity + (item.extrasTotal ?? 0);
+                const lineTotal = toMajorUnits(lineAmountMinor(item));
                 return (
                   <div
                     key={item.lineId ?? item.id}
@@ -179,32 +172,6 @@ export function Checkout({
                       <p className="font-medium text-text-primary">{item.name}</p>
                       {readableSeller(item.seller) && (
                         <p className="text-sm text-text-secondary">{readableSeller(item.seller)}</p>
-                      )}
-                      {item.extras && item.extras.length > 0 && (
-                        <ul className="text-xs text-text-tertiary space-y-0.5 mt-0.5">
-                          {(item.serviceExtras
-                            ? item.extras
-                                .map((id) =>
-                                  item.serviceExtras!.find((e) => e.id === id)
-                                )
-                                .filter(Boolean) as {
-                                id: string;
-                                name: string;
-                                price: number;
-                              }[]
-                            : []
-                          ).map((extra) => (
-                            <li key={extra.id}>
-                              {extra.name} — {formatAmount(extra.price)}
-                            </li>
-                          ))}
-                          {(!item.serviceExtras ||
-                            item.serviceExtras.length === 0) &&
-                            item.extrasTotal != null &&
-                            item.extrasTotal > 0 && (
-                              <li>Extras — {formatAmount(item.extrasTotal)}</li>
-                            )}
-                        </ul>
                       )}
                     </div>
                     <p className="font-semibold text-text-primary whitespace-nowrap">
@@ -402,11 +369,7 @@ export function Checkout({
             <div className="space-y-2 mb-4">
               <div className="flex justify-between text-sm">
                 <span className="text-text-secondary">{t("subtotalAmount")}</span>
-                <span className="text-text-primary">{formatAmount(subtotal)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">{t("shippingFee")}</span>
-                <span className="text-text-primary">{formatAmount(shippingFee)}</span>
+                <span className="text-text-primary">{formatAmount(total)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-text-secondary">{t("discount")}</span>
@@ -416,7 +379,7 @@ export function Checkout({
             <div className="border-t border-border-subtle pt-4 mb-6">
               <div className="flex justify-between font-bold text-lg text-text-primary">
                 <span>{t("total")}</span>
-                <span>{formatAmount(total)}</span>
+                <span data-testid="mp-checkout-total">{formatAmount(total)}</span>
               </div>
               <p className="text-xs text-text-secondary mt-2">
                 You will be charged {formatAmount(total)} {listingCurrency}.

@@ -2596,7 +2596,6 @@
     "payAmount": "GH₵ {amount} bezahlen",
     "subtotalAmount": "Zwischensumme",
     "subtotal": "Zwischensumme",
-    "shippingFee": "Versandkosten",
     "discount": "Rabatt",
     "sameAsShipping": "Wie Lieferadresse",
     "orderSuccess": "Ihre Bestellung wurde erfolgreich bezahlt",
