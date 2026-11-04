@@ -13,21 +13,23 @@ import { DiscoverHelpCard, RefinePanel } from './RefinePanel';
 import { EventsSection, LatestSection, OpportunitySection, ProductsSection, RecommendedOpportunitiesSection, ServicesSection, useLatestMix, useRecommendedOpportunities, withoutRepeats } from './DiscoverSections';
 import { DISCOVER_CATEGORY_KEYS, DISCOVER_ICONS, DISCOVER_SECTION_ORDER, DISCOVER_TONES, isOpportunityKey, parseCategories, parseSort, type DiscoverCategoryKey, type DiscoverSort, type DiscoverViewKey } from './discoverCategories';
 
-/** One row of 4 per section, for "For you" and for rows narrowed only by place or sort. */
+/** One row of 4 per section, for "For you", Latest and rows narrowed only by place or sort. */
 const OVERVIEW_SHOWN = 4;
+/** A row shows 3 of those beside the refine rail, so a 4th listing is only reachable through "View all". */
+const SMALLEST_ROW = 3;
 const EXPANDED_LIMIT = 12;
-/** 12 fills its last row at 2, 3 and 4 columns. Fetched with room for what "For you" takes out. */
-const LATEST_SHOWN = 12;
-const LATEST_FETCH = LATEST_SHOWN + OVERVIEW_SHOWN;
+/** Latest's "View all". Fetched with room for what "For you" takes out of the row, and the same query for both. */
+const LATEST_FETCH = EXPANDED_LIMIT + OVERVIEW_SHOWN;
 /** Sections mounted (and queried) immediately; the rest wait until they near the viewport. */
 const EAGER_SECTIONS = 2;
 
 /**
- * `/discover`: hero search, category tiles, then only "For you" (the viewer's
- * recommended opportunities of every type, ranked on the server, each with why)
- * and "Latest opportunities" (the newest of every kind). Choosing a category,
- * place or sort swaps those for real, queryable sections (services, a row per
- * kind of opportunity — together every type — products, events).
+ * `/discover`: hero search, category tiles, then only one row of "For you" (the
+ * viewer's recommended opportunities of every type, ranked on the server, each
+ * with why) and one of "Latest opportunities" (the newest of every kind), each
+ * with its own "View all". Choosing a category, place or sort swaps those for
+ * real, queryable sections (services, a row per kind of opportunity — together
+ * every type — products, events).
  * The URL carries the filters (`?cat=jobs,events&loc=Accra&sort=closing`), so a
  * view can be shared and the back button works. A section with nothing to show
  * is not rendered.
@@ -61,7 +63,11 @@ export function DiscoverView() {
     [categories, location, sort, router, pathname],
   );
 
-  const toggle = (key: DiscoverCategoryKey) => update({ cat: categories.includes(key) ? categories.filter((k) => k !== key) : [...categories, key] });
+  // Choosing a category leaves Latest's "View all".
+  const toggle = (key: DiscoverCategoryKey) => {
+    const rest = categories.filter((k) => k !== 'latest');
+    update({ cat: rest.includes(key) ? rest.filter((k) => k !== key) : [...rest, key] });
+  };
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -73,20 +79,23 @@ export function DiscoverView() {
     router.push(`/search?q=${encodeURIComponent(q)}`);
   };
 
-  const filtered = categories.length > 0;
+  // Latest is a view, not a filter. Latest cannot filter by place or sort by deadline, so either one leaves it for the plain sections.
+  const filtered = categories.some((k) => k !== 'latest');
+  const unrefined = !filtered && !location && sort === 'newest';
+  const latestView = categories.includes('latest') && !location && sort === 'newest';
   const shown = filtered ? EXPANDED_LIMIT : OVERVIEW_SHOWN;
-  // The untouched page is "For you" and Latest only; any refinement shows the plain sections.
-  const overview = !filtered && !location && sort === 'newest';
+  // The untouched page is one row of "For you" and one of Latest; any refinement shows the plain sections.
+  const overview = unrefined && !latestView;
   // "For you" = recommended opportunities. The recommender cannot filter by place or sort by deadline,
   // so the row shows only on the unfiltered page or on its own "View all".
-  const showForYou = !location && sort === 'newest' && (!filtered || categories.includes('forYou'));
+  const showForYou = !latestView && !location && sort === 'newest' && (!filtered || categories.includes('forYou'));
   const forYou = useRecommendedOpportunities(shown, showForYou);
   const forYouShown = useMemo(() => forYou.slice(0, shown), [forYou, shown]);
   const forYouIds = useMemo(() => new Set(forYouShown.map((o) => o.id)), [forYouShown]);
-  const mix = useLatestMix(LATEST_FETCH, overview);
-  const mixShown = useMemo(() => withoutRepeats(mix, forYouIds, OVERVIEW_SHOWN).slice(0, LATEST_SHOWN), [mix, forYouIds]);
+  const mix = useLatestMix(LATEST_FETCH, overview || latestView);
+  const mixShown = useMemo(() => (latestView ? mix.slice(0, EXPANDED_LIMIT) : withoutRepeats(mix, forYouIds, OVERVIEW_SHOWN).slice(0, OVERVIEW_SHOWN)), [latestView, mix, forYouIds]);
   // Products and services have no place to filter on, so a location filter leaves them out.
-  const visible = overview ? [] : DISCOVER_SECTION_ORDER.filter((k) => (!filtered || categories.includes(k)) && !(location && (k === 'services' || k === 'products')));
+  const visible = unrefined ? [] : DISCOVER_SECTION_ORDER.filter((k) => (!filtered || categories.includes(k)) && !(location && (k === 'services' || k === 'products')));
 
   const renderSection = (k: DiscoverCategoryKey) => {
     const common = { limit: shown, shown, expanded: filtered, onViewAll: () => update({ cat: [k] }) };
@@ -150,7 +159,7 @@ export function DiscoverView() {
           </div>
           <div className="min-w-0 space-y-5 lg:col-start-1 lg:row-start-1" data-testid="discover-sections" aria-label={tRefine('title')}>
             {showForYou && <RecommendedOpportunitiesSection items={forYouShown} expanded={filtered} onViewAll={() => update({ cat: ['forYou'] })} />}
-            {overview && <LatestSection entries={mixShown} />}
+            {(overview || latestView) && <LatestSection entries={mixShown} expanded={latestView} onViewAll={mix.length > SMALLEST_ROW ? () => update({ cat: ['latest'] }) : undefined} />}
             {visible.map((k, i) => (
               <div key={`${k}-${shown}-${location}-${sort}`} className="empty:hidden">{i < EAGER_SECTIONS ? renderSection(k) : <LazyMount root={scrollEl} minHeight={120}>{renderSection(k)}</LazyMount>}</div>
             ))}

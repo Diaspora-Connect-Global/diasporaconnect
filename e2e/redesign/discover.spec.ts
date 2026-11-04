@@ -18,15 +18,19 @@ async function expectNoOtherRows(page: Page) {
     await expect(page.getByTestId('discover-community-posts')).toHaveCount(0);
 }
 
-test('the untouched page lists Latest and nothing else, with honest labels and no footer', async () => {
-    const { page } = await open(browser, '/discover');
+const ALL_LATEST = ['IT Support Specialist', 'Legal Consultation', 'Project Manager', 'Agriculture Project', 'Affordable housing build'];
+const latestCards = (page: Page) => page.getByTestId('discover-section-latest').locator('[data-testid^="discover-latest-"]:visible');
+
+test('the untouched page is one row of Latest and nothing else, with honest labels and no footer', async () => {
+    const { page } = await open(browser, '/discover', {}, { width: 1280, height: 900 });
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Opportunities, services and trusted people', { timeout: 90_000 });
     const latest = page.getByTestId('discover-section-latest');
     await expect(latest.getByRole('heading', { name: 'Latest opportunities' })).toBeVisible();
-    // Every listing is in it once, and not cut to one row (text matchers also match hidden nodes, so check :visible).
-    for (const name of ['Affordable housing build', 'Legal Consultation', 'Agriculture Project', 'IT Support Specialist', 'Project Manager']) {
-        await expect(page.locator(`:text-is("${name}"):visible`)).toHaveCount(1);
-    }
+    // The newest three, each once; the rest wait behind "View all" (text matchers also match hidden nodes, so check :visible).
+    await expect(latestCards(page)).toHaveCount(3);
+    for (const name of ALL_LATEST.slice(0, 3)) await expect(page.locator(`:text-is("${name}"):visible`)).toHaveCount(1);
+    for (const name of ALL_LATEST.slice(3)) await expect(page.locator(`:text-is("${name}"):visible`)).toHaveCount(0);
+    await expect(latest.getByRole('button', { name: 'View all' })).toBeVisible();
     await expectNoOtherRows(page);
     // No rating data exists, so nothing claims "Top-rated"; no percentages or fake counts.
     await expect(page.getByText(/Top-rated|% match|views/i)).toHaveCount(0);
@@ -79,18 +83,45 @@ test('job cards say who is hiring, the commitment and the pay (API sends integer
     await page.context().close();
 });
 
-for (const width of [360, 1280, 1536]) {
-    test(`at ${width}px Latest shows every listing, and no other row is back`, async () => {
+for (const [width, cards] of [[360, 4], [1280, 3], [1536, 4]]) {
+    test(`at ${width}px Latest stops at ${cards} cards, and no other row is back`, async () => {
         const { page } = await open(browser, '/discover', {}, { width, height: 900 });
-        const latest = page.getByTestId('discover-section-latest');
-        await expect(latest.getByText('IT Support Specialist')).toBeVisible({ timeout: 90_000 });
-        for (const name of ['Affordable housing build', 'Legal Consultation', 'Agriculture Project', 'IT Support Specialist', 'Project Manager']) {
-            await expect(latest.locator(`:text-is("${name}"):visible`)).toHaveCount(1);
-        }
+        await expect(page.getByTestId('discover-section-latest').getByText('IT Support Specialist')).toBeVisible({ timeout: 90_000 });
+        await expect(latestCards(page)).toHaveCount(cards);
         await expectNoOtherRows(page);
         await page.context().close();
     });
 }
+
+test('"View all" on Latest lists every listing on its own; Clear all or a tile leaves it', async () => {
+    const { page } = await open(browser, '/discover', FOR_YOU, { width: 1280, height: 900 });
+    const latest = page.getByTestId('discover-section-latest');
+    await expect(page.getByTestId('discover-section-forYou')).toBeVisible({ timeout: 90_000 });
+    await latest.getByRole('button', { name: 'View all' }).click();
+    await expect(page).toHaveURL(/cat=latest/);
+    for (const name of ALL_LATEST) await expect(latest.locator(`:text-is("${name}"):visible`)).toHaveCount(1);
+    await expect(latest.getByRole('button', { name: 'View all' })).toHaveCount(0);
+    await expect(page.getByTestId('discover-section-forYou')).toHaveCount(0);
+    await expectNoOtherRows(page);
+    await page.getByRole('button', { name: 'Clear all' }).click();
+    await expect(page).not.toHaveURL(/cat=/);
+    await expect(latestCards(page)).toHaveCount(3);
+    await expect(page.getByTestId('discover-section-forYou')).toBeVisible();
+    await latest.getByRole('button', { name: 'View all' }).click();
+    await expect(page).toHaveURL(/cat=latest/);
+    await page.getByRole('button', { name: 'Real estate' }).click();
+    await expect(page).toHaveURL(/cat=realEstate$/);
+    await expect(page.getByTestId('discover-section-realEstate')).toBeVisible();
+    await expect(latest).toHaveCount(0);
+    await page.context().close();
+});
+
+test('a sort or place on Latest\'s "View all" shows the plain sections, never an empty page', async () => {
+    const { page } = await open(browser, '/discover?cat=latest&sort=closing', MANY);
+    await expect(page.getByTestId('discover-section-jobs')).toBeVisible({ timeout: 90_000 });
+    await expect(page.getByTestId('discover-section-latest')).toHaveCount(0);
+    await page.context().close();
+});
 
 test('on a phone the Refine panel is closed until tapped, and shows how many filters are on', async () => {
     const { page } = await open(browser, '/discover?cat=jobs&sort=closing', {}, { width: 360, height: 800 });
@@ -252,11 +283,13 @@ test('with few listings, all of them recommended, Latest repeats them rather tha
     await expect(page.getByTestId('discover-section-forYou').getByText('Chevening scholarship')).toBeVisible({ timeout: 90_000 });
     const latest = page.getByTestId('discover-section-latest');
     for (const name of ['Job number 2', 'Chevening scholarship']) await expect(latest.getByText(name)).toBeVisible();
+    // Nothing more to see, so nothing offers more.
+    await expect(latest.getByRole('button', { name: 'View all' })).toHaveCount(0);
     await page.context().close();
 });
 
-test('Latest lists every kind of opportunity, so a scholarship and a volunteer role are on the page', async () => {
-    const { page } = await open(browser, '/discover', EVERY_TYPE, { width: 1280, height: 900 });
+test('Latest\'s "View all" lists every kind of opportunity, so a scholarship and a volunteer role can be reached', async () => {
+    const { page } = await open(browser, '/discover?cat=latest', EVERY_TYPE, { width: 1280, height: 900 });
     const latest = page.getByTestId('discover-section-latest');
     await expect(latest.getByText('Masters scholarship', { exact: true })).toBeVisible({ timeout: 90_000 });
     for (const name of ['Accountant in Accra', 'Leadership fellowship', 'Small business grant', 'Founders programme', 'Weekend tutoring volunteers', 'Cocoa farm investment']) {
