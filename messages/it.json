@@ -2053,6 +2053,10 @@
     "postDrafts": {
       "title": "Post non pubblicati sul tuo dispositivo",
       "body": "Quando scrivi un post e non lo pubblichi subito, lo conserviamo come bozza nel tuo browser su questo dispositivo, così puoi finirlo più tardi, insieme a eventuali foto o file allegati. Una bozza non ci viene inviata finché non la pubblichi. Le bozze di ogni account sono conservate separatamente. Una bozza viene eliminata quando la pubblichi o la scarti, quando esci o automaticamente dopo 30 giorni (14 giorni nelle console di amministrazione di community e associazioni). Chiunque possa usare questo browser potrebbe leggere ciò che vi è salvato, quindi esci quando usi un computer condiviso."
+    },
+    "applications": {
+      "title": "Quando ti candidi a un’opportunità",
+      "body": "Quando ti candidi a un’opportunità su DiaspoPlug, la tua candidatura viene inviata a chi l’ha pubblicata, che può essere un’organizzazione o un singolo membro. Comprende il tuo nome e i tuoi dati di contatto, la lettera di presentazione e le risposte, gli eventuali link che aggiungi e il CV o i documenti che alleghi."
     }
   },
   "friends": {

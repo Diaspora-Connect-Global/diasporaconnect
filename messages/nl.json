@@ -2053,6 +2053,10 @@
     "postDrafts": {
       "title": "Onvoltooide berichten op je apparaat",
       "body": "Als je een bericht schrijft en het niet meteen plaatst, bewaren we het als concept in je browser op dit apparaat, zodat je het later kunt afmaken, inclusief eventuele foto's of bestanden die je hebt toegevoegd. Een concept wordt pas naar ons verstuurd als je het plaatst. De concepten van elk account worden apart bewaard. Een concept wordt verwijderd als je het plaatst of weggooit, als je uitlogt of automatisch na 30 dagen (14 dagen in de beheerconsoles voor gemeenschappen en verenigingen). Iedereen die deze browser kan gebruiken, kan lezen wat erin is opgeslagen, dus log uit op een gedeelde computer."
+    },
+    "applications": {
+      "title": "Wanneer je reageert op een kans",
+      "body": "Wanneer je op DiaspoPlug reageert op een kans, gaat je sollicitatie naar degene die de kans heeft geplaatst; dat kan een organisatie of een individueel lid zijn. Je sollicitatie bevat je naam en contactgegevens, je motivatiebrief en antwoorden, alle links die je toevoegt en het cv of de documenten die je bijvoegt."
     }
   },
   "friends": {

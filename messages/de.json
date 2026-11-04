@@ -2053,6 +2053,10 @@
     "postDrafts": {
       "title": "Unveröffentlichte Beiträge auf deinem Gerät",
       "body": "Wenn du einen Beitrag schreibst und ihn nicht sofort veröffentlichst, speichern wir ihn als Entwurf in deinem Browser auf diesem Gerät, damit du ihn später fertigstellen kannst – einschließlich angehängter Fotos oder Dateien. Ein Entwurf wird erst an uns gesendet, wenn du ihn veröffentlichst. Die Entwürfe jedes Kontos werden getrennt gespeichert. Ein Entwurf wird gelöscht, wenn du ihn veröffentlichst oder verwirfst, wenn du dich abmeldest oder automatisch nach 30 Tagen (in den Admin-Konsolen für Communitys und Vereine nach 14 Tagen). Jede Person, die diesen Browser benutzen kann, könnte lesen, was darin gespeichert ist – melde dich daher an gemeinsam genutzten Computern ab."
+    },
+    "applications": {
+      "title": "Wenn du dich auf eine Gelegenheit bewirbst",
+      "body": "Wenn du dich auf DiaspoPlug auf eine Gelegenheit bewirbst, geht deine Bewerbung an die Person oder Organisation, die sie veröffentlicht hat; das kann eine Organisation oder ein einzelnes Mitglied sein. Sie enthält deinen Namen und deine Kontaktdaten, dein Anschreiben und deine Antworten, alle Links, die du hinzufügst, sowie einen Lebenslauf oder Dokumente, die du anhängst."
     }
   },
   "friends": {
