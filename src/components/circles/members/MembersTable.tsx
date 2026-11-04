@@ -29,8 +29,12 @@ const HEAD_CELL =
  * would restate a hierarchy the Role column is deliberately understated about,
  * and the columns are not click-to-sort for the same reason.
  *
+ * ── PHONES DROP THE JOINED COLUMN ──────────────────────────────────────────
+ * Below `sm` the join date moves under the name, so the message button is never
+ * pushed off-screen behind a sideways scroll.
+ *
  * ── SCROLLS INSIDE ITSELF ───────────────────────────────────────────────────
- * The `min-w` on the table keeps four columns legible on a phone, and the
+ * From `sm` up, the `min-w` on the table keeps four columns legible and the
  * wrapper's `overflow-x-auto` keeps that width from pushing the page body
  * sideways. Widen a column and the table scrolls; it never widens the page.
  *
@@ -73,8 +77,8 @@ export function MembersTable({
   // `relative`: the sr-only header span is absolutely positioned; without a positioned
   // ancestor it escapes this scroller and widens the whole page at 360 px.
   return (
-    <div className="relative overflow-x-auto rounded-xl border border-border-subtle">
-      <table className="w-full min-w-[520px] border-collapse text-left">
+    <div className="relative overflow-hidden rounded-xl border border-border-subtle sm:overflow-x-auto">
+      <table className="w-full border-collapse text-left sm:min-w-[520px]">
         <thead className="border-b border-border-subtle bg-surface-subtle">
           <tr>
             <th scope="col" className={HEAD_CELL}>
@@ -83,7 +87,7 @@ export function MembersTable({
             <th scope="col" className={HEAD_CELL}>
               {t('columns.role')}
             </th>
-            <th scope="col" className={HEAD_CELL}>
+            <th scope="col" className={`${HEAD_CELL} max-sm:hidden`}>
               {t('columns.joined')}
             </th>
             {/*

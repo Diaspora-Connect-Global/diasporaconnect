@@ -2,9 +2,12 @@
 
 import {
   ChevronLeft,
+  ClipboardList,
   MessageSquare,
-  MoreHorizontal,
   Plus,
+  Scale,
+  Settings,
+  Ticket,
   Trophy,
   Users,
 } from 'lucide-react';
@@ -27,6 +30,7 @@ interface CircleHomeHeaderProps {
   name: string;
   memberCount: number;
   avatarUrl?: string | null;
+  tagline?: string | null;
 }
 
 /**
@@ -61,11 +65,28 @@ export function CircleHomeHeader({
   name,
   memberCount,
   avatarUrl,
+  tagline,
 }: CircleHomeHeaderProps) {
   const t = useTranslations('circles');
 
   const tabClass =
-    'flex flex-1 items-center justify-center gap-2 border-b-2 pb-2 pt-1 label-medium transition-colors [&_svg]:size-4 [&_svg]:shrink-0';
+    'flex shrink-0 items-center justify-center gap-2 whitespace-nowrap border-b-2 px-3 pb-2 pt-1 label-medium transition-colors [&_svg]:size-4 [&_svg]:shrink-0';
+  const linkTabClass = cn(
+    tabClass,
+    'border-transparent text-text-secondary hover:bg-surface-subtle hover:text-text-primary',
+    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand',
+  );
+  // Every screen of the circle, one tap from its home. They used to sit behind
+  // a "more" menu, which hid Leaderboard / Decisions / Rules / Plan / Settings.
+  // Phones swipe the strip; from `sm` it wraps, since a mouse cannot swipe it.
+  const sections = [
+    { href: `/circles/${circleId}/members`, label: t('home.tabMembers'), icon: Users },
+    { href: `/circles/${circleId}/leaderboard`, label: t('leaderboard.title'), icon: Trophy },
+    { href: `/circles/${circleId}/history`, label: t('history.title'), icon: ClipboardList },
+    { href: `/circles/${circleId}/governance`, label: t('governance.title'), icon: Scale },
+    { href: `/circles/${circleId}/plan`, label: t('plan.title'), icon: Ticket },
+    { href: `/circles/${circleId}/settings`, label: t('settings.title'), icon: Settings },
+  ];
 
   return (
     <header className="shrink-0 border-b border-border-subtle bg-surface-default px-3 pt-2 sm:px-4">
@@ -80,7 +101,7 @@ export function CircleHomeHeader({
           <ChevronLeft aria-hidden="true" className="size-5" />
         </Link>
 
-        <Avatar className="size-9 shrink-0">
+        <Avatar className="size-11 shrink-0">
           <AvatarImage src={toCdnUrl(avatarUrl) || undefined} alt="" />
           <AvatarFallback className="label-small">
             {name.charAt(0).toUpperCase()}
@@ -88,9 +109,10 @@ export function CircleHomeHeader({
         </Avatar>
 
         <div className="min-w-0 flex-1">
-          <h1 className="label-large truncate text-text-primary">{name}</h1>
-          <p className="caption-small text-text-secondary">
+          <h1 className="label-large line-clamp-2 break-words text-text-primary">{name}</h1>
+          <p className="caption-small truncate text-text-secondary">
             {t('common.memberCount', { count: memberCount })}
+            {tagline ? ` · ${tagline}` : ''}
           </p>
         </div>
 
@@ -134,65 +156,23 @@ export function CircleHomeHeader({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <ButtonType3
-              aria-label={t('common.moreOptions')}
-              className="shrink-0 p-1.5 text-text-primary hover:bg-surface-subtle"
-            >
-              <MoreHorizontal aria-hidden="true" className="size-5" />
-            </ButtonType3>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="min-w-[180px] bg-surface-default">
-            <DropdownMenuItem asChild className="body-medium text-text-primary">
-              <Link href={`/circles/${circleId}/members`}>{t('members.title')}</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild className="body-medium text-text-primary">
-              <Link href={`/circles/${circleId}/leaderboard`}>
-                <Trophy aria-hidden="true" className="size-4" />
-                {t('leaderboard.title')}
-              </Link>
-            </DropdownMenuItem>
-            {/* The four screens added after the first cut. Without these the
-                routes exist and compile but are unreachable — there is no other
-                navigation into them anywhere in the app. */}
-            <DropdownMenuItem asChild className="body-medium text-text-primary">
-              <Link href={`/circles/${circleId}/history`}>{t('history.title')}</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild className="body-medium text-text-primary">
-              <Link href={`/circles/${circleId}/governance`}>{t('governance.title')}</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild className="body-medium text-text-primary">
-              <Link href={`/circles/${circleId}/plan`}>{t('plan.title')}</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild className="body-medium text-text-primary">
-              <Link href={`/circles/${circleId}/settings`}>{t('settings.title')}</Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
 
-      <nav aria-label={t('common.circle')} className="mt-2 flex items-stretch">
-        <span
-          aria-current="page"
-          className={cn(tabClass, 'border-surface-brand text-text-brand')}
-        >
+      <nav
+        aria-label={t('common.circle')}
+        className="-mx-3 mt-2 flex items-stretch overflow-x-auto px-3 scrollbar-hide sm:-mx-4 sm:flex-wrap sm:overflow-x-visible sm:px-4"
+      >
+        <span aria-current="page" className={cn(tabClass, 'border-surface-brand text-text-brand')}>
           <MessageSquare aria-hidden="true" />
           {t('home.tabChat')}
         </span>
 
-        <Link
-          href={`/circles/${circleId}/members`}
-          className={cn(
-            tabClass,
-            'border-transparent text-text-secondary hover:bg-surface-subtle hover:text-text-primary',
-            'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand',
-          )}
-        >
-          <Users aria-hidden="true" />
-          {t('home.tabMembers')}
-        </Link>
+        {sections.map(({ href, label, icon: Icon }) => (
+          <Link key={href} href={href} className={linkTabClass}>
+            <Icon aria-hidden="true" />
+            {label}
+          </Link>
+        ))}
       </nav>
     </header>
   );

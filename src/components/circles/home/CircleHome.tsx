@@ -369,10 +369,19 @@ export function CircleHome({ circleId }: CircleHomeProps) {
 
   // ── Scroll ───────────────────────────────────────────────────────────────
   const endRef = useRef<HTMLDivElement>(null);
+  // A chat reads oldest to newest and follows its latest line; with chat off the
+  // same entries are a feed of what the circle is doing, so the newest is first.
+  const displayTimeline = useMemo(
+    () => (conversationId ? timeline : [...timeline].reverse()),
+    [timeline, conversationId],
+  );
   const hasScrolledRef = useRef(false);
 
   useEffect(() => {
     if (timeline.length === 0) return;
+    // With no chat there is no conversation to follow to its latest line: the
+    // screen is a feed of what the circle is doing, so it opens at the top.
+    if (!conversationId) return;
     // The first paint jumps; later arrivals animate. Smooth-scrolling a chat
     // the instant it opens looks like the page is still loading.
     endRef.current?.scrollIntoView({
@@ -380,7 +389,7 @@ export function CircleHome({ circleId }: CircleHomeProps) {
       block: 'end',
     });
     hasScrolledRef.current = true;
-  }, [timeline]);
+  }, [timeline, conversationId]);
 
   // ── Render ───────────────────────────────────────────────────────────────
   // Six independent queries feed the first frame — circle, membership, the chat
@@ -485,6 +494,7 @@ export function CircleHome({ circleId }: CircleHomeProps) {
           name={circle.name}
           memberCount={circle.memberCount}
           avatarUrl={circle.avatarUrl}
+          tagline={circle.tagline}
         />
 
         {/*
@@ -543,7 +553,7 @@ export function CircleHome({ circleId }: CircleHomeProps) {
               />
             )
           ) : (
-            timeline.map((entry) => {
+            displayTimeline.map((entry) => {
               // Date separators are driven by the whole timeline, not only by
               // messages: a motion opened at 9am on a new day has to sit under
               // that day's heading like anything else that happened.

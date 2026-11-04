@@ -64,7 +64,7 @@ export function MemberTableRow({
 
   return (
     <tr className="transition-colors hover:bg-surface-subtle">
-      <td className="px-4 py-3">
+      <td className="max-w-0 w-full px-4 py-3 sm:w-auto sm:max-w-none">
         <Link
           href={`/${member.userId}`}
           className="flex min-w-0 items-center gap-3 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand"
@@ -75,11 +75,18 @@ export function MemberTableRow({
               { id: member.userId, name: displayName, avatarUrl: user?.avatarUrl },
             ]}
           />
-          <span className="label-medium truncate text-text-primary">{name}</span>
+          <span className="min-w-0">
+            <span className="label-medium block truncate text-text-primary">{name}</span>
+            {joined && (
+              <span className="caption-small block text-text-secondary sm:hidden">
+                {t('columns.joined')} {joined}
+              </span>
+            )}
+          </span>
         </Link>
       </td>
 
-      <td className="px-4 py-3 whitespace-nowrap">
+      <td className="px-2 py-3 whitespace-nowrap sm:px-4">
         {member.role === 'LEAD' ? (
           <StatusPill variant="success" label={t('lead')} />
         ) : (
@@ -87,11 +94,11 @@ export function MemberTableRow({
         )}
       </td>
 
-      <td className="body-small px-4 py-3 whitespace-nowrap text-text-secondary">
+      <td className="body-small px-4 py-3 whitespace-nowrap text-text-secondary max-sm:hidden">
         {joined || '—'}
       </td>
 
-      <td className="px-4 py-3 text-right">
+      <td className="px-2 py-3 text-right sm:px-4">
         {!isCurrentUser && onSendMessage && (
           <button
             type="button"

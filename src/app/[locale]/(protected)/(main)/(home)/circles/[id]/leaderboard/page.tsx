@@ -87,6 +87,7 @@ type LeaderboardMode = 'RANKED' | 'COLLECTIVE';
  */
 export default function CircleLeaderboardPage() {
   const t = useTranslations('circles');
+  const tGlobal = useTranslations('common');
   const router = useRouter();
   const params = useParams();
 
@@ -139,14 +140,17 @@ export default function CircleLeaderboardPage() {
   ];
 
   const header = (
-    <button
-      type="button"
-      onClick={() => router.push(`/circles/${circleId}`)}
-      className="mb-4 inline-flex items-center gap-2 text-text-secondary transition-colors hover:text-text-primary"
-    >
-      <ArrowLeft className="size-4" />
-      <span className="label-medium">{t('leaderboard.title')}</span>
-    </button>
+    <div className="mb-4 flex shrink-0 items-center gap-2">
+      <button
+        type="button"
+        onClick={() => router.push(`/circles/${circleId}`)}
+        aria-label={tGlobal('previousPage')}
+        className="cursor-pointer rounded-full p-1.5 text-text-primary transition-colors hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand"
+      >
+        <ArrowLeft className="size-5" aria-hidden="true" />
+      </button>
+      <h1 className="label-large text-text-primary">{t('leaderboard.title')}</h1>
+    </div>
   );
 
   if (loading && !leaderboard) {

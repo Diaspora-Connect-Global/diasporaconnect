@@ -24,6 +24,11 @@ export interface DecisionsTableProps {
  * fragment — and that column is the one nobody can afford to hear out of
  * context.
  *
+ * ── PHONES GET STACKED ROWS ─────────────────────────────────────────────────
+ * Below `sm` each decision is a small block (motion, outcome, date, rules) so
+ * nothing sits off-screen behind a sideways scroll; from `sm` up it is the
+ * table described below.
+ *
  * ── SCROLLS IN ITS OWN CONTAINER ────────────────────────────────────────────
  * `min-w-[44rem]` keeps four legible columns; the wrapper scrolls horizontally
  * so a narrow viewport moves the TABLE rather than the page. Cramming the
@@ -39,10 +44,10 @@ export function DecisionsTable({ circleId, motions, usersById }: DecisionsTableP
   const t = useTranslations('circles.history.table');
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[44rem] border-collapse text-left">
+    <div className="sm:overflow-x-auto">
+      <table className="block w-full border-collapse text-left sm:table sm:min-w-[44rem]">
         <caption className="sr-only">{t('caption')}</caption>
-        <thead>
+        <thead className="max-sm:sr-only">
           <tr className="border-b border-border-subtle">
             <th scope="col" className="caption-small px-3 pb-2 font-normal text-text-secondary">
               {t('motion')}
@@ -58,7 +63,7 @@ export function DecisionsTable({ circleId, motions, usersById }: DecisionsTableP
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="block sm:table-row-group">
           {motions.map((motion) => (
             <DecisionRow
               key={motion.id}

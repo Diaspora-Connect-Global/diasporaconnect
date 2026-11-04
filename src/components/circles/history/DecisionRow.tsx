@@ -34,6 +34,7 @@ export interface DecisionRowProps {
  */
 export function DecisionRow({ circleId, motion, usersById }: DecisionRowProps) {
   const t = useTranslations('circles.history');
+  const tTable = useTranslations('circles.history.table');
   const tCommon = useTranslations('circles.common');
   const tMotion = useTranslations('circles.motion');
   const tKind = useTranslations('circles.governance.motionKind');
@@ -87,7 +88,7 @@ export function DecisionRow({ circleId, motion, usersById }: DecisionRowProps) {
   })();
 
   return (
-    <tr className="border-b border-border-subtle transition-colors last:border-b-0 hover:bg-surface-subtle">
+    <tr className="block border-b border-border-subtle py-2 transition-colors last:border-b-0 hover:bg-surface-subtle sm:table-row sm:py-0">
       {/*
         A row HEADER, not a plain cell: the motion is what every other cell in
         the row is about, so a screen reader should announce "Move the Saturday
@@ -95,7 +96,7 @@ export function DecisionRow({ circleId, motion, usersById }: DecisionRowProps) {
         threshold with nothing attached to it. `font-normal` because `<th>`
         bolds by default and the proposer line underneath is not a heading.
       */}
-      <th scope="row" className="px-3 py-3 text-left align-top font-normal">
+      <th scope="row" className="block px-3 py-1 text-left align-top font-normal sm:table-cell sm:py-3">
         <Link
           href={`/circles/${circleId}/motions/${motion.id}`}
           className="label-small rounded-sm text-text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand"
@@ -105,15 +106,17 @@ export function DecisionRow({ circleId, motion, usersById }: DecisionRowProps) {
         <p className="caption-small mt-0.5 text-text-secondary">{proposer}</p>
       </th>
 
-      <td className="px-3 py-3 align-top">
+      <td className="block px-3 py-1 align-top sm:table-cell sm:py-3">
         <OutcomePill status={motion.status} />
       </td>
 
-      <td className="body-small px-3 py-3 align-top whitespace-nowrap text-text-secondary">
+      <td className="body-small block px-3 py-1 align-top text-text-secondary sm:table-cell sm:py-3 sm:whitespace-nowrap">
+        <span className="caption-small mr-2 sm:hidden">{tTable('decided')}</span>
         {decided}
       </td>
 
-      <td className="px-3 py-3 align-top">
+      <td className="block px-3 py-1 align-top sm:table-cell sm:py-3">
+        <span className="caption-small mb-0.5 block text-text-secondary sm:hidden">{tTable('rules')}</span>
         <RulesAtTheTime motion={motion} />
       </td>
     </tr>

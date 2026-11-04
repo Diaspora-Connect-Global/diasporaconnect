@@ -38,7 +38,7 @@ export function MembersToolbar({
   const t = useTranslations('circles.members');
 
   return (
-    <div className="flex w-full items-center gap-3 sm:w-auto">
+    <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
       <SearchInput
         id="circle-members-search"
         value={query}
@@ -55,7 +55,7 @@ export function MembersToolbar({
         onClick={onToggleInvite}
         aria-expanded={inviteOpen}
         aria-controls={invitePanelId}
-        className="label-small flex shrink-0 cursor-pointer items-center gap-2 rounded-full bg-surface-brand px-4 py-2.5 text-text-white transition-colors hover:bg-border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand"
+        className="label-small flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full bg-surface-brand px-4 py-2.5 text-text-white transition-colors hover:bg-border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand"
       >
         <UserPlus className="size-4 shrink-0" aria-hidden="true" />
         <span className="whitespace-nowrap">{t('inviteToCircle')}</span>
