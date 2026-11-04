@@ -4943,7 +4943,7 @@
     "sections": {
       "latest": {
         "title": "Dernières opportunités",
-        "subtitle": "Nouveaux biens immobiliers, services, investissements et emplois sur DiaspoPlug."
+        "subtitle": "Les dernières opportunités de tous types et les services mis en avant par la plateforme."
       },
       "jobs": {
         "title": "Derniers emplois",
@@ -4984,10 +4984,6 @@
       "events": {
         "title": "Événements à venir",
         "subtitle": "Événements qui n’ont pas encore eu lieu."
-      },
-      "community": {
-        "title": "De la communauté",
-        "subtitle": "Voyez de quoi parlent les membres de vos communautés."
       },
       "forYou": {
         "title": "Pour vous",

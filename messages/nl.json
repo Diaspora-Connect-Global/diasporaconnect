@@ -4943,7 +4943,7 @@
     "sections": {
       "latest": {
         "title": "Nieuwste kansen",
-        "subtitle": "Nieuw vastgoed, diensten, investeringen en banen op DiaspoPlug."
+        "subtitle": "De nieuwste kansen van elke soort en de diensten die het platform in de kijker zet."
       },
       "jobs": {
         "title": "Nieuwste banen",
@@ -4984,10 +4984,6 @@
       "events": {
         "title": "Aankomende evenementen",
         "subtitle": "Evenementen die nog moeten plaatsvinden."
-      },
-      "community": {
-        "title": "Uit de community",
-        "subtitle": "Zie waar mensen in je communities over praten."
       },
       "forYou": {
         "title": "Voor jou",
