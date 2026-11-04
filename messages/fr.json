@@ -2564,7 +2564,6 @@
     "cartEmpty": "Votre panier est vide",
     "cartEmptySubtitle": "Ajoutez des articles pour commencer",
     "numberOfItems": "Nombre d'articles : {count}",
-    "oneTimeFee": "FRAIS UNIQUES",
     "total": "Total",
     "proceedToCheckout": "Procéder au paiement",
     "checkout": "Paiement",
@@ -2596,9 +2595,7 @@
     "payAmount": "Payer GH₵ {amount}",
     "subtotalAmount": "Montant du sous-total",
     "subtotal": "Sous-total",
-    "shippingFee": "Frais de livraison",
     "discount": "Réduction",
-    "sameAsShipping": "Identique à l'adresse de livraison",
     "orderSuccess": "Votre paiement de commande a réussi",
     "visaEnding": "Visa se terminant par {digits}",
     "doneOrder": "Terminer la commande",
@@ -7532,6 +7529,18 @@
     "orderSummary": "Récapitulatif de la commande",
     "serviceFrom": "Prix de départ",
     "checkoutHeading": "Paiement",
+    "checkoutAddressHint": "Saisissez votre nom, votre adresse, votre ville, votre pays et votre numéro de téléphone pour continuer.",
+    "checkoutPaidHeading": "Cette partie de votre commande est payée",
+    "checkoutPaidWalletLink": "Voir vos paiements dans votre portefeuille",
+    "checkoutFailure": {
+      "mixedCurrency": "Votre panier contient des articles dans des devises différentes. Veuillez payer chaque devise séparément.",
+      "orderRefused": "Nous n'avons pas pu passer cette commande. Les articles encore affichés ici ne vous ont pas été facturés. Veuillez réessayer.",
+      "paymentCancelled": "Vous avez annulé le paiement. Les articles encore affichés ici ne vous ont pas été facturés.",
+      "paymentRefused": "Ce paiement n'a pas abouti. Les articles encore affichés ici ne vous ont pas été facturés. Veuillez réessayer.",
+      "paymentUnavailable": "Nous n'avons pas pu lancer le paiement de cette commande. Les articles encore affichés ici ne vous ont pas été facturés. Veuillez réessayer plus tard.",
+      "paymentUnconfirmed": "Nous n'avons pas encore pu confirmer votre paiement. Veuillez ne pas payer à nouveau par un autre moyen. Appuyez sur Payer pour le vérifier de nouveau : aucun second paiement ne vous sera demandé.",
+      "noSavedCard": "Nous n'avons trouvé aucune carte enregistrée sur votre compte, vous n'avez donc pas été facturé. Veuillez choisir un autre moyen de paiement s'il en existe un."
+    },
     "successHeading": "Commande passée"
   }
 }

@@ -6,11 +6,10 @@ import { CheckCircle, ShoppingBag } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { ButtonType2 } from "@/components/custom/button";
 import { formatAmountWithCurrency } from "@/lib/displayCurrency";
+import { cartTotalMinor, lineAmountMinor } from "@/lib/marketplaceCheckout";
+import { toMajorUnits } from "@/types/money";
 import { readableSeller } from "@/components/marketplace/DetailParts";
 import type { CartItem } from "./types";
-
-// Same flat fee Checkout shows; kept so the two screens agree.
-const SHIPPING_FEE = 20;
 
 export function OrderSuccess({
   cart,
@@ -25,16 +24,8 @@ export function OrderSuccess({
   const currency = (cart[0]?.currency ?? "GHS").toUpperCase();
   const formatAmount = (value: number) =>
     formatAmountWithCurrency(value, currency, locale);
-  const subtotal = useMemo(
-    () =>
-      cart.reduce(
-        (sum, item) =>
-          sum + item.price * item.quantity + (item.extrasTotal ?? 0),
-        0
-      ),
-    [cart]
-  );
-  const total = subtotal + SHIPPING_FEE;
+  // The same sum Checkout showed and the orders sent: unit price x quantity.
+  const total = useMemo(() => toMajorUnits(cartTotalMinor(cart)), [cart]);
 
   return (
     <div className="h-app-inner overflow-y-auto scrollbar-hide bg-background">
@@ -48,8 +39,7 @@ export function OrderSuccess({
 
           <ul className="mb-8 space-y-4 text-left">
             {cart.map((item) => {
-              const lineTotal =
-                item.price * item.quantity + (item.extrasTotal ?? 0);
+              const lineTotal = toMajorUnits(lineAmountMinor(item));
               const seller = readableSeller(item.seller);
               return (
                 <li key={item.lineId ?? item.id} className="flex gap-3">
@@ -64,9 +54,6 @@ export function OrderSuccess({
                     <p className="font-medium text-text-primary">{item.name}</p>
                     {seller && <p className="text-sm text-text-secondary">{seller}</p>}
                     {item.quantity > 1 && <p className="text-xs text-muted-foreground">× {item.quantity}</p>}
-                    {item.extrasTotal != null && item.extrasTotal > 0 && (
-                      <p className="mt-1 text-xs text-text-tertiary">Extras — {formatAmount(item.extrasTotal)}</p>
-                    )}
                   </div>
                   <p className="font-bold text-text-primary">{formatAmount(lineTotal)}</p>
                 </li>
@@ -77,11 +64,7 @@ export function OrderSuccess({
           <dl className="mb-8 space-y-2 border-t border-border-subtle pt-6 text-sm">
             <div className="flex justify-between">
               <dt className="text-text-secondary">{t("subtotal")}</dt>
-              <dd className="text-text-primary">{formatAmount(subtotal)}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-text-secondary">{t("shippingFee")}</dt>
-              <dd className="text-text-primary">{formatAmount(SHIPPING_FEE)}</dd>
+              <dd className="text-text-primary">{formatAmount(total)}</dd>
             </div>
             <div className="flex justify-between text-lg font-bold text-text-primary">
               <dt>{t("total")}</dt>

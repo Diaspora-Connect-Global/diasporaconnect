@@ -72,7 +72,8 @@ export function ServiceDetail({
       quantity,
       projectDuration,
       // The listing has ONE price (its base price); there are no tiers to pick.
-      // "basic" is the package id the order mutation has always been sent.
+      // "basic" only tells cart lines apart: it is not a real package id and is
+      // never sent, so the order is priced from base_price.
       selectedPackage: "basic",
       extras: extrasToInclude.length > 0 ? extrasToInclude : undefined,
       extrasTotal: extrasTotalAmount > 0 ? extrasTotalAmount : undefined,

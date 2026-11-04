@@ -6,6 +6,8 @@ import { Minus, Plus, ShoppingBag, ShoppingCart, Trash2, X } from "lucide-react"
 import { useLocale, useTranslations } from "next-intl";
 import { ButtonType2, ButtonType3, ButtonType4Pill } from "@/components/custom/button";
 import { formatAmountWithCurrency } from "@/lib/displayCurrency";
+import { cartTotalMinor } from "@/lib/marketplaceCheckout";
+import { toMajorUnits } from "@/types/money";
 import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 import { readableSeller } from "@/components/marketplace/DetailParts";
 import type { CartItem } from "./types";
@@ -29,15 +31,8 @@ export function ShoppingCartModal({
   const { currency } = useDisplayCurrency();
   const formatAmount = (value: number) =>
     formatAmountWithCurrency(value, currency, locale);
-  const total = useMemo(
-    () =>
-      cart.reduce(
-        (sum, item) =>
-          sum + item.price * item.quantity + (item.extrasTotal ?? 0),
-        0
-      ),
-    [cart]
-  );
+  // The same sum Checkout shows and the orders send.
+  const total = useMemo(() => toMajorUnits(cartTotalMinor(cart)), [cart]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onKeyDown={(e) => e.key === "Escape" && onClose()}>
@@ -142,11 +137,8 @@ export function ShoppingCartModal({
             );
           })}
           <div className="mt-6 text-right">
-            <p className="text-sm text-text-secondary mb-1">
-              {t("oneTimeFee")}: {formatAmount(20)}
-            </p>
-            <p className="text-2xl font-bold mb-4 text-text-primary">
-              {t("total")}: {formatAmount(total + 20)}
+            <p className="text-2xl font-bold mb-4 text-text-primary" data-testid="mp-cart-total">
+              {t("total")}: {formatAmount(total)}
             </p>
             <ButtonType2
               onClick={onCheckout}

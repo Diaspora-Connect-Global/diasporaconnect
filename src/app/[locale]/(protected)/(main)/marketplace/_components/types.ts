@@ -1,3 +1,5 @@
+import type { CheckoutFailure } from "@/lib/marketplaceCheckout";
+
 export type MarketplaceTab = "products" | "services";
 
 export type MarketplaceView =
@@ -78,5 +80,9 @@ export interface PaymentResult {
    * For now this is optional until payment system is wired.
    */
   reference?: string;
+  /** What is paid, also when `success` is false: those lines must leave the cart. */
+  paid?: { item: CartItem; quantity: number }[];
+  /** Why the checkout stopped. Absent when nothing went wrong or the press was ignored. */
+  failure?: CheckoutFailure;
 }
 

@@ -2868,7 +2868,6 @@
     "cartEmpty": "Uw winkelwagen is leeg",
     "cartEmptySubtitle": "Voeg artikelen toe om te beginnen",
     "numberOfItems": "Aantal artikelen: {count}",
-    "oneTimeFee": "EENMALIGE KOSTEN",
     "total": "Totaal",
     "proceedToCheckout": "Doorgaan naar afrekenen",
     "checkout": "Afrekenen",
@@ -2900,9 +2899,7 @@
     "payAmount": "Betaal GH₵ {amount}",
     "subtotalAmount": "Subtotaalbedrag",
     "subtotal": "Subtotaal",
-    "shippingFee": "Verzendkosten",
     "discount": "Korting",
-    "sameAsShipping": "Hetzelfde als verzendadres",
     "orderSuccess": "Uw bestelling is succesvol betaald",
     "visaEnding": "Visa eindigend op {digits}",
     "doneOrder": "Bestelling voltooid",
@@ -7532,6 +7529,18 @@
     "orderSummary": "Besteloverzicht",
     "serviceFrom": "Startprijs",
     "checkoutHeading": "Afrekenen",
+    "checkoutAddressHint": "Vul je naam, adres, plaats, land en telefoonnummer in om verder te gaan.",
+    "checkoutPaidHeading": "Dit deel van je bestelling is betaald",
+    "checkoutPaidWalletLink": "Bekijk je betalingen in je wallet",
+    "checkoutFailure": {
+      "mixedCurrency": "Je winkelwagen bevat artikelen in verschillende valuta. Betaal elke valuta apart.",
+      "orderRefused": "We konden deze bestelling niet plaatsen. De artikelen die hier nog staan, zijn je niet in rekening gebracht. Probeer het opnieuw.",
+      "paymentCancelled": "Je hebt de betaling geannuleerd. De artikelen die hier nog staan, zijn je niet in rekening gebracht.",
+      "paymentRefused": "Deze betaling is niet gelukt. De artikelen die hier nog staan, zijn je niet in rekening gebracht. Probeer het opnieuw.",
+      "paymentUnavailable": "We konden de betaling voor deze bestelling niet starten. De artikelen die hier nog staan, zijn je niet in rekening gebracht. Probeer het later opnieuw.",
+      "paymentUnconfirmed": "We konden je betaling nog niet bevestigen. Betaal niet nog een keer op een andere manier. Druk op Betaal om het opnieuw te controleren: je wordt niet gevraagd om een tweede keer te betalen.",
+      "noSavedCard": "We konden geen opgeslagen kaart op je account vinden, dus er is niets in rekening gebracht. Kies een andere betaalmethode als die wordt aangeboden."
+    },
     "successHeading": "Bestelling geplaatst"
   }
 }

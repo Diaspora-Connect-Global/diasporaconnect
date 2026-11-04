@@ -2564,7 +2564,6 @@
     "cartEmpty": "Ihr Warenkorb ist leer",
     "cartEmptySubtitle": "Fügen Sie Artikel hinzu, um loszulegen",
     "numberOfItems": "Anzahl der Artikel: {count}",
-    "oneTimeFee": "EINMALIGE GEBÜHR",
     "total": "Gesamt",
     "proceedToCheckout": "Zur Kasse gehen",
     "checkout": "Kasse",
@@ -2596,9 +2595,7 @@
     "payAmount": "GH₵ {amount} bezahlen",
     "subtotalAmount": "Zwischensumme",
     "subtotal": "Zwischensumme",
-    "shippingFee": "Versandkosten",
     "discount": "Rabatt",
-    "sameAsShipping": "Wie Lieferadresse",
     "orderSuccess": "Ihre Bestellung wurde erfolgreich bezahlt",
     "visaEnding": "Visa endet auf {digits}",
     "doneOrder": "Bestellung abschließen",
@@ -7532,6 +7529,18 @@
     "orderSummary": "Bestellübersicht",
     "serviceFrom": "Startpreis",
     "checkoutHeading": "Kasse",
+    "checkoutAddressHint": "Geben Sie Ihren Namen, Ihre Adresse, Stadt, Ihr Land und Ihre Telefonnummer ein, um fortzufahren.",
+    "checkoutPaidHeading": "Dieser Teil Ihrer Bestellung ist bezahlt",
+    "checkoutPaidWalletLink": "Ihre Zahlungen in der Wallet ansehen",
+    "checkoutFailure": {
+      "mixedCurrency": "Ihr Warenkorb enthält Artikel in verschiedenen Währungen. Bitte bezahlen Sie jede Währung separat.",
+      "orderRefused": "Wir konnten diese Bestellung nicht aufgeben. Die hier noch aufgeführten Artikel wurden Ihnen nicht berechnet. Bitte versuchen Sie es erneut.",
+      "paymentCancelled": "Sie haben die Zahlung abgebrochen. Die hier noch aufgeführten Artikel wurden Ihnen nicht berechnet.",
+      "paymentRefused": "Diese Zahlung ist nicht durchgegangen. Die hier noch aufgeführten Artikel wurden Ihnen nicht berechnet. Bitte versuchen Sie es erneut.",
+      "paymentUnavailable": "Wir konnten die Zahlung für diese Bestellung nicht starten. Die hier noch aufgeführten Artikel wurden Ihnen nicht berechnet. Bitte versuchen Sie es später erneut.",
+      "paymentUnconfirmed": "Wir konnten Ihre Zahlung noch nicht bestätigen. Bitte zahlen Sie nicht erneut auf anderem Weg. Drücken Sie auf „Bezahlen“, um sie noch einmal zu prüfen: Sie werden nicht zu einer zweiten Zahlung aufgefordert.",
+      "noSavedCard": "Wir konnten in Ihrem Konto keine gespeicherte Karte finden, daher wurde Ihnen nichts berechnet. Bitte wählen Sie eine andere Zahlungsmethode, falls eine angeboten wird."
+    },
     "successHeading": "Bestellung aufgegeben"
   }
 }

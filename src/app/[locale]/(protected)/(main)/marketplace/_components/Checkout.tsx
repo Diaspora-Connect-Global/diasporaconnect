@@ -2,15 +2,23 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, CreditCard, ShoppingBag, Smartphone, CheckCircle2 } from "lucide-react";
+import { AlertCircle, ChevronLeft, CreditCard, ShoppingBag, Smartphone, CheckCircle2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useApolloClient } from "@apollo/client/react";
+import { Link } from "@/i18n/navigation";
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
 import { CountrySelect } from "@/components/custom/input";
 import { formatAmountWithCurrency } from "@/lib/displayCurrency";
 import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 import { CONVERT_CURRENCY } from "@/services/gql/marketplace";
-import { isMobileMoneySupported } from "@/types/money";
+import {
+  cartNeedsShipping,
+  cartTotalMinor,
+  isShippingComplete,
+  lineAmountMinor,
+  type CheckoutFailure,
+} from "@/lib/marketplaceCheckout";
+import { isMobileMoneySupported, toMajorUnits } from "@/types/money";
 import { readableSeller } from "@/components/marketplace/DetailParts";
 import type { CartItem, PaymentMethod, PaymentResult, ShippingAddress } from "./types";
 
@@ -28,8 +36,11 @@ export function Checkout({
   onPay,
   isPaying = false,
   onComplete,
+  paidLines = [],
 }: {
   cart: CartItem[];
+  /** Lines already paid in this checkout, after part of it failed. No longer in `cart`. */
+  paidLines?: CartItem[];
   onBack: () => void;
   onPay: (args: {
     cart: CartItem[];
@@ -65,7 +76,6 @@ export function Checkout({
       setPaymentMethod("credit");
     }
   }, [mobileMoneyAvailable, paymentMethod]);
-  const [sameAsShipping, setSameAsShipping] = useState(true);
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
     name: "",
     address: "",
@@ -73,25 +83,14 @@ export function Checkout({
     country: "",
     phoneNumber: "",
   });
-  const [billingAddress, setBillingAddress] = useState<ShippingAddress>({
-    name: "",
-    address: "",
-    city: "",
-    country: "",
-    phoneNumber: "",
-  });
+  // Service orders take no shipping address: a cart of only services asks for none.
+  const needsShipping = cartNeedsShipping(cart);
+  const missingAddress = needsShipping && !isShippingComplete(shippingAddress);
 
-  const subtotal = useMemo(
-    () =>
-      cart.reduce(
-        (sum, item) =>
-          sum + item.price * item.quantity + (item.extrasTotal ?? 0),
-        0
-      ),
-    [cart]
-  );
-  const shippingFee = 20;
-  const total = subtotal + shippingFee;
+  // Exactly what the order mutations send: unit price x quantity. Neither order
+  // input takes a shipping fee or extras, so the screen shows neither.
+  const totalMinor = useMemo(() => cartTotalMinor(cart), [cart]);
+  const total = toMajorUnits(totalMinor);
 
   // P2 display conversion: show the viewer's display currency alongside the
   // listing currency. Non-blocking — falls back to the listing-currency amount
@@ -109,7 +108,7 @@ export function Checkout({
           query: CONVERT_CURRENCY,
           variables: {
             // convertCurrency speaks integer minor units in AND out.
-            amount: Math.round(total * 100),
+            amount: totalMinor,
             from_currency: listingCurrency,
             to_currency: displayCurrency,
           },
@@ -137,11 +136,29 @@ export function Checkout({
     return () => {
       cancelled = true;
     };
-  }, [apolloClient, displayCurrency, listingCurrency, total, locale]);
+  }, [apolloClient, displayCurrency, listingCurrency, total, totalMinor, locale]);
+
+  const [failure, setFailure] = useState<CheckoutFailure | null>(null);
 
   const handleSubmit = async () => {
+    if (missingAddress) return;
+    setFailure(null);
     const res = await onPay({ cart, method: paymentMethod, shippingAddress });
-    if (res.success) onComplete();
+    if (res.success) {
+      onComplete();
+      return;
+    }
+    setFailure(res.failure ?? null);
+  };
+
+  const failureMessages: Record<CheckoutFailure, string> = {
+    mixed_currency: tp("checkoutFailure.mixedCurrency"),
+    order_refused: tp("checkoutFailure.orderRefused"),
+    payment_cancelled: tp("checkoutFailure.paymentCancelled"),
+    payment_refused: tp("checkoutFailure.paymentRefused"),
+    payment_unavailable: tp("checkoutFailure.paymentUnavailable"),
+    payment_unconfirmed: tp("checkoutFailure.paymentUnconfirmed"),
+    no_saved_card: tp("checkoutFailure.noSavedCard"),
   };
 
   return (
@@ -161,8 +178,7 @@ export function Checkout({
             <div className="bg-surface-default rounded-2xl border border-border-subtle p-4 shadow-sm sm:p-5 mb-6">
               <h3 className="font-semibold mb-4 text-text-primary">{t("orderDetails")}</h3>
               {cart.map((item) => {
-                const lineTotal =
-                  item.price * item.quantity + (item.extrasTotal ?? 0);
+                const lineTotal = toMajorUnits(lineAmountMinor(item));
                 return (
                   <div
                     key={item.lineId ?? item.id}
@@ -179,32 +195,6 @@ export function Checkout({
                       <p className="font-medium text-text-primary">{item.name}</p>
                       {readableSeller(item.seller) && (
                         <p className="text-sm text-text-secondary">{readableSeller(item.seller)}</p>
-                      )}
-                      {item.extras && item.extras.length > 0 && (
-                        <ul className="text-xs text-text-tertiary space-y-0.5 mt-0.5">
-                          {(item.serviceExtras
-                            ? item.extras
-                                .map((id) =>
-                                  item.serviceExtras!.find((e) => e.id === id)
-                                )
-                                .filter(Boolean) as {
-                                id: string;
-                                name: string;
-                                price: number;
-                              }[]
-                            : []
-                          ).map((extra) => (
-                            <li key={extra.id}>
-                              {extra.name} — {formatAmount(extra.price)}
-                            </li>
-                          ))}
-                          {(!item.serviceExtras ||
-                            item.serviceExtras.length === 0) &&
-                            item.extrasTotal != null &&
-                            item.extrasTotal > 0 && (
-                              <li>Extras — {formatAmount(item.extrasTotal)}</li>
-                            )}
-                        </ul>
                       )}
                     </div>
                     <p className="font-semibold text-text-primary whitespace-nowrap">
@@ -270,6 +260,7 @@ export function Checkout({
               </div>
             </div>
 
+            {needsShipping && (
             <div className="bg-surface-default rounded-2xl border border-border-subtle p-4 shadow-sm sm:p-5 mb-6">
               <h3 className="font-semibold mb-4 text-text-primary">{t("shippingAddress")}</h3>
               <div className="space-y-4">
@@ -328,71 +319,7 @@ export function Checkout({
                 />
               </div>
             </div>
-
-            <div className="bg-surface-default rounded-2xl border border-border-subtle p-4 shadow-sm sm:p-5">
-              <h3 className="font-semibold mb-4 text-text-primary">{t("billingAddress")}</h3>
-              <label className="flex items-center gap-2 cursor-pointer mb-4">
-                <input
-                  type="checkbox"
-                  checked={sameAsShipping}
-                  onChange={(e) => setSameAsShipping(e.target.checked)}
-                  className="accent-surface-brand"
-                />
-                <span className="text-sm text-text-primary">{t("sameAsShipping")}</span>
-              </label>
-              {!sameAsShipping && (
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    placeholder={t("namePlaceholder")}
-                    value={billingAddress.name}
-                    onChange={(e) =>
-                      setBillingAddress({ ...billingAddress, name: e.target.value })
-                    }
-                    className="w-full px-4 py-2 text-base md:text-sm border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
-                  />
-                  <input
-                    type="text"
-                    placeholder={t("addressPlaceholder")}
-                    value={billingAddress.address}
-                    onChange={(e) =>
-                      setBillingAddress({ ...billingAddress, address: e.target.value })
-                    }
-                    className="w-full px-4 py-2 text-base md:text-sm border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      placeholder={t("cityPlaceholder")}
-                      value={billingAddress.city}
-                      onChange={(e) =>
-                        setBillingAddress({ ...billingAddress, city: e.target.value })
-                      }
-                      className="px-4 py-2 text-base md:text-sm border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
-                    />
-                    <CountrySelect
-                      value={billingAddress.country}
-                      onChange={(value) =>
-                        setBillingAddress({ ...billingAddress, country: value })
-                      }
-                      id="checkout-billing-country"
-                    />
-                  </div>
-                  <input
-                    type="tel"
-                    placeholder={t("phoneNumberPlaceholder")}
-                    value={billingAddress.phoneNumber}
-                    onChange={(e) =>
-                      setBillingAddress({
-                        ...billingAddress,
-                        phoneNumber: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-2 text-base md:text-sm border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
-                  />
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
 
@@ -402,11 +329,7 @@ export function Checkout({
             <div className="space-y-2 mb-4">
               <div className="flex justify-between text-sm">
                 <span className="text-text-secondary">{t("subtotalAmount")}</span>
-                <span className="text-text-primary">{formatAmount(subtotal)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">{t("shippingFee")}</span>
-                <span className="text-text-primary">{formatAmount(shippingFee)}</span>
+                <span className="text-text-primary">{formatAmount(total)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-text-secondary">{t("discount")}</span>
@@ -416,7 +339,7 @@ export function Checkout({
             <div className="border-t border-border-subtle pt-4 mb-6">
               <div className="flex justify-between font-bold text-lg text-text-primary">
                 <span>{t("total")}</span>
-                <span>{formatAmount(total)}</span>
+                <span data-testid="mp-checkout-total">{formatAmount(total)}</span>
               </div>
               <p className="text-xs text-text-secondary mt-2">
                 You will be charged {formatAmount(total)} {listingCurrency}.
@@ -425,15 +348,59 @@ export function Checkout({
                   : ""}
               </p>
             </div>
+            {paidLines.length > 0 && (
+              <section
+                aria-labelledby="mp-checkout-paid-heading"
+                className="mb-4 rounded-xl bg-surface-success p-3 text-sm text-text-primary"
+                data-testid="mp-checkout-paid"
+              >
+                <h4 id="mp-checkout-paid-heading" className="flex items-center gap-2 font-semibold">
+                  <CheckCircle2 className="size-4 shrink-0 text-text-success" aria-hidden />
+                  {tp("checkoutPaidHeading")}
+                </h4>
+                <ul className="mt-2 space-y-1">
+                  {paidLines.map((item) => (
+                    <li key={item.lineId ?? item.id} className="flex justify-between gap-3">
+                      <span className="min-w-0 break-words">
+                        {item.name}
+                        {item.quantity > 1 ? ` × ${item.quantity}` : ""}
+                      </span>
+                      <span className="whitespace-nowrap">
+                        {formatAmount(toMajorUnits(lineAmountMinor(item)))}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/wallet" className="mt-2 inline-block underline">
+                  {tp("checkoutPaidWalletLink")}
+                </Link>
+              </section>
+            )}
+            {failure && (
+              <p
+                role="alert"
+                className="mb-4 flex gap-2 rounded-xl bg-surface-subtle p-3 text-sm text-text-primary"
+                data-testid="mp-checkout-failure"
+              >
+                <AlertCircle className="mt-0.5 size-4 shrink-0 text-text-danger" aria-hidden />
+                <span className="min-w-0 break-words">{failureMessages[failure]}</span>
+              </p>
+            )}
             <ButtonType2
               onClick={handleSubmit}
-              disabled={isPaying || cart.length === 0}
+              disabled={isPaying || cart.length === 0 || missingAddress}
+              aria-describedby={missingAddress ? "mp-checkout-address-hint" : undefined}
               className="w-full bg-surface-brand text-text-white py-3 rounded-lg hover:opacity-90 disabled:opacity-50"
             >
               {isPaying
                 ? t("processing") ?? "Processing…"
                 : t("payAmount", { amount: formatAmount(total) })}
             </ButtonType2>
+            {missingAddress && (
+              <p id="mp-checkout-address-hint" className="mt-2 text-xs text-text-secondary" data-testid="mp-checkout-address-hint">
+                {tp("checkoutAddressHint")}
+              </p>
+            )}
           </div>
         </div>
       </div>

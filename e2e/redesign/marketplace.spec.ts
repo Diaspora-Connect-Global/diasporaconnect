@@ -103,6 +103,8 @@ test('checkout still sends the same order mutation: vendor, product, quantity, p
     await page.getByPlaceholder('Name').fill('Ama Owusu');
     await page.getByPlaceholder('Address').fill('1 High Street');
     await page.getByPlaceholder('City').fill('Accra');
+    await page.locator('#checkout-country').click();
+    await page.getByRole('option', { name: 'Ghana' }).click();
     await page.getByPlaceholder(/phone/i).fill('0240000000');
     await page.getByRole('button', { name: /^Pay/ }).click();
     await expect.poll(() => graphql.calls.some((c) => c.name === 'CreateProductOrder'), { timeout: 30_000 }).toBe(true);
