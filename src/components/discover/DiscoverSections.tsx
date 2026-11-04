@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
+import { Fragment, useMemo, type ReactNode } from 'react';
 import { useQuery } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
 import { Section } from '@/components/redesign/Section';
@@ -39,14 +39,13 @@ const byClosing = (a: OpportunityItem, b: OpportunityItem) => (time(a.deadline) 
 /**
  * The opportunities one row lists. The query takes one `type` at a time, so a
  * two-type row (jobs = EMPLOYMENT + CONTRACT) sends two requests and merges them
- * in the row's order. One place builds the input, so the "Latest" row and the
- * sections share Apollo's cache (one request per type).
+ * in the row's order.
  */
-function useOpportunityRow(k: OpportunityKey, location: string, sort: DiscoverSort, limit: number, skip = false): OpportunityItem[] {
+function useOpportunityRow(k: OpportunityKey, location: string, sort: DiscoverSort, limit: number): OpportunityItem[] {
   const { types = [], category } = OPPORTUNITY_SOURCES[k];
   const base = { ...(category ? { category } : {}), location: location || undefined, limit, ...SORT_INPUT[sort] };
-  const first = useOpportunities(types[0] ? { ...base, type: types[0] } : base, skip);
-  const second = useOpportunities({ ...base, type: types[1] ?? types[0] }, skip || types.length < 2);
+  const first = useOpportunities(types[0] ? { ...base, type: types[0] } : base);
+  const second = useOpportunities({ ...base, type: types[1] ?? types[0] }, types.length < 2);
   const pair = types.length > 1;
   return useMemo(() => {
     if (!pair) return first.items;
@@ -83,17 +82,11 @@ function Grid({ children, overview, listRows = false }: { children: ReactNode[];
 type Common = {
   /** How many to fetch. */
   limit: number;
-  /** How many to show (after leaving out `exclude`). */
+  /** How many to show. */
   shown: number;
   expanded: boolean;
   onViewAll: () => void;
-  /** Items already shown in the "Latest opportunities" row, left out here so nothing repeats. */
-  exclude?: ReadonlySet<string>;
 };
-
-function keep<T extends { id: string }>(items: T[], exclude: ReadonlySet<string> | undefined, shown: number): T[] {
-  return (exclude?.size ? items.filter((i) => !exclude.has(i.id)) : items).slice(0, shown);
-}
 
 function Frame({ k, count, onViewAll, expanded, children }: { k: DiscoverCategoryKey | 'latest' | 'forYou'; count: number; onViewAll?: () => void; expanded: boolean; children: ReactNode }) {
   const t = useTranslations('discover.sections');
@@ -108,9 +101,9 @@ function Frame({ k, count, onViewAll, expanded, children }: { k: DiscoverCategor
   );
 }
 
-export function OpportunitySection({ k, location, sort, limit, shown, expanded, onViewAll, exclude }: Common & { k: OpportunityKey; location: string; sort: DiscoverSort }) {
+export function OpportunitySection({ k, location, sort, limit, shown, expanded, onViewAll }: Common & { k: OpportunityKey; location: string; sort: DiscoverSort }) {
   const all = useOpportunityRow(k, location, sort, limit);
-  const items = keep(all, exclude, shown);
+  const items = all.slice(0, shown);
   const Card = k === 'jobs' ? JobCard : OpportunityCard;
   return (
     <Frame k={k} count={items.length} onViewAll={onViewAll} expanded={expanded}>
@@ -150,9 +143,9 @@ export function RecommendedOpportunitiesSection({ items, expanded, onViewAll }: 
   );
 }
 
-export function ServicesSection({ limit, shown, expanded, onViewAll, exclude }: Common) {
+export function ServicesSection({ limit, shown, expanded, onViewAll }: Common) {
   const { items: all } = useFeaturedServices(limit);
-  const items = keep(all, exclude, shown);
+  const items = all.slice(0, shown);
   return (
     <Frame k="services" count={items.length} onViewAll={onViewAll} expanded={expanded}>
       <Grid overview={!expanded}>{items.map((s) => <ServiceCard key={s.id} item={s} testId="discover-card-services" />)}</Grid>
@@ -160,9 +153,9 @@ export function ServicesSection({ limit, shown, expanded, onViewAll, exclude }: 
   );
 }
 
-export function ProductsSection({ limit, shown, expanded, onViewAll, exclude }: Common) {
+export function ProductsSection({ limit, shown, expanded, onViewAll }: Common) {
   const { items: all } = useFeaturedProducts(limit);
-  const items = keep(all, exclude, shown);
+  const items = all.slice(0, shown);
   return (
     <Frame k="products" count={items.length} onViewAll={onViewAll} expanded={expanded}>
       <Grid overview={!expanded}>{items.map((p) => <ProductCard key={p.id} item={p} testId="discover-card-products" />)}</Grid>
@@ -268,67 +261,37 @@ export function ForYouRail({ kinds, className }: { kinds: readonly ForYouKind[];
 }
 
 /**
- * The newest property, service, investment and job — one of each, like the
- * mockup's mixed first row. It reads the very same queries the sections below
- * use (same variables ⇒ Apollo serves both from one request). The caller shows
- * as many as fit (see `LatestSection`) and leaves exactly those out of the
- * sections, so a card never appears twice — and never disappears either.
+ * The newest opportunities of every kind, with one service the platform features
+ * second. The unfiltered page lists nothing else, so a kind left out here would
+ * not be on it at all.
  */
 export function useLatestMix(limit: number, enabled: boolean): MixEntry[] {
-  const realEstate = useOpportunityRow('realEstate', '', 'newest', limit, !enabled);
-  const services = useFeaturedServices(limit, !enabled);
-  const investments = useOpportunityRow('investments', '', 'newest', limit, !enabled);
-  const jobs = useOpportunityRow('jobs', '', 'newest', limit, !enabled);
+  const { items: opportunities } = useOpportunities({ limit }, !enabled);
+  const { items: services } = useFeaturedServices(1, !enabled);
   return useMemo(() => {
     if (!enabled) return [];
-    const opp = (o: OpportunityItem | undefined, k: OpportunityKey): MixEntry | null => (o ? { id: o.id, node: <OpportunityCard item={o} testId={`discover-latest-${k}`} /> } : null);
-    const s = services.items[0];
-    const entries = [
-      opp(realEstate[0], 'realEstate'),
-      s ? { id: s.id, node: <ServiceCard item={s} testId="discover-latest-services" /> } : null,
-      opp(investments[0], 'investments'),
-      opp(jobs[0], 'jobs'),
-    ].filter((e): e is MixEntry => e !== null);
-    return entries;
-  }, [enabled, realEstate, services.items, investments, jobs]);
+    const entries = opportunities.map((o): MixEntry => ({ id: o.id, node: <OpportunityCard key={o.id} item={o} testId="discover-latest-opportunities" /> }));
+    const s = services[0];
+    if (s) entries.splice(1, 0, { id: s.id, node: <ServiceCard key={s.id} item={s} testId="discover-latest-services" /> });
+    return entries.slice(0, limit);
+  }, [enabled, opportunities, services, limit]);
 }
 
-/** Cards the Latest row can show without hiding any: 2×2 on phones, one row of 3 or 4 beside the rail. */
-const capacityFor = (cols: number) => (cols === 3 ? 3 : 4);
-
 /**
- * The Latest row measures its own width (the same thresholds as `Grid`) and
- * reports how many cards fit, so the page leaves exactly the shown ones out of
- * the sections below. Measured before paint, so the row never flashes.
+ * Leaves out what "For you" already shows, unless that would leave fewer than
+ * `minimum`: with few listings the two rows overlap, rather than Latest vanishing.
  */
-export function LatestSection({ entries, onCapacity }: { entries: MixEntry[]; onCapacity: (n: number) => void }) {
-  const [el, setEl] = useState<HTMLDivElement | null>(null);
-  const [cols, setCols] = useState(3);
-  useLayoutEffect(() => {
-    if (!el) return;
-    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-    const measure = () => {
-      const w = el.clientWidth / rem;
-      const c = w >= 52 ? 4 : w >= 38 ? 3 : 2;
-      setCols(c);
-      onCapacity(capacityFor(c));
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [el, onCapacity]);
+export function withoutRepeats(entries: MixEntry[], shownAbove: ReadonlySet<string>, minimum: number): MixEntry[] {
+  const fresh = entries.filter((e) => !shownAbove.has(e.id));
+  if (fresh.length >= minimum) return fresh;
+  return [...fresh, ...entries.filter((e) => shownAbove.has(e.id)).slice(0, minimum - fresh.length)];
+}
+
+/** The "Latest opportunities" section: every card it was given, in as many rows as they take. */
+export function LatestSection({ entries }: { entries: MixEntry[] }) {
   return (
     <Frame k="latest" count={entries.length} expanded={false}>
-      <div ref={setEl}>
-        <ul className="grid gap-3" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
-          {entries.map((e) => (
-            <li key={e.id} className="min-w-0">
-              {e.node}
-            </li>
-          ))}
-        </ul>
-      </div>
+      <Grid overview={false}>{entries.map((e) => e.node)}</Grid>
     </Frame>
   );
 }

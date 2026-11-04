@@ -4933,7 +4933,7 @@
     "sections": {
       "latest": {
         "title": "Neueste Möglichkeiten",
-        "subtitle": "Neue Immobilien, Dienstleistungen, Investitionen und Jobs auf DiaspoPlug."
+        "subtitle": "Die neuesten Möglichkeiten aller Art und die Dienstleistungen, die die Plattform hervorhebt."
       },
       "jobs": {
         "title": "Neueste Jobs",
@@ -4974,10 +4974,6 @@
       "events": {
         "title": "Kommende Veranstaltungen",
         "subtitle": "Veranstaltungen, die noch bevorstehen."
-      },
-      "community": {
-        "title": "Aus der Community",
-        "subtitle": "Sieh, worüber Menschen in deinen Communities sprechen."
       },
       "forYou": {
         "title": "Für dich",
