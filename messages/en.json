@@ -375,7 +375,7 @@
         "payRange": "The minimum cannot be higher than the maximum.",
         "deadlinePast": "The deadline cannot be in the past.",
         "deadlineInvalid": "Enter a valid date.",
-        "linkInvalid": "Enter a link that starts with https:// or http://.",
+        "linkInvalid": "Enter a public web link that starts with https:// or http://. Addresses such as localhost or a private network can’t be used.",
         "emailInvalid": "Enter a valid email address."
       },
       "toasts": {

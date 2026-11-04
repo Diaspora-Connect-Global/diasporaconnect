@@ -375,7 +375,7 @@
         "payRange": "Het minimum mag niet hoger zijn dan het maximum.",
         "deadlinePast": "De deadline mag niet in het verleden liggen.",
         "deadlineInvalid": "Voer een geldige datum in.",
-        "linkInvalid": "Voer een link in die begint met https:// of http://.",
+        "linkInvalid": "Voer een openbare weblink in die begint met https:// of http://. Adressen zoals localhost of van een privénetwerk kunnen niet worden gebruikt.",
         "emailInvalid": "Voer een geldig e-mailadres in."
       },
       "toasts": {

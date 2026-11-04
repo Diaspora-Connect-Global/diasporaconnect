@@ -375,7 +375,7 @@
         "payRange": "Das Minimum darf nicht höher als das Maximum sein.",
         "deadlinePast": "Die Frist darf nicht in der Vergangenheit liegen.",
         "deadlineInvalid": "Gib ein gültiges Datum ein.",
-        "linkInvalid": "Gib einen Link ein, der mit https:// oder http:// beginnt.",
+        "linkInvalid": "Gib einen öffentlichen Weblink ein, der mit https:// oder http:// beginnt. Adressen wie localhost oder aus einem privaten Netzwerk sind nicht möglich.",
         "emailInvalid": "Gib eine gültige E-Mail-Adresse ein."
       },
       "toasts": {

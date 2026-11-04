@@ -11,17 +11,33 @@ export function readableOwnerName(name?: string | null): string | null {
   return n && !LOOKS_LIKE_ID.test(n) ? n : null;
 }
 
+/** True for hosts that only mean something on the viewer's own machine or network. */
+function isInternalHost(hostname: string): boolean {
+  const h = hostname.toLowerCase().replace(/\.$/, '');
+  if (!h || h.startsWith('[')) return true; // IPv6 literals (::1, fe80::, fc00::, mapped IPv4) are never a real apply page
+  if (h === 'localhost' || h.endsWith('.localhost') || h.endsWith('.local')) return true;
+  if (!h.includes('.')) return true; // single-label hosts ("intranet", "devbox") resolve only on a private network
+  const v4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(h);
+  if (v4) {
+    const [a, b] = [Number(v4[1]), Number(v4[2])];
+    return a === 0 || a === 10 || a === 127 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127);
+  }
+  return false;
+}
+
 /**
- * The application link, only when it is http(s). `externalLink` is typed by the
- * poster, and a `javascript:` or `data:` URL must never become a link or a
- * window.open target.
+ * The application link, only when it is http(s) and points at a public host.
+ * `externalLink` is typed by the poster: a `javascript:` or `data:` URL must
+ * never become a link or a window.open target, and neither should a link to
+ * localhost or a private address, which can never be a real application page.
  */
 export function safeExternalUrl(raw?: string | null): string | null {
   const v = raw?.trim();
   if (!v) return null;
   try {
     const url = new URL(v);
-    return url.protocol === 'https:' || url.protocol === 'http:' ? url.toString() : null;
+    if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
+    return isInternalHost(url.hostname) ? null : url.toString();
   } catch {
     return null;
   }

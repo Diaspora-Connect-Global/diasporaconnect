@@ -375,7 +375,7 @@
         "payRange": "Le minimum ne peut pas dépasser le maximum.",
         "deadlinePast": "La date limite ne peut pas être passée.",
         "deadlineInvalid": "Saisissez une date valide.",
-        "linkInvalid": "Saisissez un lien commençant par https:// ou http://.",
+        "linkInvalid": "Saisissez un lien web public commençant par https:// ou http://. Les adresses comme localhost ou d’un réseau privé ne sont pas acceptées.",
         "emailInvalid": "Saisissez une adresse e-mail valide."
       },
       "toasts": {
