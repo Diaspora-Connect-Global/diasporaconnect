@@ -38,7 +38,7 @@ const BASE = {
     GetProduct: { getProduct: { __typename: 'ProductResponse', success: true, message: null, product: PRODUCT } },
     GetMarketplaceService: { getMarketplaceService: { __typename: 'ServiceResponse', success: true, message: null, service: SERVICE } },
     ProductReviews: { productReviews: { __typename: 'ProductReviewList', reviews: [], total: 0, average_rating: 0, has_more: false } },
-    MyPaymentMethods: { myPaymentMethods: { __typename: 'PaymentMethodList', success: true, message: null, payment_methods: [{ __typename: 'PaymentMethod', id: 'card-1', provider: 'STRIPE', type: 'card', is_primary: true }] } },
+    MyPaymentMethods: { myPaymentMethods: { __typename: 'PaymentMethodList', success: true, payment_methods: [{ __typename: 'PaymentMethod', id: 'card-1', provider: 'STRIPE', type: 'card', last4: '4242', brand: 'visa', expiry_month: 12, expiry_year: 2030, is_primary: true }] } },
     CreateProductOrder: orderReply('createProductOrder', 'order-p'),
     CreateServiceOrder: orderReply('createServiceOrder', 'order-s'),
     ConfirmPaymentIntent: { confirmPaymentIntent: { __typename: 'ConfirmPaymentIntentResponse', success: true, message: null, provider_transaction_id: null, requires_action: false, action_url: null } },
