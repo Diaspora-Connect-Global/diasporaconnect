@@ -49,7 +49,8 @@ export function circleCoverPlaceholder(seed: string): RedesignImage {
  * The stand-in photo for an opportunity that has no image of its own, by kind —
  * or `null` when no photo in the repo fits, so the card shows its tinted icon tile
  * (type icon + the type's name as the tag) instead of a wrong picture.
- * One mapping for every opportunity card (Home, Discover, category pages, For you).
+ * One mapping for the opportunity cards that use a stand-in photo (Discover, category pages, For you).
+ * Home's "Latest on DiaspoPlug" always shows the tile.
  */
 export function opportunityFallbackPhoto(type?: string | null, category?: string | null): RedesignImage | null {
   if (category === 'REAL_ESTATE_INFRASTRUCTURE') return CATEGORY_PHOTOS.property;

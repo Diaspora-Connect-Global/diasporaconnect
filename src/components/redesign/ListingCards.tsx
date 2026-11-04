@@ -27,8 +27,11 @@ const OPPORTUNITY_LOOK: Record<string, { icon: LucideIcon; tone: MoreTone }> = {
   VOLUNTEER: { icon: HandHeart, tone: 'danger' },
 };
 
-/** Opportunity card. An opportunity carries no image; the fallback is a photo that fits its kind, else a tinted tile with the kind's icon. */
-export function OpportunityCard({ item, testId }: { item: OpportunityItem; testId?: string }) {
+/**
+ * Opportunity card. An opportunity carries no image; the fallback is a photo that fits its kind, else a tinted tile with the kind's icon.
+ * `iconFallback` skips the photo, so every kind gets the tile.
+ */
+export function OpportunityCard({ item, testId, iconFallback = false }: { item: OpportunityItem; testId?: string; iconFallback?: boolean }) {
   const t = useTranslations('redesign');
   const format = useFormatter();
   const isRealEstate = item.category === 'REAL_ESTATE_INFRASTRUCTURE';
@@ -41,7 +44,7 @@ export function OpportunityCard({ item, testId }: { item: OpportunityItem; testI
       testId={testId}
       href={`/opportunities/${encodeURIComponent(item.id)}`}
       fallbackIcon={look.icon}
-      fallbackPhoto={opportunityFallbackPhoto(item.type, item.category)?.src}
+      fallbackPhoto={iconFallback ? undefined : opportunityFallbackPhoto(item.type, item.category)?.src}
       action={<OpportunityBookmark id={item.id} saved={!!item.isSavedByCurrentUser} />}
       tone={look.tone}
       tag={tag}

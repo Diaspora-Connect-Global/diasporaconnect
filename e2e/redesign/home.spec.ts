@@ -94,9 +94,10 @@ test('latest listings are labelled by what they are, and "From your community" s
     for (const k of ['Happy', 'Hopeful', 'Sad']) await expect(page.getByTestId('reaction-picker').getByRole('button', { name: k })).toBeVisible();
     await expect(posts.getByRole('button', { name: /^Like$/ })).toHaveCount(0);
     await expect(row.getByRole('button', { name: /Share/ })).toBeVisible();
-    // Every listing card has a photo on top (its own, or a category placeholder).
+    // Opportunities show their icon tile; the service and product have a photo (their own, or a category placeholder).
     const cards = page.getByTestId('latest-card');
-    for (let i = 0; i < 4; i += 1) await expect(cards.nth(i).locator('img').first()).toHaveAttribute('src', /.+/);
+    for (const i of [0, 1]) await expect(cards.nth(i).locator('img')).toHaveCount(0);
+    for (const i of [2, 3]) await expect(cards.nth(i).locator('img').first()).toHaveAttribute('src', /.+/);
     await page.context().close();
 });
 

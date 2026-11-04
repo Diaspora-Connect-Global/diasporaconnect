@@ -1,5 +1,5 @@
-/** Home "Latest on DiaspoPlug": each opportunity kind gets its own fitting fallback, never the job photo for all. */
-import { test, expect, type Browser } from '@playwright/test';
+/** Home "Latest on DiaspoPlug": every opportunity kind shows its icon tile, never a stand-in photo. */
+import { test, expect, type Browser, type Locator } from '@playwright/test';
 import { openBrowser } from '../support/browser';
 import { ALL, UUID, open } from './fixtures';
 
@@ -21,24 +21,29 @@ async function latest(rows: unknown[], viewport?: { width: number; height: numbe
     return { page, section };
 }
 
-test('a job gets the workshop photo; a scholarship and a grant get an icon tile, not the job photo', async () => {
+async function expectIconTile(section: Locator, title: string, tag: string) {
+    const card = section.getByTestId('latest-card').filter({ hasText: title });
+    await expect(card.locator('img')).toHaveCount(0);
+    await expect(card.locator('svg').first()).toBeVisible();
+    await expect(card).toContainText(tag);
+}
+
+test('a job and a scholarship both get an icon tile, not a photo', async () => {
     const { page, section } = await latest([opp('o-1', 'IT Support Specialist', 'EMPLOYMENT'), opp('o-2', 'Merit Scholarship', 'SCHOLARSHIP')]);
-    const job = section.getByTestId('latest-card').filter({ hasText: 'IT Support Specialist' });
-    await expect(job.locator('img')).toHaveAttribute('src', /cat-job\.webp/);
-    await expect(job.locator('img')).toHaveAttribute('alt', '');
-    const sch = section.getByTestId('latest-card').filter({ hasText: 'Merit Scholarship' });
-    await expect(sch.locator('img')).toHaveCount(0);
-    await expect(sch).toContainText('Scholarship');
+    await expectIconTile(section, 'IT Support Specialist', 'Job');
+    await expectIconTile(section, 'Merit Scholarship', 'Scholarship');
     expect(await page.locator('body').innerText()).not.toMatch(UUID);
     await page.context().close();
 });
 
-test('a grant and a volunteer role are icon tiles too, and a programme gets the workshop photo', async () => {
-    const { page, section } = await latest([opp('o-3', 'Community Grant', 'GRANT'), opp('o-4', 'Weekend Volunteer', 'VOLUNTEER')]);
-    for (const title of ['Community Grant', 'Weekend Volunteer']) await expect(section.getByTestId('latest-card').filter({ hasText: title }).locator('img')).toHaveCount(0);
-    await page.context().close();
-    const second = await latest([opp('o-5', 'Mentoring Programme', 'PROGRAM')]);
-    await expect(second.section.getByTestId('latest-card').filter({ hasText: 'Mentoring Programme' }).locator('img')).toHaveAttribute('src', /cat-team\.webp/);
+test('so do the kinds that have a stand-in photo elsewhere: programme, investment and real estate', async () => {
+    const first = await latest([opp('o-3', 'Mentoring Programme', 'PROGRAM'), opp('o-4', 'Solar Fund', 'INVESTMENT')]);
+    await expectIconTile(first.section, 'Mentoring Programme', 'Programme');
+    await expectIconTile(first.section, 'Solar Fund', 'Investment');
+    await first.page.context().close();
+    const second = await latest([opp('o-5', 'Plot in Tema', 'INVESTMENT', { category: 'REAL_ESTATE_INFRASTRUCTURE' }), opp('o-6', 'Community Grant', 'GRANT')]);
+    await expectIconTile(second.section, 'Plot in Tema', 'Real estate');
+    await expectIconTile(second.section, 'Community Grant', 'Grant');
     await second.page.context().close();
 });
 
