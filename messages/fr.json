@@ -2564,7 +2564,6 @@
     "cartEmpty": "Votre panier est vide",
     "cartEmptySubtitle": "Ajoutez des articles pour commencer",
     "numberOfItems": "Nombre d'articles : {count}",
-    "oneTimeFee": "FRAIS UNIQUES",
     "total": "Total",
     "proceedToCheckout": "Procéder au paiement",
     "checkout": "Paiement",

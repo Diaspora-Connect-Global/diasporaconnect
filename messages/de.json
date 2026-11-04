@@ -2564,7 +2564,6 @@
     "cartEmpty": "Ihr Warenkorb ist leer",
     "cartEmptySubtitle": "Fügen Sie Artikel hinzu, um loszulegen",
     "numberOfItems": "Anzahl der Artikel: {count}",
-    "oneTimeFee": "EINMALIGE GEBÜHR",
     "total": "Gesamt",
     "proceedToCheckout": "Zur Kasse gehen",
     "checkout": "Kasse",

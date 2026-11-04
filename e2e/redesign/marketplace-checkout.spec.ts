@@ -146,7 +146,7 @@ test('a service line of 2 is 2 orders, and the screen total is what they add up 
 test('the cart total is the checkout total: no fee added on the way', async () => {
     const { page } = await open(browser, '/marketplace', BASE);
     await addProductToCart(page);
-    await page.getByRole('button', { name: /cart/i }).first().click();
+    await page.getByRole('button', { name: /^Open cart/ }).click();
     await expect(page.getByTestId('mp-cart-total')).toContainText('123.45');
     await expect(page.getByText(/one time fee/i)).toHaveCount(0);
     await proceedToCheckout(page);

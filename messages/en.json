@@ -2868,7 +2868,6 @@
     "cartEmpty": "Your cart is empty",
     "cartEmptySubtitle": "Add some items to get started",
     "numberOfItems": "Number of items: {count}",
-    "oneTimeFee": "ONE TIME FEE",
     "total": "Total",
     "proceedToCheckout": "Proceed to checkout",
     "checkout": "Checkout",
