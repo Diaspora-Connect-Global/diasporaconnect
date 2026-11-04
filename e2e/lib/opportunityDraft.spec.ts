@@ -115,7 +115,7 @@ test('no pay means no compensation fields at all', () => {
 });
 
 test('an attached job survives the draft round trip and edit form', () => {
-    const att = toAttached(base({ payMin: '10.5', applicationMethod: 'EXTERNAL_LINK', externalLink: 'https://a.example/x' }));
+    const att = toAttached(base({ payMin: '10.5', applicationMethod: 'EXTERNAL_LINK', externalLink: 'https://jobs.example.org/x' }));
     expect(parseAttachedOpportunity(JSON.parse(JSON.stringify(att)))).toEqual(att);
     expect(toAttached(toFormValues(att))).toEqual(att);
 });

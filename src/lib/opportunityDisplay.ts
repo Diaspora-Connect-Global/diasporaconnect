@@ -11,25 +11,23 @@ export function readableOwnerName(name?: string | null): string | null {
   return n && !LOOKS_LIKE_ID.test(n) ? n : null;
 }
 
-/** True for hosts that only mean something on the viewer's own machine or network. */
-function isInternalHost(hostname: string): boolean {
+// The same rule the gateway applies on create and update (apply-target.validators.ts),
+// so the composer refuses what the server would refuse.
+const IPV4_HOST = /^\d{1,3}(\.\d{1,3}){3}$/;
+const LOCAL_ONLY_SUFFIX = /\.(localhost|local|internal|intranet|lan|home|corp|test|invalid|example)$/;
+
+/** True for hosts that can't be a real application page: IP addresses, single labels, local-only names. */
+function isUnfitHost(hostname: string): boolean {
   const h = hostname.toLowerCase().replace(/\.$/, '');
-  if (!h || h.startsWith('[')) return true; // IPv6 literals (::1, fe80::, fc00::, mapped IPv4) are never a real apply page
-  if (h === 'localhost' || h.endsWith('.localhost') || h.endsWith('.local')) return true;
-  if (!h.includes('.')) return true; // single-label hosts ("intranet", "devbox") resolve only on a private network
-  const v4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(h);
-  if (v4) {
-    const [a, b] = [Number(v4[1]), Number(v4[2])];
-    return a === 0 || a === 10 || a === 127 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127);
-  }
-  return false;
+  // The URL parser has already normalised 127.1 and 0x7f.0.0.1 to dotted form.
+  return !h || h.startsWith('[') || IPV4_HOST.test(h) || !h.includes('.') || LOCAL_ONLY_SUFFIX.test(h);
 }
 
 /**
  * The application link, only when it is http(s) and points at a public host.
  * `externalLink` is typed by the poster: a `javascript:` or `data:` URL must
  * never become a link or a window.open target, and neither should a link to
- * localhost or a private address, which can never be a real application page.
+ * localhost, a private network or a bare IP address.
  */
 export function safeExternalUrl(raw?: string | null): string | null {
   const v = raw?.trim();
@@ -37,7 +35,9 @@ export function safeExternalUrl(raw?: string | null): string | null {
   try {
     const url = new URL(v);
     if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
-    return isInternalHost(url.hostname) ? null : url.toString();
+    // user:pass@host is how a link is made to read as a site it isn't.
+    if (url.username || url.password) return null;
+    return isUnfitHost(url.hostname) ? null : url.toString();
   } catch {
     return null;
   }
