@@ -10,7 +10,12 @@ import { CountrySelect } from "@/components/custom/input";
 import { formatAmountWithCurrency } from "@/lib/displayCurrency";
 import { useDisplayCurrency } from "@/hooks/useDisplayCurrency";
 import { CONVERT_CURRENCY } from "@/services/gql/marketplace";
-import { cartTotalMinor, lineAmountMinor } from "@/lib/marketplaceCheckout";
+import {
+  cartNeedsShipping,
+  cartTotalMinor,
+  isShippingComplete,
+  lineAmountMinor,
+} from "@/lib/marketplaceCheckout";
 import { isMobileMoneySupported, toMajorUnits } from "@/types/money";
 import { readableSeller } from "@/components/marketplace/DetailParts";
 import type { CartItem, PaymentMethod, PaymentResult, ShippingAddress } from "./types";
@@ -66,7 +71,6 @@ export function Checkout({
       setPaymentMethod("credit");
     }
   }, [mobileMoneyAvailable, paymentMethod]);
-  const [sameAsShipping, setSameAsShipping] = useState(true);
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
     name: "",
     address: "",
@@ -74,13 +78,9 @@ export function Checkout({
     country: "",
     phoneNumber: "",
   });
-  const [billingAddress, setBillingAddress] = useState<ShippingAddress>({
-    name: "",
-    address: "",
-    city: "",
-    country: "",
-    phoneNumber: "",
-  });
+  // Service orders take no shipping address: a cart of only services asks for none.
+  const needsShipping = cartNeedsShipping(cart);
+  const missingAddress = needsShipping && !isShippingComplete(shippingAddress);
 
   // Exactly what the order mutations send: unit price x quantity. Neither order
   // input takes a shipping fee or extras, so the screen shows neither.
@@ -134,6 +134,7 @@ export function Checkout({
   }, [apolloClient, displayCurrency, listingCurrency, total, totalMinor, locale]);
 
   const handleSubmit = async () => {
+    if (missingAddress) return;
     const res = await onPay({ cart, method: paymentMethod, shippingAddress });
     if (res.success) onComplete();
   };
@@ -237,6 +238,7 @@ export function Checkout({
               </div>
             </div>
 
+            {needsShipping && (
             <div className="bg-surface-default rounded-2xl border border-border-subtle p-4 shadow-sm sm:p-5 mb-6">
               <h3 className="font-semibold mb-4 text-text-primary">{t("shippingAddress")}</h3>
               <div className="space-y-4">
@@ -295,71 +297,7 @@ export function Checkout({
                 />
               </div>
             </div>
-
-            <div className="bg-surface-default rounded-2xl border border-border-subtle p-4 shadow-sm sm:p-5">
-              <h3 className="font-semibold mb-4 text-text-primary">{t("billingAddress")}</h3>
-              <label className="flex items-center gap-2 cursor-pointer mb-4">
-                <input
-                  type="checkbox"
-                  checked={sameAsShipping}
-                  onChange={(e) => setSameAsShipping(e.target.checked)}
-                  className="accent-surface-brand"
-                />
-                <span className="text-sm text-text-primary">{t("sameAsShipping")}</span>
-              </label>
-              {!sameAsShipping && (
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    placeholder={t("namePlaceholder")}
-                    value={billingAddress.name}
-                    onChange={(e) =>
-                      setBillingAddress({ ...billingAddress, name: e.target.value })
-                    }
-                    className="w-full px-4 py-2 text-base md:text-sm border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
-                  />
-                  <input
-                    type="text"
-                    placeholder={t("addressPlaceholder")}
-                    value={billingAddress.address}
-                    onChange={(e) =>
-                      setBillingAddress({ ...billingAddress, address: e.target.value })
-                    }
-                    className="w-full px-4 py-2 text-base md:text-sm border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      placeholder={t("cityPlaceholder")}
-                      value={billingAddress.city}
-                      onChange={(e) =>
-                        setBillingAddress({ ...billingAddress, city: e.target.value })
-                      }
-                      className="px-4 py-2 text-base md:text-sm border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
-                    />
-                    <CountrySelect
-                      value={billingAddress.country}
-                      onChange={(value) =>
-                        setBillingAddress({ ...billingAddress, country: value })
-                      }
-                      id="checkout-billing-country"
-                    />
-                  </div>
-                  <input
-                    type="tel"
-                    placeholder={t("phoneNumberPlaceholder")}
-                    value={billingAddress.phoneNumber}
-                    onChange={(e) =>
-                      setBillingAddress({
-                        ...billingAddress,
-                        phoneNumber: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-2 text-base md:text-sm border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
-                  />
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
 
@@ -390,13 +328,19 @@ export function Checkout({
             </div>
             <ButtonType2
               onClick={handleSubmit}
-              disabled={isPaying || cart.length === 0}
+              disabled={isPaying || cart.length === 0 || missingAddress}
+              aria-describedby={missingAddress ? "mp-checkout-address-hint" : undefined}
               className="w-full bg-surface-brand text-text-white py-3 rounded-lg hover:opacity-90 disabled:opacity-50"
             >
               {isPaying
                 ? t("processing") ?? "Processing…"
                 : t("payAmount", { amount: formatAmount(total) })}
             </ButtonType2>
+            {missingAddress && (
+              <p id="mp-checkout-address-hint" className="mt-2 text-xs text-text-secondary" data-testid="mp-checkout-address-hint">
+                {tp("checkoutAddressHint")}
+              </p>
+            )}
           </div>
         </div>
       </div>

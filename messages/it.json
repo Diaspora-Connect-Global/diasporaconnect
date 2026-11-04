@@ -2597,7 +2597,6 @@
     "subtotalAmount": "Importo subtotale",
     "subtotal": "Subtotale",
     "discount": "Sconto",
-    "sameAsShipping": "Uguale all'indirizzo di spedizione",
     "orderSuccess": "Il pagamento dell'ordine è stato effettuato con successo",
     "visaEnding": "Visa che termina con {digits}",
     "doneOrder": "Completa ordine",
@@ -7531,6 +7530,7 @@
     "orderSummary": "Riepilogo dell’ordine",
     "serviceFrom": "Prezzo di partenza",
     "checkoutHeading": "Pagamento",
+    "checkoutAddressHint": "Inserisci nome, indirizzo, città, paese e numero di telefono per continuare.",
     "successHeading": "Ordine effettuato"
   }
 }

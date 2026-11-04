@@ -2597,7 +2597,6 @@
     "subtotalAmount": "Montant du sous-total",
     "subtotal": "Sous-total",
     "discount": "Réduction",
-    "sameAsShipping": "Identique à l'adresse de livraison",
     "orderSuccess": "Votre paiement de commande a réussi",
     "visaEnding": "Visa se terminant par {digits}",
     "doneOrder": "Terminer la commande",
@@ -7531,6 +7530,7 @@
     "orderSummary": "Récapitulatif de la commande",
     "serviceFrom": "Prix de départ",
     "checkoutHeading": "Paiement",
+    "checkoutAddressHint": "Saisissez votre nom, votre adresse, votre ville, votre pays et votre numéro de téléphone pour continuer.",
     "successHeading": "Commande passée"
   }
 }

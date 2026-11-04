@@ -2901,7 +2901,6 @@
     "subtotalAmount": "Subtotal amount",
     "subtotal": "Subtotal",
     "discount": "Discount",
-    "sameAsShipping": "Same as shipping address",
     "orderSuccess": "Your order payment successfully",
     "visaEnding": "Visa ending in {digits}",
     "doneOrder": "Done order",
@@ -7531,6 +7530,7 @@
     "orderSummary": "Order summary",
     "serviceFrom": "Starting price",
     "checkoutHeading": "Checkout",
+    "checkoutAddressHint": "Enter your name, address, city, country and phone number to continue.",
     "successHeading": "Order placed"
   }
 }

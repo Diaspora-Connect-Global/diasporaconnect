@@ -2597,7 +2597,6 @@
     "subtotalAmount": "Zwischensumme",
     "subtotal": "Zwischensumme",
     "discount": "Rabatt",
-    "sameAsShipping": "Wie Lieferadresse",
     "orderSuccess": "Ihre Bestellung wurde erfolgreich bezahlt",
     "visaEnding": "Visa endet auf {digits}",
     "doneOrder": "Bestellung abschließen",
@@ -7531,6 +7530,7 @@
     "orderSummary": "Bestellübersicht",
     "serviceFrom": "Startpreis",
     "checkoutHeading": "Kasse",
+    "checkoutAddressHint": "Geben Sie Ihren Namen, Ihre Adresse, Stadt, Ihr Land und Ihre Telefonnummer ein, um fortzufahren.",
     "successHeading": "Bestellung aufgegeben"
   }
 }

@@ -2901,7 +2901,6 @@
     "subtotalAmount": "Subtotaalbedrag",
     "subtotal": "Subtotaal",
     "discount": "Korting",
-    "sameAsShipping": "Hetzelfde als verzendadres",
     "orderSuccess": "Uw bestelling is succesvol betaald",
     "visaEnding": "Visa eindigend op {digits}",
     "doneOrder": "Bestelling voltooid",
@@ -7531,6 +7530,7 @@
     "orderSummary": "Besteloverzicht",
     "serviceFrom": "Startprijs",
     "checkoutHeading": "Afrekenen",
+    "checkoutAddressHint": "Vul je naam, adres, plaats, land en telefoonnummer in om verder te gaan.",
     "successHeading": "Bestelling geplaatst"
   }
 }

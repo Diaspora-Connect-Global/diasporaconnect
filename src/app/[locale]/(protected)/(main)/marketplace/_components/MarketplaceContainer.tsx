@@ -34,6 +34,7 @@ import { Checkout } from "./Checkout";
 import { OrderSuccess } from "./OrderSuccess";
 import { useMarketplacePayment } from "./payments/useMarketplacePayment";
 import { toCdnUrl } from "@/lib/cdn";
+import { cartNeedsShipping, formatShippingAddress } from "@/lib/marketplaceCheckout";
 
 function toUiProductFromProductApi(item: {
   id: string;
@@ -360,7 +361,7 @@ export default function MarketplaceContainer() {
             pay(
               { kind: "cart", cart: c },
               method,
-              `${shippingAddress.name}, ${shippingAddress.address}, ${shippingAddress.city}, ${shippingAddress.country}, ${shippingAddress.phoneNumber}`
+              cartNeedsShipping(c) ? formatShippingAddress(shippingAddress) : undefined
             )
           }
           onComplete={handleOrderComplete}
