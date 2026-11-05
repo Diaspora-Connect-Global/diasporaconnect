@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useMutation } from '@apollo/client/react';
 import { Check, Link2, Loader2, Send, UserPlus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -16,6 +16,13 @@ import type {
   InviteToCircleInput,
 } from '@/services/gql/types/circles';
 
+import { InvitePersonField } from './InvitePersonField';
+import {
+  classifyInviteText,
+  useInvitePeopleSearch,
+  type InvitePerson,
+} from './inviteSearch';
+
 export interface InviteCardProps {
   circleId: string;
 }
@@ -25,12 +32,12 @@ export interface InviteCardProps {
  *
  * ── THIS IS NOT THE INVITE-LINK PANEL, AND THE DIFFERENCE IS THE POINT ──────
  * `inviteToCircle` addresses somebody: a user id or a contact, an invitation
- * that lands in their inbox and can be withdrawn. It is open to every member.
- * `InviteLinksPanel` mints a BEARER credential that whoever holds the URL can
- * use, that the circle cannot see the holders of, and that survives being
- * forwarded — which is why only a lead may create one. The two sit together
- * because they answer the same question, and are kept visibly distinct because
- * they are not the same permission.
+ * that can be withdrawn. `InviteLinksPanel` mints a BEARER credential that
+ * whoever holds the URL can use, that the circle cannot see the holders of, and
+ * that survives being forwarded. The two sit together because they answer the
+ * same question, and are kept visibly distinct because they are not the same
+ * thing. The gateway limits both to a circle's leads today; anyone else who
+ * submits here gets the "reserved to its leads" refusal.
  *
  * ── "COPY CIRCLE LINK" IS NOT AN INVITE LINK ────────────────────────────────
  * It copies this circle's own page URL — no token, nothing redeemable. It used
@@ -40,6 +47,18 @@ export interface InviteCardProps {
  * being only one kind. Whether that URL gets the recipient in is the circle's
  * `joinMode`, which is the circle's decision to make, not this button's.
  *
+ * ── THREE WAYS TO NAME THE PERSON ───────────────────────────────────────────
+ * A person picked from the search sends `inviteeUserId` — the only route that
+ * lands in anyone's invitation inbox. Text shaped like an email or phone number
+ * sends `inviteeContact`. Anything else with nobody picked is NOT sent:
+ * circle-service stores whatever `inviteeContact` it is given without checking
+ * it, so "Ama Mensah" would create an invitation to nobody and the card would
+ * tick it.
+ *
+ * KNOWN GAP: `inviteeContact` is only stored. Nothing sends it, it is not matched
+ * to an existing user, and the redemption token is never returned, so today an
+ * email or phone invitation reaches nobody even though the card confirms it.
+ *
  * The contact field is labelled rather than placeholder-only: the label is the
  * one string this card has for the action, and a visible label survives being
  * typed into where a placeholder does not.
@@ -48,9 +67,18 @@ export function InviteCard({ circleId }: InviteCardProps) {
   const t = useTranslations('circles.members.invite');
   const tActions = useTranslations('circles.actions');
 
-  const [contact, setContact] = useState('');
+  const fieldId = useId();
+  const hintId = `${fieldId}-hint`;
+
+  const [text, setText] = useState('');
+  const [chosen, setChosen] = useState<InvitePerson | null>(null);
+  const [needsPick, setNeedsPick] = useState(false);
   const [invited, setInvited] = useState<string | null>(null);
   const [uncopiedLink, setUncopiedLink] = useState<string | null>(null);
+
+  const kind = classifyInviteText(text);
+  const searchable = kind === 'text' && !chosen;
+  const { state: searchState, people } = useInvitePeopleSearch(text, searchable);
 
   const [invite, { loading }] = useMutation<
     InviteToCircleData,
@@ -71,17 +99,42 @@ export function InviteCard({ circleId }: InviteCardProps) {
     }
   }
 
+  function refusalKey(outcome: { message: string | null; refusal: Parameters<typeof refusalMessageKey>[0] }) {
+    // Two refusals that matter here are not in the shared classifier (which
+    // answers UNKNOWN for them). Matched on the invariant prose only; the
+    // sentence itself, which carries ids, is never rendered.
+    const raw = (outcome.message ?? '').toLowerCase();
+    if (raw.includes('already an active member')) return 'invite.alreadyMember';
+    if (raw.includes('pending invitation already exists')) return 'invite.alreadyInvited';
+    return `actions.writeErrors.${refusalMessageKey(outcome.refusal)}`;
+  }
+
+  function toastRefusal(key: string) {
+    toast.error(key.startsWith('invite.') ? t(key.slice('invite.'.length)) : tActions(key.slice('actions.'.length)));
+  }
+
   async function handleInvite(event: React.FormEvent) {
     event.preventDefault();
-    const trimmed = contact.trim();
+    const trimmed = text.trim();
     if (!trimmed || loading) return;
 
-    // `inviteeContact` is the path for someone who is not on the platform yet;
-    // an existing user is matched server-side.
+    let input: InviteToCircleInput;
+    let echo: string;
+    if (chosen) {
+      input = { circleId, inviteeUserId: chosen.userId };
+      echo = chosen.name;
+    } else if (kind === 'email' || kind === 'phone') {
+      input = { circleId, inviteeContact: trimmed };
+      echo = trimmed;
+    } else {
+      // Not a person we found and not an address: sending it would create an
+      // invitation nobody can ever receive. Say so instead.
+      setNeedsPick(true);
+      return;
+    }
+
     try {
-      const result = await invite({
-        variables: { input: { circleId, inviteeContact: trimmed } },
-      });
+      const result = await invite({ variables: { input } });
 
       /*
        * `data`, not the absence of a throw. The app's global
@@ -98,24 +151,26 @@ export function InviteCard({ circleId }: InviteCardProps) {
        */
       const outcome = readCircleWrite(result, (d) => d.inviteToCircle);
       if (!outcome.ok) {
-        toast.error(tActions(`writeErrors.${refusalMessageKey(outcome.refusal)}`));
+        toastRefusal(refusalKey(outcome));
         return;
       }
 
-      // The success signal is the echoed contact below, and it is gated on the
+      // The success signal is the echoed name below, and it is gated on the
       // outcome — never on the mere fact that the await returned.
-      setInvited(trimmed);
-      setContact('');
+      setInvited(echo);
+      setText('');
+      setChosen(null);
+      setNeedsPick(false);
     } catch (error) {
       // A few failures genuinely do reject (a link-level throw, an aborted
       // request). Both paths converge on the same classified outcome.
       const outcome = readCircleWrite({ error }, () => null);
-      toast.error(tActions(`writeErrors.${refusalMessageKey(outcome.refusal)}`));
+      toastRefusal(refusalKey(outcome));
     }
   }
 
   return (
-    <section className="rounded-xl border border-border-subtle p-4">
+    <section className="rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm">
       <div className="flex items-start gap-3">
         <UserPlus
           aria-hidden="true"
@@ -128,28 +183,37 @@ export function InviteCard({ circleId }: InviteCardProps) {
       </div>
 
       <form className="mt-4 flex flex-col gap-2" onSubmit={handleInvite}>
-        <label
-          htmlFor="circle-invite-contact"
-          className="label-small text-text-primary"
-        >
-          {t('invitePerson')}
+        <label htmlFor={fieldId} className="label-small text-text-primary">
+          {t('fieldLabel')}
         </label>
-        <div className="flex items-center gap-2">
-          <input
-            id="circle-invite-contact"
-            type="text"
-            value={contact}
-            onChange={(event) => {
-              setContact(event.target.value);
+        <div className="flex items-start gap-2">
+          <InvitePersonField
+            id={fieldId}
+            value={text}
+            chosen={chosen !== null}
+            searchable={searchable}
+            state={searchState}
+            people={people}
+            describedBy={needsPick ? hintId : undefined}
+            invalid={needsPick}
+            onChange={(next) => {
+              setText(next);
+              setChosen(null);
+              setNeedsPick(false);
               setInvited(null);
             }}
-            className="body-small min-w-0 flex-1 rounded-full border border-border-subtle bg-surface-subtle px-4 py-2 text-text-primary outline-none focus-visible:border-text-brand"
+            onPick={(person) => {
+              setChosen(person);
+              setText(person.name);
+              setNeedsPick(false);
+              setInvited(null);
+            }}
           />
           <button
             type="submit"
-            disabled={!contact.trim() || loading}
+            disabled={!text.trim() || loading}
             aria-label={t('invitePerson')}
-            className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-surface-brand text-text-white transition-colors hover:bg-border-brand disabled:cursor-not-allowed disabled:bg-surface-disabled disabled:text-text-primary"
+            className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-surface-brand text-text-white transition-colors hover:bg-border-brand focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand disabled:cursor-not-allowed disabled:bg-surface-disabled disabled:text-text-primary"
           >
             {loading ? (
               <Loader2 className="size-4 animate-spin" />
@@ -159,15 +223,23 @@ export function InviteCard({ circleId }: InviteCardProps) {
           </button>
         </div>
 
+        {needsPick && (
+          <p id={hintId} role="alert" className="caption-small text-text-danger">
+            {t('pickPerson')}
+          </p>
+        )}
+
         {/*
-          The invited contact echoed back, rather than a sentence: it names
-          exactly who was invited, and says it in whatever language the address
-          was typed in.
+          Who was invited, by name: the person's name for a pick, the address as
+          typed for a contact. Never an id.
         */}
         {invited && (
-          <p className="caption-small flex items-center gap-1.5 text-text-success">
+          <p
+            role="status"
+            className="caption-small flex items-center gap-1.5 break-words text-text-success"
+          >
             <Check className="size-4 shrink-0" aria-hidden="true" />
-            {invited}
+            <span className="min-w-0">{t('invited', { name: invited })}</span>
           </p>
         )}
       </form>
