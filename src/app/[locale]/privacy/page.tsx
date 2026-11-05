@@ -4,8 +4,8 @@ import { getTranslations } from 'next-intl/server';
 import JsonLd from '@/components/seo/JsonLd';
 import { BASE, SITE_NAME, buildAlternates, publicRobots, ogImages } from '@/lib/seo';
 
-const LAST_UPDATED = '2026-10-27';
-const LAST_UPDATED_DISPLAY = 'October 27, 2026';
+const LAST_UPDATED = '2026-11-05';
+const LAST_UPDATED_DISPLAY = 'November 5, 2026';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
