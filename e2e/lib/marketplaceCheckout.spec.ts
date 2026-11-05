@@ -42,7 +42,7 @@ const service = (id: string, price: number, quantity = 1, seller = VENDOR_B, cur
     lineId: `line-${id}`,
     selectedPackage: 'basic',
 });
-const ADDRESS = 'Ama, 1 High Street, Accra, GH, 0240000000';
+const ADDRESS = { name: 'Ama', address: '1 High Street', city: 'Accra', country: 'GH', phoneNumber: '0240000000' };
 const plannedTotal = (orders: PlannedOrder[]) => orders.reduce((sum, order) => sum + order.amountMinor, 0);
 
 test.describe('totals', () => {
@@ -87,7 +87,7 @@ test.describe('the plan', () => {
                 { product_id: 'p1', quantity: 2, price: 12345, currency: 'GHS' },
                 { product_id: 'p2', quantity: 1, price: 1000, currency: 'GHS' },
             ],
-            shipping_address: ADDRESS,
+            shipping_details: { recipient_name: 'Ama', street: '1 High Street', city: 'Accra', country: 'GH', phone: '0240000000' },
             notes: 'payment_method:credit',
         });
         expect(plannedTotal(plan.orders)).toBe(cartTotalMinor(cart));
@@ -120,8 +120,8 @@ test.describe('the plan', () => {
         expect(buildCheckoutPlan([product('p', 1, 1, VENDOR_A, 'USD')], { method: 'mobile' })).toEqual({ ok: false, failure: 'payment_unavailable' });
     });
     test('a corrected address is a new order, never the one created with the old address', () => {
-        const before = buildCheckoutPlan([product('p', 1)], { method: 'credit', shippingAddress: 'old' });
-        const after = buildCheckoutPlan([product('p', 1)], { method: 'credit', shippingAddress: 'new' });
+        const before = buildCheckoutPlan([product('p', 1)], { method: 'credit', shippingAddress: ADDRESS });
+        const after = buildCheckoutPlan([product('p', 1)], { method: 'credit', shippingAddress: { ...ADDRESS, address: '2 Other Road' } });
         if (!before.ok || !after.ok) throw new Error('expected plans');
         expect(before.orders[0].key).not.toBe(after.orders[0].key);
     });
@@ -159,7 +159,7 @@ test('the payment intent id is read off the reply, and only CONFIRMED counts as 
 /** A fake backend that records every call, so a test can count charges. */
 function fakeBackend(over: Partial<CheckoutDeps> = {}) {
     const created: PlannedOrder[] = [];
-    const popups: { amountMinor: number; currency: string }[] = [];
+    const popups: { amountMinor: number; currency: string; paymentIntentId: string }[] = [];
     const confirms: { payment_intent_id: string; payment_method_id: string; provider: string }[] = [];
     let next = 0;
     const deps: CheckoutDeps = {
@@ -174,7 +174,6 @@ function fakeBackend(over: Partial<CheckoutDeps> = {}) {
             popups.push(args);
             return `ref-${popups.length}`;
         },
-        stripeCardId: async () => 'card-1',
         confirm: async (input) => {
             confirms.push(input);
             return 'confirmed';
@@ -200,16 +199,36 @@ test.describe('runCheckout', () => {
         expect(backend.confirms.map((c) => c.provider)).toEqual(['PAYSTACK', 'PAYSTACK']);
     });
 
-    test('card payments go to the provider that settles the currency', async () => {
-        const stripe = fakeBackend();
-        await run([product('p', 1, 1, VENDOR_A, 'USD')], stripe.deps);
-        expect(stripe.popups).toHaveLength(0);
-        expect(stripe.confirms[0]).toEqual({ payment_intent_id: 'pi-1', payment_method_id: 'card-1', provider: 'STRIPE' });
+    test('a card in a currency Paystack takes opens Paystack, with the payment id on it', async () => {
+        for (const currency of ['GHS', 'NGN', 'KES']) {
+            const paystack = fakeBackend();
+            await run([product('p', 1, 1, VENDOR_A, currency)], paystack.deps);
+            expect(paystack.popups).toHaveLength(1);
+            expect(paystack.popups[0]).toMatchObject({ paymentIntentId: 'pi-1' });
+            expect(paystack.confirms[0]).toMatchObject({ payment_intent_id: 'pi-1', provider: 'PAYSTACK' });
+        }
+    });
 
-        const paystack = fakeBackend();
-        await run([product('p', 1, 1, VENDOR_A, 'NGN')], paystack.deps);
-        expect(paystack.popups).toHaveLength(1);
-        expect(paystack.confirms[0].provider).toBe('PAYSTACK');
+    test('a price that moved since the cart was built stops before any money is taken', async () => {
+        const backend = fakeBackend({ createOrder: async () => ({ orderId: 'o', paymentIntentId: 'pi', totalMinor: 99999 }) });
+        const outcome = await run([product('p', 100)], backend.deps);
+        expect(outcome.failure).toBe('price_changed');
+        expect(backend.popups).toHaveLength(0);
+        expect(backend.confirms).toHaveLength(0);
+    });
+
+    test('the order total matching the cart goes ahead', async () => {
+        const backend = fakeBackend({ createOrder: async () => ({ orderId: 'o', paymentIntentId: 'pi', totalMinor: 10000 }) });
+        expect((await run([product('p', 100)], backend.deps)).success).toBe(true);
+        expect(backend.popups[0].amountMinor).toBe(10000);
+    });
+
+    test('a currency with no way to pay stops before any order reserves stock', async () => {
+        const backend = fakeBackend();
+        const outcome = await run([product('p', 1, 1, VENDOR_A, 'USD')], backend.deps);
+        expect(outcome.failure).toBe('payment_unavailable');
+        expect(backend.created).toHaveLength(0);
+        expect(backend.popups).toHaveLength(0);
     });
 
     test('second order refused: first stays paid, nothing further is charged, and it does not claim success', async () => {
@@ -241,24 +260,6 @@ test.describe('runCheckout', () => {
         expect(outcome.success).toBe(false);
         expect(outcome.paid).toEqual([]);
         expect(outcome.failure).toBe('payment_unconfirmed');
-    });
-
-    test('Stripe refuses: said plainly, and the retry reuses the same order and intent', async () => {
-        const answers: ConfirmAnswer[] = ['refused', 'confirmed'];
-        const intents: string[] = [];
-        const backend = fakeBackend({
-            confirm: async (input) => {
-                intents.push(input.payment_intent_id);
-                return answers.shift() as ConfirmAnswer;
-            },
-        });
-        const attempts = new Map<string, OrderAttempt>();
-        const first = await run([product('p', 100)], backend.deps, attempts);
-        expect(first.failure).toBe('payment_refused');
-        const second = await run([product('p', 100)], backend.deps, attempts);
-        expect(second.success).toBe(true);
-        expect(backend.created).toHaveLength(1);
-        expect(intents).toEqual(['pi-1', 'pi-1']);
     });
 
     test('Paystack took the money and the confirm failed: the retry never opens a second popup', async () => {
@@ -345,10 +346,6 @@ test.describe('runCheckout', () => {
     });
 
     test('checks that can fail are made before any order exists', async () => {
-        const noCard = fakeBackend({ stripeCardId: async () => null });
-        expect((await run([product('p', 100)], noCard.deps)).failure).toBe('no_saved_card');
-        expect(noCard.created).toHaveLength(0);
-
         const noEmail = fakeBackend({ hasEmail: false });
         expect((await run([product('p', 100)], noEmail.deps, new Map(), 'mobile')).failure).toBe('payment_unavailable');
         expect(noEmail.created).toHaveLength(0);

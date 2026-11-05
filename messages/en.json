@@ -7567,6 +7567,7 @@
     "checkoutFailure": {
       "mixedCurrency": "Your cart has items in different currencies. Please pay for each currency separately.",
       "orderRefused": "We could not place this order. You have not been charged for the items still listed here. Please try again.",
+      "priceChanged": "The price of an item has changed, so you have not been charged. Please refresh the page to see the new price.",
       "paymentCancelled": "You cancelled the payment. You have not been charged for the items still listed here.",
       "paymentRefused": "This payment did not go through. You have not been charged for the items still listed here. Please try again.",
       "paymentUnavailable": "We could not start the payment for this order. You have not been charged for the items still listed here. Please try again later.",

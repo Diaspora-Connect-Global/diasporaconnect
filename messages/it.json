@@ -7567,6 +7567,7 @@
     "checkoutFailure": {
       "mixedCurrency": "Il tuo carrello contiene articoli in valute diverse. Paga ogni valuta separatamente.",
       "orderRefused": "Non siamo riusciti a effettuare questo ordine. Gli articoli ancora elencati qui non ti sono stati addebitati. Riprova.",
+      "priceChanged": "Il prezzo di un articolo è cambiato, quindi non ti è stato addebitato nulla. Aggiorna la pagina per vedere il nuovo prezzo.",
       "paymentCancelled": "Hai annullato il pagamento. Gli articoli ancora elencati qui non ti sono stati addebitati.",
       "paymentRefused": "Questo pagamento non è andato a buon fine. Gli articoli ancora elencati qui non ti sono stati addebitati. Riprova.",
       "paymentUnavailable": "Non siamo riusciti ad avviare il pagamento di questo ordine. Gli articoli ancora elencati qui non ti sono stati addebitati. Riprova più tardi.",

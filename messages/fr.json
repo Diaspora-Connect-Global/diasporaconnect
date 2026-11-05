@@ -7567,6 +7567,7 @@
     "checkoutFailure": {
       "mixedCurrency": "Votre panier contient des articles dans des devises différentes. Veuillez payer chaque devise séparément.",
       "orderRefused": "Nous n'avons pas pu passer cette commande. Les articles encore affichés ici ne vous ont pas été facturés. Veuillez réessayer.",
+      "priceChanged": "Le prix d’un article a changé : aucun montant ne vous a donc été débité. Veuillez actualiser la page pour voir le nouveau prix.",
       "paymentCancelled": "Vous avez annulé le paiement. Les articles encore affichés ici ne vous ont pas été facturés.",
       "paymentRefused": "Ce paiement n'a pas abouti. Les articles encore affichés ici ne vous ont pas été facturés. Veuillez réessayer.",
       "paymentUnavailable": "Nous n'avons pas pu lancer le paiement de cette commande. Les articles encore affichés ici ne vous ont pas été facturés. Veuillez réessayer plus tard.",

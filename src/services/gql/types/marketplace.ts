@@ -160,10 +160,19 @@ export interface OrderItemInput {
   currency: string;
 }
 
+export interface OrderShippingDetails {
+  recipient_name: string;
+  street: string;
+  city: string;
+  /** ISO alpha-2, as the country picker gives it. The gateway converts it. */
+  country: string;
+  phone?: string;
+}
+
 export interface CreateProductOrderInput {
   vendor_id: string;
   items: OrderItemInput[];
-  shipping_address?: string;
+  shipping_details?: OrderShippingDetails;
   notes?: string;
 }
 

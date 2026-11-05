@@ -2,9 +2,8 @@
  * Checkout against faked GraphQL: the exact mutation variables for a product, a
  * service and a mixed cart, and that the total on screen is the sum of what is sent.
  *
- * NOTE: the fake replies carry `payment_intent_id` on the order. The real gateway
- * does not return it yet (see the commit that added this file), so this describes
- * the contract checkout needs, not what production answers today.
+ * The Paystack popup is replaced by the stub `openPaystackCheckout` looks for: it cannot
+ * run here, and it proves nothing the server does not check again with Paystack.
  */
 import { test, expect, type Browser, type Page } from '@playwright/test';
 import { openBrowser } from '../support/browser';
@@ -28,8 +27,8 @@ const service = (id: string, title: string, base_price: number) => ({ __typename
 const PRODUCT = product('prod-1', 'Kente cloth', 12345);
 const SERVICE = service('svc-1', 'Tax filing help', 25000);
 
-const orderReply = (key: string, id: string) => ({
-    [key]: { __typename: 'OrderResponse', success: true, message: null, order: { __typename: 'MarketplaceOrder', id, payment_intent_id: `pi-${id}`, buyer_id: 'b', vendor_id: VENDOR_ID, status: 'CREATED', items: null, total_amount: 0, currency: 'GHS', shipping_address: null, notes: null, created_at: AT, updated_at: AT } },
+const orderReply = (key: string, id: string, total: number) => ({
+    [key]: { __typename: 'OrderResponse', success: true, message: null, order: { __typename: 'MarketplaceOrder', id, payment_intent_id: `pi-${id}`, buyer_id: 'b', vendor_id: VENDOR_ID, status: 'CREATED', items: null, total_amount: total, currency: 'GHS', shipping_address: null, notes: null, created_at: AT, updated_at: AT } },
 });
 
 const BASE = {
@@ -38,9 +37,8 @@ const BASE = {
     GetProduct: { getProduct: { __typename: 'ProductResponse', success: true, message: null, product: PRODUCT } },
     GetMarketplaceService: { getMarketplaceService: { __typename: 'ServiceResponse', success: true, message: null, service: SERVICE } },
     ProductReviews: { productReviews: { __typename: 'ProductReviewList', reviews: [], total: 0, average_rating: 0, has_more: false } },
-    MyPaymentMethods: { myPaymentMethods: { __typename: 'PaymentMethodList', success: true, payment_methods: [{ __typename: 'PaymentMethod', id: 'card-1', provider: 'STRIPE', type: 'card', last4: '4242', brand: 'visa', expiry_month: 12, expiry_year: 2030, is_primary: true }] } },
-    CreateProductOrder: orderReply('createProductOrder', 'order-p'),
-    CreateServiceOrder: orderReply('createServiceOrder', 'order-s'),
+    CreateProductOrder: orderReply('createProductOrder', 'order-p', 12345),
+    CreateServiceOrder: orderReply('createServiceOrder', 'order-s', 25000),
     ConfirmPaymentIntent: { confirmPaymentIntent: { __typename: 'ConfirmPaymentIntentResponse', success: true, message: null, provider_transaction_id: null, requires_action: false, action_url: null } },
 };
 
@@ -61,6 +59,13 @@ async function addServiceToCart(page: Page, quantity = 1) {
     for (let i = 1; i < quantity; i += 1) await rail.getByRole('button', { name: 'Increase quantity' }).click();
     await rail.getByRole('button', { name: 'Continue' }).click();
     await page.getByRole('button', { name: 'Add to cart', exact: true }).click();
+}
+
+async function pay(page: Page) {
+    await page.evaluate(() => {
+        (window as unknown as { __paystackTestStub: () => Promise<{ reference: string }> }).__paystackTestStub = async () => ({ reference: 'ref-test' });
+    });
+    await page.getByRole('button', { name: /^Pay/ }).click();
 }
 
 const proceedToCheckout = (page: Page) => page.getByRole('button', { name: 'Proceed to checkout' }).click();
@@ -95,17 +100,17 @@ test('product cart: exact createProductOrder variables, and the total is what is
     await expect(page.getByTestId('mp-checkout-address-hint')).toBeVisible();
     await fillAddress(page);
     await expect(page.getByTestId('mp-checkout-address-hint')).toHaveCount(0);
-    await page.getByRole('button', { name: /^Pay/ }).click();
+    await pay(page);
 
     await expect(page.getByRole('button', { name: 'Done order' })).toBeVisible({ timeout: 30_000 });
     expect(inputs(graphql, 'CreateProductOrder')).toEqual([{
         vendor_id: VENDOR_ID,
         items: [{ product_id: 'prod-1', quantity: 1, price: 12345, currency: 'GHS' }],
-        shipping_address: 'Ama Owusu, 1 High Street, Accra, GH, 0240000000',
+        shipping_details: { recipient_name: 'Ama Owusu', street: '1 High Street', city: 'Accra', country: 'GH', phone: '0240000000' },
         notes: 'payment_method:credit',
     }]);
     expect(inputs(graphql, 'CreateServiceOrder')).toEqual([]);
-    expect(inputs(graphql, 'ConfirmPaymentIntent')).toEqual([{ payment_intent_id: 'pi-order-p', payment_method_id: 'card-1', provider: 'STRIPE' }]);
+    expect(inputs(graphql, 'ConfirmPaymentIntent')).toEqual([{ payment_intent_id: 'pi-order-p', payment_method_id: 'ref-test', provider: 'PAYSTACK' }]);
     expect(total).toBe((inputs(graphql, 'CreateProductOrder')[0].items as { price: number; quantity: number }[]).reduce((sum, i) => sum + i.price * i.quantity, 0));
     expect(await page.locator('body').innerText()).not.toMatch(UUID);
     await page.context().close();
@@ -122,7 +127,7 @@ test('service cart: createServiceOrder with no product_id, package or address, a
     await expect(page.getByPlaceholder('Address')).toHaveCount(0);
     await expect(page.getByText('Shipping address')).toHaveCount(0);
     await expect(page.getByRole('button', { name: /^Pay/ })).toBeEnabled();
-    await page.getByRole('button', { name: /^Pay/ }).click();
+    await pay(page);
 
     await expect(page.getByRole('button', { name: 'Done order' })).toBeVisible({ timeout: 30_000 });
     expect(inputs(graphql, 'CreateServiceOrder')).toEqual([{ vendor_id: VENDOR_2, service_id: 'svc-1', notes: 'payment_method:credit' }]);
@@ -136,10 +141,34 @@ test('a service line of 2 is 2 orders, and the screen total is what they add up 
     await addServiceToCart(page, 2);
     await proceedToCheckout(page);
     expect(toMinor(await page.getByTestId('mp-checkout-total').textContent())).toBe(50000);
-    await page.getByRole('button', { name: /^Pay/ }).click();
+    await pay(page);
     await expect(page.getByRole('button', { name: 'Done order' })).toBeVisible({ timeout: 30_000 });
     expect(inputs(graphql, 'CreateServiceOrder')).toHaveLength(2);
     expect(inputs(graphql, 'ConfirmPaymentIntent')).toHaveLength(2);
+    await page.context().close();
+});
+
+test('a listing repriced since the cart was built: the customer is told, and no payment is taken', async () => {
+    const over = { ...BASE, CreateProductOrder: orderReply('createProductOrder', 'order-p', 99999) };
+    const { page, graphql } = await open(browser, '/marketplace', over);
+    await expect(page.getByTestId('mp-card').first()).toBeVisible({ timeout: 90_000 });
+    await page.getByTestId('mp-card').first().click();
+    await page.getByRole('button', { name: 'Buy now' }).click();
+    await fillAddress(page);
+    await page.evaluate(() => {
+        const w = window as unknown as { __paystackCalls: number; __paystackTestStub: () => Promise<{ reference: string }> };
+        w.__paystackCalls = 0;
+        w.__paystackTestStub = async () => {
+            w.__paystackCalls += 1;
+            return { reference: 'ref-test' };
+        };
+    });
+    await page.getByRole('button', { name: /^Pay/ }).click();
+
+    await expect(page.getByTestId('mp-checkout-failure')).toContainText('you have not been charged', { timeout: 30_000 });
+    await expect(page.getByRole('button', { name: 'Done order' })).toHaveCount(0);
+    expect(await page.evaluate(() => (window as unknown as { __paystackCalls: number }).__paystackCalls)).toBe(0);
+    expect(inputs(graphql, 'ConfirmPaymentIntent')).toEqual([]);
     await page.context().close();
 });
 
@@ -162,7 +191,7 @@ test('mixed cart: one of each mutation, and the total is the sum of both', async
 
     expect(toMinor(await page.getByTestId('mp-checkout-total').textContent())).toBe(12345 + 25000);
     await fillAddress(page); // the product still needs one
-    await page.getByRole('button', { name: /^Pay/ }).click();
+    await pay(page);
 
     await expect(page.getByRole('button', { name: 'Done order' })).toBeVisible({ timeout: 30_000 });
     expect(inputs(graphql, 'CreateProductOrder')).toHaveLength(1);
@@ -176,14 +205,14 @@ test('part of a mixed cart fails: paid part shown, rest still payable, no succes
     const over = {
         ...BASE,
         // errorPolicy 'all': a refused mutation resolves with data: null, it does not throw.
-        CreateServiceOrder: () => (refuse ? { __errors: [{ message: 'refused', code: 'INTERNAL' }] } : orderReply('createServiceOrder', 'order-s')),
+        CreateServiceOrder: () => (refuse ? { __errors: [{ message: 'refused', code: 'INTERNAL' }] } : orderReply('createServiceOrder', 'order-s', 25000)),
     };
     const { page, graphql } = await open(browser, '/marketplace', over);
     await addProductToCart(page);
     await addServiceToCart(page);
     await proceedToCheckout(page);
     await fillAddress(page);
-    await page.getByRole('button', { name: /^Pay/ }).click();
+    await pay(page);
 
     await expect(page.getByTestId('mp-checkout-failure')).toContainText('You have not been charged for the items still listed here');
     await expect(page.getByTestId('mp-checkout-paid')).toContainText('Kente cloth');
@@ -192,7 +221,7 @@ test('part of a mixed cart fails: paid part shown, rest still payable, no succes
     expect(toMinor(await page.getByTestId('mp-checkout-total').textContent())).toBe(25000);
 
     refuse = false;
-    await page.getByRole('button', { name: /^Pay/ }).click();
+    await pay(page);
     await expect(page.getByRole('button', { name: 'Done order' })).toBeVisible({ timeout: 30_000 });
     expect(inputs(graphql, 'CreateProductOrder')).toHaveLength(1);
     expect(inputs(graphql, 'ConfirmPaymentIntent')).toHaveLength(2);
@@ -209,7 +238,7 @@ test('checkout with a paid line and a failure fits 360px', async () => {
     await addServiceToCart(page);
     await proceedToCheckout(page);
     await fillAddress(page);
-    await page.getByRole('button', { name: /^Pay/ }).click();
+    await pay(page);
     await expect(page.getByTestId('mp-checkout-failure')).toBeVisible({ timeout: 30_000 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await page.context().close();

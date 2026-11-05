@@ -11,10 +11,8 @@ import {
 import {
   CONFIRM_PAYMENT_INTENT,
   GET_PAYMENT_INTENT,
-  MY_PAYMENT_METHODS,
   type ConfirmPaymentIntentResponse,
   type GetPaymentIntentResponse,
-  type MyPaymentMethodsResponse,
 } from "@/services/gql/payments";
 import type {
   CreateProductOrderResponse,
@@ -33,7 +31,7 @@ import {
 } from "@/lib/marketplaceCheckout";
 import { openPaystackMobileMoney, openPaystackCard } from "@/lib/paystack";
 import { useUserStore } from "@/store/useUserStore";
-import type { PaymentContext, PaymentResult, PaymentMethod } from "../types";
+import type { PaymentContext, PaymentResult, PaymentMethod, ShippingAddress } from "../types";
 
 /**
  * Connects the checkout rules in @/lib/marketplaceCheckout to Apollo and the
@@ -58,10 +56,6 @@ export function useMarketplacePayment() {
     useMutation<CreateServiceOrderResponse>(CREATE_SERVICE_ORDER);
   const [confirmPaymentIntent] =
     useMutation<ConfirmPaymentIntentResponse>(CONFIRM_PAYMENT_INTENT);
-  const [fetchMyPaymentMethods] = useLazyQuery<MyPaymentMethodsResponse>(
-    MY_PAYMENT_METHODS,
-    { fetchPolicy: "network-only" }
-  );
   const [fetchPaymentIntent] = useLazyQuery<GetPaymentIntentResponse>(
     GET_PAYMENT_INTENT,
     { fetchPolicy: "network-only" }
@@ -71,7 +65,7 @@ export function useMarketplacePayment() {
     async (
       ctx: PaymentContext,
       method: PaymentMethod,
-      shippingAddress?: string
+      shippingAddress?: ShippingAddress
     ): Promise<PaymentResult> => {
       if (inFlight.current) return { success: false };
       inFlight.current = true;
@@ -86,7 +80,7 @@ export function useMarketplacePayment() {
       };
 
       const readOrderReply = (
-        reply: { success?: boolean; order?: { id?: string } | null } | null | undefined,
+        reply: { success?: boolean; order?: { id?: string; total_amount?: number } | null } | null | undefined,
         error: unknown
       ) => {
         redirectIfSignedOut(error);
@@ -94,16 +88,8 @@ export function useMarketplacePayment() {
         return {
           orderId: reply.order.id,
           paymentIntentId: resolvePaymentIntentId(reply),
+          totalMinor: reply.order.total_amount,
         };
-      };
-
-      let savedCard: Promise<string | null> | undefined;
-      const lookUpSavedCard = async (): Promise<string | null> => {
-        const { data } = await fetchMyPaymentMethods();
-        const cards = (data?.myPaymentMethods?.payment_methods ?? []).filter(
-          (m) => m.provider === "STRIPE" && m.type === "card"
-        );
-        return (cards.find((m) => Boolean(m.is_primary)) ?? cards[0])?.id ?? null;
       };
 
       const deps: CheckoutDeps = {
@@ -124,16 +110,16 @@ export function useMarketplacePayment() {
           const { data } = await fetchPaymentIntent({ variables: { id } });
           return isPaidIntentStatus(data?.getPaymentIntent?.payment_intent?.status);
         },
-        takePaystackPayment: async ({ amountMinor, currency, method: chosen }) => {
+        takePaystackPayment: async ({ amountMinor, currency, method: chosen, paymentIntentId }) => {
           const open = chosen === "mobile" ? openPaystackMobileMoney : openPaystackCard;
           const { reference } = await open({
             email: userEmail ?? "",
             amountInPesewas: amountMinor,
             currency,
+            paymentIntentId,
           });
           return reference;
         },
-        stripeCardId: () => (savedCard ??= lookUpSavedCard()),
         confirm: async (input) => {
           const { data, error } = await confirmPaymentIntent({
             variables: { input },
@@ -170,7 +156,6 @@ export function useMarketplacePayment() {
       confirmPaymentIntent,
       createProductOrder,
       createServiceOrder,
-      fetchMyPaymentMethods,
       fetchPaymentIntent,
       locale,
       router,

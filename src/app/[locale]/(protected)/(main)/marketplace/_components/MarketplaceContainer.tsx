@@ -36,7 +36,6 @@ import { useMarketplacePayment } from "./payments/useMarketplacePayment";
 import { toCdnUrl } from "@/lib/cdn";
 import {
   cartNeedsShipping,
-  formatShippingAddress,
   settlePaidLines,
 } from "@/lib/marketplaceCheckout";
 
@@ -374,7 +373,7 @@ export default function MarketplaceContainer() {
             const result = await pay(
               { kind: "cart", cart: c },
               method,
-              cartNeedsShipping(c) ? formatShippingAddress(shippingAddress) : undefined
+              cartNeedsShipping(c) ? shippingAddress : undefined
             );
             const paid = result.paid ?? [];
             setPaidLines((prev) => settlePaidLines(c, paid, prev).paidLines);

@@ -51,13 +51,12 @@ export function isMobileMoneySupported(currency?: string | null): boolean {
  * Which provider settles CARD payments for a given currency. Must mirror the
  * payment-service `PROVIDER_CURRENCIES_*` guard (which rejects mismatches):
  *   - USD / EUR / GBP → Stripe (and PayPal)
- *   - GHS            → Stripe (the existing GHS-card flow)
- *   - NGN / KES      → Paystack (Stripe cannot settle these; Paystack can)
+ *   - GHS / NGN / KES → Paystack, which needs nothing saved beforehand
  * This is the routing that makes the platform work for currencies beyond USD/GHS.
  */
 export function cardProviderForCurrency(currency?: string | null): 'STRIPE' | 'PAYSTACK' {
   const code = (currency ?? DEFAULT_CURRENCY).toUpperCase();
-  return code === 'NGN' || code === 'KES' ? 'PAYSTACK' : 'STRIPE';
+  return code === 'GHS' || code === 'NGN' || code === 'KES' ? 'PAYSTACK' : 'STRIPE';
 }
 
 /** True when the card rail for this currency is the Paystack inline popup (vs Stripe saved-card). */

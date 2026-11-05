@@ -401,6 +401,7 @@ export const CREATE_PRODUCT_ORDER = gql`
         }
         total_amount
         currency
+        payment_intent_id
         shipping_address
         notes
         created_at
@@ -428,6 +429,7 @@ export const CREATE_SERVICE_ORDER = gql`
         }
         total_amount
         currency
+        payment_intent_id
         shipping_address
         notes
         created_at

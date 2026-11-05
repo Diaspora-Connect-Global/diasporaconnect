@@ -7567,6 +7567,7 @@
     "checkoutFailure": {
       "mixedCurrency": "Je winkelwagen bevat artikelen in verschillende valuta. Betaal elke valuta apart.",
       "orderRefused": "We konden deze bestelling niet plaatsen. De artikelen die hier nog staan, zijn je niet in rekening gebracht. Probeer het opnieuw.",
+      "priceChanged": "De prijs van een artikel is gewijzigd, dus er is niets in rekening gebracht. Vernieuw de pagina om de nieuwe prijs te zien.",
       "paymentCancelled": "Je hebt de betaling geannuleerd. De artikelen die hier nog staan, zijn je niet in rekening gebracht.",
       "paymentRefused": "Deze betaling is niet gelukt. De artikelen die hier nog staan, zijn je niet in rekening gebracht. Probeer het opnieuw.",
       "paymentUnavailable": "We konden de betaling voor deze bestelling niet starten. De artikelen die hier nog staan, zijn je niet in rekening gebracht. Probeer het later opnieuw.",

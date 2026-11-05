@@ -64,7 +64,7 @@ export async function seedSession(context: BrowserContext): Promise<void> {
             );
             localStorage.setItem(
                 'user-store',
-                JSON.stringify({ state: { user: { userId: me, firstName: 'Ama', lastName: 'Mensah', username: 'ama' }, rememberMe: false }, version: 0 }),
+                JSON.stringify({ state: { user: { userId: me, firstName: 'Ama', lastName: 'Mensah', username: 'ama', email: 'ama@example.com' }, rememberMe: false }, version: 0 }),
             );
             // The privacy-policy consent modal would cover every screenshot.
             localStorage.setItem('privacy_policy_accepted', 'true');

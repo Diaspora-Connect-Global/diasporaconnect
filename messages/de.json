@@ -7567,6 +7567,7 @@
     "checkoutFailure": {
       "mixedCurrency": "Ihr Warenkorb enthält Artikel in verschiedenen Währungen. Bitte bezahlen Sie jede Währung separat.",
       "orderRefused": "Wir konnten diese Bestellung nicht aufgeben. Die hier noch aufgeführten Artikel wurden Ihnen nicht berechnet. Bitte versuchen Sie es erneut.",
+      "priceChanged": "Der Preis eines Artikels hat sich geändert, deshalb wurde dir nichts berechnet. Bitte lade die Seite neu, um den neuen Preis zu sehen.",
       "paymentCancelled": "Sie haben die Zahlung abgebrochen. Die hier noch aufgeführten Artikel wurden Ihnen nicht berechnet.",
       "paymentRefused": "Diese Zahlung ist nicht durchgegangen. Die hier noch aufgeführten Artikel wurden Ihnen nicht berechnet. Bitte versuchen Sie es erneut.",
       "paymentUnavailable": "Wir konnten die Zahlung für diese Bestellung nicht starten. Die hier noch aufgeführten Artikel wurden Ihnen nicht berechnet. Bitte versuchen Sie es später erneut.",

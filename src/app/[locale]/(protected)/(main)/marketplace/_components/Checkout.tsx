@@ -154,11 +154,11 @@ export function Checkout({
   const failureMessages: Record<CheckoutFailure, string> = {
     mixed_currency: tp("checkoutFailure.mixedCurrency"),
     order_refused: tp("checkoutFailure.orderRefused"),
+    price_changed: tp("checkoutFailure.priceChanged"),
     payment_cancelled: tp("checkoutFailure.paymentCancelled"),
     payment_refused: tp("checkoutFailure.paymentRefused"),
     payment_unavailable: tp("checkoutFailure.paymentUnavailable"),
     payment_unconfirmed: tp("checkoutFailure.paymentUnconfirmed"),
-    no_saved_card: tp("checkoutFailure.noSavedCard"),
   };
 
   return (

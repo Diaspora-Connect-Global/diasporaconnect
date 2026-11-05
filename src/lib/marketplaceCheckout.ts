@@ -45,18 +45,18 @@ export function isShippingComplete(address: ShippingAddress): boolean {
     );
 }
 
-export const formatShippingAddress = (a: ShippingAddress): string =>
+const addressKey = (a: ShippingAddress): string =>
     `${a.name}, ${a.address}, ${a.city}, ${a.country}, ${a.phoneNumber}`;
 
 /** Why a checkout stopped. Each one has its own message for the customer. */
 export type CheckoutFailure =
     | 'mixed_currency'
     | 'order_refused'
+    | 'price_changed'
     | 'payment_cancelled'
     | 'payment_refused'
     | 'payment_unavailable'
-    | 'payment_unconfirmed'
-    | 'no_saved_card';
+    | 'payment_unconfirmed';
 
 export interface PaidLine {
     item: CartItem;
@@ -90,7 +90,7 @@ export type CheckoutPlan =
  */
 export function buildCheckoutPlan(
     cart: CartItem[],
-    { method, shippingAddress }: { method: PaymentMethod; shippingAddress?: string },
+    { method, shippingAddress }: { method: PaymentMethod; shippingAddress?: ShippingAddress },
 ): CheckoutPlan {
     const currencies = Array.from(new Set(cart.map((item) => (item.currency ?? 'GHS').toUpperCase())));
     if (currencies.length > 1) return { ok: false, failure: 'mixed_currency' };
@@ -113,7 +113,7 @@ export function buildCheckoutPlan(
             kind: 'product',
             // The address is part of the key: an order already created keeps the address
             // it was created with, so a corrected address has to be a new order.
-            key: `product|${vendorId}|${quantities}|${shippingAddress ?? ''}`,
+            key: `product|${vendorId}|${quantities}|${shippingAddress ? addressKey(shippingAddress) : ''}`,
             currency,
             amountMinor: cartTotalMinor(items),
             lines: items.map((item) => ({ item, quantity: item.quantity })),
@@ -125,7 +125,13 @@ export function buildCheckoutPlan(
                     price: toMinorUnits(item.price),
                     currency,
                 })),
-                shipping_address: shippingAddress,
+                shipping_details: shippingAddress && {
+                    recipient_name: shippingAddress.name.trim(),
+                    street: shippingAddress.address.trim(),
+                    city: shippingAddress.city.trim(),
+                    country: shippingAddress.country,
+                    phone: shippingAddress.phoneNumber.trim(),
+                },
                 notes,
             },
         });
@@ -214,19 +220,19 @@ export type ConfirmAnswer = 'confirmed' | 'refused' | 'unknown';
 export interface CheckoutDeps {
     hasEmail: boolean;
     /** Must not throw for a refusal: a refused order comes back with no orderId. */
-    createOrder(order: PlannedOrder): Promise<{ orderId?: string; paymentIntentId?: string }>;
+    createOrder(order: PlannedOrder): Promise<{ orderId?: string; paymentIntentId?: string; totalMinor?: number }>;
     isIntentPaid(paymentIntentId: string): Promise<boolean>;
     /** Opens the Paystack popup for exactly this amount. Rejects if it is cancelled or fails. */
     takePaystackPayment(args: {
         amountMinor: number;
         currency: string;
         method: PaymentMethod;
+        paymentIntentId: string;
     }): Promise<string>;
-    stripeCardId(): Promise<string | null>;
     confirm(input: {
         payment_intent_id: string;
         payment_method_id: string;
-        provider: 'PAYSTACK' | 'STRIPE';
+        provider: 'PAYSTACK';
     }): Promise<ConfirmAnswer>;
 }
 
@@ -268,6 +274,12 @@ async function settleOrder(
     if (!attempt) {
         const created = await deps.createOrder(order).catch(() => ({ orderId: undefined, paymentIntentId: undefined }));
         if (!created.orderId) return { paid: false, failure: 'order_refused' };
+        // The order is priced from the listing as it is now. If that moved since this cart
+        // was built, the screen is out of date, and a charge for the old amount would be
+        // refused after the money had gone. Not remembered: the order expires by itself.
+        if (created.totalMinor !== undefined && created.totalMinor !== order.amountMinor) {
+            return { paid: false, failure: 'price_changed' };
+        }
         attempt = { order, orderId: created.orderId, paymentIntentId: created.paymentIntentId };
         attempts.set(order.key, attempt);
     }
@@ -275,33 +287,22 @@ async function settleOrder(
     // Kept in `attempts` on purpose: pressing Pay again must not stack up more unpayable orders.
     if (!attempt.paymentIntentId) return { paid: false, failure: 'payment_unavailable' };
 
-    let provider: 'PAYSTACK' | 'STRIPE';
-    let paymentMethodId: string;
-    if (attempt.paystackReference) {
-        provider = 'PAYSTACK';
-        paymentMethodId = attempt.paystackReference;
-    } else if (usesPaystack(method, order.currency)) {
+    if (!attempt.paystackReference) {
         try {
             attempt.paystackReference = await deps.takePaystackPayment({
                 amountMinor: order.amountMinor,
                 currency: order.currency,
                 method,
+                paymentIntentId: attempt.paymentIntentId,
             });
         } catch (error) {
             const cancelled = error instanceof Error && error.message === 'Payment cancelled.';
             return { paid: false, failure: cancelled ? 'payment_cancelled' : 'payment_refused' };
         }
-        provider = 'PAYSTACK';
-        paymentMethodId = attempt.paystackReference;
-    } else {
-        const cardId = await deps.stripeCardId().catch(() => null);
-        if (!cardId) return { paid: false, failure: 'no_saved_card' };
-        provider = 'STRIPE';
-        paymentMethodId = cardId;
     }
 
     const answer = await deps
-        .confirm({ payment_intent_id: attempt.paymentIntentId, payment_method_id: paymentMethodId, provider })
+        .confirm({ payment_intent_id: attempt.paymentIntentId, payment_method_id: attempt.paystackReference, provider: 'PAYSTACK' })
         .catch((): ConfirmAnswer => 'unknown');
     if (answer === 'confirmed') {
         attempts.delete(order.key);
@@ -329,7 +330,7 @@ export async function runCheckout({
 }: {
     cart: CartItem[];
     method: PaymentMethod;
-    shippingAddress?: string;
+    shippingAddress?: ShippingAddress;
     attempts: Map<string, OrderAttempt>;
     deps: CheckoutDeps;
 }): Promise<CheckoutOutcome> {
@@ -353,12 +354,10 @@ export async function runCheckout({
     if (plan.orders.length === 0) return { success: paid.length > 0, paid, orderIds };
 
     // Catch what would fail anyway before any order exists, not after the first is paid.
-    if (usesPaystack(method, plan.currency)) {
-        if (!deps.hasEmail) return stop('payment_unavailable');
-    } else {
-        const cardId = await deps.stripeCardId().catch(() => null);
-        if (!cardId) return stop('no_saved_card');
-    }
+    // Paystack is the one way to pay that the server can check with the provider. Other
+    // currencies have no way to take a card yet, so they stop here, before an order
+    // reserves any stock.
+    if (!usesPaystack(method, plan.currency) || !deps.hasEmail) return stop('payment_unavailable');
 
     for (const order of plan.orders) {
         const settled = await settleOrder(order, method, attempts, deps);
