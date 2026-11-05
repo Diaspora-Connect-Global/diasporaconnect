@@ -44,27 +44,3 @@ export function circleCoverPlaceholder(seed: string): RedesignImage {
   for (let i = 0; i < seed.length; i += 1) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
   return CIRCLE_COVERS[h % CIRCLE_COVERS.length];
 }
-
-/**
- * The stand-in photo for an opportunity that has no image of its own, by kind —
- * or `null` when no photo in the repo fits, so the card shows its tinted icon tile
- * (type icon + the type's name as the tag) instead of a wrong picture.
- * One mapping for the opportunity cards that use a stand-in photo (Discover, category pages, For you).
- * Home's "Latest on DiaspoPlug" always shows the tile.
- */
-export function opportunityFallbackPhoto(type?: string | null, category?: string | null): RedesignImage | null {
-  if (category === 'REAL_ESTATE_INFRASTRUCTURE') return CATEGORY_PHOTOS.property;
-  switch (type) {
-    case 'EMPLOYMENT':
-    case 'CONTRACT':
-      return CATEGORY_PHOTOS.job;
-    case 'PROGRAM':
-    case 'INITIATIVE':
-      return cat('team', 472);
-    case 'INVESTMENT':
-      return CATEGORY_PHOTOS.investment;
-    // SCHOLARSHIP, FELLOWSHIP, GRANT, VOLUNTEER and unknown kinds: no fitting photo exists.
-    default:
-      return null;
-  }
-}

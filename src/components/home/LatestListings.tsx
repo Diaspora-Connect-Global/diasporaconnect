@@ -20,7 +20,7 @@ export function LatestListings() {
   const products = useFeaturedProducts(1);
 
   const cards = [
-    ...opps.items.slice(0, 2).map((o) => <OpportunityCard key={`o-${o.id}`} item={o} testId="latest-card" iconFallback />),
+    ...opps.items.slice(0, 2).map((o) => <OpportunityCard key={`o-${o.id}`} item={o} testId="latest-card" />),
     ...services.items.slice(0, 1).map((s) => <ServiceCard key={`s-${s.id}`} item={s} testId="latest-card" />),
     ...products.items.slice(0, 1).map((p) => <ProductCard key={`p-${p.id}`} item={p} testId="latest-card" />),
   ];

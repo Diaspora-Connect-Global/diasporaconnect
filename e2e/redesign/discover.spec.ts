@@ -353,3 +353,14 @@ test('a kind with nothing posted has no row', async () => {
     await expect(page.getByTestId('discover-section-grants')).toHaveCount(0);
     await page.context().close();
 });
+
+test('an opportunity with no image of its own shows its icon tile, never a stock photo', async () => {
+    const { page } = await open(browser, '/discover', FOR_YOU, { width: 1280, height: 900 });
+    for (const testId of ['discover-foryou-opportunities', 'discover-latest-opportunities']) {
+        const cards = page.getByTestId(testId);
+        await expect(cards.first()).toBeVisible({ timeout: 90_000 });
+        await expect(cards.locator('img')).toHaveCount(0);
+        await expect(cards.first().locator('svg').first()).toBeVisible();
+    }
+    await page.context().close();
+});

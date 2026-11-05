@@ -1,4 +1,4 @@
-/** Home "Latest on DiaspoPlug": every opportunity kind shows its icon tile, never a stand-in photo. */
+/** Home "Latest on DiaspoPlug": every opportunity kind shows its icon tile, never a stock photo. */
 import { test, expect, type Browser, type Locator } from '@playwright/test';
 import { openBrowser } from '../support/browser';
 import { ALL, UUID, open } from './fixtures';
@@ -36,7 +36,7 @@ test('a job and a scholarship both get an icon tile, not a photo', async () => {
     await page.context().close();
 });
 
-test('so do the kinds that have a stand-in photo elsewhere: programme, investment and real estate', async () => {
+test('so do programme, investment and real estate', async () => {
     const first = await latest([opp('o-3', 'Mentoring Programme', 'PROGRAM'), opp('o-4', 'Solar Fund', 'INVESTMENT')]);
     await expectIconTile(first.section, 'Mentoring Programme', 'Programme');
     await expectIconTile(first.section, 'Solar Fund', 'Investment');

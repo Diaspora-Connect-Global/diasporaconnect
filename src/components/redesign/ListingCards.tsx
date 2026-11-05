@@ -7,7 +7,7 @@ import { Link } from '@/i18n/navigation';
 import { ICON_CHIP_CLASS, TONE_CLASS } from '@/components/more/MoreLinkCard';
 import { MediaCard } from './MediaCard';
 import { OpportunityBookmark } from './OpportunityBookmark';
-import { CATEGORY_PHOTOS, opportunityFallbackPhoto } from '@/lib/redesignImages';
+import { CATEGORY_PHOTOS } from '@/lib/redesignImages';
 import { toCdnUrl } from '@/lib/cdn';
 import { formatMoney } from '@/types/money';
 import { getEventCoverImage, getEventLocationDisplay, type Event } from '@/services/gql/events';
@@ -28,10 +28,10 @@ const OPPORTUNITY_LOOK: Record<string, { icon: LucideIcon; tone: MoreTone }> = {
 };
 
 /**
- * Opportunity card. An opportunity carries no image; the fallback is a photo that fits its kind, else a tinted tile with the kind's icon.
- * `iconFallback` skips the photo, so every kind gets the tile.
+ * Opportunity card. An opportunity has no image of its own yet, so every one shows a
+ * tinted tile with its kind's icon, never a stock photo passed off as its picture.
  */
-export function OpportunityCard({ item, testId, iconFallback = false }: { item: OpportunityItem; testId?: string; iconFallback?: boolean }) {
+export function OpportunityCard({ item, testId }: { item: OpportunityItem; testId?: string }) {
   const t = useTranslations('redesign');
   const format = useFormatter();
   const isRealEstate = item.category === 'REAL_ESTATE_INFRASTRUCTURE';
@@ -44,7 +44,6 @@ export function OpportunityCard({ item, testId, iconFallback = false }: { item: 
       testId={testId}
       href={`/opportunities/${encodeURIComponent(item.id)}`}
       fallbackIcon={look.icon}
-      fallbackPhoto={iconFallback ? undefined : opportunityFallbackPhoto(item.type, item.category)?.src}
       action={<OpportunityBookmark id={item.id} saved={!!item.isSavedByCurrentUser} />}
       tone={look.tone}
       tag={tag}
