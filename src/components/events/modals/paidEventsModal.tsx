@@ -118,8 +118,8 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
         const subtotalCents = ticketQty * unitPrice;
         const discountCents = appliedPromo?.discountCents ?? 0;
         const discountedCents = Math.max(0, subtotalCents - discountCents);
-        const serviceFeeCents = selectedEvent?.isPaid ? Math.round(discountedCents * 0.1) : 0;
-        setTotalAmount((discountedCents + serviceFeeCents) / 100);
+        // What the registration's payment is for: the server adds no fee.
+        setTotalAmount(discountedCents / 100);
     }, [ticketQty, selectedEvent, appliedPromo]);
 
     const handleApplyPromo = async () => {
@@ -239,7 +239,6 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
     const subtotal = ticketQty * unitPrice;
     const discountAmount = (appliedPromo?.discountCents ?? 0) / 100;
     const discountedSubtotal = Math.max(0, subtotal - discountAmount);
-    const serviceFee = selectedEvent?.isPaid ? discountedSubtotal * 0.1 : 0;
 
     const currencyCode = selectedEvent?.currency ?? 'GHS';
     const mobileMoneyAvailable = isMobileMoneySupported(currencyCode);
@@ -320,10 +319,6 @@ const PaidEventsModal = forwardRef<PaidEventsModalRef>((_, ref) => {
                                     <div className="flex justify-between text-sm">
                                         <span>{t('subtotal')}</span>
                                         <span>{formatAmount(discountedSubtotal)}</span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span>{t('serviceFee')}</span>
-                                        <span>{formatAmount(serviceFee)}</span>
                                     </div>
                                 </div>
 

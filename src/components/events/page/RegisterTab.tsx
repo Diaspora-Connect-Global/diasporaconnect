@@ -121,8 +121,9 @@ export default function RegisterTab({
   const unitCents = event.isPaid ? (ticket?.priceInCents ?? 0) : 0;
   const subtotalCents = quantity * unitCents;
   const discountedCents = Math.max(0, subtotalCents - (promo?.discountCents ?? 0));
-  const feeCents = event.isPaid ? Math.round(discountedCents * 0.1) : 0;
-  const totalCents = discountedCents + feeCents;
+  // Exactly what the registration's payment is for: the server adds no fee, and a
+  // charge of any other amount is refused when it is checked with the provider.
+  const totalCents = discountedCents;
   const money = (cents: number) => {
     try {
       return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(cents / 100);
@@ -177,6 +178,7 @@ export default function RegisterTab({
           email: user.email,
           amountInPesewas: totalCents,
           currency,
+          paymentIntentId: intentId,
         });
         const r = await confirmPaymentIntent({ variables: { input: { payment_intent_id: intentId, payment_method_id: reference, provider: 'PAYSTACK' } } });
         return Boolean(r.data) && !hasErrors(r);
@@ -385,7 +387,6 @@ export default function RegisterTab({
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between"><span>{ticket?.name ?? tPay('ticketTypeRegular')} × {quantity}</span><span>{money(subtotalCents)}</span></div>
                 {promo && <div className="flex justify-between text-text-success"><span>{t('summary.discount', { code: promo.code })}</span><span>−{money(promo.discountCents)}</span></div>}
-                <div className="flex justify-between"><span>{tPay('serviceFee')}</span><span>{money(feeCents)}</span></div>
                 <div className="flex justify-between border-t border-border-subtle pt-2 font-semibold"><span>{tPay('total')}</span><span>{money(totalCents)}</span></div>
               </div>
               {promo ? (

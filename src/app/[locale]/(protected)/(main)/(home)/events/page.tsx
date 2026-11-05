@@ -88,6 +88,7 @@ export default function Events() {
     const tActions = useTranslations("actions");
     const t = useTranslations("home.events");
     const tPage = useTranslations("eventsPage");
+    const tPayment = useTranslations("membership.payment");
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState<Filter>("all");
     const [showPast, setShowPast] = useState(false);
@@ -199,9 +200,10 @@ export default function Events() {
                             email: userEmail,
                             amountInPesewas,
                             currency: event.currency ?? 'GHS',
+                            paymentIntentId,
                         });
 
-                        await confirmPaymentIntent({
+                        const confirmed = await confirmPaymentIntent({
                             variables: {
                                 input: {
                                     payment_intent_id: paymentIntentId,
@@ -210,6 +212,11 @@ export default function Events() {
                                 },
                             },
                         });
+                        // A refusal resolves here with no data under errorPolicy 'all'.
+                        if (!confirmed.data?.confirmPaymentIntent?.success) {
+                            toast.error(tPayment('errors.confirmFailed'));
+                            return;
+                        }
                     } else {
                         const stripePaymentMethodId = await getPrimaryStripeCardPaymentMethodId();
                         if (!stripePaymentMethodId) {

@@ -15,6 +15,11 @@ export interface PaystackCheckoutParams {
   /** Payment channels to enable. Defaults to card + mobile money. */
   channels?: PaystackChannel[];
   publicKey?: string;
+  /**
+   * Our payment this charge is for. The signed webhook reads it, so a customer who
+   * closes the tab straight after paying is still recorded as paid.
+   */
+  paymentIntentId?: string;
 }
 
 /** Back-compat alias for the original mobile-money-only shape. */
@@ -32,6 +37,11 @@ export async function openPaystackCheckout(
     process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY ||
     'pk_test_a941b987b0cc71abf69f358dbe5b5bdeff170533';
 
+  // End-to-end tests pay through this instead of the real popup. It fools only the
+  // browser it runs in: the server checks every reference with Paystack itself.
+  const testStub = (globalThis as { __paystackTestStub?: () => Promise<{ reference: string }> }).__paystackTestStub;
+  if (testStub) return testStub();
+
   // Browser-only SDK — import it lazily so this module is safe to evaluate on
   // the server (see note at top of file).
   const { default: PaystackPop } = await import('@paystack/inline-js');
@@ -46,6 +56,7 @@ export async function openPaystackCheckout(
         amount: params.amountInPesewas,
         currency: (params.currency ?? 'GHS').toUpperCase(),
         channels: params.channels ?? ['card', 'mobile_money'],
+        ...(params.paymentIntentId ? { metadata: { payment_intent_id: params.paymentIntentId } } : {}),
         onSuccess: (transaction: { reference?: string }) => {
           if (!transaction?.reference) {
             reject(new Error('Paystack transaction reference is missing.'));
