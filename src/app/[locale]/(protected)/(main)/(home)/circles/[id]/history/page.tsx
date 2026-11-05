@@ -4,7 +4,7 @@
 // v4's hooks package does not re-export the enum.
 import { NetworkStatus } from '@apollo/client';
 import { useQuery } from '@apollo/client/react';
-import { ArrowLeft, ScrollText, Users } from 'lucide-react';
+import { ScrollText, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
@@ -24,8 +24,7 @@ import { ButtonType1 } from '@/components/custom/button';
 import PageLoader from '@/components/custom/PageLoader';
 import { EmptyState, ErrorState } from '@/components/feedback';
 import { useCircleUsers } from '@/hooks/useCircleUsers';
-import { useRouter } from '@/i18n/navigation';
-import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { CIRCLE_SCREEN_CLASS, CircleScreenHeading } from '@/components/circles/shell';
 import { CIRCLE_MOTIONS } from '@/services/gql/circles';
 import { CIRCLE_AUDIT_TRAIL } from '@/services/gql/circles-governance';
 import type {
@@ -121,10 +120,8 @@ type HistoryTab = 'MOTIONS' | 'MEMBERSHIP' | 'ACTIVITY';
  */
 export default function CircleHistoryPage() {
   const params = useParams();
-  const router = useRouter();
   const t = useTranslations('circles.history');
   const tCommon = useTranslations('circles.common');
-  const tGlobal = useTranslations('common');
 
   const circleId = typeof params.id === 'string' ? params.id : '';
 
@@ -455,27 +452,12 @@ export default function CircleHistoryPage() {
    * history" would announce it as a link TO this page, which is where the user
    * already is.
    */
-  const header = (
-    <div className="flex shrink-0 items-start gap-2">
-      <button
-        type="button"
-        onClick={() => router.push(`/circles/${circleId}`)}
-        aria-label={tGlobal('previousPage')}
-        className="mt-0.5 cursor-pointer rounded-full p-1.5 text-text-primary transition-colors hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand"
-      >
-        <ArrowLeft className="size-5" />
-      </button>
-      <div className="min-w-0">
-        <h1 className="heading-xsmall text-text-primary">{t('title')}</h1>
-        <p className="body-small mt-0.5 text-text-secondary">{t('subtitle')}</p>
-      </div>
-    </div>
-  );
+  const header = <CircleScreenHeading title={t('title')} subtitle={t('subtitle')} />;
 
   if (isInitialLoading) {
     return (
-      <div className="h-app-inner flex overflow-hidden">
-        <div className={CIRCLE_COLUMN_CLASS}>
+      <div className="flex">
+        <div className={CIRCLE_SCREEN_CLASS}>
           {header}
           <PageLoader />
         </div>
@@ -575,11 +557,11 @@ export default function CircleHistoryPage() {
   }
 
   return (
-    <div className="h-app-inner flex overflow-hidden">
-      <div className={CIRCLE_COLUMN_CLASS}>
+    <div className="flex">
+      <div className={CIRCLE_SCREEN_CLASS}>
         {header}
 
-        <div className="flex flex-col gap-4 py-4">
+        <div className="flex flex-col gap-5">
           {/* Stated even on an empty record: "nothing recorded yet, and we
               verified that" is a different claim from "we could not check". */}
           {trailLoading ? null : (
@@ -601,7 +583,7 @@ export default function CircleHistoryPage() {
             ]}
           />
 
-          {body}
+          <div className="rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm sm:p-5">{body}</div>
 
           {pager.hasMore ? (
             <div className="flex justify-center pt-1">

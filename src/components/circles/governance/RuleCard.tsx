@@ -123,7 +123,7 @@ export function RuleCard({
       : null;
 
   return (
-    <section className="rounded-xl border border-border-subtle px-4 py-3">
+    <section className="rounded-2xl border border-border-subtle bg-surface-default px-4 py-3 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <h3 className="heading-xsmall text-text-primary">{kindLabel}</h3>
         {onShowHistory && versionCount && versionCount > 1 ? (

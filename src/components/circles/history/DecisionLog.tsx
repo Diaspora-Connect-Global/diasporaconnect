@@ -88,7 +88,7 @@ export function DecisionLog({ circleId, events, usersById }: DecisionLogProps) {
               the PAGE, and the two tokens differ in both themes (#ffffff vs the
               off-white page ground in light, #191919 vs near-black in dark), so
               the wrong one draws a visible band as the log scrolls under it. */}
-          <h2 className="caption-small sticky top-0 z-10 bg-background py-1 text-text-secondary">
+          <h2 className="caption-small sticky top-0 z-10 bg-surface-default py-1 text-text-secondary">
             {group.label || t('entry.undated')}
           </h2>
           <ol className="flex flex-col">

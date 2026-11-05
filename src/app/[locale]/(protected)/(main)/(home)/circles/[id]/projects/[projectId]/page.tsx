@@ -10,7 +10,7 @@ import { ButtonType1 } from '@/components/custom/button';
 import PageLoader from '@/components/custom/PageLoader';
 import { EmptyState, ErrorState } from '@/components/feedback';
 import { Link, useRouter } from '@/i18n/navigation';
-import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { CIRCLE_SCREEN_CLASS } from '@/components/circles/shell';
 import { useUserStore } from '@/store/useUserStore';
 import { circleUserDisplayName, useCircleUsers } from '@/hooks/useCircleUsers';
 import {
@@ -174,12 +174,12 @@ export default function CircleProjectPage() {
    * which is where the reader already is.
    */
   const header = (
-    <div className="mb-4 flex shrink-0 items-center gap-2">
+    <div className="flex shrink-0 items-center gap-2">
       <button
         type="button"
         onClick={() => router.push(`/circles/${circleId}`)}
         aria-label={t('common.back')}
-        className="cursor-pointer rounded-full p-1.5 text-text-primary transition-colors hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand"
+        className="cursor-pointer rounded-full border border-border-subtle bg-surface-default p-1.5 text-text-primary shadow-sm transition-colors hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand"
       >
         <ArrowLeft className="size-5" />
       </button>
@@ -195,8 +195,8 @@ export default function CircleProjectPage() {
    */
   if ((projectLoading && !projectData) || (goalsLoading && !goalsData)) {
     return (
-      <div className="h-app-inner flex overflow-hidden">
-        <div className={CIRCLE_COLUMN_CLASS}>
+      <div className="flex">
+        <div className={CIRCLE_SCREEN_CLASS}>
           {header}
           <PageLoader />
         </div>
@@ -206,8 +206,8 @@ export default function CircleProjectPage() {
 
   if (projectError && !project) {
     return (
-      <div className="h-app-inner flex overflow-hidden">
-        <div className={CIRCLE_COLUMN_CLASS}>
+      <div className="flex">
+        <div className={CIRCLE_SCREEN_CLASS}>
           {header}
           <ErrorState
             title={t('errors.loadProject')}
@@ -227,8 +227,8 @@ export default function CircleProjectPage() {
    */
   if (!project) {
     return (
-      <div className="h-app-inner flex overflow-hidden">
-        <div className={CIRCLE_COLUMN_CLASS}>
+      <div className="flex">
+        <div className={CIRCLE_SCREEN_CLASS}>
           {header}
           <EmptyState
             title={t('errors.noAccess.title')}
@@ -246,79 +246,87 @@ export default function CircleProjectPage() {
 
   return (
     /*
-     * One scroll container on mobile; two side-by-side ones from `lg`. The
-     * breakpoint switch lives here rather than in `feedColumnLayout` because it
-     * is specific to this screen having a second column of primary content.
+     * One column on mobile; main column + ledger rail from `lg`, the same
+     * two-column grid Discover and the circle home use. Every block is mounted
+     * exactly once (rendering the rail twice behind `lg:hidden` / `hidden
+     * lg:block` would mount two `ContributeForm`s, each minting its own
+     * idempotency key — the only thing between a retry and a double-counted
+     * ledger row).
      */
-    <div className="h-app-inner scrollbar-hide overflow-y-auto lg:flex lg:overflow-hidden">
-      <div className="scrollbar-hide mx-4 flex min-w-0 flex-col py-4 lg:mr-6 lg:flex-1 lg:overflow-y-auto">
-        {header}
+    <div className={CIRCLE_SCREEN_CLASS}>
+      {header}
 
-        <ProjectHeader project={project} proposerName={proposerName} />
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start xl:grid-cols-[minmax(0,1fr)_24rem]">
+        <div className="flex min-w-0 flex-col gap-5">
+          <ProjectHeader project={project} proposerName={proposerName} />
 
-        {goals.length > 0 && (
-          <section className="mt-6 space-y-5">
-            {goals.map((goal, index) => (
-              <GoalProgressPanel
-                key={goal.id}
-                circleId={circleId}
-                goal={goal}
-                // Only the primary goal carries the section heading; the rest
-                // are additional bars under it, not competing headings.
-                label={index === 0 ? t('project.progressTitle') : undefined}
-              />
-            ))}
-          </section>
-        )}
-
-        {/*
-          A project with no goal cannot be contributed to at all —
-          `ContributeForm` needs one and renders nothing without it — so this is
-          not an extra: it is the step that makes a freshly created project
-          usable. Creation puts a project straight into ACTIVE with zero goals,
-          which is exactly the state that would otherwise be a dead end.
-        */}
-        <section className="mt-6">
-          {addingGoal ? (
-            <AddGoalForm
-              circleId={circleId}
-              projectId={projectId}
-              onDone={() => setAddingGoal(false)}
-            />
-          ) : (
-            <ButtonType1 className="w-full" onClick={() => setAddingGoal(true)}>
-              {goals.length === 0 ? t('newGoal.ctaFirst') : t('newGoal.cta')}
-            </ButtonType1>
+          {goals.length > 0 && (
+            <section className="space-y-5 rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm sm:p-5">
+              {goals.map((goal, index) => (
+                <GoalProgressPanel
+                  key={goal.id}
+                  circleId={circleId}
+                  goal={goal}
+                  // Only the primary goal carries the section heading; the rest
+                  // are additional bars under it, not competing headings.
+                  label={index === 0 ? t('project.progressTitle') : undefined}
+                />
+              ))}
+            </section>
           )}
-        </section>
 
-        {/*
-          Where the project is actually talked about. Rendered only when the
-          circle's chat is really available — the chat adapter is behind a
-          server flag, and a link into a room that does not exist is worse than
-          no link at all.
-        */}
-        {conversationId && (
-          <section className="mt-6">
-            <ProjectDiscussion
-              circleId={circleId}
-              messageCount={messagesData?.getMessages?.total ?? null}
-            />
+          {/*
+            A project with no goal cannot be contributed to at all —
+            `ContributeForm` needs one and renders nothing without it — so this
+            is not an extra: it is the step that makes a freshly created
+            project usable. Creation puts a project straight into ACTIVE with
+            zero goals, which is exactly the state that would otherwise be a
+            dead end.
+          */}
+          <section>
+            {addingGoal ? (
+              <div className="rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm sm:p-5">
+                <AddGoalForm
+                  circleId={circleId}
+                  projectId={projectId}
+                  onDone={() => setAddingGoal(false)}
+                />
+              </div>
+            ) : (
+              <ButtonType1 className="w-full" onClick={() => setAddingGoal(true)}>
+                {goals.length === 0 ? t('newGoal.ctaFirst') : t('newGoal.cta')}
+              </ButtonType1>
+            )}
           </section>
-        )}
-      </div>
 
-      <ContributionsPanel
-        circleId={circleId}
-        contributions={contributions}
-        usersById={usersById}
-        goal={primaryGoal}
-        currentUserId={currentUserId}
-        loading={contributionsLoading}
-        hasMore={hasMore}
-        onSeeAll={() => setLimit((current) => current + CONTRIBUTIONS_PAGE)}
-        className="mx-4 mb-4 lg:my-4 lg:ml-0 lg:mr-4 lg:w-[22rem] lg:shrink-0 xl:w-[24rem]"
-      />
+          {/*
+            Where the project is actually talked about. Rendered only when the
+            circle's chat is really available — the chat adapter is behind a
+            server flag, and a link into a room that does not exist is worse
+            than no link at all.
+          */}
+          {conversationId && (
+            <section>
+              <ProjectDiscussion
+                circleId={circleId}
+                messageCount={messagesData?.getMessages?.total ?? null}
+              />
+            </section>
+          )}
+        </div>
+
+        <ContributionsPanel
+          circleId={circleId}
+          contributions={contributions}
+          usersById={usersById}
+          goal={primaryGoal}
+          currentUserId={currentUserId}
+          loading={contributionsLoading}
+          hasMore={hasMore}
+          onSeeAll={() => setLimit((current) => current + CONTRIBUTIONS_PAGE)}
+          className="lg:max-h-[40rem]"
+        />
+      </div>
     </div>
   );
 }

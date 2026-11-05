@@ -104,7 +104,7 @@ function PlanCard({ plan, isCurrent, canManage, onChoose }: PlanCardProps) {
   const purchasable = circlePlanIsFree(plan);
 
   return (
-    <article className="flex w-full flex-col rounded-2xl border border-border-subtle p-4">
+    <article className="flex w-full flex-col rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-1">
           <h3 className="label-large text-text-primary">{plan.name}</h3>

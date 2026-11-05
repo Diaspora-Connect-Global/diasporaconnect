@@ -3532,6 +3532,19 @@
       }
     },
     "home": {
+      "nav": {
+        "activity": "Activity",
+        "chat": "Chat",
+        "members": "Members",
+        "leaderboard": "Leaderboard",
+        "decisions": "Decisions",
+        "rules": "Rules",
+        "plan": "Plan",
+        "settings": "Settings"
+      },
+      "feedTitle": "Latest activity",
+      "feedSubtitle": "Projects, challenges and votes, newest first.",
+      "chatSubtitle": "Messages, projects, challenges and votes in one place.",
       "tabChat": "Chat",
       "tabMembers": "Members",
       "pinnedPrefix": "Pinned:",
@@ -3570,7 +3583,7 @@
       "historyLimited": "Showing the last {days, plural, =1 {1 day} other {# days}} of this chat. Nothing older has been deleted.",
       "noChatEmpty": {
         "title": "Nothing here yet",
-        "description": "Chat isn't switched on yet, but this is still where your circle's projects, challenges and votes appear. Start one from the + menu above."
+        "description": "Chat isn't switched on yet, but this is still where your circle's projects, challenges and votes appear. Start one with “Start something”."
       }
     },
     "motion": {
@@ -3735,10 +3748,20 @@
       "noResults": "No members match “{query}”.",
       "invite": {
         "title": "Invite",
-        "description": "Invite one person by email or phone, or share the circle's page.",
+        "description": "Invite one person by name, username, email or phone, or share the circle's page.",
         "copyLink": "Copy link",
         "linkCopied": "Link copied",
         "invitePerson": "Invite someone",
+        "fieldLabel": "Name, username, email or phone",
+        "searching": "Searching…",
+        "resultsLabel": "People",
+        "resultsFound": "{count, plural, =1 {1 person found} other {# people found}}",
+        "noMatches": "No one found. Try a username, or enter an email or phone number.",
+        "searchFailed": "Search didn't work. Try again, or enter an email or phone number.",
+        "pickPerson": "Pick someone from the list, or enter an email or phone number.",
+        "invited": "Invited {name}",
+        "alreadyMember": "That person is already a member of this circle.",
+        "alreadyInvited": "That person already has an invitation to this circle.",
         "copyCircleLink": "Copy circle link",
         "circleLinkCopied": "Circle link copied"
       },

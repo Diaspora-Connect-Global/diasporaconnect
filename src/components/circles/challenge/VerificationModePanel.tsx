@@ -41,8 +41,8 @@ export function VerificationModePanel({ mode }: VerificationModePanelProps) {
   const { icon: ModeIcon, label, description } = presentation;
 
   return (
-    <section className="mt-8">
-      <h2 className="label-medium text-text-primary">
+    <section className="rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm sm:p-5">
+      <h2 className="text-lg font-bold text-text-primary">
         {t('verificationTitle')}
       </h2>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@apollo/client/react';
-import { ArrowLeft, Scale } from 'lucide-react';
+import { Scale } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { useMemo, useState } from 'react';
@@ -15,8 +15,7 @@ import {
 } from '@/components/circles/governance';
 import PageLoader from '@/components/custom/PageLoader';
 import { EmptyState, ErrorState } from '@/components/feedback';
-import { useRouter } from '@/i18n/navigation';
-import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { CIRCLE_SCREEN_CLASS, CircleScreenHeading } from '@/components/circles/shell';
 import { CIRCLE, CIRCLE_GOVERNANCE_RULES } from '@/services/gql/circles';
 import { CIRCLE_GOVERNANCE_RULE_HISTORY } from '@/services/gql/circles-governance';
 import type {
@@ -61,10 +60,8 @@ import type {
  */
 export default function CircleGovernancePage() {
   const params = useParams();
-  const router = useRouter();
   const t = useTranslations('circles.governance');
   const tCommon = useTranslations('circles.common');
-  const tGlobal = useTranslations('common');
 
   const circleId = typeof params.id === 'string' ? params.id : '';
   const [expandedKind, setExpandedKind] = useState<string | null>(null);
@@ -113,24 +110,12 @@ export default function CircleGovernancePage() {
 
   const memberCount = circleData?.circle?.memberCount ?? null;
 
-  const header = (
-    <div className="flex shrink-0 items-center gap-2">
-      <button
-        type="button"
-        onClick={() => router.push(`/circles/${circleId}`)}
-        aria-label={tGlobal('previousPage')}
-        className="cursor-pointer rounded-full p-1.5 text-text-primary transition-colors hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand"
-      >
-        <ArrowLeft className="size-5" />
-      </button>
-      <h1 className="label-large text-text-primary">{t('title')}</h1>
-    </div>
-  );
+  const header = <CircleScreenHeading title={t('title')} subtitle={t('intro')} />;
 
   if (loading && rules.length === 0) {
     return (
-      <div className="h-app-inner flex overflow-hidden">
-        <div className={CIRCLE_COLUMN_CLASS}>
+      <div className="flex">
+        <div className={CIRCLE_SCREEN_CLASS}>
           {header}
           <PageLoader />
         </div>
@@ -140,8 +125,8 @@ export default function CircleGovernancePage() {
 
   if (error && rules.length === 0) {
     return (
-      <div className="h-app-inner flex overflow-hidden">
-        <div className={CIRCLE_COLUMN_CLASS}>
+      <div className="flex">
+        <div className={CIRCLE_SCREEN_CLASS}>
           {header}
           <div className="flex flex-1 items-center justify-center">
             <ErrorState
@@ -157,13 +142,11 @@ export default function CircleGovernancePage() {
   }
 
   return (
-    <div className="h-app-inner flex overflow-hidden">
-      <div className={CIRCLE_COLUMN_CLASS}>
+    <div className="flex">
+      <div className={CIRCLE_SCREEN_CLASS}>
         {header}
 
         <div className="flex flex-col gap-4 py-4">
-          <p className="body-small text-text-secondary">{t('intro')}</p>
-
           <PinnedRuleNotice />
 
           {rules.length === 0 ? (

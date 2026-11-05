@@ -34,6 +34,12 @@ interface MessageInputProps {
     senderId?: string;
     /** Called when user starts or stops typing (debounced). Use to emit typing:start / typing:stop. */
     onTyping?: (isTyping: boolean) => void;
+    /**
+     * Put the cursor here once the chat is ready (default). Turn it off where the
+     * box sits below other content: focusing would scroll the page to it and, on a
+     * phone, open the keyboard over what the person came to see.
+     */
+    autoFocusWhenReady?: boolean;
 }
 
 export function MessageInput({
@@ -43,6 +49,7 @@ export function MessageInput({
     conversationId,
     senderId = 'current-user',
     onTyping,
+    autoFocusWhenReady = true,
 }: MessageInputProps) {
     const t = useTranslations('chat.direct');
     const [newMessage, setNewMessage] = useState('');
@@ -224,14 +231,14 @@ export function MessageInput({
 
     // When chat is ready (conversationId set, not disabled), focus textarea so user can type immediately
     useEffect(() => {
-        if (!conversationId || disabled) return;
+        if (!autoFocusWhenReady || !conversationId || disabled) return;
         if (hasAutoFocusedRef.current === conversationId) return;
         const textarea = textareaRef.current;
         if (textarea) {
             textarea.focus();
             hasAutoFocusedRef.current = conversationId;
         }
-    }, [conversationId, disabled]);
+    }, [autoFocusWhenReady, conversationId, disabled]);
 
     // Typing indicator: notify parent on first keystroke, debounced stop after inactivity
     const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {

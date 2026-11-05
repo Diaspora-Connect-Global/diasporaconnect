@@ -65,7 +65,7 @@ export function ProjectHeader({ project, proposerName }: ProjectHeaderProps) {
   const statusVariant = STATUS_VARIANT[project.status];
 
   return (
-    <header>
+    <header className="rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm sm:p-5">
       <div className="flex flex-wrap items-center gap-2">
         <StatusPill label={t('project.title')} variant="brand" />
         {statusVariant && (
@@ -79,7 +79,7 @@ export function ProjectHeader({ project, proposerName }: ProjectHeaderProps) {
         )}
       </div>
 
-      <h1 className="heading-small mt-3 text-text-primary">{project.title}</h1>
+      <h1 className="mt-3 break-words text-2xl font-bold leading-tight text-text-primary sm:text-3xl">{project.title}</h1>
 
       {project.description && (
         <p className="body-small mt-2 whitespace-pre-line text-text-secondary">

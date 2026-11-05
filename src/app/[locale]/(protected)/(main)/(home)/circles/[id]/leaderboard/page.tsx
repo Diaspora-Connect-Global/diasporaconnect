@@ -4,13 +4,12 @@ import { useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
-import { ArrowLeft } from 'lucide-react';
 
 import { ButtonType1 } from '@/components/custom/button';
 import PageLoader from '@/components/custom/PageLoader';
 import { EmptyState, ErrorState } from '@/components/feedback';
-import { Link, useRouter } from '@/i18n/navigation';
-import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { Link } from '@/i18n/navigation';
+import { CIRCLE_SCREEN_CLASS, CircleScreenHeading } from '@/components/circles/shell';
 import { useUserStore } from '@/store/useUserStore';
 import { useCircleUsers } from '@/hooks/useCircleUsers';
 import { CIRCLE_LEADERBOARD } from '@/services/gql/circles';
@@ -36,7 +35,7 @@ import {
  * has no cap so the sidebar stays at the page edge, which on a wide monitor
  * would otherwise stretch a six-row list across most of the screen.
  */
-const SHELL_CLASS = 'mx-auto w-full max-w-5xl';
+const SHELL_CLASS = 'flex w-full flex-col gap-5';
 
 type LeaderboardMode = 'RANKED' | 'COLLECTIVE';
 
@@ -87,8 +86,6 @@ type LeaderboardMode = 'RANKED' | 'COLLECTIVE';
  */
 export default function CircleLeaderboardPage() {
   const t = useTranslations('circles');
-  const tGlobal = useTranslations('common');
-  const router = useRouter();
   const params = useParams();
 
   const circleId = String(params?.id ?? '');
@@ -139,24 +136,12 @@ export default function CircleLeaderboardPage() {
     { value: 'COLLECTIVE', label: t('leaderboard.modeCollective') },
   ];
 
-  const header = (
-    <div className="mb-4 flex shrink-0 items-center gap-2">
-      <button
-        type="button"
-        onClick={() => router.push(`/circles/${circleId}`)}
-        aria-label={tGlobal('previousPage')}
-        className="cursor-pointer rounded-full p-1.5 text-text-primary transition-colors hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand"
-      >
-        <ArrowLeft className="size-5" aria-hidden="true" />
-      </button>
-      <h1 className="label-large text-text-primary">{t('leaderboard.title')}</h1>
-    </div>
-  );
+  const header = <CircleScreenHeading title={t('leaderboard.title')} />;
 
   if (loading && !leaderboard) {
     return (
-      <div className="h-app-inner flex overflow-hidden">
-        <div className={CIRCLE_COLUMN_CLASS}>
+      <div className="flex">
+        <div className={CIRCLE_SCREEN_CLASS}>
           <div className={SHELL_CLASS}>
             {header}
             <PageLoader />
@@ -168,8 +153,8 @@ export default function CircleLeaderboardPage() {
 
   if (error && !leaderboard) {
     return (
-      <div className="h-app-inner flex overflow-hidden">
-        <div className={CIRCLE_COLUMN_CLASS}>
+      <div className="flex">
+        <div className={CIRCLE_SCREEN_CLASS}>
           <div className={SHELL_CLASS}>
             {header}
             <ErrorState
@@ -185,8 +170,8 @@ export default function CircleLeaderboardPage() {
 
   if (!leaderboard) {
     return (
-      <div className="h-app-inner flex overflow-hidden">
-        <div className={CIRCLE_COLUMN_CLASS}>
+      <div className="flex">
+        <div className={CIRCLE_SCREEN_CLASS}>
           <div className={SHELL_CLASS}>
             {header}
             <EmptyState
@@ -207,14 +192,14 @@ export default function CircleLeaderboardPage() {
   const hasBreakdown = rows.length > 0;
 
   return (
-    <div className="h-app-inner flex overflow-hidden">
-      <div className={CIRCLE_COLUMN_CLASS}>
+    <div className="flex">
+      <div className={CIRCLE_SCREEN_CLASS}>
         <div className={SHELL_CLASS}>
           {header}
 
           {rankingEnabled && (
             <SegmentedControl
-              className="mx-auto mb-6 w-full max-w-xs"
+              className="mx-auto w-full max-w-xs"
               aria-label={t('leaderboard.title')}
               options={options}
               value={mode}
@@ -236,8 +221,8 @@ export default function CircleLeaderboardPage() {
             <div
               className={
                 hasBreakdown
-                  ? 'grid grid-cols-1 items-start gap-8 pb-4 lg:grid-cols-2 lg:gap-12'
-                  : 'mx-auto w-full max-w-xl pb-4'
+                  ? 'grid grid-cols-1 items-start gap-5 lg:grid-cols-2'
+                  : 'mx-auto w-full max-w-xl'
               }
             >
               {mode === 'RANKED' ? (

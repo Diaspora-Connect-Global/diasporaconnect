@@ -210,7 +210,7 @@ export function InviteLinksPanel({ circleId }: InviteLinksPanelProps) {
   }
 
   return (
-    <section className="rounded-xl border border-border-subtle p-4">
+    <section className="rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm sm:p-5">
       <div className="flex items-start gap-3">
         <Link2
           aria-hidden="true"

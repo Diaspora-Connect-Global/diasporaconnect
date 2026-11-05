@@ -3532,6 +3532,19 @@
       }
     },
     "home": {
+      "nav": {
+        "activity": "Activité",
+        "chat": "Chat",
+        "members": "Membres",
+        "leaderboard": "Classement",
+        "decisions": "Décisions",
+        "rules": "Règles",
+        "plan": "Formule",
+        "settings": "Paramètres"
+      },
+      "feedTitle": "Activité récente",
+      "feedSubtitle": "Projets, défis et votes, du plus récent au plus ancien.",
+      "chatSubtitle": "Messages, projets, défis et votes au même endroit.",
       "tabChat": "Chat",
       "tabMembers": "Membres",
       "pinnedPrefix": "Épinglé :",
@@ -3570,7 +3583,7 @@
       "historyLimited": "Affichage {days, plural, =1 {du dernier jour} other {des # derniers jours}} de cette discussion. Rien de plus ancien n'a été supprimé.",
       "noChatEmpty": {
         "title": "Rien ici pour l'instant",
-        "description": "La messagerie n'est pas encore activée, mais c'est bien ici qu'apparaissent les projets, les défis et les votes de votre cercle. Lancez-en un depuis le menu + ci-dessus."
+        "description": "La messagerie n'est pas encore activée, mais c'est bien ici qu'apparaissent les projets, les défis et les votes de votre cercle. Lancez-en un avec « Lancer quelque chose »."
       }
     },
     "motion": {
@@ -3735,10 +3748,20 @@
       "noResults": "Aucun membre ne correspond à « {query} ».",
       "invite": {
         "title": "Inviter",
-        "description": "Invitez quelqu'un par e-mail ou téléphone, ou partagez la page du cercle.",
+        "description": "Invitez quelqu'un par nom, nom d'utilisateur, e-mail ou téléphone, ou partagez la page du cercle.",
         "copyLink": "Copier le lien",
         "linkCopied": "Lien copié",
         "invitePerson": "Inviter quelqu'un",
+        "fieldLabel": "Nom, nom d'utilisateur, e-mail ou téléphone",
+        "searching": "Recherche en cours…",
+        "resultsLabel": "Personnes",
+        "resultsFound": "{count, plural, =1 {1 personne trouvée} other {# personnes trouvées}}",
+        "noMatches": "Aucune personne trouvée. Essayez un nom d'utilisateur, ou saisissez un e-mail ou un numéro de téléphone.",
+        "searchFailed": "La recherche a échoué. Réessayez, ou saisissez un e-mail ou un numéro de téléphone.",
+        "pickPerson": "Choisissez quelqu'un dans la liste, ou saisissez un e-mail ou un numéro de téléphone.",
+        "invited": "Invitation envoyée à {name}",
+        "alreadyMember": "Cette personne est déjà membre de ce cercle.",
+        "alreadyInvited": "Cette personne a déjà une invitation pour ce cercle.",
         "copyCircleLink": "Copier le lien du cercle",
         "circleLinkCopied": "Lien du cercle copié"
       },

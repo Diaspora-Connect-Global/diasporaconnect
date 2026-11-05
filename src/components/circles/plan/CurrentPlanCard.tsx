@@ -102,7 +102,7 @@ export function CurrentPlanCard({
   const showCancel = canManage && !onDefaultPlan;
 
   return (
-    <section className="rounded-2xl border border-border-subtle p-4">
+    <section className="rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-1">
           <p className="caption-small text-text-secondary">{t('heading')}</p>

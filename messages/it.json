@@ -3532,6 +3532,19 @@
       }
     },
     "home": {
+      "nav": {
+        "activity": "Attività",
+        "chat": "Chat",
+        "members": "Membri",
+        "leaderboard": "Classifica",
+        "decisions": "Decisioni",
+        "rules": "Regole",
+        "plan": "Piano",
+        "settings": "Impostazioni"
+      },
+      "feedTitle": "Attività recente",
+      "feedSubtitle": "Progetti, sfide e votazioni, dalla più recente.",
+      "chatSubtitle": "Messaggi, progetti, sfide e votazioni in un unico posto.",
       "tabChat": "Chat",
       "tabMembers": "Membri",
       "pinnedPrefix": "In evidenza:",
@@ -3570,7 +3583,7 @@
       "historyLimited": "Stiamo mostrando {days, plural, =1 {l'ultimo giorno} other {gli ultimi # giorni}} di questa chat. Niente di più vecchio è stato cancellato.",
       "noChatEmpty": {
         "title": "Ancora niente qui",
-        "description": "La chat non è ancora attiva, ma è qui che compaiono comunque i progetti, le sfide e le votazioni della tua cerchia. Avviane uno dal menu + qui sopra."
+        "description": "La chat non è ancora attiva, ma è qui che compaiono comunque i progetti, le sfide e le votazioni della tua cerchia. Avviane uno con «Avvia qualcosa»."
       }
     },
     "motion": {
@@ -3735,10 +3748,20 @@
       "noResults": "Nessun membro corrisponde a «{query}».",
       "invite": {
         "title": "Invita",
-        "description": "Invita qualcuno via e-mail o telefono, oppure condividi la pagina della cerchia.",
+        "description": "Invita qualcuno per nome, nome utente, e-mail o telefono, oppure condividi la pagina della cerchia.",
         "copyLink": "Copia il link",
         "linkCopied": "Link copiato",
         "invitePerson": "Invita qualcuno",
+        "fieldLabel": "Nome, nome utente, e-mail o telefono",
+        "searching": "Ricerca in corso…",
+        "resultsLabel": "Persone",
+        "resultsFound": "{count, plural, =1 {1 persona trovata} other {# persone trovate}}",
+        "noMatches": "Nessuno trovato. Prova con un nome utente, oppure inserisci un'e-mail o un numero di telefono.",
+        "searchFailed": "La ricerca non è riuscita. Riprova, oppure inserisci un'e-mail o un numero di telefono.",
+        "pickPerson": "Scegli qualcuno dall'elenco, oppure inserisci un'e-mail o un numero di telefono.",
+        "invited": "Invito inviato a {name}",
+        "alreadyMember": "Questa persona è già membro di questa cerchia.",
+        "alreadyInvited": "Questa persona ha già un invito a questa cerchia.",
         "copyCircleLink": "Copia il link della cerchia",
         "circleLinkCopied": "Link della cerchia copiato"
       },

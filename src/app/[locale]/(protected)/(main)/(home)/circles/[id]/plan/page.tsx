@@ -2,7 +2,6 @@
 
 import { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useQuery } from '@apollo/client/react';
-import { ArrowLeft } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 
@@ -19,8 +18,8 @@ import {
 import { EmptyState, ErrorState } from '@/components/feedback';
 import { ButtonType1 } from '@/components/custom/button';
 import PageLoader from '@/components/custom/PageLoader';
-import { Link, useRouter } from '@/i18n/navigation';
-import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { Link } from '@/i18n/navigation';
+import { CIRCLE_SCREEN_CLASS, CircleScreenHeading } from '@/components/circles/shell';
 import { CIRCLE_PLAN_SCREEN } from '@/services/gql/circles-billing';
 import type {
   CirclePlanScreenData,
@@ -65,11 +64,9 @@ import type { CirclePlan } from '@/services/gql/types/circles';
  */
 export default function CirclePlanPage() {
   const params = useParams();
-  const router = useRouter();
 
   const t = useTranslations('circles.plan');
   const tCommon = useTranslations('circles.common');
-  const tGlobal = useTranslations('common');
 
   const circleId = typeof params.id === 'string' ? params.id : '';
 
@@ -79,7 +76,7 @@ export default function CirclePlanPage() {
   /*
    * The catalogue is the destination of every "Change plan" affordance above
    * it. A ref rather than an `#anchor`: the page scrolls inside
-   * `CIRCLE_COLUMN_CLASS`, not the document, and a hash would also push a
+   * the circle frame, not the document, and a hash would also push a
    * history entry for what is a scroll, not a navigation.
    */
   const catalogueRef = useRef<HTMLDivElement | null>(null);
@@ -127,34 +124,13 @@ export default function CirclePlanPage() {
 
   const canManage = membership?.isLead === true;
 
-  const header = (
-    <div className="flex shrink-0 items-center gap-2">
-      <button
-        type="button"
-        onClick={() => router.push(`/circles/${circleId}`)}
-        aria-label={tGlobal('previousPage')}
-        className="cursor-pointer rounded-full p-1.5 text-text-primary transition-colors hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand"
-      >
-        <ArrowLeft className="size-5" />
-      </button>
-      <h1 className="label-large text-text-primary">{t('title')}</h1>
-    </div>
-  );
+  const header = <CircleScreenHeading title={t('title')} />;
 
-  /*
-   * `max-w-5xl` inside the column, not on it. Capping `CIRCLE_COLUMN_CLASS`
-   * itself would centre the whole 60vw block in the `(home)` shell and drag the
-   * sidebar towards the middle of the page (see the note on that constant); an
-   * inner wrapper leaves the column where it is and only stops the capacity
-   * cards from stretching to a metre wide on a large monitor.
-   */
   const shell = (children: ReactNode) => (
-    <div className="h-app-inner flex overflow-hidden">
-      <div className={CIRCLE_COLUMN_CLASS}>
-        <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col">
-          {header}
-          {children}
-        </div>
+    <div className="flex">
+      <div className={CIRCLE_SCREEN_CLASS}>
+        {header}
+        {children}
       </div>
     </div>
   );
@@ -204,7 +180,7 @@ export default function CirclePlanPage() {
   return (
     <>
       {shell(
-        <div className="flex flex-col gap-6 py-4">
+        <div className="flex flex-col gap-5">
           {/* A partial failure that still produced a subscription is worth naming. */}
           {error && (
             <p className="caption-small text-text-secondary">{t('partialLoad')}</p>

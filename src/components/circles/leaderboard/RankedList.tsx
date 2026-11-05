@@ -41,11 +41,11 @@ export function RankedList({
   return (
     <section
       className={cn(
-        'flex flex-col rounded-2xl border border-border-subtle p-5',
+        'flex flex-col rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm sm:p-5',
         className,
       )}
     >
-      <h2 className="label-medium text-text-primary">
+      <h2 className="text-lg font-bold text-text-primary">
         {t('leaderboard.standingsTitle')}
       </h2>
 

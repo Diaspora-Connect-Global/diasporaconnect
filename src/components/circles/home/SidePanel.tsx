@@ -1,4 +1,8 @@
-import type { ReactNode } from 'react';
+'use client';
+
+import { useId, type ReactNode } from 'react';
+
+import { SectionHeader } from '@/components/redesign/SectionHeader';
 import { cn } from '@/lib/utils';
 
 export interface SidePanelProps {
@@ -13,24 +17,24 @@ export interface SidePanelProps {
 }
 
 /**
- * Chrome shared by the two panels in the circle home rail.
+ * Chrome shared by the two panels in the circle home rail: the redesign's
+ * `RailCard` look (rounded white card, soft shadow, compact heading), built on
+ * `SectionHeader` so the heading is the same one Home and Discover use. It is
+ * not `RailCard` itself only because these panels need a custom trailing
+ * control that is not a plain "View all" link.
  *
- * Border-and-surface only: the rail is context beside the conversation, and a
- * tinted or accented panel would compete with the chat for attention. Colour in
- * here is reserved for things you can act on.
+ * Border-and-surface only: the rail is context beside the feed, and a tinted or
+ * accented panel would compete with it for attention. Colour in here is
+ * reserved for things you can act on.
  */
 export function SidePanel({ title, action, children, className }: SidePanelProps) {
+  const id = useId();
   return (
     <section
-      className={cn(
-        'rounded-2xl border border-border-subtle bg-surface-default p-4',
-        className,
-      )}
+      aria-labelledby={id}
+      className={cn('rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm', className)}
     >
-      <div className="mb-3 flex items-center justify-between gap-2">
-        <h2 className="label-medium min-w-0 truncate text-text-primary">{title}</h2>
-        {action}
-      </div>
+      <SectionHeader id={id} title={title} action={action} compact />
       {children}
     </section>
   );

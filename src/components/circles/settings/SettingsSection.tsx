@@ -42,14 +42,14 @@ export function SettingsSection({
   return (
     <section
       className={cn(
-        'rounded-lg border bg-surface-default p-4 sm:p-5',
+        'rounded-2xl border bg-surface-default p-4 shadow-sm sm:p-5',
         'border-border-subtle',
         className,
       )}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="heading-small text-text-primary">{title}</h2>
+          <h2 className="text-lg font-bold text-text-primary">{title}</h2>
           {description && (
             <p className="caption-small mt-1 text-text-secondary">{description}</p>
           )}

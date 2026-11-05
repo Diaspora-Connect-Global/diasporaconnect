@@ -72,7 +72,7 @@ export function ContributionsPanel({
   return (
     <section
       className={cn(
-        'flex flex-col overflow-hidden rounded-2xl border border-border-subtle bg-surface-default',
+        'flex flex-col overflow-hidden rounded-2xl border border-border-subtle bg-surface-default shadow-sm',
         className,
       )}
       aria-label={t('project.contributionsTitle')}

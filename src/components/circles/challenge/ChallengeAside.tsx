@@ -74,8 +74,8 @@ export function ChallengeAside({
   const hasPoints = progress !== null && progress.points !== null && progress.points > 0;
 
   return (
-    <div className="rounded-2xl border border-border-subtle p-5">
-      <h2 className="label-medium text-text-primary">{t('aboutTitle')}</h2>
+    <div className="rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm sm:p-5">
+      <h2 className="text-lg font-bold text-text-primary">{t('aboutTitle')}</h2>
 
       {/*
         Absent when the wire named a mode this client cannot map. Saying nothing

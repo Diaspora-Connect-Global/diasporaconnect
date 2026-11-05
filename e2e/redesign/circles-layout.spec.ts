@@ -71,10 +71,11 @@ test('history: decisions stack instead of hiding columns @360', async () => {
     await page.context().close();
 });
 
-test('leaderboard has a page heading and a labelled back button', async () => {
+test('leaderboard has a page heading and a labelled way back to the circle', async () => {
     const { page } = await open(browser, '/circles/cir-1/leaderboard', memberScreens('MEMBER') as never, PHONE);
     await expect(page.getByRole('heading', { level: 1, name: 'Leaderboard' })).toBeVisible({ timeout: 90_000 });
-    await expect(page.getByRole('button', { name: 'Previous page' })).toBeVisible();
+    // The shared circle header replaces the per-screen back arrow: the circle's own name links home.
+    await expect(page.getByTestId('circle-frame').getByRole('link', { name: /Accra Tech Hub/ })).toBeVisible();
     await page.context().close();
 });
 

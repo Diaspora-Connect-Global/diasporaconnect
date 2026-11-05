@@ -102,8 +102,8 @@ export function SettingsNav({
          * `lg:` reset is what turns it back into a real sidebar rather than a
          * scroller that happens to wrap.
          */
-        'flex gap-1 overflow-x-auto scrollbar-hide',
-        'lg:w-60 lg:shrink-0 lg:flex-col lg:overflow-visible',
+        'flex gap-1 overflow-x-auto [scrollbar-width:thin]',
+        'lg:w-60 lg:shrink-0 lg:flex-col lg:overflow-visible lg:rounded-2xl lg:border lg:border-border-subtle lg:bg-surface-default lg:p-2 lg:shadow-sm',
         className,
       )}
     >
@@ -115,7 +115,7 @@ export function SettingsNav({
             key={panel.id}
             type="button"
             onClick={() => onSelect(panel.id)}
-            aria-current={isActive ? 'page' : undefined}
+            aria-pressed={isActive}
             className={cn(
               ROW_BASE,
               'w-auto lg:w-full',

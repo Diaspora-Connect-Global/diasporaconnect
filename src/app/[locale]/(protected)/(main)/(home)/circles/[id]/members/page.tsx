@@ -2,7 +2,6 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useQuery } from '@apollo/client/react';
-import { ArrowLeft } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 
@@ -20,7 +19,7 @@ import PageLoader from '@/components/custom/PageLoader';
 import { ErrorState } from '@/components/feedback';
 import { useCircleUsers } from '@/hooks/useCircleUsers';
 import { useRouter } from '@/i18n/navigation';
-import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { CircleScreen, CircleScreenHeading } from '@/components/circles/shell';
 import { CIRCLE_MEMBERS, MY_CIRCLE_MEMBERSHIP } from '@/services/gql/circles';
 import { CIRCLE_PAST_MEMBERS } from '@/services/gql/circles-invites';
 import type {
@@ -62,9 +61,10 @@ const INVITE_PANEL_ID = 'circle-members-invite-panel';
  * open a motion, and land the user on that motion.
  *
  * The mutations this screen does reach are all about ADMISSION, which is not a
- * decision about anyone already inside: `inviteToCircle` (any member, one named
- * person) and `mintCircleInviteLink` / `revokeCircleInviteLink` (lead only, a
- * shareable bearer credential). Both live behind the toolbar's "Invite to
+ * decision about anyone already inside: `inviteToCircle` (one named person) and
+ * `mintCircleInviteLink` / `revokeCircleInviteLink` (a shareable bearer
+ * credential). The gateway limits both to a circle's leads, so any other member
+ * who submits the invite form is refused. Both live behind the toolbar's "Invite to
  * circle" disclosure rather than sitting open under the roster — the roster and
  * the governance rule are what the screen is for.
  *
@@ -85,7 +85,6 @@ export default function CircleMembersPage() {
   const t = useTranslations('circles.members');
   const tCommon = useTranslations('circles.common');
   const tErrors = useTranslations('circles.errors');
-  const tGlobal = useTranslations('common');
 
   const circleId = typeof params.id === 'string' ? params.id : '';
   const currentUserId = useUserStore((state) => state.user?.userId);
@@ -176,44 +175,28 @@ export default function CircleMembersPage() {
   );
 
   /*
-   * Back arrow + page title on the left, search + invite on the right — the
-   * app's detail-screen chrome, widened into a toolbar. The arrow is icon-only
-   * and carries a generic accessible name rather than the title: labelling it
-   * "Members" would announce it as a link TO this page, which is where the user
-   * already is. The row stacks on a phone so neither control is squeezed.
+   * Page title on the left, search + invite on the right. The shared circle
+   * header above already says where you are and links home, so there is no back
+   * arrow here. The row stacks on a phone so neither control is squeezed.
    */
   const header = (
-    <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => router.push(`/circles/${circleId}`)}
-          aria-label={tGlobal('previousPage')}
-          className="cursor-pointer rounded-full p-1.5 text-text-primary transition-colors hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand"
-        >
-          <ArrowLeft className="size-5" />
-        </button>
-        <div className="min-w-0">
-          <h1 className="label-large text-text-primary">{t('title')}</h1>
-          <p className="caption-small text-text-secondary">
-            {tCommon('memberCount', { count: members.length })}
-          </p>
-        </div>
-      </div>
-
-      <MembersToolbar
-        query={query}
-        onQueryChange={setQuery}
-        inviteOpen={inviteOpen}
-        onToggleInvite={() => setInviteOpen((open) => !open)}
-        invitePanelId={INVITE_PANEL_ID}
-      />
-    </div>
+    <CircleScreenHeading
+      title={t('title')}
+      subtitle={tCommon('memberCount', { count: members.length })}
+      actions={
+        <MembersToolbar
+          query={query}
+          onQueryChange={setQuery}
+          inviteOpen={inviteOpen}
+          onToggleInvite={() => setInviteOpen((open) => !open)}
+          invitePanelId={INVITE_PANEL_ID}
+        />
+      }
+    />
   );
 
   return (
-    <div className="h-app-inner flex overflow-hidden">
-      <div className={CIRCLE_COLUMN_CLASS}>
+    <CircleScreen>
         {header}
 
         {loading && members.length === 0 ? (
@@ -228,7 +211,7 @@ export default function CircleMembersPage() {
             />
           </div>
         ) : (
-          <div className="flex flex-col gap-6 py-4">
+          <div className="flex flex-col gap-5">
             {/*
               The wrapper always exists so the toolbar button's `aria-controls`
               always resolves, but its contents mount only when opened —
@@ -280,7 +263,6 @@ export default function CircleMembersPage() {
             <GovernanceCallout />
           </div>
         )}
-      </div>
-    </div>
+    </CircleScreen>
   );
 }

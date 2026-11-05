@@ -36,7 +36,7 @@ export default function CircleHistoryError({
   }, [error]);
 
   return (
-    <div className="flex h-app-inner items-center justify-center px-4">
+    <div className="flex min-h-[60vh] items-center justify-center px-4">
       <ErrorState
         size="lg"
         title={tFeedback('error.title')}

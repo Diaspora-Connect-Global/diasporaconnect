@@ -3532,6 +3532,19 @@
       }
     },
     "home": {
+      "nav": {
+        "activity": "Aktivität",
+        "chat": "Chat",
+        "members": "Mitglieder",
+        "leaderboard": "Bestenliste",
+        "decisions": "Beschlüsse",
+        "rules": "Regeln",
+        "plan": "Tarif",
+        "settings": "Einstellungen"
+      },
+      "feedTitle": "Neueste Aktivität",
+      "feedSubtitle": "Projekte, Challenges und Abstimmungen, die neuesten zuerst.",
+      "chatSubtitle": "Nachrichten, Projekte, Challenges und Abstimmungen an einem Ort.",
       "tabChat": "Chat",
       "tabMembers": "Mitglieder",
       "pinnedPrefix": "Angepinnt:",
@@ -3570,7 +3583,7 @@
       "historyLimited": "{days, plural, =1 {Angezeigt wird der letzte Tag dieses Chats.} other {Angezeigt werden die letzten # Tage dieses Chats.}} Ältere Nachrichten wurden nicht gelöscht.",
       "noChatEmpty": {
         "title": "Hier ist noch nichts",
-        "description": "Der Chat ist noch nicht freigeschaltet, aber hier erscheinen trotzdem die Projekte, Challenges und Abstimmungen deines Kreises. Starte etwas über das +-Menü oben."
+        "description": "Der Chat ist noch nicht freigeschaltet, aber hier erscheinen trotzdem die Projekte, Challenges und Abstimmungen deines Kreises. Starte etwas mit „Etwas starten“."
       }
     },
     "motion": {
@@ -3735,10 +3748,20 @@
       "noResults": "Keine Mitglieder passen zu „{query}“.",
       "invite": {
         "title": "Einladen",
-        "description": "Lade jemanden per E-Mail oder Telefon ein oder teile die Seite des Kreises.",
+        "description": "Lade jemanden per Name, Benutzername, E-Mail oder Telefon ein oder teile die Seite des Kreises.",
         "copyLink": "Link kopieren",
         "linkCopied": "Link kopiert",
         "invitePerson": "Jemanden einladen",
+        "fieldLabel": "Name, Benutzername, E-Mail oder Telefon",
+        "searching": "Suche läuft …",
+        "resultsLabel": "Personen",
+        "resultsFound": "{count, plural, =1 {1 Person gefunden} other {# Personen gefunden}}",
+        "noMatches": "Niemand gefunden. Versuche es mit einem Benutzernamen oder gib eine E-Mail-Adresse oder Telefonnummer ein.",
+        "searchFailed": "Die Suche hat nicht geklappt. Versuche es erneut oder gib eine E-Mail-Adresse oder Telefonnummer ein.",
+        "pickPerson": "Wähle jemanden aus der Liste oder gib eine E-Mail-Adresse oder Telefonnummer ein.",
+        "invited": "{name} eingeladen",
+        "alreadyMember": "Diese Person ist schon Mitglied dieses Kreises.",
+        "alreadyInvited": "Diese Person hat bereits eine Einladung zu diesem Kreis.",
         "copyCircleLink": "Kreis-Link kopieren",
         "circleLinkCopied": "Kreis-Link kopiert"
       },

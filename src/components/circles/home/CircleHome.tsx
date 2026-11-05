@@ -13,6 +13,9 @@ import { MessageInput } from '@/components/chats/MessageInput';
 import { TypingDots } from '@/components/chats/TypingDots';
 import PageLoader from '@/components/custom/PageLoader';
 import { EmptyState, ErrorState } from '@/components/feedback';
+import { CircleHero } from '@/components/circles/shell';
+import { Section } from '@/components/redesign/Section';
+import { SectionHeader } from '@/components/redesign/SectionHeader';
 import { circleUserDisplayName, useCircleUsers } from '@/hooks/useCircleUsers';
 import { useChatMessages } from '@/hooks/useChatMessages';
 import { useMediaUpload } from '@/hooks/useMediaUpload';
@@ -48,7 +51,6 @@ import { ChallengeCard } from './ChallengeCard';
 import { CircleLivePanel } from './CircleLivePanel';
 import { CircleMembersPanel } from './CircleMembersPanel';
 import { CircleMessageBubble } from './CircleMessageBubble';
-import { CircleHomeHeader } from './CircleHomeHeader';
 import { MotionCard } from './MotionCard';
 import { ProjectCard } from './ProjectCard';
 import { buildCircleTimeline, collectTimelineUserIds } from './timeline';
@@ -69,34 +71,12 @@ const INLINE_CARD_LIMIT = 10;
 const MESSAGE_PAGE_SIZE = 50;
 
 /**
- * Geometry of the chat column inside the `(home)` sidebar shell.
- *
- * `FEED_COLUMN_CLASS` is deliberately NOT reused: it scrolls the whole column,
- * which would carry the header and the composer away with the messages. A chat
- * pins both and scrolls only the conversation between them, so the column is a
- * fixed-height flex container and the overflow sits one level in.
- *
- * The width is pinned rather than content-sized, the same way
- * `FEED_COLUMN_POST_PAGE_CLASS` pins the post column: chat lines are short, and
- * a column that sized to its content would visibly resize as messages arrive.
+ * The chat, when it is on, is a card of fixed height inside the page: the
+ * conversation scrolls inside it and the composer stays pinned to its foot, so
+ * neither is carried away with the page. `svh` so a phone's collapsing address
+ * bar does not push the composer under the fold.
  */
-const CHAT_COLUMN_CLASS =
-  'mx-4 flex w-full min-w-0 flex-1 flex-col lg:w-[40vw] lg:min-w-[40vw] lg:max-w-[40vw] lg:flex-none';
-
-/**
- * The rail beside the conversation: what is live, and who is here.
- *
- * Desktop only, and that is not a compromise — on a phone the whole viewport is
- * the conversation, and both panels already have full-size homes one tap away
- * (the artefact cards are IN the stream; Members is the adjacent tab). A
- * collapsed drawer would add a control that duplicates the tab strip.
- *
- * `lg:flex-1` rather than a fixed width, matching `post/[id]`'s right rail: the
- * chat column is the pinned measure, so the rail takes whatever is left instead
- * of leaving the pair floating in the middle of a wide screen.
- */
-const SIDEBAR_CLASS =
-  'hidden lg:flex lg:min-w-0 lg:flex-1 flex-col gap-4 overflow-y-auto py-4 pr-4 scrollbar-hide';
+const CHAT_CARD_HEIGHT_CLASS = 'h-[min(72svh,44rem)] min-h-[24rem]';
 
 interface CircleData {
   circle?: Circle | null;
@@ -219,7 +199,11 @@ export function CircleHome({ circleId }: CircleHomeProps) {
   });
 
   // ── Messages ─────────────────────────────────────────────────────────────
-  const { refetch: refetchMessages, loading: messagesLoading } = useChatMessages({
+  const {
+    refetch: refetchMessages,
+    loading: messagesLoading,
+    initialLoading: messagesFirstLoad,
+  } = useChatMessages({
     conversationId,
     limit: MESSAGE_PAGE_SIZE,
   });
@@ -368,30 +352,13 @@ export function CircleHome({ circleId }: CircleHomeProps) {
   );
 
   // ── Scroll ───────────────────────────────────────────────────────────────
-  const endRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   // A chat reads oldest to newest and follows its latest line; with chat off the
   // same entries are a feed of what the circle is doing, so the newest is first.
   const displayTimeline = useMemo(
     () => (conversationId ? timeline : [...timeline].reverse()),
     [timeline, conversationId],
   );
-  const hasScrolledRef = useRef(false);
-
-  useEffect(() => {
-    if (timeline.length === 0) return;
-    // With no chat there is no conversation to follow to its latest line: the
-    // screen is a feed of what the circle is doing, so it opens at the top.
-    if (!conversationId) return;
-    // The first paint jumps; later arrivals animate. Smooth-scrolling a chat
-    // the instant it opens looks like the page is still loading.
-    endRef.current?.scrollIntoView({
-      behavior: hasScrolledRef.current ? 'smooth' : 'auto',
-      block: 'end',
-    });
-    hasScrolledRef.current = true;
-  }, [timeline, conversationId]);
-
-  // ── Render ───────────────────────────────────────────────────────────────
   // Six independent queries feed the first frame — circle, membership, the chat
   // handle (which decides whether the composer shows an input or "unavailable"),
   // and the three artefact lists interleaved into the timeline. They already
@@ -412,6 +379,30 @@ export function CircleHome({ circleId }: CircleHomeProps) {
     (projectsLoading && !projectsData) ||
     (challengesLoading && !challengesData);
 
+  const hasScrolledRef = useRef(false);
+
+  useEffect(() => {
+    if (timeline.length === 0) return;
+    // With no chat there is no conversation to follow to its latest line: the
+    // screen is a feed of what the circle is doing, so it opens at the top.
+    if (!conversationId) return;
+    // Still behind the page loader, or the circle's other activity has landed
+    // before the messages: there is nothing to follow yet, and the first jump
+    // must not be spent on it or the conversation would animate into place.
+    const list = listRef.current;
+    if (!list || messagesFirstLoad) return;
+    // The first paint jumps; later arrivals animate. Smooth-scrolling a chat
+    // the instant it opens looks like the page is still loading. The list
+    // itself is scrolled (not `scrollIntoView`, which would also drag the whole
+    // page to the foot of the chat card).
+    list.scrollTo({
+      top: list.scrollHeight,
+      behavior: hasScrolledRef.current ? 'smooth' : 'auto',
+    });
+    hasScrolledRef.current = true;
+  }, [timeline, conversationId, messagesFirstLoad, criticalLoading]);
+
+  // ── Render ───────────────────────────────────────────────────────────────
   if (criticalLoading) {
     return <PageLoader />;
   }
@@ -424,7 +415,7 @@ export function CircleHome({ circleId }: CircleHomeProps) {
 
   if (circleError && !circle && !notAMember) {
     return (
-      <div className="flex h-app-inner items-center justify-center px-4">
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
         <ErrorState
           title={tFeedback('error.title')}
           description={t('errors.loadCircle')}
@@ -444,7 +435,7 @@ export function CircleHome({ circleId }: CircleHomeProps) {
     if (!isMember && publicCard && publicCard.joinMode !== 'INVITE_ONLY') {
       const open = publicCard.joinMode === 'OPEN';
       return (
-        <div className="flex h-app-inner items-center justify-center px-4">
+        <div className="flex min-h-[60vh] items-center justify-center px-4">
           <EmptyState
             size="lg"
             title={publicCard.name}
@@ -466,7 +457,7 @@ export function CircleHome({ circleId }: CircleHomeProps) {
       );
     }
     return (
-      <div className="flex h-app-inner items-center justify-center px-4">
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
         <EmptyState
           size="lg"
           title={t(`errors.${scope}.title`)}
@@ -485,203 +476,207 @@ export function CircleHome({ circleId }: CircleHomeProps) {
   }
 
   let lastDateKey: string | null = null;
+  const chatOn = Boolean(conversationId);
 
-  return (
-    <div className="flex h-app-inner overflow-hidden">
-      <div className={CHAT_COLUMN_CLASS}>
-        <CircleHomeHeader
-          circleId={circleId}
-          name={circle.name}
-          memberCount={circle.memberCount}
-          avatarUrl={circle.avatarUrl}
-          tagline={circle.tagline}
+  const entries =
+    timeline.length === 0 ? (
+      messagesLoading ? (
+        /*
+         * Messages are a genuinely second-stage fetch: `conversationId` only
+         * exists once `chat` (one of the six gated queries above) has resolved,
+         * so this is the earliest it can start. It is an on-demand panel inside
+         * an already-revealed page, not part of first paint, hence `PageLoader`
+         * here rather than blocking the whole screen on a query that cannot
+         * start any sooner.
+         */
+        <PageLoader />
+      ) : conversationId ? (
+        <EmptyState
+          icon={MessageSquare}
+          title={t('empty.messages.title')}
+          description={t('empty.messages.description')}
         />
-
-        {/*
-         * The banner row under the header.
-         *
-         * The design put a PINNED MESSAGE here; message-service has no pin —
-         * no field on a message, no mutation, nothing on the conversation — so
-         * there is nothing true to render and inventing one line of chat would
-         * be a fabricated message attributed to a real circle.
-         *
-         * What does belong in exactly this slot is the CHAT_HISTORY_DAYS
-         * entitlement. `circleChat` already returns `historyLimited` and
-         * `historyDays` and nothing read them, so a circle on a short-history
-         * plan silently appeared to have started later than it did — the chat
-         * just began mid-conversation with no explanation. Nothing is deleted
-         * by a plan change, and saying so is the point of the row.
-         */}
-        {chat?.available && chat.historyLimited && chat.historyDays > 0 && (
-          <div className="shrink-0 border-b border-border-subtle bg-surface-subtle px-3 py-2 sm:px-4">
-            <p className="caption-small flex items-start gap-2 text-text-secondary">
-              <History aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
-              {t('home.historyLimited', { days: chat.historyDays })}
-            </p>
-          </div>
-        )}
-
-        <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 py-4 scrollbar-hide sm:px-4">
-          {timeline.length === 0 ? (
-            messagesLoading ? (
-              /*
-               * Messages are a genuinely second-stage fetch: `conversationId`
-               * only exists once `chat` (one of the six gated queries above)
-               * has resolved, so this is the earliest it can start. It is an
-               * on-demand panel inside an already-revealed page, not part of
-               * first paint, hence `PageLoader` here rather than blocking the
-               * whole screen on a query that cannot start any sooner.
-               */
-              <PageLoader />
-            ) : conversationId ? (
-              <EmptyState
-                icon={MessageSquare}
-                title={t('empty.messages.title')}
-                description={t('empty.messages.description')}
+      ) : (
+        /*
+         * Chat is off, so "Say hello — this is where your circle talks" would
+         * invite something the page has just said is impossible. The rest of
+         * the circle still works, and "Start something" is how you reach it.
+         */
+        <EmptyState
+          icon={Sparkles}
+          title={t('home.noChatEmpty.title')}
+          description={t('home.noChatEmpty.description')}
+        />
+      )
+    ) : (
+      displayTimeline.map((entry) => {
+        // Date separators are driven by the whole timeline, not only by
+        // messages: a motion opened at 9am on a new day has to sit under that
+        // day's heading like anything else that happened.
+        let separator: ReactNode = null;
+        if (entry.iso) {
+          const dateKey = getMessageDateKey(entry.iso, userTimeZone);
+          if (dateKey !== lastDateKey) {
+            lastDateKey = dateKey;
+            separator = (
+              <DateSeparator
+                label={getDateLabel(
+                  entry.iso,
+                  userTimeZone,
+                  { today: tDates('today'), yesterday: tDates('yesterday') },
+                  locale,
+                )}
               />
-            ) : (
-              /*
-               * Chat is off, so "Say hello — this is where your circle talks"
-               * would invite something the composer below has just said is
-               * impossible. The rest of the circle still works, and the +
-               * menu in the header is how you reach it.
-               */
-              <EmptyState
-                icon={Sparkles}
-                title={t('home.noChatEmpty.title')}
-                description={t('home.noChatEmpty.description')}
+            );
+          }
+        }
+
+        return (
+          <div key={entry.key}>
+            {separator}
+            {entry.kind === 'message' && (
+              <CircleMessageBubble
+                message={entry.message}
+                isMe={entry.message.senderId === currentUserId}
+                sender={usersById[entry.message.senderId] ?? null}
+                fallbackName={unknownName}
+                timeZone={userTimeZone}
               />
-            )
-          ) : (
-            displayTimeline.map((entry) => {
-              // Date separators are driven by the whole timeline, not only by
-              // messages: a motion opened at 9am on a new day has to sit under
-              // that day's heading like anything else that happened.
-              let separator: ReactNode = null;
-              if (entry.iso) {
-                const dateKey = getMessageDateKey(entry.iso, userTimeZone);
-                if (dateKey !== lastDateKey) {
-                  lastDateKey = dateKey;
-                  separator = (
-                    <DateSeparator
-                      label={getDateLabel(
-                        entry.iso,
-                        userTimeZone,
-                        { today: tDates('today'), yesterday: tDates('yesterday') },
-                        locale,
-                      )}
-                    />
-                  );
-                }
-              }
-
-              return (
-                <div key={entry.key}>
-                  {separator}
-                  {entry.kind === 'message' && (
-                    <CircleMessageBubble
-                      message={entry.message}
-                      isMe={entry.message.senderId === currentUserId}
-                      sender={usersById[entry.message.senderId] ?? null}
-                      fallbackName={unknownName}
-                      timeZone={userTimeZone}
-                    />
-                  )}
-                  {entry.kind === 'project' && (
-                    <ProjectCard
-                      circleId={circleId}
-                      project={entry.project}
-                      proposerName={nameFor(entry.project.createdBy)}
-                    />
-                  )}
-                  {entry.kind === 'motion' && (
-                    <MotionCard
-                      circleId={circleId}
-                      motion={entry.motion}
-                      proposerName={nameFor(entry.motion.proposedBy)}
-                    />
-                  )}
-                  {entry.kind === 'challenge' && (
-                    <ChallengeCard
-                      circleId={circleId}
-                      challenge={entry.challenge}
-                      starterName={nameFor(entry.challenge.createdBy)}
-                    />
-                  )}
-                </div>
-              );
-            })
-          )}
-
-          <div ref={endRef} />
-        </div>
-
-        {typingUserIds.size > 0 && (
-          <div
-            aria-live="polite"
-            className="flex shrink-0 items-center gap-2 px-4 pb-1"
-          >
-            <TypingDots dotClassName="bg-text-secondary" />
-            {/*
-              Only the one-person form is spelled out. "Ama, Kofi is typing…" is
-              wrong in English and worse in the four other locales this app ships,
-              and the catalogue has no plural for it — so several people typing at
-              once is shown by the dots alone rather than by a broken sentence.
-            */}
-            {typingUserIds.size === 1 && (
-              <span className="caption-small text-text-secondary">
-                {`${nameFor([...typingUserIds][0])} ${tChat('typing')}`}
-              </span>
+            )}
+            {entry.kind === 'project' && (
+              <ProjectCard
+                circleId={circleId}
+                project={entry.project}
+                proposerName={nameFor(entry.project.createdBy)}
+              />
+            )}
+            {entry.kind === 'motion' && (
+              <MotionCard
+                circleId={circleId}
+                motion={entry.motion}
+                proposerName={nameFor(entry.motion.proposedBy)}
+              />
+            )}
+            {entry.kind === 'challenge' && (
+              <ChallengeCard
+                circleId={circleId}
+                challenge={entry.challenge}
+                starterName={nameFor(entry.challenge.createdBy)}
+              />
             )}
           </div>
-        )}
+        );
+      })
+    );
 
-        <div className="shrink-0">
-          {conversationId ? (
-            <MessageInput
-              onSendMessage={handleSendMessage}
-              placeholder={t('home.composerPlaceholder', { circleName: circle.name })}
-              disabled={!currentUserId || !isMember}
-              conversationId={conversationId}
-              senderId={currentUserId}
-              onTyping={emitTyping}
-            />
+  /*
+   * The CHAT_HISTORY_DAYS entitlement. `circleChat` already returns
+   * `historyLimited` and `historyDays`; without this a circle on a short-history
+   * plan silently appeared to have started later than it did. Nothing is deleted
+   * by a plan change, and saying so is the point of the row. (The design put a
+   * pinned message in this slot; message-service has no pin, so there is nothing
+   * true to render.)
+   */
+  const historyNote =
+    chat?.available && chat.historyLimited && chat.historyDays > 0 ? (
+      <p className="caption-small flex items-start gap-2 rounded-xl bg-surface-subtle px-3 py-2 text-text-secondary">
+        <History aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
+        {t('home.historyLimited', { days: chat.historyDays })}
+      </p>
+    ) : null;
+
+  return (
+    <div className="space-y-5">
+      <CircleHero
+        circleId={circleId}
+        name={circle.name}
+        tagline={circle.tagline}
+        memberCount={circle.memberCount}
+        avatarUrl={circle.avatarUrl}
+        bannerUrl={circle.bannerUrl}
+        chatOn={chatOn}
+      />
+
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_19rem]">
+        <div className="min-w-0">
+          {chatOn ? (
+            <Section labelledBy="circle-feed-title" testId="circle-chat" className="flex flex-col !p-0">
+              <div className="shrink-0 px-4 pt-4 sm:px-5 sm:pt-5">
+                <SectionHeader id="circle-feed-title" title={t('home.nav.chat')} subtitle={t('home.chatSubtitle')} />
+                {historyNote}
+              </div>
+              <div className={`flex flex-col ${CHAT_CARD_HEIGHT_CLASS}`}>
+                <div ref={listRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-3 sm:px-5">
+                  {entries}
+                </div>
+
+                {typingUserIds.size > 0 && (
+                  <div aria-live="polite" className="flex shrink-0 items-center gap-2 px-4 pb-1 sm:px-5">
+                    <TypingDots dotClassName="bg-text-secondary" />
+                    {/*
+                      Only the one-person form is spelled out. "Ama, Kofi is typing…" is
+                      wrong in English and worse in the four other locales this app ships,
+                      and the catalogue has no plural for it — so several people typing at
+                      once is shown by the dots alone rather than by a broken sentence.
+                    */}
+                    {typingUserIds.size === 1 && (
+                      <span className="caption-small text-text-secondary">
+                        {`${nameFor([...typingUserIds][0])} ${tChat('typing')}`}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                <div className="shrink-0 rounded-b-2xl" data-testid="circle-composer">
+                  <MessageInput
+                    onSendMessage={handleSendMessage}
+                    placeholder={t('home.composerPlaceholder', { circleName: circle.name })}
+                    disabled={!currentUserId || !isMember}
+                    conversationId={conversationId ?? undefined}
+                    senderId={currentUserId}
+                    onTyping={emitTyping}
+                    autoFocusWhenReady={false}
+                  />
+                </div>
+              </div>
+            </Section>
           ) : (
-            /*
-             * Chat is provisioned per circle and is currently switched off
-             * platform-wide (CIRCLE_CHAT_ENABLED), so there is no conversation
-             * to write into. Previously this still rendered a MessageInput with
-             * a "Message <circle>…" placeholder and `disabled`, which reads as a
-             * working composer that silently swallows what you type — the exact
-             * kind of control that is worse than no control. Say what is
-             * happening instead.
-             */
-            <div className="border-t border-border-subtle bg-surface-subtle px-4 py-3 text-center">
-              <p className="caption-small text-text-secondary">
+            <Section labelledBy="circle-feed-title" testId="circle-feed">
+              <SectionHeader id="circle-feed-title" title={t('home.feedTitle')} subtitle={t('home.feedSubtitle')} />
+              <div className="space-y-3">{entries}</div>
+              {/*
+               * Chat is provisioned per circle and is currently switched off
+               * platform-wide (CIRCLE_CHAT_ENABLED), so there is no conversation
+               * to write into. A composer here would read as a working control
+               * that silently swallows what you type — worse than none. Say what
+               * is happening instead.
+               */}
+              <p className="caption-small mt-4 rounded-xl bg-surface-subtle px-3 py-2 text-center text-text-secondary">
                 {t('home.chatUnavailable')}
               </p>
-            </div>
+            </Section>
           )}
         </div>
-      </div>
 
-      {/*
-       * The rail. Both panels read their own data and degrade to nothing on
-       * failure, so a circle-service hiccup costs the context beside the
-       * conversation rather than the conversation itself.
-       *
-       * No `aria-label`: this is a complementary landmark and each panel
-       * already carries its own heading. Naming the whole aside after one of
-       * the two would announce the roster as part of "What's live".
-       */}
-      <aside className={SIDEBAR_CLASS}>
-        <CircleLivePanel circleId={circleId} />
-        <CircleMembersPanel
-          circleId={circleId}
-          memberCount={circle.memberCount}
-          currentUserId={currentUserId}
-        />
-      </aside>
+        {/*
+         * The rail. Both panels read their own data and degrade to nothing on
+         * failure, so a circle-service hiccup costs the context beside the feed
+         * rather than the feed itself. On a phone it sits above a chat-less feed
+         * (what is live is the summary of it) and below a chat (which wants the
+         * screen).
+         *
+         * No `aria-label`: this is a complementary landmark and each panel
+         * already carries its own heading.
+         */}
+        <aside className={`min-w-0 space-y-5 ${chatOn ? '' : 'order-first lg:order-none'}`}>
+          <CircleLivePanel circleId={circleId} />
+          <CircleMembersPanel
+            circleId={circleId}
+            memberCount={circle.memberCount}
+            currentUserId={currentUserId}
+          />
+        </aside>
+      </div>
     </div>
   );
 }

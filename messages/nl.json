@@ -3532,6 +3532,19 @@
       }
     },
     "home": {
+      "nav": {
+        "activity": "Activiteit",
+        "chat": "Chat",
+        "members": "Leden",
+        "leaderboard": "Ranglijst",
+        "decisions": "Besluiten",
+        "rules": "Regels",
+        "plan": "Abonnement",
+        "settings": "Instellingen"
+      },
+      "feedTitle": "Recente activiteit",
+      "feedSubtitle": "Projecten, challenges en stemmingen, nieuwste eerst.",
+      "chatSubtitle": "Berichten, projecten, challenges en stemmingen op één plek.",
       "tabChat": "Chat",
       "tabMembers": "Leden",
       "pinnedPrefix": "Vastgezet:",
@@ -3570,7 +3583,7 @@
       "historyLimited": "Je ziet de laatste {days, plural, =1 {dag} other {# dagen}} van deze chat. Oudere berichten zijn niet verwijderd.",
       "noChatEmpty": {
         "title": "Hier is nog niets",
-        "description": "Chat staat nog niet aan, maar hier verschijnen wel de projecten, challenges en stemmingen van je kring. Start er een via het +-menu hierboven."
+        "description": "Chat staat nog niet aan, maar hier verschijnen wel de projecten, challenges en stemmingen van je kring. Start er een met “Iets starten”."
       }
     },
     "motion": {
@@ -3735,10 +3748,20 @@
       "noResults": "Geen leden gevonden voor ‘{query}’.",
       "invite": {
         "title": "Uitnodigen",
-        "description": "Nodig iemand uit via e-mail of telefoon, of deel de pagina van de kring.",
+        "description": "Nodig iemand uit met naam, gebruikersnaam, e-mail of telefoon, of deel de pagina van de kring.",
         "copyLink": "Link kopiëren",
         "linkCopied": "Link gekopieerd",
         "invitePerson": "Iemand uitnodigen",
+        "fieldLabel": "Naam, gebruikersnaam, e-mail of telefoon",
+        "searching": "Zoeken…",
+        "resultsLabel": "Personen",
+        "resultsFound": "{count, plural, =1 {1 persoon gevonden} other {# personen gevonden}}",
+        "noMatches": "Niemand gevonden. Probeer een gebruikersnaam, of vul een e-mailadres of telefoonnummer in.",
+        "searchFailed": "Zoeken is mislukt. Probeer het opnieuw, of vul een e-mailadres of telefoonnummer in.",
+        "pickPerson": "Kies iemand uit de lijst, of vul een e-mailadres of telefoonnummer in.",
+        "invited": "{name} is uitgenodigd",
+        "alreadyMember": "Deze persoon is al lid van deze kring.",
+        "alreadyInvited": "Deze persoon heeft al een uitnodiging voor deze kring.",
         "copyCircleLink": "Link naar de kring kopiëren",
         "circleLinkCopied": "Link naar de kring gekopieerd"
       },

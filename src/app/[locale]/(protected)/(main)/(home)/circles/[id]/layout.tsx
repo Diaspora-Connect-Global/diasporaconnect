@@ -1,3 +1,5 @@
+import { CircleFrame } from '@/components/circles/shell';
+
 /**
  * Pass-through layout for one circle.
  *
@@ -7,9 +9,10 @@
  *
  * It exists as the segment's extension point — per-circle `generateMetadata`
  * belongs here, the way `(home)/post/[id]/layout.tsx` fetches a post's OG tags.
- * Do not add chrome: the chat, the member screens and the artefact screens each
- * draw their own header, and a shared one here would sit above every one of
- * them.
+ * It draws the one frame every circle screen shares (`CircleFrame`: Discover's
+ * scroll area and measure, plus the circle's header and section navigation).
+ * Each screen still owns its `h1`; the home draws its own hero in place of the
+ * compact header.
  *
  * The one thing it does draw is no box at all: `display: contents` wrapper that
  * darkens the secondary text colour for the circle screens. The app-wide
@@ -20,10 +23,17 @@
  * the layout moves. The fix belongs in the global token; this keeps the circle
  * screens readable until it changes.
  */
-export default function CircleLayout({ children }: { children: React.ReactNode }) {
+export default async function CircleLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode;
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   return (
     <div className="contents [--text-secondary:#666666] dark:[--text-secondary:#9b9b9b]">
-      {children}
+      <CircleFrame circleId={id}>{children}</CircleFrame>
     </div>
   );
 }

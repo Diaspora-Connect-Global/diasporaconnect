@@ -40,30 +40,16 @@ import {
 const ENTRIES_PAGE = 100;
 
 /**
- * Geometry of the challenge screen inside the `(home)` sidebar shell.
- *
- * `CIRCLE_COLUMN_CLASS` is deliberately NOT reused. It is `flex-1` with no
- * width cap, which is right for the single-column Circles screens — a capped
- * column would leave `20vw` sidebar + `40vw` content as a 60vw block that the
- * centring shell pushes into the middle of the page, so the sidebar stops
- * looking like a sidebar. This screen has a second column that takes the
- * remaining width, so the row fills the viewport on its own and the main column
- * can be pinned; that is exactly the arrangement `FEED_COLUMN_POST_PAGE_CLASS`
- * describes for the post page, and pinning stops the column resizing as the
- * side panel's content loads.
- *
- * Below `lg` the shell itself scrolls and the two columns simply stack, so the
- * side panel becomes the last section of one continuous page rather than a
- * second scroll region fighting the first. That is also why each piece is
- * mounted exactly once: rendering the panel twice behind `lg:hidden` /
- * `hidden lg:block` would put two entry forms in the DOM with duplicate input
- * ids and two independent idempotency keys.
+ * Geometry of the challenge screen inside the circle frame: one column on a
+ * phone, the main column plus the join/entry panel from `lg`, the same two-column
+ * grid Discover and the circle home use. Each piece is mounted exactly once:
+ * rendering the panel twice behind `lg:hidden` / `hidden lg:block` would put two
+ * entry forms in the DOM with duplicate input ids and two independent
+ * idempotency keys.
  */
-const SHELL_CLASS = 'h-app-inner overflow-y-auto scrollbar-hide lg:flex lg:overflow-hidden';
-const MAIN_COLUMN_CLASS =
-  'mx-4 flex w-full min-w-0 flex-col py-4 lg:w-[40vw] lg:min-w-[40vw] lg:max-w-[40vw] lg:flex-none lg:overflow-y-auto lg:overflow-x-hidden scrollbar-hide';
-const SIDE_COLUMN_CLASS =
-  'mx-4 mb-6 min-w-0 lg:mb-0 lg:flex-1 lg:overflow-y-auto lg:py-4 scrollbar-hide';
+const SHELL_CLASS = 'flex w-full min-w-0 flex-col gap-5';
+const MAIN_COLUMN_CLASS = 'flex min-w-0 flex-col gap-5';
+const GRID_CLASS = 'grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start xl:grid-cols-[minmax(0,1fr)_24rem]';
 
 /**
  * Screen 6 — Challenge detail.
@@ -150,10 +136,10 @@ export default function CircleChallengePage() {
     <button
       type="button"
       onClick={() => router.push(`/circles/${circleId}`)}
-      className="mb-4 inline-flex w-fit items-center gap-2 text-text-secondary transition-colors hover:text-text-primary"
+      className="inline-flex w-fit items-center gap-2 rounded-full border border-border-subtle bg-surface-default px-3 py-1.5 text-text-secondary shadow-sm transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
     >
-      <ArrowLeft className="size-4" />
-      <span className="label-medium">{t('challenge.title')}</span>
+      <ArrowLeft aria-hidden="true" className="size-4" />
+      <span className="text-sm font-medium">{t('challenge.title')}</span>
     </button>
   );
 
@@ -206,44 +192,44 @@ export default function CircleChallengePage() {
 
   return (
     <div className={SHELL_CLASS}>
-      <div className={MAIN_COLUMN_CLASS}>
-        {header}
+      {header}
 
-        <ChallengeHeader
-          challenge={challenge}
-          starter={
-            challenge.createdBy ? usersById[challenge.createdBy] : undefined
-          }
-        />
+      <div className={GRID_CLASS}>
+        <div className={MAIN_COLUMN_CLASS}>
+          <ChallengeHeader
+            challenge={challenge}
+            starter={
+              challenge.createdBy ? usersById[challenge.createdBy] : undefined
+            }
+          />
 
-        <VerificationModePanel mode={challenge.verificationMode} />
+          <VerificationModePanel mode={challenge.verificationMode} />
 
-        <ChallengeProgress participants={participants} endsAt={challenge.endsAt} />
+          <ChallengeProgress participants={participants} endsAt={challenge.endsAt} />
 
-        <ChallengeActivity
-          entries={entries}
-          usersById={usersById}
-          currentUserId={currentUserId}
-          loading={entriesLoading}
-        />
+          <ChallengeActivity
+            entries={entries}
+            usersById={usersById}
+            currentUserId={currentUserId}
+            loading={entriesLoading}
+          />
+        </div>
 
-        <div className="pb-4" />
-      </div>
-
-      <div className={SIDE_COLUMN_CLASS}>
-        {/*
-          The raw entries are passed rather than a `joined` boolean: a recurring
-          challenge is meant to be entered again each period, so the CTA has to
-          ask "entered for THIS period?" — a question a single has-ever-entered
-          flag cannot answer.
-        */}
-        <ChallengeAside
-          circleId={circleId}
-          challenge={challenge}
-          entries={entries}
-          currentUserId={currentUserId}
-          loading={entriesLoading}
-        />
+        <div className="min-w-0">
+          {/*
+            The raw entries are passed rather than a `joined` boolean: a recurring
+            challenge is meant to be entered again each period, so the CTA has to
+            ask "entered for THIS period?" — a question a single has-ever-entered
+            flag cannot answer.
+          */}
+          <ChallengeAside
+            circleId={circleId}
+            challenge={challenge}
+            entries={entries}
+            currentUserId={currentUserId}
+            loading={entriesLoading}
+          />
+        </div>
       </div>
     </div>
   );

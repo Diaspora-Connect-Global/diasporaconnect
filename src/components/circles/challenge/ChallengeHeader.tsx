@@ -55,7 +55,7 @@ export function ChallengeHeader({ challenge, starter }: ChallengeHeaderProps) {
   const starterName = circleUserDisplayName(starter, tCommon('loading'));
 
   return (
-    <header>
+    <header className="rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm sm:p-5">
       <div className="flex flex-wrap items-center gap-2">
         <StatusPill
           variant="brand"
@@ -87,7 +87,7 @@ export function ChallengeHeader({ challenge, starter }: ChallengeHeaderProps) {
         )}
       </div>
 
-      <h1 className="heading-small mt-3 text-text-primary">
+      <h1 className="mt-3 break-words text-2xl font-bold leading-tight text-text-primary sm:text-3xl">
         {challenge.title}
       </h1>
 

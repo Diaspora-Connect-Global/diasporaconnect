@@ -118,7 +118,7 @@ export function JoinRequestsSection({ circleId }: JoinRequestsSectionProps) {
   }
 
   return (
-    <section data-testid="join-requests" className="flex flex-col gap-3 rounded-xl border border-border-subtle p-4">
+    <section data-testid="join-requests" className="flex flex-col gap-3 rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm sm:p-5">
       <div className="flex items-start gap-3">
         <span className={`grid size-9 shrink-0 place-items-center rounded-lg ${ICON_CHIP_CLASS}`}>
           <UserPlus aria-hidden="true" className="size-5" />

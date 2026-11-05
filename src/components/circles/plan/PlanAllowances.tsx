@@ -151,7 +151,7 @@ function AllowanceGrid({
            * border would make the card itself look like an error, which is
            * the opposite of what a lock is.
            */
-          className="flex flex-col rounded-xl border border-border-subtle bg-surface-default p-4"
+          className="flex flex-col rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm"
         >
           <AllowanceCard
             allowance={allowance}

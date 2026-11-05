@@ -81,8 +81,8 @@ export function ChallengeProgress({
   }, [endsAt, locale]);
 
   return (
-    <section className="mt-8">
-      <h2 className="label-medium text-text-primary">{t('progressTitle')}</h2>
+    <section className="rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm sm:p-5">
+      <h2 className="text-lg font-bold text-text-primary">{t('progressTitle')}</h2>
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <div className="flex min-w-0 items-center gap-3">

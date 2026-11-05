@@ -23,7 +23,7 @@ import {
 import PageLoader from '@/components/custom/PageLoader';
 import { ErrorState } from '@/components/feedback';
 import { useRouter } from '@/i18n/navigation';
-import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { CIRCLE_SCREEN_CLASS } from '@/components/circles/shell';
 import {
   CIRCLE_CHAT,
   CIRCLE_MEMBERS,
@@ -151,16 +151,16 @@ export default function CircleMotionPage() {
    * expects it.
    */
   const header = (
-    <div className="flex shrink-0 items-center gap-2 border-b border-border-subtle pb-3">
+    <div className="flex shrink-0 items-center gap-2">
       <button
         type="button"
         onClick={() => router.push(`/circles/${circleId}`)}
         aria-label={tGlobal('previousPage')}
-        className="cursor-pointer rounded-full p-1.5 text-text-primary transition-colors hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand"
+        className="cursor-pointer rounded-full border border-border-subtle bg-surface-default p-1.5 text-text-primary shadow-sm transition-colors hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand"
       >
         <ArrowLeft className="size-5" />
       </button>
-      <span className="label-large min-w-0 flex-1 truncate text-text-primary">
+      <span className="min-w-0 flex-1 truncate text-sm font-semibold text-text-secondary">
         {t('title')}
       </span>
       {motion && (
@@ -184,8 +184,8 @@ export default function CircleMotionPage() {
 
   if (motionLoading && !motion) {
     return (
-      <div className="h-app-inner flex overflow-hidden">
-        <div className={CIRCLE_COLUMN_CLASS}>
+      <div className="flex">
+        <div className={CIRCLE_SCREEN_CLASS}>
           {header}
           <PageLoader />
         </div>
@@ -200,8 +200,8 @@ export default function CircleMotionPage() {
    */
   if (motionError || !motion) {
     return (
-      <div className="h-app-inner flex overflow-hidden">
-        <div className={CIRCLE_COLUMN_CLASS}>
+      <div className="flex">
+        <div className={CIRCLE_SCREEN_CLASS}>
           {header}
           <div className="flex flex-1 items-center justify-center">
             <ErrorState
@@ -249,11 +249,11 @@ export default function CircleMotionPage() {
   );
 
   return (
-    <div className="h-app-inner flex overflow-hidden">
-      <div className={CIRCLE_COLUMN_CLASS}>
-        {header}
+    <div className="flex">
+      <div className={CIRCLE_SCREEN_CLASS}>
+        <div className={MOTION_MEASURE_CLASS}>
+          {header}
 
-        <div className={`${MOTION_MEASURE_CLASS} py-4`}>
           <MotionCard>
             <MotionHeader motion={motion} />
           </MotionCard>

@@ -2,13 +2,12 @@
 
 import { useState } from 'react';
 import { useQuery } from '@apollo/client/react';
-import { ArrowLeft, Lock } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import PageLoader from '@/components/custom/PageLoader';
 import { EmptyState, ErrorState } from '@/components/feedback';
-import { useRouter } from '@/i18n/navigation';
-import { CIRCLE_COLUMN_CLASS } from '@/lib/feedColumnLayout';
+import { CIRCLE_SCREEN_CLASS, CircleScreenHeading } from '@/components/circles/shell';
 import { CIRCLE, MY_CIRCLE_MEMBERSHIP } from '@/services/gql/circles';
 import type {
   CircleData,
@@ -84,8 +83,6 @@ export function CircleSettingsScreen({ circleId }: CircleSettingsScreenProps) {
   const t = useTranslations('circles.settings');
   const tCommon = useTranslations('circles.common');
   const tErrors = useTranslations('circles.errors');
-  const tGlobal = useTranslations('common');
-  const router = useRouter();
 
   /*
    * Local state rather than a `?section=` search param. `useSearchParams` in a
@@ -179,24 +176,7 @@ export function CircleSettingsScreen({ circleId }: CircleSettingsScreenProps) {
     void refetchMembership();
   };
 
-  const header = (
-    <div className="flex shrink-0 items-center gap-2">
-      <button
-        type="button"
-        onClick={() => router.push(`/circles/${circleId}`)}
-        /*
-         * A generic label, not the page title: calling it "Settings" would
-         * announce a link TO the page the user is already on. Same choice as
-         * the members screen.
-         */
-        aria-label={tGlobal('previousPage')}
-        className="cursor-pointer rounded-full p-1.5 text-text-primary transition-colors hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-brand"
-      >
-        <ArrowLeft className="size-5" />
-      </button>
-      <h1 className="label-large text-text-primary">{t('title')}</h1>
-    </div>
-  );
+  const header = <CircleScreenHeading title={t('title')} />;
 
   const body = () => {
     /*
@@ -244,7 +224,7 @@ export function CircleSettingsScreen({ circleId }: CircleSettingsScreenProps) {
     }
 
     return (
-      <div className="flex flex-col gap-4 py-4 lg:flex-row lg:items-start lg:gap-8">
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:gap-6">
         <SettingsNav circleId={circleId} active={panel} onSelect={setPanel} />
 
         <div className="flex min-w-0 flex-1 flex-col gap-4">
@@ -298,8 +278,8 @@ export function CircleSettingsScreen({ circleId }: CircleSettingsScreenProps) {
   };
 
   return (
-    <div className="h-app-inner flex overflow-hidden">
-      <div className={CIRCLE_COLUMN_CLASS}>
+    <div className="flex">
+      <div className={CIRCLE_SCREEN_CLASS}>
         {header}
         {body()}
       </div>
