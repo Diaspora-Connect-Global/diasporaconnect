@@ -30,3 +30,13 @@ export function getStripe(): Promise<Stripe | null> {
   }
   return stripePromise;
 }
+
+/**
+ * End-to-end tests take the card through this instead of the real card form. It fools
+ * only the browser it runs in: a payment counts as paid when the server's signed Stripe
+ * webhook says so, never because this resolved. Rejecting with `Error('Payment cancelled.')`
+ * behaves like closing the dialog.
+ */
+export function getStripeTestStub(): ((args: { clientSecret: string }) => Promise<void>) | undefined {
+  return (globalThis as { __stripeTestStub?: (args: { clientSecret: string }) => Promise<void> }).__stripeTestStub;
+}

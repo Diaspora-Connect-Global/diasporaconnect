@@ -4,6 +4,8 @@
  *
  * The Paystack popup is replaced by the stub `openPaystackCheckout` looks for: it cannot
  * run here, and it proves nothing the server does not check again with Paystack.
+ * The Stripe card form is replaced the same way by `__stripeTestStub`: the order only
+ * counts as paid when the (faked) server then says the payment is CONFIRMED.
  */
 import { test, expect, type Browser, type Page } from '@playwright/test';
 import { openBrowser } from '../support/browser';
@@ -241,5 +243,63 @@ test('checkout with a paid line and a failure fits 360px', async () => {
     await pay(page);
     await expect(page.getByTestId('mp-checkout-failure')).toBeVisible({ timeout: 30_000 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    await page.context().close();
+});
+
+test('a USD cart pays by card through Stripe: the server is asked to start it, and the order is paid only when the server says so', async () => {
+    const usdProduct = { ...product('prod-usd', 'Kente cloth', 2500), currency: 'USD' };
+    const usdOrder = {
+        createProductOrder: {
+            __typename: 'OrderResponse',
+            success: true,
+            message: null,
+            order: { __typename: 'MarketplaceOrder', id: 'order-u', payment_intent_id: 'pi-order-u', buyer_id: 'b', vendor_id: VENDOR_ID, status: 'CREATED', items: null, total_amount: 2500, currency: 'USD', shipping_address: null, notes: null, created_at: AT, updated_at: AT },
+        },
+    };
+    const over = {
+        ...BASE,
+        SearchProducts: { searchProducts: { __typename: 'ProductList', success: true, products: [usdProduct], total: 1, page: 1, limit: 20 } },
+        GetProduct: { getProduct: { __typename: 'ProductResponse', success: true, message: null, product: usdProduct } },
+        CreateProductOrder: usdOrder,
+        StartCardPayment: { startCardPayment: { __typename: 'StartCardPaymentResponse', success: true, client_secret: 'pi_test_secret_test', message: null } },
+        // What the signed Stripe webhook leaves behind.
+        GetPaymentIntent: { getPaymentIntent: { __typename: 'PaymentIntentResponse', success: true, payment_intent: { __typename: 'PaymentIntentType', id: 'pi-order-u', status: 'CONFIRMED', gross_amount: 2500, currency: 'USD', provider_transaction_id: null } } },
+    };
+    const { page, graphql } = await open(browser, '/marketplace', over);
+    await expect(page.getByTestId('mp-card').first()).toBeVisible({ timeout: 90_000 });
+    await page.getByTestId('mp-card').first().click();
+    await page.getByRole('button', { name: 'Buy now' }).click();
+    expect(toMinor(await page.getByTestId('mp-checkout-total').textContent())).toBe(2500);
+    await fillAddress(page);
+    await page.evaluate(() => {
+        const w = window as unknown as {
+            __cardSecrets: string[];
+            __paystackCalls: number;
+            __stripeTestStub: (a: { clientSecret: string }) => Promise<void>;
+            __paystackTestStub: () => Promise<{ reference: string }>;
+        };
+        w.__cardSecrets = [];
+        w.__paystackCalls = 0;
+        w.__stripeTestStub = async ({ clientSecret }) => {
+            w.__cardSecrets.push(clientSecret);
+        };
+        w.__paystackTestStub = async () => {
+            w.__paystackCalls += 1;
+            return { reference: 'ref-test' };
+        };
+    });
+    await page.getByRole('button', { name: /^Pay/ }).click();
+
+    await expect(page.getByRole('button', { name: 'Done order' })).toBeVisible({ timeout: 30_000 });
+    expect(inputs(graphql, 'CreateProductOrder')[0]).toMatchObject({ items: [{ product_id: 'prod-usd', quantity: 1, price: 2500, currency: 'USD' }] });
+    // Only the intent id goes up: who is paying comes from the token on the server.
+    const starts = graphql.calls.filter((c) => c.name === 'StartCardPayment').map((c) => c.variables);
+    expect(starts).toEqual([{ paymentIntentId: 'pi-order-u' }]);
+    expect(await page.evaluate(() => (window as unknown as { __cardSecrets: string[] }).__cardSecrets)).toEqual(['pi_test_secret_test']);
+    // The browser never tells the server a payment succeeded, and Paystack is not involved.
+    expect(inputs(graphql, 'ConfirmPaymentIntent')).toEqual([]);
+    expect(await page.evaluate(() => (window as unknown as { __paystackCalls: number }).__paystackCalls)).toBe(0);
+    expect(graphql.calls.some((c) => c.name === 'GetPaymentIntent')).toBe(true);
+    expect(await page.locator('body').innerText()).not.toMatch(UUID);
     await page.context().close();
 });

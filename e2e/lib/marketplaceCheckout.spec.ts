@@ -1,7 +1,8 @@
 /**
  * Checkout rules without a browser: the total equals what is sent, carts become
  * the right mutations, and a failure part-way charges nothing twice, loses nothing
- * paid and never claims success.
+ * paid and never claims success. A Stripe card payment counts as paid only when the
+ * server says it recorded it, never because the browser said Stripe was done.
  */
 import { test, expect } from '@playwright/test';
 import {
@@ -14,6 +15,7 @@ import {
     resolvePaymentIntentId,
     runCheckout,
     settlePaidLines,
+    STRIPE_POLL_DELAYS_MS,
     type CheckoutDeps,
     type ConfirmAnswer,
     type OrderAttempt,
@@ -161,9 +163,18 @@ function fakeBackend(over: Partial<CheckoutDeps> = {}) {
     const created: PlannedOrder[] = [];
     const popups: { amountMinor: number; currency: string; paymentIntentId: string }[] = [];
     const confirms: { payment_intent_id: string; payment_method_id: string; provider: string }[] = [];
+    const cards: { amountMinor: number; currency: string; paymentIntentId: string }[] = [];
+    const sleeps: number[] = [];
     let next = 0;
     const deps: CheckoutDeps = {
         hasEmail: true,
+        stripeConfigured: true,
+        takeStripePayment: async (args) => {
+            cards.push(args);
+        },
+        sleep: async (ms) => {
+            sleeps.push(ms);
+        },
         createOrder: async (order) => {
             created.push(order);
             next += 1;
@@ -180,7 +191,7 @@ function fakeBackend(over: Partial<CheckoutDeps> = {}) {
         },
         ...over,
     };
-    return { deps, created, popups, confirms };
+    return { deps, created, popups, confirms, cards, sleeps };
 }
 
 const run = (cart: CartItem[], deps: CheckoutDeps, attempts = new Map<string, OrderAttempt>(), method: 'credit' | 'mobile' = 'credit') =>
@@ -223,14 +234,137 @@ test.describe('runCheckout', () => {
         expect(backend.popups[0].amountMinor).toBe(10000);
     });
 
-    test('a currency with no way to pay stops before any order reserves stock', async () => {
-        const backend = fakeBackend();
-        const outcome = await run([product('p', 1, 1, VENDOR_A, 'USD')], backend.deps);
-        expect(outcome.failure).toBe('payment_unavailable');
-        expect(backend.created).toHaveLength(0);
-        expect(backend.popups).toHaveLength(0);
+    test('Stripe not configured stops USD/EUR/GBP before any order reserves stock', async () => {
+        for (const currency of ['USD', 'EUR', 'GBP']) {
+            const backend = fakeBackend({ stripeConfigured: false });
+            const outcome = await run([product('p', 1, 1, VENDOR_A, currency)], backend.deps);
+            expect(outcome.failure).toBe('payment_unavailable');
+            expect(backend.created).toHaveLength(0);
+            expect(backend.cards).toHaveLength(0);
+        }
     });
 
+    test('Stripe not being configured changes nothing for Paystack currencies', async () => {
+        const backend = fakeBackend({ stripeConfigured: false });
+        const outcome = await run([product('p', 1, 1, VENDOR_A, 'GHS')], backend.deps);
+        expect(outcome.success).toBe(true);
+        expect(backend.popups).toHaveLength(1);
+    });
+
+    test.describe('a USD/EUR/GBP card, through Stripe', () => {
+        test('opens the card dialog for the exact amount, and is paid only once the server has recorded it', async () => {
+            let recorded = false;
+            const backend = fakeBackend({ isIntentPaid: async () => recorded });
+            backend.deps.sleep = async (ms) => {
+                backend.sleeps.push(ms);
+                // The signed webhook lands during the third wait.
+                if (backend.sleeps.length === 3) recorded = true;
+            };
+            const outcome = await run([product('p', 12.5, 2, VENDOR_A, 'USD')], backend.deps);
+            expect(outcome.success).toBe(true);
+            expect(backend.cards).toEqual([{ paymentIntentId: 'pi-1', amountMinor: 2500, currency: 'USD' }]);
+            expect(backend.sleeps).toHaveLength(3);
+            // Neither provider's other route is touched: no Paystack popup, no confirm call from the browser.
+            expect(backend.popups).toHaveLength(0);
+            expect(backend.confirms).toHaveLength(0);
+        });
+
+        test('Stripe saying done is not paid: if the server never records it, it is unconfirmed, not failed', async () => {
+            const backend = fakeBackend({ isIntentPaid: async () => false });
+            const outcome = await run([product('p', 10, 1, VENDOR_A, 'EUR')], backend.deps);
+            expect(outcome.success).toBe(false);
+            expect(outcome.paid).toEqual([]);
+            expect(outcome.failure).toBe('payment_unconfirmed');
+            // Bounded: about 30 seconds in all, and not a request more than the schedule.
+            expect(backend.sleeps).toEqual([...STRIPE_POLL_DELAYS_MS]);
+            expect(backend.sleeps.reduce((a, b) => a + b, 0)).toBeGreaterThanOrEqual(28000);
+            expect(backend.sleeps.reduce((a, b) => a + b, 0)).toBeLessThanOrEqual(32000);
+        });
+
+        test('a failing status check while waiting is "not yet", never a crash or a success', async () => {
+            const backend = fakeBackend({
+                isIntentPaid: async () => {
+                    throw new Error('network');
+                },
+            });
+            expect((await run([product('p', 10, 1, VENDOR_A, 'GBP')], backend.deps)).failure).toBe('payment_unconfirmed');
+        });
+
+        test('closing the dialog is a cancel, charges nothing, and paying later uses the same order', async () => {
+            let cancel = true;
+            let recorded = false;
+            const backend = fakeBackend({ isIntentPaid: async () => recorded });
+            const take = backend.deps.takeStripePayment;
+            backend.deps.takeStripePayment = async (args) => {
+                if (cancel) throw new Error('Payment cancelled.');
+                await take(args);
+                recorded = true;
+            };
+            const attempts = new Map<string, OrderAttempt>();
+            const first = await run([product('p', 10, 1, VENDOR_A, 'USD')], backend.deps, attempts);
+            expect(first.failure).toBe('payment_cancelled');
+            expect(backend.sleeps).toHaveLength(0);
+            expect(backend.cards).toHaveLength(0);
+            cancel = false;
+            const second = await run([product('p', 10, 1, VENDOR_A, 'USD')], backend.deps, attempts);
+            expect(second.success).toBe(true);
+            expect(backend.cards).toHaveLength(1);
+            expect(backend.created).toHaveLength(1);
+        });
+
+        test('a card the customer cannot complete is "refused", not "cancelled"', async () => {
+            const backend = fakeBackend({
+                takeStripePayment: async () => {
+                    throw new Error('The card payment could not be started.');
+                },
+            });
+            expect((await run([product('p', 10, 1, VENDOR_A, 'USD')], backend.deps)).failure).toBe('payment_refused');
+        });
+
+        test('money taken but not recorded yet: a retry never reopens the card dialog', async () => {
+            let recorded = false;
+            const backend = fakeBackend({ isIntentPaid: async () => recorded });
+            const attempts = new Map<string, OrderAttempt>();
+            const first = await run([product('p', 10, 1, VENDOR_A, 'USD')], backend.deps, attempts);
+            expect(first.failure).toBe('payment_unconfirmed');
+            expect(attempts.get(Array.from(attempts.keys())[0])?.stripeTaken).toBe(true);
+
+            recorded = true;
+            const second = await run([product('p', 10, 1, VENDOR_A, 'USD')], backend.deps, attempts);
+            expect(second.success).toBe(true);
+            expect(backend.cards).toHaveLength(1);
+            expect(backend.created).toHaveLength(1);
+            expect(attempts.size).toBe(0);
+        });
+
+        test('money taken, then the cart changed: it is recorded first, even if the customer now picked mobile', async () => {
+            let recorded = false;
+            const backend = fakeBackend({ isIntentPaid: async () => recorded });
+            const attempts = new Map<string, OrderAttempt>();
+            await run([product('p', 10, 1, VENDOR_A, 'USD')], backend.deps, attempts);
+            recorded = true;
+            const second = await run([product('q', 5, 1, VENDOR_A, 'USD')], backend.deps, attempts, 'mobile');
+            // The paid order is settled through Stripe's record, never through a Paystack popup.
+            expect(backend.popups).toHaveLength(0);
+            expect(second.paid.map((l) => l.item.id)).toEqual(['p']);
+        });
+
+        test('a Stripe currency never opens Paystack, and a Paystack currency never opens the card dialog', async () => {
+            const usd = fakeBackend({ isIntentPaid: async () => true });
+            await run([product('p', 10, 1, VENDOR_A, 'USD')], usd.deps);
+            expect(usd.popups).toHaveLength(0);
+            const ghs = fakeBackend();
+            await run([product('p', 10, 1, VENDOR_A, 'GHS')], ghs.deps);
+            expect(ghs.cards).toHaveLength(0);
+        });
+
+        test('mobile money stays GHS only', () => {
+            expect(buildCheckoutPlan([product('p', 1, 1, VENDOR_A, 'EUR')], { method: 'mobile' })).toEqual({
+                ok: false,
+                failure: 'payment_unavailable',
+            });
+        });
+    });
     test('second order refused: first stays paid, nothing further is charged, and it does not claim success', async () => {
         const cart = [product('p', 100), service('s', 250), service('t', 30)];
         const backend = fakeBackend();

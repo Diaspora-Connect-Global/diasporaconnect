@@ -33,6 +33,7 @@ import { ShoppingCartModal } from "./ShoppingCartModal";
 import { Checkout } from "./Checkout";
 import { OrderSuccess } from "./OrderSuccess";
 import { useMarketplacePayment } from "./payments/useMarketplacePayment";
+import { StripeCardDialog } from "./payments/StripeCardDialog";
 import { toCdnUrl } from "@/lib/cdn";
 import {
   cartNeedsShipping,
@@ -102,7 +103,7 @@ function toUiProductFromServiceApi(item: {
 export default function MarketplaceContainer() {
   const t = useTranslations("marketplace");
   const tCommon = useTranslations("common");
-  const { pay, isPaying } = useMarketplacePayment();
+  const { pay, isPaying, cardRequest, closeCardDialog } = useMarketplacePayment();
 
   const [currentView, setCurrentView] = useState<MarketplaceView>("home");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -316,6 +317,7 @@ export default function MarketplaceContainer() {
 
   return (
     <>
+      <StripeCardDialog request={cardRequest} onClose={closeCardDialog} />
       {currentView === "home" && (
         <MarketplaceBrowse
           query={query}

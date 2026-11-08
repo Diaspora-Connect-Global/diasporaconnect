@@ -213,12 +213,19 @@ export interface OrderAttempt {
     paymentIntentId?: string;
     /** Paystack took the money in the browser. Never open another popup for this order. */
     paystackReference?: string;
+    /** Stripe reported the card payment done in the browser. Never open another card dialog for this order. */
+    stripeTaken?: boolean;
 }
 
 export type ConfirmAnswer = 'confirmed' | 'refused' | 'unknown';
 
+/** How long to keep asking whether a card payment was recorded: about 30 s in all, easing off. */
+export const STRIPE_POLL_DELAYS_MS: readonly number[] = [1000, 1500, 2000, 3000, 4000, 5000, 6000, 8000];
+
 export interface CheckoutDeps {
     hasEmail: boolean;
+    /** Whether this deployment has a Stripe publishable key. Without it USD/EUR/GBP cannot be paid. */
+    stripeConfigured: boolean;
     /** Must not throw for a refusal: a refused order comes back with no orderId. */
     createOrder(order: PlannedOrder): Promise<{ orderId?: string; paymentIntentId?: string; totalMinor?: number }>;
     isIntentPaid(paymentIntentId: string): Promise<boolean>;
@@ -229,6 +236,16 @@ export interface CheckoutDeps {
         method: PaymentMethod;
         paymentIntentId: string;
     }): Promise<string>;
+    /**
+     * Takes the card in a dialog (USD/EUR/GBP, through Stripe) and resolves when Stripe
+     * reports the card payment done. That is NOT proof of payment: only the signed Stripe
+     * webhook records one, and `isIntentPaid` is how this file finds out. Rejects with
+     * `Error('Payment cancelled.')` if the customer closes the dialog, and with any other
+     * error if the payment could not be started or was declined.
+     */
+    takeStripePayment(args: { paymentIntentId: string; amountMinor: number; currency: string }): Promise<void>;
+    /** Pause between checks of a card payment. Tests pass an instant one. */
+    sleep?(ms: number): Promise<void>;
     confirm(input: {
         payment_intent_id: string;
         payment_method_id: string;
@@ -250,10 +267,29 @@ type Settled = { paid: true; orderId: string } | { paid: false; failure: Checkou
 const usesPaystack = (method: PaymentMethod, currency: string): boolean =>
     method === 'mobile' || usesPaystackCard(currency);
 
+/** Money left the customer's hands for this order, by either provider. */
+const tookMoney = (attempt: OrderAttempt): boolean => Boolean(attempt.paystackReference || attempt.stripeTaken);
+
+/**
+ * After Stripe says the card payment is done, ask our own backend until it has recorded it.
+ * The browser's word is never the evidence: only the signed webhook marks the intent
+ * CONFIRMED. Bounded, so a webhook that is slow or never comes ends in "unconfirmed".
+ */
+async function waitForStripeRecord(paymentIntentId: string, deps: CheckoutDeps): Promise<boolean> {
+    const sleep = deps.sleep ?? ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
+    for (const delay of STRIPE_POLL_DELAYS_MS) {
+        await sleep(delay);
+        if (await deps.isIntentPaid(paymentIntentId).catch(() => false)) return true;
+    }
+    return false;
+}
+
 /**
  * Takes one order from wherever it got to as far as paid. Safe to call again for
- * the same order: an order is created once, a popup that took money is never
- * reopened, and a confirm whose answer was lost is checked before it is retried.
+ * the same order: an order is created once, a popup or card dialog that took money
+ * is never reopened, and a confirm whose answer was lost is checked before it is
+ * retried. A Stripe card payment is never confirmed from here: the browser's word is
+ * not evidence, so this only waits for the signed webhook to have recorded it.
  */
 async function settleOrder(
     order: PlannedOrder,
@@ -286,6 +322,29 @@ async function settleOrder(
 
     // Kept in `attempts` on purpose: pressing Pay again must not stack up more unpayable orders.
     if (!attempt.paymentIntentId) return { paid: false, failure: 'payment_unavailable' };
+
+    // Stripe (USD/EUR/GBP card). Money Paystack already took is finished through Paystack below.
+    if (!attempt.paystackReference && (attempt.stripeTaken || !usesPaystack(method, order.currency))) {
+        if (!attempt.stripeTaken) {
+            try {
+                await deps.takeStripePayment({
+                    paymentIntentId: attempt.paymentIntentId,
+                    amountMinor: order.amountMinor,
+                    currency: order.currency,
+                });
+                attempt.stripeTaken = true;
+            } catch (error) {
+                const cancelled = error instanceof Error && error.message === 'Payment cancelled.';
+                return { paid: false, failure: cancelled ? 'payment_cancelled' : 'payment_refused' };
+            }
+        }
+        // Paid only when our backend says so. Not yet is "money taken, not recorded", never "failed".
+        if (await waitForStripeRecord(attempt.paymentIntentId, deps)) {
+            attempts.delete(order.key);
+            return { paid: true, orderId: attempt.orderId };
+        }
+        return { paid: false, failure: 'payment_unconfirmed' };
+    }
 
     if (!attempt.paystackReference) {
         try {
@@ -338,10 +397,10 @@ export async function runCheckout({
     const orderIds: string[] = [];
     const stop = (failure: CheckoutFailure): CheckoutOutcome => ({ success: false, paid, orderIds, failure });
 
-    // Money Paystack already took gets recorded before anything new starts, even if
+    // Money a provider already took gets recorded before anything new starts, even if
     // the customer changed the cart in between and this order is no longer in it.
     for (const attempt of Array.from(attempts.values())) {
-        if (!attempt.paystackReference) continue;
+        if (!tookMoney(attempt)) continue;
         const settled = await settleOrder(attempt.order, method, attempts, deps);
         if (!settled.paid) return stop(settled.failure);
         orderIds.push(settled.orderId);
@@ -354,10 +413,12 @@ export async function runCheckout({
     if (plan.orders.length === 0) return { success: paid.length > 0, paid, orderIds };
 
     // Catch what would fail anyway before any order exists, not after the first is paid.
-    // Paystack is the one way to pay that the server can check with the provider. Other
-    // currencies have no way to take a card yet, so they stop here, before an order
+    // Paystack needs the customer's email. A card in USD/EUR/GBP goes through Stripe, which
+    // needs this deployment to have a publishable key. Either way, stop before an order
     // reserves any stock.
-    if (!usesPaystack(method, plan.currency) || !deps.hasEmail) return stop('payment_unavailable');
+    if (usesPaystack(method, plan.currency) ? !deps.hasEmail : !deps.stripeConfigured) {
+        return stop('payment_unavailable');
+    }
 
     for (const order of plan.orders) {
         const settled = await settleOrder(order, method, attempts, deps);

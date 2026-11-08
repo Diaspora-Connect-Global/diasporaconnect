@@ -285,7 +285,9 @@ export function MembershipPaymentModal({
               onPaymentMethodChange={setPaymentMethod}
               userEmail={userEmail ?? null}
               confirmPaymentIntent={async (input) => {
-                await confirmPaymentIntent({ variables: { input } });
+                // Apollo resolves a refused mutation with data: null, so the answer has to be read.
+                const { data } = await confirmPaymentIntent({ variables: { input } });
+                return Boolean(data?.confirmPaymentIntent?.success);
               }}
               onBackToPlan={() => setStep('plan')}
               onPaid={handlePaidSuccess}
@@ -438,7 +440,8 @@ interface PayStepProps {
   paymentMethod: PaymentMethod;
   onPaymentMethodChange: (method: PaymentMethod) => void;
   userEmail: string | null;
-  confirmPaymentIntent: (input: ConfirmPaymentIntentInput) => Promise<void>;
+  /** True only when the server checked the payment with Paystack and accepted it. */
+  confirmPaymentIntent: (input: ConfirmPaymentIntentInput) => Promise<boolean>;
   onBackToPlan: () => void;
   onPaid: (membershipId: string) => void;
 }
@@ -470,7 +473,8 @@ function PayStep({
   // Mobile money (Paystack) settles GHS only. Hide it for non-GHS-priced
   // entities; the backend rejects a non-GHS charge on the mobile-money rail.
   const listingCurrency = (price?.currency ?? 'GHS').toUpperCase();
-  const mobileMoneyAvailable = isMobileMoneySupported(listingCurrency);
+  // A subscription renews by itself, and mobile money can only take one payment at a time.
+  const mobileMoneyAvailable = isMobileMoneySupported(listingCurrency) && entity.access.paymentType !== 'SUBSCRIPTION';
 
   useEffect(() => {
     if (!mobileMoneyAvailable && paymentMethod === 'mobile') {
@@ -507,24 +511,8 @@ function PayStep({
 
     const status = paymentIntent?.status;
     if (status === 'succeeded' || status === 'processing') {
-      // Inform BE so the payment-service can publish the confirmed event
-      // even if the webhook is slow / dropped. Matches the paid-events
-      // post-confirm pattern.
-      try {
-        const intentId = paymentIntent?.id ?? paymentIntentIdHint;
-        if (intentId) {
-          await confirmPaymentIntent({
-            payment_intent_id: intentId,
-            payment_method_id: intentId,
-            provider: 'STRIPE',
-          });
-        }
-        onPaid(membershipId);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : t('errors.confirmFailed');
-        setErrorMessage(message);
-        setSubmitting(false);
-      }
+      // Stripe's signed webhook activates the membership; nothing to report from here.
+      onPaid(membershipId);
       return;
     }
 
@@ -548,12 +536,17 @@ function PayStep({
         email: userEmail,
         amountInPesewas: price.amountInCents,
         currency: price.currency,
+        paymentIntentId: paymentIntentIdHint,
       });
-      await confirmPaymentIntent({
+      const accepted = await confirmPaymentIntent({
         payment_intent_id: paymentIntentIdHint,
         payment_method_id: reference,
         provider: 'PAYSTACK',
       });
+      if (!accepted) {
+        setErrorMessage(t('errors.confirmFailed'));
+        return;
+      }
       onPaid(membershipId);
     } catch (err) {
       const message = err instanceof Error ? err.message : t('errors.confirmFailed');

@@ -104,6 +104,29 @@ export const CONFIRM_PAYMENT_INTENT = gql`
   }
 `;
 
+/**
+ * Starts the Stripe card payment (USD/EUR/GBP) and returns the client secret the
+ * card form needs. The server takes who is asking from the token. It never says a
+ * payment succeeded: only Stripe's signed webhook records one.
+ */
+export const START_CARD_PAYMENT = gql`
+  mutation StartCardPayment($paymentIntentId: String!) {
+    startCardPayment(paymentIntentId: $paymentIntentId) {
+      success
+      client_secret
+      message
+    }
+  }
+`;
+
+export interface StartCardPaymentResponse {
+  startCardPayment?: {
+    success?: boolean;
+    client_secret?: string | null;
+    message?: string | null;
+  } | null;
+}
+
 export const CANCEL_PAYMENT_INTENT = gql`
   mutation CancelPaymentIntent($payment_intent_id: ID!) {
     cancelPaymentIntent(payment_intent_id: $payment_intent_id) {

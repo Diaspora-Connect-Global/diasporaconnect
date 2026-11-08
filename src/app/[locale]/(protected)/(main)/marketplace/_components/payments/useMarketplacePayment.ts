@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useLazyQuery, useMutation } from "@apollo/client/react";
@@ -11,8 +11,10 @@ import {
 import {
   CONFIRM_PAYMENT_INTENT,
   GET_PAYMENT_INTENT,
+  START_CARD_PAYMENT,
   type ConfirmPaymentIntentResponse,
   type GetPaymentIntentResponse,
+  type StartCardPaymentResponse,
 } from "@/services/gql/payments";
 import type {
   CreateProductOrderResponse,
@@ -30,6 +32,8 @@ import {
   type OrderAttempt,
 } from "@/lib/marketplaceCheckout";
 import { openPaystackMobileMoney, openPaystackCard } from "@/lib/paystack";
+import { getStripeTestStub, isStripeConfigured } from "@/lib/stripe";
+import type { CardPaymentRequest } from "./StripeCardDialog";
 import { useUserStore } from "@/store/useUserStore";
 import type { PaymentContext, PaymentResult, PaymentMethod, ShippingAddress } from "../types";
 
@@ -47,6 +51,14 @@ export function useMarketplacePayment() {
   const attempts = useRef(new Map<string, OrderAttempt>());
   // isPaying only takes effect on the next render; a double press must not start twice.
   const inFlight = useRef(false);
+  // The card dialog for USD/EUR/GBP. `pay` waits on a promise that resolves when it closes.
+  const [cardRequest, setCardRequest] = useState<CardPaymentRequest | null>(null);
+  const cardResolver = useRef<((result: "succeeded" | "cancelled") => void) | null>(null);
+  const closeCardDialog = useCallback((result: "succeeded" | "cancelled") => {
+    cardResolver.current?.(result);
+  }, []);
+  // Leaving the page with the dialog open counts as closing it.
+  useEffect(() => () => cardResolver.current?.("cancelled"), []);
   const locale = useLocale();
   const router = useRouter();
   const userEmail = useUserStore((state) => state.user?.email);
@@ -56,6 +68,8 @@ export function useMarketplacePayment() {
     useMutation<CreateServiceOrderResponse>(CREATE_SERVICE_ORDER);
   const [confirmPaymentIntent] =
     useMutation<ConfirmPaymentIntentResponse>(CONFIRM_PAYMENT_INTENT);
+  const [startCardPayment] =
+    useMutation<StartCardPaymentResponse>(START_CARD_PAYMENT);
   const [fetchPaymentIntent] = useLazyQuery<GetPaymentIntentResponse>(
     GET_PAYMENT_INTENT,
     { fetchPolicy: "network-only" }
@@ -94,6 +108,8 @@ export function useMarketplacePayment() {
 
       const deps: CheckoutDeps = {
         hasEmail: Boolean(userEmail),
+        // The test stub stands in for the card form only in the browser it is set in.
+        stripeConfigured: isStripeConfigured() || Boolean(getStripeTestStub()),
         createOrder: async (order) => {
           if (order.kind === "product") {
             const { data, error } = await createProductOrder({
@@ -119,6 +135,28 @@ export function useMarketplacePayment() {
             paymentIntentId,
           });
           return reference;
+        },
+        takeStripePayment: async ({ paymentIntentId, amountMinor, currency }) => {
+          const { data, error } = await startCardPayment({
+            variables: { paymentIntentId },
+          });
+          redirectIfSignedOut(error);
+          const started = data?.startCardPayment;
+          if (!started?.success || !started.client_secret) {
+            throw new Error("The card payment could not be started.");
+          }
+          const stub = getStripeTestStub();
+          if (stub) {
+            await stub({ clientSecret: started.client_secret });
+            return;
+          }
+          const result = await new Promise<"succeeded" | "cancelled">((resolve) => {
+            cardResolver.current = resolve;
+            setCardRequest({ clientSecret: started.client_secret as string, amountMinor, currency });
+          });
+          cardResolver.current = null;
+          setCardRequest(null);
+          if (result === "cancelled") throw new Error("Payment cancelled.");
         },
         confirm: async (input) => {
           const { data, error } = await confirmPaymentIntent({
@@ -157,11 +195,12 @@ export function useMarketplacePayment() {
       createProductOrder,
       createServiceOrder,
       fetchPaymentIntent,
+      startCardPayment,
       locale,
       router,
       userEmail,
     ]
   );
 
-  return { pay, isPaying, lastResult };
+  return { pay, isPaying, lastResult, cardRequest, closeCardDialog };
 }
