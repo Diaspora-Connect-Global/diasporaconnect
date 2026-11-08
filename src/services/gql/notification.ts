@@ -286,6 +286,9 @@ function resolvePrimaryPath(
     return follower ? `/${enc(follower)}` : '/friends?tab=friends';
   }
 
+  // Invited to a circle → the invitations inbox (accept / decline live there)
+  if (t === 'circle.member.invited') return '/circles/invitations';
+
   // Payments, payouts, vendor status, KYC
   if (t === 'payment.confirmed' || t === 'payment.failed') return '/wallet';
   if (t === 'escrow.released') return '/vendors/payouts';

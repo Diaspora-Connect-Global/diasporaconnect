@@ -3748,17 +3748,18 @@
       "noResults": "Nessun membro corrisponde a «{query}».",
       "invite": {
         "title": "Invita",
-        "description": "Invita qualcuno per nome, nome utente, e-mail o telefono, oppure condividi la pagina della cerchia.",
+        "description": "Invita una persona per nome o nome utente, oppure condividi la pagina della cerchia.",
         "copyLink": "Copia il link",
         "linkCopied": "Link copiato",
         "invitePerson": "Invita qualcuno",
-        "fieldLabel": "Nome, nome utente, e-mail o telefono",
+        "fieldLabel": "Nome o nome utente",
         "searching": "Ricerca in corso…",
         "resultsLabel": "Persone",
         "resultsFound": "{count, plural, =1 {1 persona trovata} other {# persone trovate}}",
-        "noMatches": "Nessuno trovato. Prova con un nome utente, oppure inserisci un'e-mail o un numero di telefono.",
-        "searchFailed": "La ricerca non è riuscita. Riprova, oppure inserisci un'e-mail o un numero di telefono.",
-        "pickPerson": "Scegli qualcuno dall'elenco, oppure inserisci un'e-mail o un numero di telefono.",
+        "noMatches": "Nessuno trovato. Prova con un nome utente.",
+        "searchFailed": "La ricerca non è riuscita. Riprova.",
+        "pickPerson": "Scegli qualcuno dall'elenco.",
+        "nameOnly": "Gli inviti arrivano alle persone su DiaspoPlug. Cerca per nome o nome utente invece che per e-mail o numero di telefono.",
         "invited": "Invito inviato a {name}",
         "alreadyMember": "Questa persona è già membro di questa cerchia.",
         "alreadyInvited": "Questa persona ha già un invito a questa cerchia.",
@@ -5009,7 +5010,7 @@
         "subtitle": "Eventi che devono ancora svolgersi."
       },
       "forYou": {
-        "title": "Per te",
+        "title": "Consigliati",
         "subtitle": "Opportunità di ogni tipo, scelte in base alle tue comunità, ai tuoi interessi, alle tue competenze e a dove vivi."
       }
     },
@@ -7564,6 +7565,15 @@
     "checkoutAddressHint": "Inserisci nome, indirizzo, città, paese e numero di telefono per continuare.",
     "checkoutPaidHeading": "Questa parte del tuo ordine è pagata",
     "checkoutPaidWalletLink": "Vedi i tuoi pagamenti nel portafoglio",
+    "cardDialog": {
+      "title": "Paga con carta",
+      "description": "Inserisci i dati della tua carta per pagare {amount}. La tua carta viene elaborata in modo sicuro da Stripe.",
+      "payCta": "Paga {amount}",
+      "processing": "Elaborazione in corso…",
+      "cancelCta": "Annulla",
+      "genericError": "Non è stato possibile addebitare la tua carta. Controlla i dati o prova un'altra carta.",
+      "loadError": "Non è stato possibile caricare il modulo della carta. Chiudi questa finestra e riprova."
+    },
     "checkoutFailure": {
       "mixedCurrency": "Il tuo carrello contiene articoli in valute diverse. Paga ogni valuta separatamente.",
       "orderRefused": "Non siamo riusciti a effettuare questo ordine. Gli articoli ancora elencati qui non ti sono stati addebitati. Riprova.",

@@ -3748,17 +3748,18 @@
       "noResults": "Aucun membre ne correspond à « {query} ».",
       "invite": {
         "title": "Inviter",
-        "description": "Invitez quelqu'un par nom, nom d'utilisateur, e-mail ou téléphone, ou partagez la page du cercle.",
+        "description": "Invitez une personne par nom ou nom d'utilisateur, ou partagez la page du cercle.",
         "copyLink": "Copier le lien",
         "linkCopied": "Lien copié",
         "invitePerson": "Inviter quelqu'un",
-        "fieldLabel": "Nom, nom d'utilisateur, e-mail ou téléphone",
+        "fieldLabel": "Nom ou nom d'utilisateur",
         "searching": "Recherche en cours…",
         "resultsLabel": "Personnes",
         "resultsFound": "{count, plural, =1 {1 personne trouvée} other {# personnes trouvées}}",
-        "noMatches": "Aucune personne trouvée. Essayez un nom d'utilisateur, ou saisissez un e-mail ou un numéro de téléphone.",
-        "searchFailed": "La recherche a échoué. Réessayez, ou saisissez un e-mail ou un numéro de téléphone.",
-        "pickPerson": "Choisissez quelqu'un dans la liste, ou saisissez un e-mail ou un numéro de téléphone.",
+        "noMatches": "Aucune personne trouvée. Essayez un nom d'utilisateur.",
+        "searchFailed": "La recherche a échoué. Réessayez.",
+        "pickPerson": "Choisissez quelqu'un dans la liste.",
+        "nameOnly": "Les invitations sont envoyées aux personnes présentes sur DiaspoPlug. Cherchez par nom ou nom d'utilisateur plutôt que par e-mail ou numéro de téléphone.",
         "invited": "Invitation envoyée à {name}",
         "alreadyMember": "Cette personne est déjà membre de ce cercle.",
         "alreadyInvited": "Cette personne a déjà une invitation pour ce cercle.",
@@ -5009,7 +5010,7 @@
         "subtitle": "Événements qui n’ont pas encore eu lieu."
       },
       "forYou": {
-        "title": "Pour vous",
+        "title": "Recommandés",
         "subtitle": "Des opportunités de tout type, choisies selon vos communautés, vos centres d’intérêt, vos compétences et votre lieu de résidence."
       }
     },
@@ -7564,6 +7565,15 @@
     "checkoutAddressHint": "Saisissez votre nom, votre adresse, votre ville, votre pays et votre numéro de téléphone pour continuer.",
     "checkoutPaidHeading": "Cette partie de votre commande est payée",
     "checkoutPaidWalletLink": "Voir vos paiements dans votre portefeuille",
+    "cardDialog": {
+      "title": "Payer par carte",
+      "description": "Saisissez les informations de votre carte pour payer {amount}. Votre carte est traitée en toute sécurité par Stripe.",
+      "payCta": "Payer {amount}",
+      "processing": "Traitement en cours…",
+      "cancelCta": "Annuler",
+      "genericError": "Votre carte n'a pas pu être débitée. Vérifiez vos informations ou essayez une autre carte.",
+      "loadError": "Le formulaire de carte n'a pas pu être chargé. Fermez cette fenêtre et réessayez."
+    },
     "checkoutFailure": {
       "mixedCurrency": "Votre panier contient des articles dans des devises différentes. Veuillez payer chaque devise séparément.",
       "orderRefused": "Nous n'avons pas pu passer cette commande. Les articles encore affichés ici ne vous ont pas été facturés. Veuillez réessayer.",

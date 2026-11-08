@@ -1,4 +1,4 @@
-/** Circles: inviting a person by name or username (and still by email or phone) from the Members page. */
+/** Circles: inviting a person by name or username from the Members page (leads only; email/phone are never sent). */
 import { test, expect, type Browser, type Page } from '@playwright/test';
 import { openBrowser } from '../support/browser';
 import { open } from './fixtures';
@@ -46,12 +46,12 @@ const searchAnswer = (v: Record<string, unknown>) => {
     return { searchUserSummaries: PEOPLE.filter((p) => p.username === q || p.displayName?.toLowerCase().includes(q)) };
 };
 
-async function openMembers(over: Record<string, unknown> = {}, viewport?: { width: number; height: number }) {
+async function openMembers(over: Record<string, unknown> = {}, viewport?: { width: number; height: number }, role: 'LEAD' | 'MEMBER' = 'LEAD') {
     const r = await open(
         browser,
         '/circles/cir-1/members',
         {
-            ...memberScreens('LEAD'),
+            ...memberScreens(role),
             CircleInviteSearchPeople: searchAnswer,
             InviteToCircle: { inviteToCircle: invitation() },
             ...over,
@@ -62,13 +62,29 @@ async function openMembers(over: Record<string, unknown> = {}, viewport?: { widt
     return r;
 }
 
-const field = (page: Page) => page.getByRole('combobox', { name: /name, username, email or phone/i });
+const field = (page: Page) => page.getByRole('combobox', { name: /name or username/i });
 // Scoped to the people list: the Members page also has native <select>s, whose options match the same role.
 const results = (page: Page) => page.getByRole('listbox', { name: 'People' }).getByRole('option');
 const sentInvites = (graphql: { calls: Array<{ name: string; variables: Record<string, unknown> }> }) =>
     graphql.calls.filter((c) => c.name === 'InviteToCircle');
 const searches = (graphql: { calls: Array<{ name: string; variables: Record<string, unknown> }> }) =>
     graphql.calls.filter((c) => c.name === 'CircleInviteSearchPeople');
+
+test.describe('who sees the invite form', () => {
+    test('a lead sees the invite button, and the form and link panel behind it', async () => {
+        const { page } = await openMembers();
+        await expect(field(page)).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Invite someone' })).toBeVisible();
+    });
+
+    test('an ordinary member sees no invite button and no form at all', async () => {
+        const { page } = await open(browser, '/circles/cir-1/members', memberScreens('MEMBER') as never);
+        await expect(page.locator('#circle-members-search')).toBeVisible();
+        await expect(page.locator('button[aria-controls="circle-members-invite-panel"]')).toHaveCount(0);
+        await expect(page.getByRole('combobox', { name: /name or username/i })).toHaveCount(0);
+        await expect(page.getByRole('button', { name: 'Copy circle link' })).toHaveCount(0);
+    });
+});
 
 test.describe('invite by name or username', () => {
     test('typing a name lists people, and picking one sends their user id without showing it', async () => {
@@ -127,16 +143,19 @@ test.describe('invite by name or username', () => {
         expect(searches(graphql)).toHaveLength(1);
     });
 
-    test('an email or phone number is sent as a contact and never searched', async () => {
-        const { page, graphql } = await openMembers({ InviteToCircle: { inviteToCircle: invitation({ inviteeUserId: null, inviteeContact: 'new@example.com' }) } });
+    test('an email or phone number is never sent and never searched: a hint says to search by name', async () => {
+        const { page, graphql } = await openMembers();
+        const hint = page.getByText(/Search by name or username instead of an email or phone number/);
         await field(page).fill('new@example.com');
+        await expect(hint).toBeVisible();
         await page.getByRole('button', { name: 'Invite someone' }).click();
-        await expect(page.getByText('Invited new@example.com')).toBeVisible();
-        expect(sentInvites(graphql)[0].variables).toEqual({ input: { circleId: 'cir-1', inviteeContact: 'new@example.com' } });
+        await expect(hint).toBeVisible();
+        await expect(page.getByText(/^Invited /)).toHaveCount(0);
         await field(page).fill('+233 24 123 4567');
+        await expect(hint).toBeVisible();
         await page.getByRole('button', { name: 'Invite someone' }).click();
-        await expect(page.getByText('Invited +233 24 123 4567')).toBeVisible();
-        expect(sentInvites(graphql)[1].variables).toEqual({ input: { circleId: 'cir-1', inviteeContact: '+233 24 123 4567' } });
+        await expect(page.getByText(/^Invited /)).toHaveCount(0);
+        expect(sentInvites(graphql)).toHaveLength(0);
         expect(searches(graphql)).toHaveLength(0);
     });
 

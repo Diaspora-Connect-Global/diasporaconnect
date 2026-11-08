@@ -190,6 +190,7 @@ export default function CircleMembersPage() {
           inviteOpen={inviteOpen}
           onToggleInvite={() => setInviteOpen((open) => !open)}
           invitePanelId={INVITE_PANEL_ID}
+          canInvite={isLead}
         />
       }
     />
@@ -223,16 +224,16 @@ export default function CircleMembersPage() {
               hidden={!inviteOpen}
               className="flex flex-col gap-4"
             >
-              {inviteOpen && (
+              {inviteOpen && isLead && (
                 <>
+                  {/* Inviting is a lead's call, like minting a link: the gateway refuses anyone else. */}
                   <InviteCard circleId={circleId} />
 
                   {/*
-                    Minting a shareable link is a lead's call, not a member's: an
-                    invitation names its addressee, a link is a bearer credential
-                    that opens the circle to an audience the rest never agreed to.
+                    A link is a bearer credential that opens the circle to an
+                    audience the rest never agreed to.
                   */}
-                  {isLead && <InviteLinksPanel circleId={circleId} />}
+                  <InviteLinksPanel circleId={circleId} />
                 </>
               )}
             </div>

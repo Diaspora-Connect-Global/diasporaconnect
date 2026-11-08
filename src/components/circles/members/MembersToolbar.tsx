@@ -13,6 +13,8 @@ export interface MembersToolbarProps {
   onToggleInvite: () => void;
   /** id of the panel the button expands, for `aria-controls`. */
   invitePanelId: string;
+  /** Leads only: for anyone else there is nothing behind the button. */
+  canInvite: boolean;
 }
 
 /**
@@ -34,6 +36,7 @@ export function MembersToolbar({
   inviteOpen,
   onToggleInvite,
   invitePanelId,
+  canInvite,
 }: MembersToolbarProps) {
   const t = useTranslations('circles.members');
 
@@ -50,6 +53,7 @@ export function MembersToolbar({
         className="sm:w-64"
       />
 
+      {canInvite && (
       <button
         type="button"
         onClick={onToggleInvite}
@@ -60,6 +64,7 @@ export function MembersToolbar({
         <UserPlus className="size-4 shrink-0" aria-hidden="true" />
         <span className="whitespace-nowrap">{t('inviteToCircle')}</span>
       </button>
+      )}
     </div>
   );
 }

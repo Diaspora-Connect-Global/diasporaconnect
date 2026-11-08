@@ -31,13 +31,13 @@ export interface InviteCardProps {
  * Invite ONE named person to the circle.
  *
  * ── THIS IS NOT THE INVITE-LINK PANEL, AND THE DIFFERENCE IS THE POINT ──────
- * `inviteToCircle` addresses somebody: a user id or a contact, an invitation
+ * `inviteToCircle` addresses somebody on the platform by user id: an invitation
  * that can be withdrawn. `InviteLinksPanel` mints a BEARER credential that
  * whoever holds the URL can use, that the circle cannot see the holders of, and
  * that survives being forwarded. The two sit together because they answer the
  * same question, and are kept visibly distinct because they are not the same
- * thing. The gateway limits both to a circle's leads today; anyone else who
- * submits here gets the "reserved to its leads" refusal.
+ * thing. The gateway limits both to a circle's leads, and the members page
+ * renders this card for leads only.
  *
  * ── "COPY CIRCLE LINK" IS NOT AN INVITE LINK ────────────────────────────────
  * It copies this circle's own page URL — no token, nothing redeemable. It used
@@ -47,17 +47,15 @@ export interface InviteCardProps {
  * being only one kind. Whether that URL gets the recipient in is the circle's
  * `joinMode`, which is the circle's decision to make, not this button's.
  *
- * ── THREE WAYS TO NAME THE PERSON ───────────────────────────────────────────
- * A person picked from the search sends `inviteeUserId` — the only route that
- * lands in anyone's invitation inbox. Text shaped like an email or phone number
- * sends `inviteeContact`. Anything else with nobody picked is NOT sent:
- * circle-service stores whatever `inviteeContact` it is given without checking
- * it, so "Ama Mensah" would create an invitation to nobody and the card would
- * tick it.
- *
- * KNOWN GAP: `inviteeContact` is only stored. Nothing sends it, it is not matched
- * to an existing user, and the redemption token is never returned, so today an
- * email or phone invitation reaches nobody even though the card confirms it.
+ * ── ONE WAY TO NAME THE PERSON: PICK THEM ───────────────────────────────────
+ * Only a person picked from the search sends anything (`inviteeUserId`, the
+ * route that lands in their invitations inbox and notifies them). Typed text is
+ * never sent as-is. An email address or phone number would have been stored as a
+ * contact that nothing delivers and nothing matches to a user, so it reaches
+ * nobody; the gateway now refuses such an invitation, and this card says so up
+ * front ("search by name or username") instead of ticking one. Anything else
+ * typed with nobody picked is likewise not sent, since it would address nobody.
+ * Reaching someone who is not on the platform is the invite-link panel's job.
  *
  * The contact field is labelled rather than placeholder-only: the label is the
  * one string this card has for the action, and a visible label survives being
@@ -78,6 +76,9 @@ export function InviteCard({ circleId }: InviteCardProps) {
 
   const kind = classifyInviteText(text);
   const searchable = kind === 'text' && !chosen;
+  // Email- or phone-shaped text can never be sent; tell the person right away.
+  const contactShaped = !chosen && (kind === 'email' || kind === 'phone');
+  const hintKey = contactShaped ? 'nameOnly' : needsPick ? 'pickPerson' : null;
   const { state: searchState, people } = useInvitePeopleSearch(text, searchable);
 
   const [invite, { loading }] = useMutation<
@@ -118,20 +119,14 @@ export function InviteCard({ circleId }: InviteCardProps) {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
 
-    let input: InviteToCircleInput;
-    let echo: string;
-    if (chosen) {
-      input = { circleId, inviteeUserId: chosen.userId };
-      echo = chosen.name;
-    } else if (kind === 'email' || kind === 'phone') {
-      input = { circleId, inviteeContact: trimmed };
-      echo = trimmed;
-    } else {
-      // Not a person we found and not an address: sending it would create an
-      // invitation nobody can ever receive. Say so instead.
+    if (!chosen) {
+      // Not a person we found: sending it would create an invitation nobody can
+      // ever receive (an email or phone included). Say so instead.
       setNeedsPick(true);
       return;
     }
+    const input: InviteToCircleInput = { circleId, inviteeUserId: chosen.userId };
+    const echo = chosen.name;
 
     try {
       const result = await invite({ variables: { input } });
@@ -194,7 +189,7 @@ export function InviteCard({ circleId }: InviteCardProps) {
             searchable={searchable}
             state={searchState}
             people={people}
-            describedBy={needsPick ? hintId : undefined}
+            describedBy={hintKey ? hintId : undefined}
             invalid={needsPick}
             onChange={(next) => {
               setText(next);
@@ -223,15 +218,18 @@ export function InviteCard({ circleId }: InviteCardProps) {
           </button>
         </div>
 
-        {needsPick && (
-          <p id={hintId} role="alert" className="caption-small text-text-danger">
-            {t('pickPerson')}
+        {hintKey && (
+          <p
+            id={hintId}
+            role={needsPick ? 'alert' : 'status'}
+            className={`caption-small break-words ${needsPick ? 'text-text-danger' : 'text-text-secondary'}`}
+          >
+            {t(hintKey)}
           </p>
         )}
 
         {/*
-          Who was invited, by name: the person's name for a pick, the address as
-          typed for a contact. Never an id.
+          Who was invited, by name. Never an id.
         */}
         {invited && (
           <p

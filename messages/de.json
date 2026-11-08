@@ -3748,17 +3748,18 @@
       "noResults": "Keine Mitglieder passen zu „{query}“.",
       "invite": {
         "title": "Einladen",
-        "description": "Lade jemanden per Name, Benutzername, E-Mail oder Telefon ein oder teile die Seite des Kreises.",
+        "description": "Lade eine Person per Name oder Benutzername ein oder teile die Seite des Kreises.",
         "copyLink": "Link kopieren",
         "linkCopied": "Link kopiert",
         "invitePerson": "Jemanden einladen",
-        "fieldLabel": "Name, Benutzername, E-Mail oder Telefon",
+        "fieldLabel": "Name oder Benutzername",
         "searching": "Suche läuft …",
         "resultsLabel": "Personen",
         "resultsFound": "{count, plural, =1 {1 Person gefunden} other {# Personen gefunden}}",
-        "noMatches": "Niemand gefunden. Versuche es mit einem Benutzernamen oder gib eine E-Mail-Adresse oder Telefonnummer ein.",
-        "searchFailed": "Die Suche hat nicht geklappt. Versuche es erneut oder gib eine E-Mail-Adresse oder Telefonnummer ein.",
-        "pickPerson": "Wähle jemanden aus der Liste oder gib eine E-Mail-Adresse oder Telefonnummer ein.",
+        "noMatches": "Niemand gefunden. Versuche es mit einem Benutzernamen.",
+        "searchFailed": "Die Suche hat nicht geklappt. Versuche es erneut.",
+        "pickPerson": "Wähle jemanden aus der Liste.",
+        "nameOnly": "Einladungen gehen an Personen auf DiaspoPlug. Suche nach Name oder Benutzername statt nach E-Mail-Adresse oder Telefonnummer.",
         "invited": "{name} eingeladen",
         "alreadyMember": "Diese Person ist schon Mitglied dieses Kreises.",
         "alreadyInvited": "Diese Person hat bereits eine Einladung zu diesem Kreis.",
@@ -5009,7 +5010,7 @@
         "subtitle": "Veranstaltungen, die noch bevorstehen."
       },
       "forYou": {
-        "title": "Für dich",
+        "title": "Empfohlen",
         "subtitle": "Möglichkeiten aller Art, ausgewählt nach deinen Communities, Interessen, Fähigkeiten und deinem Wohnort."
       }
     },
@@ -7564,6 +7565,15 @@
     "checkoutAddressHint": "Geben Sie Ihren Namen, Ihre Adresse, Stadt, Ihr Land und Ihre Telefonnummer ein, um fortzufahren.",
     "checkoutPaidHeading": "Dieser Teil Ihrer Bestellung ist bezahlt",
     "checkoutPaidWalletLink": "Ihre Zahlungen in der Wallet ansehen",
+    "cardDialog": {
+      "title": "Mit Karte bezahlen",
+      "description": "Gib deine Kartendaten ein, um {amount} zu bezahlen. Deine Karte wird sicher von Stripe verarbeitet.",
+      "payCta": "{amount} bezahlen",
+      "processing": "Wird verarbeitet…",
+      "cancelCta": "Abbrechen",
+      "genericError": "Deine Karte konnte nicht belastet werden. Bitte prüfe deine Angaben oder versuche eine andere Karte.",
+      "loadError": "Das Kartenformular konnte nicht geladen werden. Bitte schließe dieses Fenster und versuche es erneut."
+    },
     "checkoutFailure": {
       "mixedCurrency": "Ihr Warenkorb enthält Artikel in verschiedenen Währungen. Bitte bezahlen Sie jede Währung separat.",
       "orderRefused": "Wir konnten diese Bestellung nicht aufgeben. Die hier noch aufgeführten Artikel wurden Ihnen nicht berechnet. Bitte versuchen Sie es erneut.",

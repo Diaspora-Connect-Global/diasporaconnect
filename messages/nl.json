@@ -3748,17 +3748,18 @@
       "noResults": "Geen leden gevonden voor ‘{query}’.",
       "invite": {
         "title": "Uitnodigen",
-        "description": "Nodig iemand uit met naam, gebruikersnaam, e-mail of telefoon, of deel de pagina van de kring.",
+        "description": "Nodig één persoon uit met naam of gebruikersnaam, of deel de pagina van de kring.",
         "copyLink": "Link kopiëren",
         "linkCopied": "Link gekopieerd",
         "invitePerson": "Iemand uitnodigen",
-        "fieldLabel": "Naam, gebruikersnaam, e-mail of telefoon",
+        "fieldLabel": "Naam of gebruikersnaam",
         "searching": "Zoeken…",
         "resultsLabel": "Personen",
         "resultsFound": "{count, plural, =1 {1 persoon gevonden} other {# personen gevonden}}",
-        "noMatches": "Niemand gevonden. Probeer een gebruikersnaam, of vul een e-mailadres of telefoonnummer in.",
-        "searchFailed": "Zoeken is mislukt. Probeer het opnieuw, of vul een e-mailadres of telefoonnummer in.",
-        "pickPerson": "Kies iemand uit de lijst, of vul een e-mailadres of telefoonnummer in.",
+        "noMatches": "Niemand gevonden. Probeer een gebruikersnaam.",
+        "searchFailed": "Zoeken is mislukt. Probeer het opnieuw.",
+        "pickPerson": "Kies iemand uit de lijst.",
+        "nameOnly": "Uitnodigingen gaan naar mensen op DiaspoPlug. Zoek op naam of gebruikersnaam in plaats van op e-mailadres of telefoonnummer.",
         "invited": "{name} is uitgenodigd",
         "alreadyMember": "Deze persoon is al lid van deze kring.",
         "alreadyInvited": "Deze persoon heeft al een uitnodiging voor deze kring.",
@@ -5009,7 +5010,7 @@
         "subtitle": "Evenementen die nog moeten plaatsvinden."
       },
       "forYou": {
-        "title": "Voor jou",
+        "title": "Aanbevolen",
         "subtitle": "Allerlei kansen, gekozen op basis van je community’s, interesses, vaardigheden en waar je woont."
       }
     },
@@ -7564,6 +7565,15 @@
     "checkoutAddressHint": "Vul je naam, adres, plaats, land en telefoonnummer in om verder te gaan.",
     "checkoutPaidHeading": "Dit deel van je bestelling is betaald",
     "checkoutPaidWalletLink": "Bekijk je betalingen in je wallet",
+    "cardDialog": {
+      "title": "Betaal met kaart",
+      "description": "Vul je kaartgegevens in om {amount} te betalen. Je kaart wordt veilig verwerkt door Stripe.",
+      "payCta": "Betaal {amount}",
+      "processing": "Bezig met verwerken…",
+      "cancelCta": "Annuleren",
+      "genericError": "Je kaart kon niet worden belast. Controleer je gegevens of probeer een andere kaart.",
+      "loadError": "Het kaartformulier kon niet worden geladen. Sluit dit venster en probeer het opnieuw."
+    },
     "checkoutFailure": {
       "mixedCurrency": "Je winkelwagen bevat artikelen in verschillende valuta. Betaal elke valuta apart.",
       "orderRefused": "We konden deze bestelling niet plaatsen. De artikelen die hier nog staan, zijn je niet in rekening gebracht. Probeer het opnieuw.",

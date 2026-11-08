@@ -142,6 +142,7 @@ const fixtures: Fixture[] = [
     { type: 'vendor.suspended', data: {}, oldUrl: '/vendor/dashboard', newUrl: '/vendors' },
     { type: 'kyc.approved', data: {}, oldUrl: '/profile', newUrl: '/profile' },
     { type: 'kyc.rejected', data: {}, oldUrl: '/settings/verification', newUrl: '/verifykyc', expected: '/verifykyc' },
+    { type: 'circle.member.invited', data: { circleId: ID, circleName: 'Sunday Runners' }, oldUrl: '/circles/invitations', newUrl: '/circles/invitations', expected: '/circles/invitations' },
     { type: 'case.resolved', data: community, oldUrl: `/cases/${ID2}`, newUrl: `/community/${ID}?tab=support&case=${ID2}`, expected: `/community/${ID}?tab=support&case=${ID2}` },
     { type: 'case.assigned', data: { ...community, ownerType: 'association' }, oldUrl: `/cases/${ID2}`, newUrl: `/association/${ID}?tab=support&case=${ID2}`, expected: `/association/${ID}?tab=support&case=${ID2}` },
     { type: 'case.created', data: { ownerType: 'SYSTEM', caseId: ID2 }, oldUrl: `/cases/${ID2}`, newUrl: '/notification', expected: '/notification' },

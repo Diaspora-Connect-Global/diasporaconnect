@@ -241,7 +241,7 @@ const FOR_YOU = {
 test('"For you" and Latest are the whole page: every type, each pick says why, and none repeats below', async () => {
     const { page, graphql } = await open(browser, '/discover', { ...MANY, ...FOR_YOU }, { width: 1280, height: 900 });
     const forYou = page.getByTestId('discover-section-forYou');
-    await expect(forYou.getByRole('heading', { name: 'For you' })).toBeVisible({ timeout: 90_000 });
+    await expect(forYou.getByRole('heading', { name: 'Recommended' })).toBeVisible({ timeout: 90_000 });
     await expect(forYou.getByText('Job number 2')).toBeVisible();
     await expect(forYou.getByText('Chevening scholarship')).toBeVisible();
     await expect(forYou.getByText('Scholarship', { exact: true })).toBeVisible();

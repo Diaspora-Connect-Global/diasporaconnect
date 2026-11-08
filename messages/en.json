@@ -3748,17 +3748,18 @@
       "noResults": "No members match “{query}”.",
       "invite": {
         "title": "Invite",
-        "description": "Invite one person by name, username, email or phone, or share the circle's page.",
+        "description": "Invite one person by name or username, or share the circle's page.",
         "copyLink": "Copy link",
         "linkCopied": "Link copied",
         "invitePerson": "Invite someone",
-        "fieldLabel": "Name, username, email or phone",
+        "fieldLabel": "Name or username",
         "searching": "Searching…",
         "resultsLabel": "People",
         "resultsFound": "{count, plural, =1 {1 person found} other {# people found}}",
-        "noMatches": "No one found. Try a username, or enter an email or phone number.",
-        "searchFailed": "Search didn't work. Try again, or enter an email or phone number.",
-        "pickPerson": "Pick someone from the list, or enter an email or phone number.",
+        "noMatches": "No one found. Try a username.",
+        "searchFailed": "Search didn't work. Try again.",
+        "pickPerson": "Pick someone from the list.",
+        "nameOnly": "Invitations go to people on DiaspoPlug. Search by name or username instead of an email or phone number.",
         "invited": "Invited {name}",
         "alreadyMember": "That person is already a member of this circle.",
         "alreadyInvited": "That person already has an invitation to this circle.",
@@ -5009,7 +5010,7 @@
         "subtitle": "Events that have not happened yet."
       },
       "forYou": {
-        "title": "For you",
+        "title": "Recommended",
         "subtitle": "Opportunities of every kind, picked from your communities, interests, skills and where you live."
       }
     },
@@ -7564,6 +7565,15 @@
     "checkoutAddressHint": "Enter your name, address, city, country and phone number to continue.",
     "checkoutPaidHeading": "This part of your order is paid",
     "checkoutPaidWalletLink": "See your payments in your wallet",
+    "cardDialog": {
+      "title": "Pay by card",
+      "description": "Enter your card details to pay {amount}. Your card is processed securely by Stripe.",
+      "payCta": "Pay {amount}",
+      "processing": "Processing…",
+      "cancelCta": "Cancel",
+      "genericError": "Your card could not be charged. Please check your details or try another card.",
+      "loadError": "The card form could not be loaded. Please close this window and try again."
+    },
     "checkoutFailure": {
       "mixedCurrency": "Your cart has items in different currencies. Please pay for each currency separately.",
       "orderRefused": "We could not place this order. You have not been charged for the items still listed here. Please try again.",
