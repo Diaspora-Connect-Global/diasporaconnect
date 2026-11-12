@@ -142,6 +142,51 @@ test('where do people register: external needs a web link, gets https://, warns 
     await page.context().close();
 });
 
+test('create wizard: choosing another website hides price and capacity, sends none of it, and keeps what was typed', async () => {
+    const overrides = eventPageOverrides(eventFixture(), {
+        ...ADMIN_OF_ORGANISER,
+        CreateEvent: { createEvent: { __typename: 'EventGQL', id: EVENT_ID, title: 'Gala', status: 'draft' } },
+    });
+    const { page, graphql } = await openPage(browser, '/events/create', overrides);
+    await page.locator('#title').fill('Gala night', { timeout: 90_000 });
+    await page.locator('#description').fill('An evening for everyone.');
+    await page.locator('#category').selectOption('Community');
+    await page.locator('#startAt').fill('2030-11-20T18:00');
+    await page.locator('#endAt').fill('2030-11-20T22:00');
+    await page.getByRole('button', { name: /^Next/ }).click();
+    await page.locator('#city').fill('Berlin');
+    await page.getByRole('button', { name: /^Next/ }).click();
+
+    await expect(page.getByText('Paid event')).toBeVisible();
+    await page.getByText('Paid event').locator('xpath=ancestor::div[contains(@class,"justify-between")][1]').getByRole('button').click();
+    await page.locator('#ticketPrice').fill('20');
+    await page.getByRole('button', { name: 'Limited', exact: true }).click();
+    await page.locator('#capacity').fill('50');
+
+    await page.getByRole('radio', { name: /On another website/ }).check();
+    await expect(page.getByText('Paid event')).toHaveCount(0);
+    await expect(page.locator('#ticketPrice')).toHaveCount(0);
+    await expect(page.locator('#capacity')).toHaveCount(0);
+    await expect(page.getByText('Capacity', { exact: true })).toHaveCount(0);
+
+    // Switching back brings the inputs back with their values.
+    await page.getByRole('radio', { name: /On DiaspoPlug/ }).check();
+    await expect(page.locator('#ticketPrice')).toHaveValue('20');
+    await expect(page.locator('#capacity')).toHaveValue('50');
+
+    await page.getByRole('radio', { name: /On another website/ }).check();
+    await page.getByLabel('Registration website').fill('example.org/signup');
+    await page.getByRole('button', { name: 'Save draft' }).click();
+    await expect.poll(() => graphql.calls.some((c) => c.name === 'CreateEvent')).toBe(true);
+    const input = graphql.calls.find((c) => c.name === 'CreateEvent')!.variables.input as Record<string, unknown>;
+    expect(input.registrationMode).toBe('EXTERNAL');
+    expect(input.registrationLink).toBe('https://example.org/signup');
+    expect(input.isPaid).toBe(false);
+    for (const k of ['ticketPrice', 'capacity', 'currency']) expect(input[k]).toBeUndefined();
+    expect(graphql.calls.some((c) => c.name === 'UpdateEventFormFields')).toBe(false);
+    await page.context().close();
+});
+
 // ─── Registering ────────────────────────────────────────────────────────────────
 
 const ALL_TYPES = [

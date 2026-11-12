@@ -193,16 +193,18 @@ export default function CreateEventPage() {
         ? form.virtualLink.trim().length > 0
         : form.city.trim().length > 0 && form.virtualLink.trim().length > 0;
 
+  // External events have no in-app tickets, payment or capacity: nothing of that is shown or sent.
+  const isExternal = form.registrationMode === 'EXTERNAL';
   const externalLink = form.registrationMode === 'EXTERNAL' ? normaliseRegistrationLink(form.registrationLink) : null;
   const step3Valid =
-    (!form.isPaid || (form.ticketPriceStr.trim().length > 0 && Number(form.ticketPriceStr) > 0)) &&
+    (isExternal || !form.isPaid || (form.ticketPriceStr.trim().length > 0 && Number(form.ticketPriceStr) > 0)) &&
     (form.registrationMode !== 'EXTERNAL' || externalLink !== null);
 
   const handleCreateDraft = async () => {
     if (!user) { toast.error("Please log in"); return; }
     if (!organiser) { toast.error(tCreate("chooseOrganiser")); return null; }
-    const ticketPrice = form.isPaid ? Math.round(Number(form.ticketPriceStr) * 100) : undefined;
-    const capacity = form.capacityType === 'limited' ? Number(form.capacityStr) : undefined;
+    const ticketPrice = !isExternal && form.isPaid ? Math.round(Number(form.ticketPriceStr) * 100) : undefined;
+    const capacity = !isExternal && form.capacityType === 'limited' ? Number(form.capacityStr) : undefined;
 
     try {
       const result = await createEvent({
@@ -227,9 +229,9 @@ export default function CreateEventPage() {
             startAt: toIsoInTimezone(form.startAt, form.timezone),
             endAt: toIsoInTimezone(form.endAt, form.timezone),
             timezone: form.timezone,
-            isPaid: form.isPaid,
+            isPaid: isExternal ? false : form.isPaid,
             ticketPrice,
-            currency: form.isPaid ? form.currency : undefined,
+            currency: !isExternal && form.isPaid ? form.currency : undefined,
             capacity,
             coverImageUrl: form.coverImageUrl || undefined,
             tags: form.tags ? form.tags.split(',').map((t) => t.trim()).filter(Boolean) : undefined,
@@ -486,6 +488,8 @@ export default function CreateEventPage() {
               linkError={(form.registrationMode === 'EXTERNAL' && form.registrationLink.trim().length > 0 && externalLink === null)}
             />
 
+            {!isExternal && (
+              <>
             {/* Paid toggle */}
             <div className="flex items-center justify-between p-4 rounded-lg border border-border-subtle">
               <div>
@@ -543,6 +547,9 @@ export default function CreateEventPage() {
               )}
             </div>
 
+              </>
+            )}
+
             {/* Summary */}
             <div className="rounded-lg border border-border-subtle p-4 space-y-2 bg-surface-subtle">
               <p className="font-medium text-text-primary flex items-center gap-2">
@@ -552,9 +559,13 @@ export default function CreateEventPage() {
               <p className="text-sm text-text-secondary">{form.title || '—'}</p>
               <p className="text-sm text-text-secondary">{form.eventCategory || '—'} · {form.visibility}</p>
               <p className="text-sm text-text-secondary">
-                {form.isPaid ? `${form.currency} ${Number(form.ticketPriceStr || 0).toFixed(2)} / ticket` : 'Free'}
-                {' · '}
-                {form.capacityType === 'limited' ? `${form.capacityStr} spots` : 'Unlimited'}
+                {isExternal
+                  ? tForm('where.external')
+                  : <>
+                      {form.isPaid ? `${form.currency} ${Number(form.ticketPriceStr || 0).toFixed(2)} / ticket` : 'Free'}
+                      {' · '}
+                      {form.capacityType === 'limited' ? `${form.capacityStr} spots` : 'Unlimited'}
+                    </>}
               </p>
             </div>
           </div>
