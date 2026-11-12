@@ -72,6 +72,32 @@ function toCircleUser(userId: string, data: GetProfileResponse | undefined): Cir
   };
 }
 
+/**
+ * Resolve many users outside React (a CSV export), a few at a time so a long list
+ * never fans out into hundreds of simultaneous requests. Best-effort like the hooks:
+ * an unresolvable profile yields an unnamed entry.
+ */
+export async function resolveCircleUsers(
+  client: ReturnType<typeof useApolloClient>,
+  userIds: string[],
+  concurrency = 6,
+): Promise<Record<string, CircleUser>> {
+  const ids = Array.from(new Set(userIds.filter(Boolean)));
+  const out: Record<string, CircleUser> = {};
+  let next = 0;
+  const worker = async () => {
+    while (next < ids.length) {
+      const userId = ids[next++];
+      out[userId] = await client
+        .query<GetProfileResponse>({ query: GET_USER_PROFILE, variables: { userId }, fetchPolicy: 'cache-first', errorPolicy: 'all' })
+        .then(({ data }) => toCircleUser(userId, data))
+        .catch(() => toCircleUser(userId, undefined));
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(concurrency, ids.length) }, worker));
+  return out;
+}
+
 /** Resolve one user. Safe to call with an empty id — the query is skipped. */
 export function useCircleUser(userId?: string | null): {
   user: CircleUser | null;

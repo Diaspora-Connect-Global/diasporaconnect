@@ -5,7 +5,10 @@ import { useQuery, useMutation } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { useSearchParams } from 'next/navigation';
-import { Link, usePathname } from '@/i18n/navigation';
+import { Link, usePathname, useRouter } from '@/i18n/navigation';
+import LeavingSiteDialog from '@/components/events/page/LeavingSiteDialog';
+import { registrationRoute } from '@/lib/eventRegistrationForm';
+import { httpUrlOrNull } from '@/lib/safeUrl';
 import { readMutationOutcome, refusalMessageKey } from '@/lib/mutationOutcome';
 import Image from 'next/image';
 import {
@@ -259,6 +262,8 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
   const tRoot = useTranslations();
   const isEmbassyVariant = useIsEmbassy();
   const pathname = usePathname();
+  const router = useRouter();
+  const [leavingUrl, setLeavingUrl] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const [subTab, setSubTab] = useState<SubTabKey>('about');
   const [copied, setCopied] = useState(false);
@@ -343,9 +348,15 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
       toast.error(t('toastNotAccepting'));
       return;
     }
-    if (event.registrationFormFields && event.registrationFormFields.length > 0) {
-      setFormAnswers({});
-      setRegisterFormOpen(true);
+    // The organiser's own questions (and external registration) live on the event page: this
+    // tab never registers anyone for an event that has them.
+    const route = registrationRoute(event, httpUrlOrNull);
+    if (route.kind === 'external') {
+      setLeavingUrl(route.url);
+      return;
+    }
+    if (route.kind === 'page') {
+      router.push(`/events/${event.id}?tab=register`);
       return;
     }
     void submitRegistration();
@@ -564,6 +575,7 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
 
   return (
     <div className="mx-auto max-w-6xl px-3 py-6 lg:px-6">
+      <LeavingSiteDialog url={leavingUrl} onClose={() => setLeavingUrl(null)} />
       {/* Breadcrumb */}
       <div className="mb-4 flex items-center gap-1 caption-medium text-text-secondary">
         <Link

@@ -33,7 +33,10 @@ import { toast } from 'sonner';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useUserStore } from '@/store/useUserStore';
 import { openPaystackMobileMoney } from '@/lib/paystack';
-import { Link } from '@/i18n/navigation';
+import { Link, useRouter } from '@/i18n/navigation';
+import LeavingSiteDialog from '@/components/events/page/LeavingSiteDialog';
+import { registrationRoute } from '@/lib/eventRegistrationForm';
+import { httpUrlOrNull } from '@/lib/safeUrl';
 import { useAdminOrganisers } from '@/hooks/useAdminOrganisers';
 import { PageHero } from '@/components/redesign/PageHero';
 import { EmptyState } from '@/components/feedback';
@@ -93,6 +96,8 @@ export default function Events() {
     const [filter, setFilter] = useState<Filter>("all");
     const [showPast, setShowPast] = useState(false);
     const modalRef = useRef<PaidEventsModalRef>(null);
+    const router = useRouter();
+    const [leavingUrl, setLeavingUrl] = useState<string | null>(null);
     const sessionToken = useAuthStore((s) => s.tokens?.sessionToken);
     const userEmail = useUserStore((s) => s.user?.email);
     const isAuthHydrated = useAuthStore.persist.hasHydrated();
@@ -150,6 +155,17 @@ export default function Events() {
     };
 
     const handleAttendEvent = (event: Event) => {
+        // Events with their own questions, or that register on another website, are never
+        // registered from this list: the questions (or the leaving notice) come first.
+        const route = registrationRoute(event, httpUrlOrNull);
+        if (route.kind === 'external') {
+            setLeavingUrl(route.url);
+            return;
+        }
+        if (route.kind === 'page') {
+            router.push(`/events/${event.id}?tab=register`);
+            return;
+        }
         const primaryTicket = event.tickets?.[0];
         modalRef.current?.open({
             onPaymentSuccess: async ({
@@ -511,6 +527,7 @@ export default function Events() {
                 </div>
             </div>
             <PaidEventsModal ref={modalRef} />
+            <LeavingSiteDialog url={leavingUrl} onClose={() => setLeavingUrl(null)} />
         </div>
     );
 }

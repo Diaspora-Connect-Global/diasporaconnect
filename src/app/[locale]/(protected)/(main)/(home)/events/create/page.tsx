@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@apollo/client/react";
-import { CREATE_EVENT, PUBLISH_EVENT, type CreateEventData } from "@/services/gql/events";
+import { CREATE_EVENT, PUBLISH_EVENT, UPDATE_EVENT_FORM_FIELDS, type CreateEventData, type EventRegistrationMode } from "@/services/gql/events";
+import RegistrationModePicker from "@/components/events/manage/RegistrationModePicker";
+import { DEFAULT_FIELDS, normaliseRegistrationLink } from "@/lib/eventRegistrationForm";
 import { ButtonType2, ButtonType3 } from "@/components/custom/button";
 import { TextInput, TextArea, Select } from "@/components/custom/input";
 import { Loader2, ChevronLeft, ChevronRight, Globe } from "lucide-react";
@@ -80,6 +82,8 @@ interface FormData {
   capacityStr: string;
   coverImageUrl: string;
   tags: string;
+  registrationMode: EventRegistrationMode;
+  registrationLink: string;
 }
 
 const INITIAL: FormData = {
@@ -104,6 +108,8 @@ const INITIAL: FormData = {
   capacityStr: '',
   coverImageUrl: '',
   tags: '',
+  registrationMode: 'IN_APP',
+  registrationLink: '',
 };
 
 function getTimeZoneOffsetMs(date: Date, timeZone: string): number {
@@ -165,6 +171,8 @@ export default function CreateEventPage() {
 
   const [createEvent, { loading: creating }] = useMutation<CreateEventData>(CREATE_EVENT);
   const [publishEvent] = useMutation(PUBLISH_EVENT);
+  const [updateFormFields] = useMutation(UPDATE_EVENT_FORM_FIELDS);
+  const tForm = useTranslations("eventForm");
 
   const set = (key: keyof FormData, value: string | boolean) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -185,8 +193,10 @@ export default function CreateEventPage() {
         ? form.virtualLink.trim().length > 0
         : form.city.trim().length > 0 && form.virtualLink.trim().length > 0;
 
+  const externalLink = form.registrationMode === 'EXTERNAL' ? normaliseRegistrationLink(form.registrationLink) : null;
   const step3Valid =
-    !form.isPaid || (form.ticketPriceStr.trim().length > 0 && Number(form.ticketPriceStr) > 0);
+    (!form.isPaid || (form.ticketPriceStr.trim().length > 0 && Number(form.ticketPriceStr) > 0)) &&
+    (form.registrationMode !== 'EXTERNAL' || externalLink !== null);
 
   const handleCreateDraft = async () => {
     if (!user) { toast.error("Please log in"); return; }
@@ -223,6 +233,8 @@ export default function CreateEventPage() {
             capacity,
             coverImageUrl: form.coverImageUrl || undefined,
             tags: form.tags ? form.tags.split(',').map((t) => t.trim()).filter(Boolean) : undefined,
+            registrationMode: form.registrationMode,
+            registrationLink: externalLink ?? undefined,
           },
         },
       });
@@ -233,6 +245,17 @@ export default function CreateEventPage() {
         return null;
       }
       setCreatedEventId(id);
+      if (form.registrationMode === 'IN_APP') {
+        // The server does not seed the default fields, so the new event gets them here, before it can be published.
+        try {
+          const res = await updateFormFields({
+            variables: { input: { eventId: id, fields: DEFAULT_FIELDS.map((d) => ({ id: d.id, label: d.label, type: d.type, required: d.required })) } },
+          });
+          if (!res.data || res.error) toast.error(tForm('builder.saveFailed'));
+        } catch {
+          toast.error(tForm('builder.saveFailed'));
+        }
+      }
       return id;
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to create event');
@@ -455,6 +478,14 @@ export default function CreateEventPage() {
         {/* Step 3 — Pricing & Capacity */}
         {step === 3 && (
           <div className="space-y-5">
+            <RegistrationModePicker
+              mode={form.registrationMode}
+              onMode={(m) => set('registrationMode', m)}
+              link={form.registrationLink}
+              onLink={(v) => set('registrationLink', v)}
+              linkError={(form.registrationMode === 'EXTERNAL' && form.registrationLink.trim().length > 0 && externalLink === null)}
+            />
+
             {/* Paid toggle */}
             <div className="flex items-center justify-between p-4 rounded-lg border border-border-subtle">
               <div>

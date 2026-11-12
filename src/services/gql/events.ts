@@ -40,13 +40,20 @@ export interface EventTicketFull {
   createdAt?: string | null;
 }
 
+export type RegistrationFieldType = 'text' | 'textarea' | 'email' | 'phone' | 'number' | 'date' | 'select' | 'multiselect' | 'checkbox';
+
 export interface RegistrationFormField {
   id: string;
   label: string;
-  type: 'text' | 'select' | 'multiselect' | 'checkbox';
+  type: RegistrationFieldType;
   required: boolean;
   options?: string[] | null;
+  /** full_name | email | phone | job_title for a default field; null for the organiser's own question. */
+  builtin?: string | null;
 }
+
+/** Where people register. A null from an older gateway means IN_APP. */
+export type EventRegistrationMode = 'IN_APP' | 'EXTERNAL';
 
 // EventGQL on the backend has no `capacityType` — use `capacity` (null = unlimited)
 // and `availableSpots` (null = unlimited, 0 = sold out)
@@ -75,6 +82,7 @@ export interface Event {
   tickets?: EventTicket[] | null;
   coverImageUrl?: string | null;
   registrationLink?: string | null;
+  registrationMode?: EventRegistrationMode | null;
   tags?: string[] | null;
   timezone?: string | null;
   publishedAt?: string | null;
@@ -115,6 +123,8 @@ export interface EventRegistration {
   confirmedAt?: string | null;
   cancelledAt?: string | null;
   createdAt?: string | null;
+  /** JSON object { [questionId]: string | string[] | boolean }; only returned to the event's managers or the registrant. */
+  formResponsesJson?: string | null;
 }
 
 export interface EventAttendanceRecord {
@@ -366,6 +376,7 @@ export const GET_EVENT = gql`
       canRegister
       coverImageUrl
       registrationLink
+      registrationMode
       tags
       timezone
       ownerType
@@ -383,6 +394,7 @@ export const GET_EVENT = gql`
         type
         required
         options
+        builtin
       }
       myRegistrationId
       createdAt
@@ -423,6 +435,11 @@ export const LIST_EVENTS = gql`
         tags
         ownerType
         ownerId
+        registrationMode
+        registrationLink
+        registrationFormFields {
+          id
+        }
         tickets {
           id
           name
@@ -570,6 +587,7 @@ export const GET_EVENT_REGISTRATIONS = gql`
         registeredAt
         confirmedAt
         cancelledAt
+        formResponsesJson
       }
     }
   }
@@ -657,6 +675,11 @@ export const GET_EVENTS_BY_OWNER = gql`
         coverImageUrl
         ownerType
         ownerId
+        registrationMode
+        registrationLink
+        registrationFormFields {
+          id
+        }
       }
     }
   }
@@ -747,6 +770,7 @@ export const UPDATE_EVENT_FORM_FIELDS = gql`
         type
         required
         options
+        builtin
       }
     }
   }

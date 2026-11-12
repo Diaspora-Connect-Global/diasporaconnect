@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { ArrowRight, CalendarDays, ExternalLink, Globe2, Mail, MapPin, Phone, ShieldCheck, Sparkles, Ticket, Users } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
@@ -11,6 +12,7 @@ import { formatInZone, formatTimeInZone, timezoneLabel, zoneDiffersFromViewer } 
 import { httpUrlOrNull } from '@/lib/safeUrl';
 import { eventFormat } from '@/lib/eventFormat';
 import { canJoinFromEvent, type OrganiserView } from './organiser';
+import LeavingSiteDialog from './LeavingSiteDialog';
 
 const CARD = 'rounded-2xl border border-border-subtle bg-surface-default p-4 sm:p-5';
 const PREVIEW_SPEAKERS = 4;
@@ -47,6 +49,7 @@ export function OverviewTab({
   const contactPhone = venueInfo?.contactPublic ? venueInfo.contactPhone : null;
   const hasContact = Boolean(contactEmail || contactPhone);
   const external = httpUrlOrNull(event.registrationLink);
+  const [leaving, setLeaving] = useState<string | null>(null);
   const fmt = eventFormat(event.locationType);
 
   const access = event.requiresApproval ? t('accessApproval') : t('accessRegistration');
@@ -147,9 +150,12 @@ export function OverviewTab({
           </p>
         )}
         {external && (
-          <a href={external} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 pt-2 text-sm font-medium text-text-brand hover:underline">
-            {t('externalRegistration')} <ExternalLink className="size-3.5" aria-hidden />
-          </a>
+          <>
+            <button type="button" onClick={() => setLeaving(external)} className="inline-flex min-h-11 items-center gap-1 pt-2 text-sm font-medium text-text-brand hover:underline" data-testid="overview-external-link">
+              {t('externalRegistration')} <ExternalLink className="size-3.5" aria-hidden />
+            </button>
+            <LeavingSiteDialog url={leaving} onClose={() => setLeaving(null)} />
+          </>
         )}
       </section>
 

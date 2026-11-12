@@ -47,6 +47,8 @@ import MyEventTab from "@/components/events/page/MyEventTab";
 import OrganiserCard from "@/components/events/page/OrganiserCard";
 import RegisterTab, { type RegistrationResult } from "@/components/events/page/RegisterTab";
 import RegistrationCard from "@/components/events/page/RegistrationCard";
+import ExternalRegisterButton from "@/components/events/page/ExternalRegisterButton";
+import { httpUrlOrNull } from "@/lib/safeUrl";
 import { GrowNetworkCard, RegisterRail, ShareCard, SimilarEvents } from "@/components/events/page/RailExtras";
 import { useEventPriceLabel } from "@/components/events/page/useEventPriceLabel";
 import { useOrganiser } from "@/components/events/page/useOrganiser";
@@ -111,16 +113,22 @@ export default function EventDetailPage() {
   const networking = useEventNetworking(eventId, signedIn && !!event);
   const hasVenue = event ? hasVenueContent(event, venue.data?.eventVenueInfo) : false;
 
+  // Registration on the organiser's own website: people who are not registered here get no
+  // Register tab and no networking prompts (those need an in-app registration).
+  const externalEvent = event?.registrationMode === "EXTERNAL";
+  const hideRegistration = externalEvent && !registered && !lastResult;
+  const externalUrl = externalEvent ? httpUrlOrNull(event?.registrationLink) : null;
+
   const tabs = useMemo(() => {
     const list: TabKey[] = ["overview"];
     if (sessionList.length > 0 || canManage) list.push("programme");
     if (speakerList.length > 0 || canManage) list.push("speakers");
-    if (networking.available) list.push("networking", "circles");
+    if (networking.available && !hideRegistration) list.push("networking", "circles");
     if (hasVenue || canManage) list.push("venue");
     if (updateList.length > 0 || canManage) list.push("updates");
-    list.push("register");
+    if (!hideRegistration) list.push("register");
     return list;
-  }, [sessionList.length, speakerList.length, hasVenue, updateList.length, canManage, networking.available]);
+  }, [sessionList.length, speakerList.length, hasVenue, updateList.length, canManage, networking.available, hideRegistration]);
 
   const requested = search.get("tab") as TabKey | null;
   const active: TabKey = requested && TAB_KEYS.includes(requested) && tabs.includes(requested) ? requested : "overview";
@@ -199,9 +207,13 @@ export default function EventDetailPage() {
           {state === "eventCancelled" && <p role="status" className="w-fit rounded-lg bg-surface-danger p-2 text-sm text-text-danger">{tRail("states.eventCancelled")}</p>}
           {/* Phones show the rail below the tabs, so the one action that matters sits up here too. */}
           <div className="lg:hidden">
+            {hideRegistration ? (
+              externalUrl && state !== "eventCancelled" && state !== "ended" ? <ExternalRegisterButton url={externalUrl} /> : null
+            ) : (
             <ButtonType2 onClick={() => openTab("register")} className="w-full" size="lg">
               {registered ? tRail("cta.myEvent") : state === "full" ? tRail("cta.joinWaitlist") : state === "open" ? tRail("cta.register") : tRail(`states.${state}`, { date: event.registrationOpensAt ? formatInZone(event.registrationOpensAt, locale, event.timezone) : "" })}
             </ButtonType2>
+            )}
           </div>
         </EventHero>
 
@@ -292,7 +304,7 @@ export default function EventDetailPage() {
             ) : (
               <>
                 <RegistrationCard event={event} state={state} waitlistPosition={lastResult?.waitlistPosition} signedIn={signedIn} onOpenTab={openTab} />
-                <NetworkingCtas eventId={event.id} networking={networking} />
+                {!hideRegistration && <NetworkingCtas eventId={event.id} networking={networking} />}
                 {organiser && <OrganiserCard eventId={event.id} organiser={organiser} signedIn={signedIn} />}
                 <ShareCard eventId={event.id} title={event.title} />
                 <SimilarEvents eventId={event.id} category={event.eventCategory} />

@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { errorMessage } from '@/lib/client-error-messages';
 import { useAuthStore } from '@/store/useAuthStore';
 import { purgeNetworkingCache, stripNetworkingFromPersisted } from '@/lib/networkingCache';
+import { stripAnswersFromPersisted } from '@/lib/answersCache';
 
 /* ------------------------------------------------------------------ */
 /* Track shown toasts to prevent duplicates */
@@ -184,6 +185,12 @@ const cache = new InMemoryCache({
     Attachment: {
       keyFields: ['id'],
     },
+    // A registration question belongs to ONE event. The four default fields use the same
+    // reserved ids (full_name, email, ...) on every event, so normalising them by id would
+    // merge different events' labels / required flags into one shared cache entry.
+    RegistrationFormFieldGQL: {
+      keyFields: false,
+    },
   },
 });
 
@@ -205,7 +212,7 @@ if (typeof window !== 'undefined') {
       maxSize: 2 * 1024 * 1024,
       key: 'diaspoplug-apollo-cache',
       // Event networking is personal, per-event data: never persist it.
-      persistenceMapper: async (data: string) => stripNetworkingFromPersisted(data),
+      persistenceMapper: async (data: string) => stripAnswersFromPersisted(stripNetworkingFromPersisted(data)),
     });
   } catch {
     // Non-fatal: app boots fine with an empty in-memory cache.

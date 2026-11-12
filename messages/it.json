@@ -7585,5 +7585,118 @@
       "noSavedCard": "Non abbiamo trovato una carta salvata sul tuo account, quindi non ti è stato addebitato nulla. Scegli un altro metodo di pagamento, se disponibile."
     },
     "successHeading": "Ordine effettuato"
+  },
+  "eventForm": {
+    "where": {
+      "title": "Dove si iscrivono le persone?",
+      "inApp": "Su DiaspoPlug",
+      "inAppSub": "Le persone si iscrivono qui e rispondono alle tue domande.",
+      "external": "Su un altro sito web",
+      "externalSub": "Il pulsante di iscrizione porta al tuo sito web.",
+      "linkLabel": "Sito web per l'iscrizione",
+      "linkPlaceholder": "https://il-tuo-sito.it/iscrizione",
+      "linkHelp": "Aggiungiamo https:// se manca. Funzionano solo i link web (http o https).",
+      "linkInvalid": "Inserisci un indirizzo web valido, ad esempio https://il-tuo-sito.it/iscrizione.",
+      "alreadyRegistered": "{count, plural, one {# persona si è} other {# persone si sono}} già iscritte qui e mantengono la propria iscrizione.",
+      "save": "Salva",
+      "saved": "Impostazioni di iscrizione salvate",
+      "saveFailed": "Non siamo riusciti a salvare."
+    },
+    "external": {
+      "note": "L'iscrizione a questo evento avviene su {domain}. Le domande qui sotto non vengono usate.",
+      "noteNoLink": "L'iscrizione a questo evento avviene su un altro sito web. Le domande qui sotto non vengono usate.",
+      "show": "Mostra comunque le domande",
+      "hide": "Nascondi le domande"
+    },
+    "builder": {
+      "title": "Modulo di iscrizione",
+      "intro": "Scegli cosa ti dicono le persone quando si iscrivono. Solo tu e gli altri organizzatori vedete le risposte.",
+      "defaultTag": "Predefinito",
+      "required": "Obbligatorio",
+      "remove": "Rimuovi",
+      "removeField": "Rimuovi «{label}»",
+      "moveUp": "Sposta su «{label}»",
+      "moveDown": "Sposta giù «{label}»",
+      "restore": "Ripristina i campi predefiniti",
+      "addDefaults": "Aggiungi i campi predefiniti",
+      "addQuestion": "Aggiungi una domanda",
+      "empty": "Nessuna domanda per ora. Le persone si iscriveranno senza modulo.",
+      "questionLabel": "Domanda",
+      "questionPlaceholder": "es. Esigenze alimentari",
+      "type": "Tipo di risposta",
+      "options": "Opzioni (una per riga)",
+      "optionsPlaceholder": "Opzione A\nOpzione B\nOpzione C",
+      "noNewQuestions": "A chi si è già iscritto non verranno poste le nuove domande.",
+      "save": "Salva il modulo",
+      "saved": "Modulo di iscrizione salvato",
+      "saveFailed": "Non siamo riusciti a salvare il modulo.",
+      "tooMany": "Un modulo può avere al massimo {max} domande.",
+      "labelRequired": "Dai un'etichetta a ogni domanda.",
+      "labelTooLong": "Le etichette possono avere al massimo {max} caratteri.",
+      "optionsRequired": "Aggiungi almeno un'opzione a «{label}».",
+      "optionsTooMany": "«{label}» può avere al massimo {max} opzioni.",
+      "optionTooLong": "Ogni opzione può avere al massimo {max} caratteri."
+    },
+    "types": {
+      "text": "Testo breve",
+      "textarea": "Testo lungo",
+      "email": "Indirizzo e-mail",
+      "phone": "Numero di telefono",
+      "number": "Numero",
+      "date": "Data",
+      "select": "Scelta singola",
+      "multiselect": "Scelta multipla",
+      "checkbox": "Casella di controllo"
+    },
+    "defaults": {
+      "full_name": "Nome completo",
+      "email": "Indirizzo e-mail",
+      "phone": "Numero di telefono",
+      "job_title": "Ruolo professionale"
+    },
+    "form": {
+      "selectOption": "Scegli…",
+      "sharedWith": "Le tue risposte sono condivise con {name}.",
+      "sharedWithGeneric": "Le tue risposte sono condivise con l'organizzatore.",
+      "requiredWord": "obbligatorio",
+      "yes": "Sì",
+      "no": "No",
+      "errors": {
+        "required": "Questa risposta è obbligatoria.",
+        "email": "Inserisci un indirizzo e-mail valido.",
+        "phone": "Inserisci un numero di telefono valido, ad esempio +233 20 123 4567.",
+        "number": "Inserisci un numero.",
+        "date": "Inserisci una data valida.",
+        "option": "Scegli una delle opzioni.",
+        "options": "Scegli solo tra le opzioni."
+      }
+    },
+    "leaving": {
+      "title": "Stai lasciando DiaspoPlug",
+      "body": "L'iscrizione prosegue su {domain}. DiaspoPlug non vede ciò che inserisci lì.",
+      "continue": "Continua",
+      "cancel": "Resta qui",
+      "cta": "Iscriviti su {domain}",
+      "noLink": "L'iscrizione a questo evento non è ancora aperta. Torna presto."
+    },
+    "answers": {
+      "button": "Risposte",
+      "title": "Risposte all'iscrizione",
+      "none": "Questa persona non ha dato risposte.",
+      "noQuestions": "Questo evento non ha domande di iscrizione.",
+      "close": "Chiudi",
+      "download": "Scarica il CSV",
+      "preparing": "Preparazione…",
+      "failed": "Non siamo riusciti a preparare il file. Riprova.",
+      "ready": "CSV scaricato",
+      "unknownPerson": "Qualcuno"
+    },
+    "csv": {
+      "attendee": "Partecipante",
+      "status": "Stato",
+      "ticket": "Biglietto",
+      "quantity": "Quantità",
+      "registered": "Iscritto il"
+    }
   }
 }

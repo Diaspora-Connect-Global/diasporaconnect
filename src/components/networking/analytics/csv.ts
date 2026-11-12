@@ -1,5 +1,6 @@
 import type { NetworkingAnalytics, NetworkingRate, NetworkingStat } from '../../../services/gql/networkingAnalytics';
 import { cellOf, rateOf } from './stats';
+import { csvSlugFilename, escapeCsvCell, toCsv } from '../../../lib/csv';
 
 /**
  * CSV of the aggregates the organiser is looking at, built client-side from the loaded
@@ -7,32 +8,11 @@ import { cellOf, rateOf } from './stats';
  * decisions or messages exist in the data, so none can be exported.
  */
 
-const FORMULA_START = /^[=+\-@\t\r]/;
-
-/** RFC 4180 quoting AFTER formula-injection escaping (a leading ' defuses = + - @ TAB CR in spreadsheets). */
-export function escapeCsvCell(value: string | number): string {
-  let s = String(value ?? '');
-  if (FORMULA_START.test(s)) s = `'${s}`;
-  if (/[",\r\n]/.test(s)) s = `"${s.replace(/"/g, '""')}"`;
-  return s;
-}
-
-export function toCsv(rows: Array<Array<string | number>>): string {
-  return `${rows.map((r) => r.map(escapeCsvCell).join(',')).join('\r\n')}\r\n`;
-}
+export { escapeCsvCell, toCsv };
 
 /** `title-slug-networking-analytics-2030-11-24.csv`: a readable slug of the title and the date, never an id. */
 export function csvFilename(title: string, now: Date = new Date()): string {
-  const slug = (title || '')
-    .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 60)
-    .replace(/-+$/g, '');
-  const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-  return `${slug || 'event'}-networking-analytics-${date}.csv`;
+  return csvSlugFilename(title, 'networking-analytics', now);
 }
 
 export interface CsvText {

@@ -60,6 +60,7 @@ export const GET_EVENT_PAGE = gql`
       canRegister
       coverImageUrl
       registrationLink
+      registrationMode
       tags
       timezone
       ownerType
@@ -78,6 +79,7 @@ export const GET_EVENT_PAGE = gql`
         type
         required
         options
+        builtin
       }
       myRegistrationId
       myRegistrationStatus

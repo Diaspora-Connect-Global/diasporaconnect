@@ -7585,5 +7585,118 @@
       "noSavedCard": "Wir konnten in Ihrem Konto keine gespeicherte Karte finden, daher wurde Ihnen nichts berechnet. Bitte wählen Sie eine andere Zahlungsmethode, falls eine angeboten wird."
     },
     "successHeading": "Bestellung aufgegeben"
+  },
+  "eventForm": {
+    "where": {
+      "title": "Wo melden sich Leute an?",
+      "inApp": "Auf DiaspoPlug",
+      "inAppSub": "Die Anmeldung erfolgt hier und deine Fragen werden beantwortet.",
+      "external": "Auf einer anderen Website",
+      "externalSub": "Der Anmelde-Button führt zu deiner Website.",
+      "linkLabel": "Website für die Anmeldung",
+      "linkPlaceholder": "https://deine-seite.de/anmeldung",
+      "linkHelp": "Wir ergänzen https://, wenn es fehlt. Nur Weblinks (http oder https) funktionieren.",
+      "linkInvalid": "Gib eine gültige Webadresse ein, zum Beispiel https://deine-seite.de/anmeldung.",
+      "alreadyRegistered": "{count, plural, one {# Person hat sich} other {# Personen haben sich}} bereits hier angemeldet und behalten ihre Anmeldung.",
+      "save": "Speichern",
+      "saved": "Anmeldeeinstellungen gespeichert",
+      "saveFailed": "Das konnten wir nicht speichern."
+    },
+    "external": {
+      "note": "Die Anmeldung für diese Veranstaltung erfolgt auf {domain}. Die Fragen unten werden nicht verwendet.",
+      "noteNoLink": "Die Anmeldung für diese Veranstaltung erfolgt auf einer anderen Website. Die Fragen unten werden nicht verwendet.",
+      "show": "Fragen trotzdem anzeigen",
+      "hide": "Fragen ausblenden"
+    },
+    "builder": {
+      "title": "Anmeldeformular",
+      "intro": "Lege fest, was Leute bei der Anmeldung angeben. Nur du und die anderen Organisatoren sehen die Antworten.",
+      "defaultTag": "Standard",
+      "required": "Pflichtfeld",
+      "remove": "Entfernen",
+      "removeField": "„{label}“ entfernen",
+      "moveUp": "„{label}“ nach oben",
+      "moveDown": "„{label}“ nach unten",
+      "restore": "Standardfelder wiederherstellen",
+      "addDefaults": "Standardfelder hinzufügen",
+      "addQuestion": "Frage hinzufügen",
+      "empty": "Noch keine Fragen. Die Anmeldung erfolgt ohne Formular.",
+      "questionLabel": "Frage",
+      "questionPlaceholder": "z. B. Ernährungswünsche",
+      "type": "Antworttyp",
+      "options": "Optionen (eine pro Zeile)",
+      "optionsPlaceholder": "Option A\nOption B\nOption C",
+      "noNewQuestions": "Wer sich bereits angemeldet hat, bekommt neue Fragen nicht gestellt.",
+      "save": "Formular speichern",
+      "saved": "Anmeldeformular gespeichert",
+      "saveFailed": "Das Formular konnte nicht gespeichert werden.",
+      "tooMany": "Ein Formular kann höchstens {max} Fragen haben.",
+      "labelRequired": "Gib jeder Frage eine Bezeichnung.",
+      "labelTooLong": "Bezeichnungen dürfen höchstens {max} Zeichen haben.",
+      "optionsRequired": "Füge „{label}“ mindestens eine Option hinzu.",
+      "optionsTooMany": "„{label}“ kann höchstens {max} Optionen haben.",
+      "optionTooLong": "Jede Option darf höchstens {max} Zeichen haben."
+    },
+    "types": {
+      "text": "Kurzer Text",
+      "textarea": "Langer Text",
+      "email": "E-Mail-Adresse",
+      "phone": "Telefonnummer",
+      "number": "Zahl",
+      "date": "Datum",
+      "select": "Einzelauswahl",
+      "multiselect": "Mehrfachauswahl",
+      "checkbox": "Kontrollkästchen"
+    },
+    "defaults": {
+      "full_name": "Vollständiger Name",
+      "email": "E-Mail-Adresse",
+      "phone": "Telefonnummer",
+      "job_title": "Berufsbezeichnung"
+    },
+    "form": {
+      "selectOption": "Auswählen…",
+      "sharedWith": "Deine Antworten werden mit {name} geteilt.",
+      "sharedWithGeneric": "Deine Antworten werden mit dem Organisator geteilt.",
+      "requiredWord": "Pflichtfeld",
+      "yes": "Ja",
+      "no": "Nein",
+      "errors": {
+        "required": "Diese Angabe ist erforderlich.",
+        "email": "Gib eine gültige E-Mail-Adresse ein.",
+        "phone": "Gib eine gültige Telefonnummer ein, zum Beispiel +233 20 123 4567.",
+        "number": "Gib eine Zahl ein.",
+        "date": "Gib ein gültiges Datum ein.",
+        "option": "Wähle eine der Optionen.",
+        "options": "Wähle nur aus den Optionen."
+      }
+    },
+    "leaving": {
+      "title": "Du verlässt DiaspoPlug",
+      "body": "Die Anmeldung wird auf {domain} fortgesetzt. DiaspoPlug sieht nicht, was du dort eingibst.",
+      "continue": "Weiter",
+      "cancel": "Hier bleiben",
+      "cta": "Auf {domain} anmelden",
+      "noLink": "Die Anmeldung für diese Veranstaltung ist noch nicht geöffnet. Schau bald wieder vorbei."
+    },
+    "answers": {
+      "button": "Antworten",
+      "title": "Antworten zur Anmeldung",
+      "none": "Diese Person hat keine Antworten gegeben.",
+      "noQuestions": "Diese Veranstaltung hat keine Anmeldefragen.",
+      "close": "Schließen",
+      "download": "CSV herunterladen",
+      "preparing": "Wird vorbereitet…",
+      "failed": "Die Datei konnte nicht erstellt werden. Versuche es erneut.",
+      "ready": "CSV heruntergeladen",
+      "unknownPerson": "Jemand"
+    },
+    "csv": {
+      "attendee": "Teilnehmer",
+      "status": "Status",
+      "ticket": "Ticket",
+      "quantity": "Anzahl",
+      "registered": "Angemeldet am"
+    }
   }
 }

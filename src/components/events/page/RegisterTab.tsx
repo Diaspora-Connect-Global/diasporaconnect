@@ -42,6 +42,7 @@ import { canJoinFromEvent, type OrganiserView } from './organiser';
 import type { JoinOutcome } from './OrganiserCard';
 import NetworkingDraftSection, { EMPTY_DRAFT, draftIsEmpty, type NetworkingDraft } from './NetworkingDraftSection';
 import RegistrationFields from './RegistrationFields';
+import { answersToJson, builtinOf, isFormRefusal, rawServerMessageOf, stripCodePrefix, validateAnswer, type Answer } from '@/lib/eventRegistrationForm';
 import { useEventNetworking, useNetworkingTaxonomy } from './useEventNetworking';
 
 /** Version of the consent text shown below; stored with the registration as the "terms hash". */
@@ -88,6 +89,7 @@ export default function RegisterTab({
   const tErr = useTranslations('eventPage.errors');
   const tStates = useTranslations('eventPage.rail.states');
   const tPay = useTranslations('home.events.payment');
+  const tForm = useTranslations('eventForm');
   const locale = useLocale();
   const search = useSearchParams();
   const user = useUserStore((s) => s.user);
@@ -96,7 +98,10 @@ export default function RegisterTab({
   const [ticketId, setTicketId] = useState<string | undefined>(() => tickets.find((x) => x.availableQuantity !== 0)?.id ?? tickets[0]?.id);
   const ticket = tickets.find((x) => x.id === ticketId) ?? tickets[0];
   const [quantity, setQuantity] = useState(1);
-  const [responses, setResponses] = useState<Record<string, string | string[]>>({});
+  // Only what the person has typed lives here; everything else is read through `values`.
+  const [responses, setResponses] = useState<Record<string, Answer>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [formRefusal, setFormRefusal] = useState<string | null>(null);
   const [format, setFormat] = useState<'IN_PERSON' | 'ONLINE' | ''>('');
   const [terms, setTerms] = useState(false);
   // Deliberately unticked: registering never makes anyone a member.
@@ -133,14 +138,28 @@ export default function RegisterTab({
   };
 
   const hybrid = eventFormat(event.locationType) === 'hybrid';
-  const fields = event.registrationFormFields ?? [];
-  const formOk = fields.every((f) => {
-    if (!f.required) return true;
-    const v = responses[f.id];
-    if (f.type === 'multiselect') return Array.isArray(v) && v.length > 0;
-    if (f.type === 'checkbox') return v === 'true';
-    return typeof v === 'string' && v.trim().length > 0;
-  });
+  const fields = useMemo(() => event.registrationFormFields ?? [], [event.registrationFormFields]);
+  // The default fields start from the signed-in profile (editable); a field the person has
+  // touched always wins, even when they cleared it.
+  const prefill: Record<string, string> = {
+    full_name: [user?.firstName, user?.lastName].filter(Boolean).join(' '),
+    email: user?.email ?? '',
+    phone: user?.phone ?? '',
+  };
+  const values: Record<string, Answer> = {};
+  for (const f of fields) {
+    const b = builtinOf(f);
+    values[f.id] = f.id in responses ? responses[f.id] : b && prefill[b] ? prefill[b] : f.type === 'multiselect' ? [] : '';
+  }
+  const fieldErrors: Record<string, string> = {};
+  let formOk = true;
+  for (const f of fields) {
+    const why = validateAnswer(f, values[f.id]);
+    if (why) {
+      formOk = false;
+      if (touched[f.id]) fieldErrors[f.id] = tForm(`form.errors.${why}`);
+    }
+  }
   const needsPaymentMethod = event.isPaid && totalCents > 0;
   const missing: string[] = [];
   if (quantity < 1) missing.push(t('missing.quantity'));
@@ -223,9 +242,8 @@ export default function RegisterTab({
       const sourceParam = (search.get('source') ?? '').toUpperCase();
       const invite = search.get('invite')?.trim().slice(0, 64) || undefined;
       const source = SOURCES.has(sourceParam) ? sourceParam : invite ? 'INVITE' : 'EVENT_PAGE';
-      const formResponsesJson = fields.length
-        ? JSON.stringify(Object.fromEntries(fields.map((f) => [f.id, responses[f.id] ?? (f.type === 'multiselect' ? [] : '')])))
-        : undefined;
+      const formResponsesJson = fields.length ? answersToJson(fields, values) : undefined;
+      setFormRefusal(null);
       const offerJoin = Boolean(organiser && canJoinFromEvent(organiser));
       const result = await registerForEvent({
         variables: {
@@ -246,6 +264,14 @@ export default function RegisterTab({
       });
       const data = result.data?.registerForEvent;
       if (!data?.registrationId) {
+        const raw = rawServerMessageOf(result);
+        if (isFormRefusal(raw)) {
+          // The server's own words say which answer to fix (code prefix stripped).
+          const text = stripCodePrefix(raw);
+          setFormRefusal(text);
+          toast.error(text);
+          return;
+        }
         const refusal = eventRefusal(result);
         toast.error(tErr(refusal.key));
         return;
@@ -263,7 +289,13 @@ export default function RegisterTab({
         networkingDraft,
       });
     } catch (err) {
-      toast.error(tErr(eventRefusal(err).key));
+      const raw = rawServerMessageOf(err);
+      if (isFormRefusal(raw)) {
+        setFormRefusal(stripCodePrefix(raw));
+        toast.error(stripCodePrefix(raw));
+      } else {
+        toast.error(tErr(eventRefusal(err).key));
+      }
     } finally {
       setSubmitting(false);
     }
@@ -287,6 +319,8 @@ export default function RegisterTab({
   }
 
   const fullName = [user?.firstName, user?.lastName].filter(Boolean).join(' ');
+  const hasName = fields.some((f) => builtinOf(f) === 'full_name');
+  const hasEmail = fields.some((f) => builtinOf(f) === 'email');
   const showOrganiserBox = organiser && canJoinFromEvent(organiser);
   const submitLabel = state === 'full'
     ? t('submit.waitlist')
@@ -323,22 +357,40 @@ export default function RegisterTab({
             <h3 id="reg-attendee" className="text-base font-bold text-text-primary">{next()}. {t('attendee')}</h3>
             <p className="text-sm text-text-secondary">{t('attendeeSub')}</p>
           </div>
-          <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="min-w-0 rounded-lg border border-border-subtle bg-surface-subtle/50 px-3 py-2">
-              <dt className="text-xs text-text-secondary">{t('name')}</dt>
-              <dd className="break-words text-sm text-text-primary">{fullName || '—'}</dd>
-            </div>
-            <div className="min-w-0 rounded-lg border border-border-subtle bg-surface-subtle/50 px-3 py-2">
-              <dt className="text-xs text-text-secondary">{t('email')}</dt>
-              <dd className="break-all text-sm text-text-primary">{user?.email || '—'}</dd>
-            </div>
-          </dl>
-          <p className="text-xs text-text-secondary">{t('attendeeNote')}</p>
+          {(!hasName || !hasEmail) && (
+            <>
+              <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {!hasName && (
+                  <div className="min-w-0 rounded-lg border border-border-subtle bg-surface-subtle/50 px-3 py-2">
+                    <dt className="text-xs text-text-secondary">{t('name')}</dt>
+                    <dd className="break-words text-sm text-text-primary">{fullName || '—'}</dd>
+                  </div>
+                )}
+                {!hasEmail && (
+                  <div className="min-w-0 rounded-lg border border-border-subtle bg-surface-subtle/50 px-3 py-2">
+                    <dt className="text-xs text-text-secondary">{t('email')}</dt>
+                    <dd className="break-all text-sm text-text-primary">{user?.email || '—'}</dd>
+                  </div>
+                )}
+              </dl>
+              <p className="text-xs text-text-secondary">{t('attendeeNote')}</p>
+            </>
+          )}
           <RegistrationFields
-            fields={event.registrationFormFields ?? []}
-            responses={responses}
+            fields={fields}
+            responses={values}
+            errors={fieldErrors}
             onChange={(id, v) => setResponses((p) => ({ ...p, [id]: v }))}
+            onBlur={(id) => setTouched((p) => (p[id] ? p : { ...p, [id]: true }))}
           />
+          {fields.length > 0 && (
+            <p className="text-xs text-text-secondary" data-testid="answers-shared-note">
+              {organiser?.entity.name ? tForm('form.sharedWith', { name: organiser.entity.name }) : tForm('form.sharedWithGeneric')}
+            </p>
+          )}
+          {formRefusal && (
+            <p role="alert" className="rounded-lg bg-surface-danger p-3 text-sm text-text-danger" data-testid="register-form-refusal">{formRefusal}</p>
+          )}
         </section>
 
         <section aria-labelledby="reg-type" className="space-y-3 border-t border-border-subtle pt-5">

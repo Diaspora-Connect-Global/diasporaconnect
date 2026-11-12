@@ -6,6 +6,8 @@ import { ButtonType1, ButtonType2 } from '@/components/custom/button';
 import { formatInZone } from '@/lib/eventCalendar';
 import { REGISTERED_STATES, canStartRegistration, type RegistrationUiState } from '@/lib/eventRegistrationState';
 import type { EventPageEvent } from '@/services/gql/eventsM2';
+import { httpUrlOrNull } from '@/lib/safeUrl';
+import ExternalRegisterButton from './ExternalRegisterButton';
 
 const ICONS: Record<RegistrationUiState, typeof Info> = {
   confirmed: CheckCircle2,
@@ -48,8 +50,12 @@ export default function RegistrationCard({
   onOpenTab: (tab: 'register') => void;
 }) {
   const t = useTranslations('eventPage.rail');
+  const tLeave = useTranslations('eventForm.leaving');
   const locale = useLocale();
   const Icon = ICONS[state];
+  // Registration happens on the organiser's own website: no in-app form, tickets or approval step.
+  const externalMode = event.registrationMode === 'EXTERNAL' && !REGISTERED_STATES.has(state);
+  const externalUrl = externalMode ? httpUrlOrNull(event.registrationLink) : null;
   const opens = event.registrationOpensAt ? formatInZone(event.registrationOpensAt, locale, event.timezone) : '';
   const closes = event.registrationClosesAt ? formatInZone(event.registrationClosesAt, locale, event.timezone) : '';
   const closesInFuture = event.registrationClosesAt ? new Date(event.registrationClosesAt).getTime() > Date.now() : false;
@@ -80,9 +86,12 @@ export default function RegistrationCard({
         <span data-testid="registration-headline">{headline}</span>
       </p>
       {hint && <p className="text-sm text-text-secondary">{hint}</p>}
-      {event.requiresApproval && canStartRegistration(state) && <p className="text-xs text-text-secondary">{t('hints.needsApproval')}</p>}
+      {!externalMode && event.requiresApproval && canStartRegistration(state) && <p className="text-xs text-text-secondary">{t('hints.needsApproval')}</p>}
 
-      {canStartRegistration(state) && (
+      {externalMode && canStartRegistration(state) && (
+        externalUrl ? <ExternalRegisterButton url={externalUrl} /> : <p className="text-sm text-text-secondary" data-testid="external-no-link">{tLeave('noLink')}</p>
+      )}
+      {!externalMode && canStartRegistration(state) && (
         signedIn ? (
           <ButtonType2 onClick={() => onOpenTab('register')} className="w-full" size="lg">
             {state === 'full' ? t('cta.joinWaitlist') : t('cta.register')}

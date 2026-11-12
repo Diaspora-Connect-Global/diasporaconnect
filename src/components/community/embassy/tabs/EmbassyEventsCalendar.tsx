@@ -6,7 +6,10 @@ import { useQuery, useMutation } from '@apollo/client/react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { useSearchParams } from 'next/navigation';
-import { Link, usePathname } from '@/i18n/navigation';
+import { Link, usePathname, useRouter } from '@/i18n/navigation';
+import LeavingSiteDialog from '@/components/events/page/LeavingSiteDialog';
+import { registrationRoute } from '@/lib/eventRegistrationForm';
+import { httpUrlOrNull } from '@/lib/safeUrl';
 import { readMutationOutcome, refusalMessageKey } from '@/lib/mutationOutcome';
 import {
   Search,
@@ -64,6 +67,9 @@ interface OwnerEvent {
   isPaid?: boolean;
   coverImageUrl?: string | null;
   timezone?: string | null;
+  registrationMode?: string | null;
+  registrationLink?: string | null;
+  registrationFormFields?: Array<{ id: string }> | null;
 }
 
 interface GetEventsByOwnerResponse {
@@ -312,6 +318,8 @@ export function EmbassyEventsCalendar({ community, profile }: Props) {
   });
 
   const [registerMutation] = useMutation<RegisterEventData>(REGISTER_EVENT);
+  const router = useRouter();
+  const [leavingUrl, setLeavingUrl] = useState<string | null>(null);
 
   const allEvents = data?.getEventsByOwner?.events ?? [];
   // Prefer published events (cancelled always hidden); if none are published
@@ -427,6 +435,19 @@ export function EmbassyEventsCalendar({ community, profile }: Props) {
   // ── My status (RSVP) ───────────────────────────────────────────────────────
 
   async function handleStatus(evt: OwnerEvent, status: RsvpStatus) {
+    // An event with its own questions, or one that registers on another website, is never
+    // registered from here: send the person where the form (or the leaving notice) is.
+    if (status === 'going') {
+      const route = registrationRoute(evt, httpUrlOrNull);
+      if (route.kind === 'external') {
+        setLeavingUrl(route.url);
+        return;
+      }
+      if (route.kind === 'page') {
+        router.push(`/events/${evt.id}?tab=register`);
+        return;
+      }
+    }
     setLocalStatus((prev) => ({ ...prev, [evt.id]: status }));
     if (status === 'going') {
       const result = await registerMutation({ variables: { input: { eventId: evt.id } } });
@@ -454,6 +475,7 @@ export function EmbassyEventsCalendar({ community, profile }: Props) {
 
   return (
     <div className="mx-auto max-w-6xl px-3 py-6 lg:px-6">
+      <LeavingSiteDialog url={leavingUrl} onClose={() => setLeavingUrl(null)} />
       {/* Back breadcrumb */}
       <Link
         href={listHref}

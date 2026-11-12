@@ -7585,5 +7585,118 @@
       "noSavedCard": "We konden geen opgeslagen kaart op je account vinden, dus er is niets in rekening gebracht. Kies een andere betaalmethode als die wordt aangeboden."
     },
     "successHeading": "Bestelling geplaatst"
+  },
+  "eventForm": {
+    "where": {
+      "title": "Waar schrijven mensen zich in?",
+      "inApp": "Op DiaspoPlug",
+      "inAppSub": "Mensen schrijven zich hier in en beantwoorden je vragen.",
+      "external": "Op een andere website",
+      "externalSub": "De inschrijfknop stuurt mensen naar jouw website.",
+      "linkLabel": "Website voor inschrijving",
+      "linkPlaceholder": "https://jouw-site.nl/inschrijven",
+      "linkHelp": "We voegen https:// toe als het ontbreekt. Alleen weblinks (http of https) werken.",
+      "linkInvalid": "Voer een geldig webadres in, bijvoorbeeld https://jouw-site.nl/inschrijven.",
+      "alreadyRegistered": "{count, plural, one {# persoon heeft zich} other {# mensen hebben zich}} hier al ingeschreven en behouden hun inschrijving.",
+      "save": "Opslaan",
+      "saved": "Inschrijfinstellingen opgeslagen",
+      "saveFailed": "Dat kon niet worden opgeslagen."
+    },
+    "external": {
+      "note": "Inschrijven voor dit evenement gebeurt op {domain}. De vragen hieronder worden niet gebruikt.",
+      "noteNoLink": "Inschrijven voor dit evenement gebeurt op een andere website. De vragen hieronder worden niet gebruikt.",
+      "show": "Toon de vragen toch",
+      "hide": "Verberg de vragen"
+    },
+    "builder": {
+      "title": "Inschrijfformulier",
+      "intro": "Kies wat mensen je vertellen als ze zich inschrijven. Alleen jij en de andere organisatoren zien de antwoorden.",
+      "defaultTag": "Standaard",
+      "required": "Verplicht",
+      "remove": "Verwijderen",
+      "removeField": "“{label}” verwijderen",
+      "moveUp": "“{label}” omhoog",
+      "moveDown": "“{label}” omlaag",
+      "restore": "Standaardvelden herstellen",
+      "addDefaults": "Standaardvelden toevoegen",
+      "addQuestion": "Vraag toevoegen",
+      "empty": "Nog geen vragen. Mensen schrijven zich in zonder formulier.",
+      "questionLabel": "Vraag",
+      "questionPlaceholder": "bijv. Dieetwensen",
+      "type": "Antwoordtype",
+      "options": "Opties (één per regel)",
+      "optionsPlaceholder": "Optie A\nOptie B\nOptie C",
+      "noNewQuestions": "Mensen die zich al hebben ingeschreven krijgen de nieuwe vragen niet.",
+      "save": "Formulier opslaan",
+      "saved": "Inschrijfformulier opgeslagen",
+      "saveFailed": "Het formulier kon niet worden opgeslagen.",
+      "tooMany": "Een formulier kan maximaal {max} vragen hebben.",
+      "labelRequired": "Geef elke vraag een naam.",
+      "labelTooLong": "Namen mogen maximaal {max} tekens hebben.",
+      "optionsRequired": "Voeg minstens één optie toe aan “{label}”.",
+      "optionsTooMany": "“{label}” kan maximaal {max} opties hebben.",
+      "optionTooLong": "Elke optie mag maximaal {max} tekens hebben."
+    },
+    "types": {
+      "text": "Korte tekst",
+      "textarea": "Lange tekst",
+      "email": "E-mailadres",
+      "phone": "Telefoonnummer",
+      "number": "Getal",
+      "date": "Datum",
+      "select": "Enkele keuze",
+      "multiselect": "Meerdere keuzes",
+      "checkbox": "Selectievakje"
+    },
+    "defaults": {
+      "full_name": "Volledige naam",
+      "email": "E-mailadres",
+      "phone": "Telefoonnummer",
+      "job_title": "Functie"
+    },
+    "form": {
+      "selectOption": "Kies…",
+      "sharedWith": "Je antwoorden worden gedeeld met {name}.",
+      "sharedWithGeneric": "Je antwoorden worden gedeeld met de organisator.",
+      "requiredWord": "verplicht",
+      "yes": "Ja",
+      "no": "Nee",
+      "errors": {
+        "required": "Dit antwoord is verplicht.",
+        "email": "Voer een geldig e-mailadres in.",
+        "phone": "Voer een geldig telefoonnummer in, bijvoorbeeld +233 20 123 4567.",
+        "number": "Voer een getal in.",
+        "date": "Voer een geldige datum in.",
+        "option": "Kies een van de opties.",
+        "options": "Kies alleen uit de opties."
+      }
+    },
+    "leaving": {
+      "title": "Je verlaat DiaspoPlug",
+      "body": "De inschrijving gaat verder op {domain}. DiaspoPlug ziet niet wat je daar invult.",
+      "continue": "Doorgaan",
+      "cancel": "Hier blijven",
+      "cta": "Inschrijven op {domain}",
+      "noLink": "Inschrijven voor dit evenement is nog niet geopend. Kom binnenkort terug."
+    },
+    "answers": {
+      "button": "Antwoorden",
+      "title": "Antwoorden bij de inschrijving",
+      "none": "Deze persoon heeft geen antwoorden gegeven.",
+      "noQuestions": "Dit evenement heeft geen inschrijfvragen.",
+      "close": "Sluiten",
+      "download": "CSV downloaden",
+      "preparing": "Bezig met voorbereiden…",
+      "failed": "Het bestand kon niet worden gemaakt. Probeer het opnieuw.",
+      "ready": "CSV gedownload",
+      "unknownPerson": "Iemand"
+    },
+    "csv": {
+      "attendee": "Deelnemer",
+      "status": "Status",
+      "ticket": "Ticket",
+      "quantity": "Aantal",
+      "registered": "Ingeschreven op"
+    }
   }
 }

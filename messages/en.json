@@ -7585,5 +7585,118 @@
       "noSavedCard": "We could not find a saved card on your account, so you have not been charged. Please choose another payment method if one is offered."
     },
     "successHeading": "Order placed"
+  },
+  "eventForm": {
+    "where": {
+      "title": "Where do people register?",
+      "inApp": "On DiaspoPlug",
+      "inAppSub": "People register here and answer your questions.",
+      "external": "On another website",
+      "externalSub": "The Register button sends people to your website.",
+      "linkLabel": "Registration website",
+      "linkPlaceholder": "https://your-site.com/register",
+      "linkHelp": "We add https:// if you leave it out. Only web links (http or https) work.",
+      "linkInvalid": "Enter a valid web address, for example https://your-site.com/register.",
+      "alreadyRegistered": "{count, plural, one {# person has} other {# people have}} already registered here and keep their registration.",
+      "save": "Save",
+      "saved": "Registration settings saved",
+      "saveFailed": "We couldn't save that."
+    },
+    "external": {
+      "note": "Registration for this event happens on {domain}. The questions below are not used.",
+      "noteNoLink": "Registration for this event happens on another website. The questions below are not used.",
+      "show": "Show the questions anyway",
+      "hide": "Hide the questions"
+    },
+    "builder": {
+      "title": "Registration form",
+      "intro": "Choose what people tell you when they register. Only you and the other organisers see their answers.",
+      "defaultTag": "Default",
+      "required": "Required",
+      "remove": "Remove",
+      "removeField": "Remove “{label}”",
+      "moveUp": "Move “{label}” up",
+      "moveDown": "Move “{label}” down",
+      "restore": "Restore default fields",
+      "addDefaults": "Add default fields",
+      "addQuestion": "Add a question",
+      "empty": "No questions yet. People will register without a form.",
+      "questionLabel": "Question",
+      "questionPlaceholder": "e.g. Dietary needs",
+      "type": "Answer type",
+      "options": "Options (one per line)",
+      "optionsPlaceholder": "Option A\nOption B\nOption C",
+      "noNewQuestions": "People who already registered won't be asked new questions.",
+      "save": "Save form",
+      "saved": "Registration form saved",
+      "saveFailed": "We couldn't save the form.",
+      "tooMany": "A form can have at most {max} questions.",
+      "labelRequired": "Give every question a label.",
+      "labelTooLong": "Labels can have at most {max} characters.",
+      "optionsRequired": "Add at least one option to “{label}”.",
+      "optionsTooMany": "“{label}” can have at most {max} options.",
+      "optionTooLong": "Each option can have at most {max} characters."
+    },
+    "types": {
+      "text": "Short text",
+      "textarea": "Long text",
+      "email": "Email address",
+      "phone": "Phone number",
+      "number": "Number",
+      "date": "Date",
+      "select": "Single choice",
+      "multiselect": "Multiple choice",
+      "checkbox": "Checkbox"
+    },
+    "defaults": {
+      "full_name": "Full name",
+      "email": "Email address",
+      "phone": "Phone number",
+      "job_title": "Job title"
+    },
+    "form": {
+      "selectOption": "Choose…",
+      "sharedWith": "Your answers are shared with {name}.",
+      "sharedWithGeneric": "Your answers are shared with the organiser.",
+      "requiredWord": "required",
+      "yes": "Yes",
+      "no": "No",
+      "errors": {
+        "required": "This answer is required.",
+        "email": "Enter a valid email address.",
+        "phone": "Enter a valid phone number, for example +233 20 123 4567.",
+        "number": "Enter a number.",
+        "date": "Enter a valid date.",
+        "option": "Choose one of the options.",
+        "options": "Choose only from the options."
+      }
+    },
+    "leaving": {
+      "title": "You're leaving DiaspoPlug",
+      "body": "Registration continues on {domain}. DiaspoPlug doesn't see what you enter there.",
+      "continue": "Continue",
+      "cancel": "Stay here",
+      "cta": "Register on {domain}",
+      "noLink": "Registration for this event isn't open yet. Check back soon."
+    },
+    "answers": {
+      "button": "Answers",
+      "title": "Registration answers",
+      "none": "This person gave no answers.",
+      "noQuestions": "This event has no registration questions.",
+      "close": "Close",
+      "download": "Download CSV",
+      "preparing": "Preparing…",
+      "failed": "We couldn't prepare the file. Try again.",
+      "ready": "CSV downloaded",
+      "unknownPerson": "Someone"
+    },
+    "csv": {
+      "attendee": "Attendee",
+      "status": "Status",
+      "ticket": "Ticket",
+      "quantity": "Quantity",
+      "registered": "Registered on"
+    }
   }
 }

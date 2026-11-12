@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@apollo/client/react";
 import {
@@ -15,7 +15,6 @@ import {
   UNPUBLISH_EVENT,
   CANCEL_EVENT,
   DELETE_EVENT,
-  UPDATE_EVENT_FORM_FIELDS,
   CREATE_EVENT_TICKET,
   UPDATE_EVENT_TICKET,
   CREATE_EVENT_PROMO_CODE,
@@ -29,7 +28,7 @@ import {
   type EventPromoCodesData,
   type EventTicketFull,
   type EventPromoCode,
-  type RegistrationFormField,
+  type EventRegistration,
 } from "@/services/gql/events";
 import { ButtonType1, ButtonType2, ButtonType3 } from "@/components/custom/button";
 import { ConfirmationModal } from "@/components/custom/confirmationModal";
@@ -41,6 +40,8 @@ import AnalyticsSection from "@/components/networking/analytics/AnalyticsSection
 import { NETWORKING_FEATURES } from "@/lib/networkingFeatures";
 import { ApprovalsManageTab, StaffManageTab } from "@/components/events/manage/PeopleManageTabs";
 import { ProgrammeManageTab, SpeakersManageTab, UpdatesManageTab } from "@/components/events/manage/ContentManageTabs";
+import RegistrationFormBuilder from "@/components/events/manage/RegistrationFormBuilder";
+import { AnswersDialog, DownloadCsvButton } from "@/components/events/manage/RegistrationAnswers";
 import { circleUserDisplayName, useCircleUsers } from "@/hooks/useCircleUsers";
 import {
   Loader2, ChevronLeft, Users, TicketIcon, Tag, BarChart2,
@@ -127,6 +128,11 @@ function RegistrationsTab({ eventId }: { eventId: string }) {
   });
 
   const list = data?.getEventRegistrations;
+  // The event's questions and tickets drive the Answers view and the CSV columns.
+  const { data: eventData } = useQuery<GetEventData>(GET_EVENT, { variables: { id: eventId } });
+  const formFields = eventData?.getEvent?.registrationFormFields ?? [];
+  const tAns = useTranslations('eventForm.answers');
+  const [answersFor, setAnswersFor] = useState<EventRegistration | null>(null);
   // Attendees are shown by name, resolved from their profiles — never by id.
   const tIdentity = useTranslations('common.identity');
   const { usersById } = useCircleUsers((list?.registrations ?? []).map((r) => r.userId));
@@ -147,7 +153,8 @@ function RegistrationsTab({ eventId }: { eventId: string }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex gap-2 flex-wrap">
         {['', 'confirmed', 'pending', 'cancelled', 'waitlisted'].map((s) => (
           <button
             key={s}
@@ -158,6 +165,14 @@ function RegistrationsTab({ eventId }: { eventId: string }) {
             {s === '' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1)}
           </button>
         ))}
+        </div>
+        <DownloadCsvButton
+          eventId={eventId}
+          eventTitle={eventData?.getEvent?.title ?? ''}
+          fields={formFields}
+          tickets={(eventData?.getEvent?.tickets ?? []).map((x) => ({ id: x.id, name: x.name }))}
+          unknownName={tIdentity('unknownUser')}
+        />
       </div>
 
       {loading && !data ? (
@@ -175,6 +190,7 @@ function RegistrationsTab({ eventId }: { eventId: string }) {
                   <th className="px-4 py-2 text-left font-medium">Status</th>
                   <th className="px-4 py-2 text-left font-medium">Amount</th>
                   <th className="px-4 py-2 text-left font-medium">Registered</th>
+                  <th className="px-4 py-2 text-left font-medium"><span className="sr-only">{tAns('button')}</span></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-subtle">
@@ -188,6 +204,16 @@ function RegistrationsTab({ eventId }: { eventId: string }) {
                     <td className="px-4 py-2 text-text-secondary">{r.totalAmount ? `${r.currency} ${(Number(r.totalAmount) / 100).toFixed(2)}` : '—'}</td>
                     <td className="px-4 py-2 text-text-secondary text-xs">
                       {r.registeredAt ? new Date(r.registeredAt).toLocaleDateString() : '—'}
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      <button
+                        type="button"
+                        onClick={() => setAnswersFor(r)}
+                        className="min-h-9 rounded-full border border-border-subtle px-3 text-xs font-medium text-text-brand hover:bg-surface-subtle"
+                        data-testid="view-answers"
+                      >
+                        {tAns('button')}
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -205,6 +231,13 @@ function RegistrationsTab({ eventId }: { eventId: string }) {
           <p className="text-xs text-text-secondary">{list.total} total registrations</p>
         </>
       )}
+      <AnswersDialog
+        open={!!answersFor}
+        onClose={() => setAnswersFor(null)}
+        name={answersFor ? circleUserDisplayName(usersById[answersFor.userId], tIdentity('unknownUser')) : ''}
+        registration={answersFor}
+        fields={formFields}
+      />
     </div>
   );
 }
@@ -537,132 +570,7 @@ function PromoCodesTab({ eventId }: { eventId: string }) {
 
 // ─── Form Builder Tab ─────────────────────────────────────────────────────────
 function FormBuilderTab({ eventId }: { eventId: string }) {
-  const { data, loading } = useQuery<GetEventData>(GET_EVENT, { variables: { id: eventId } });
-  const event = data?.getEvent;
-
-  const [fields, setFields] = useState<RegistrationFormField[]>(() => event?.registrationFormFields ?? []);
-  useEffect(() => {
-    setFields(event?.registrationFormFields ?? []);
-  }, [event?.registrationFormFields]);
-  const [updateFormFields, { loading: saving }] = useMutation(UPDATE_EVENT_FORM_FIELDS, {
-    onCompleted: () => toast.success('Form saved'),
-    onError: (e) => toast.error(e.message),
-  });
-
-  const FIELD_TYPES = [
-    { value: 'text', label: 'Text' },
-    { value: 'select', label: 'Single choice' },
-    { value: 'multiselect', label: 'Multiple choice' },
-    { value: 'checkbox', label: 'Checkbox' },
-  ];
-
-  const addField = () => {
-    setFields((prev) => [...prev, { id: `new_${Date.now()}`, label: '', type: 'text', required: false, options: [] }]);
-  };
-
-  const updateField = (idx: number, patch: Partial<RegistrationFormField>) => {
-    setFields((prev) => prev.map((f, i) => i === idx ? { ...f, ...patch } : f));
-  };
-
-  const removeField = (idx: number) => {
-    setFields((prev) => prev.filter((_, i) => i !== idx));
-  };
-
-  const handleSave = () => {
-    updateFormFields({
-      variables: {
-        input: {
-          eventId,
-          fields: fields.map((f) => ({
-            id: f.id.startsWith('new_') ? undefined : f.id,
-            label: f.label,
-            type: f.type,
-            required: f.required,
-            options: ['select', 'multiselect'].includes(f.type) ? (f.options ?? []) : undefined,
-          })),
-        },
-      },
-    });
-  };
-
-  // Never render an empty builder that then fills in (GET_EVENT is normally
-  // already cached by the page, so this is rarely visible).
-  if (loading && !data) return <PageLoader />;
-
-  return (
-    <div className="space-y-4">
-      <p className="text-sm text-text-secondary">
-        These fields are shown to attendees when they register. Leave empty to use no custom form.
-      </p>
-
-      <div className="space-y-3">
-        {fields.map((field, idx) => (
-          <div key={field.id} className="rounded-lg border border-border-subtle p-4 space-y-3">
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <TextInput
-                  id={`label_${idx}`}
-                  label="Question label"
-                  placeholder="e.g. Full Name"
-                  value={field.label}
-                  onChange={(v) => updateField(idx, { label: v })}
-                  required
-                />
-              </div>
-              <Select
-                id={`type_${idx}`}
-                label="Type"
-                value={field.type}
-                onChange={(v) => updateField(idx, { type: v as RegistrationFormField['type'] })}
-                options={FIELD_TYPES}
-              />
-              <button onClick={() => removeField(idx)} className="mt-6 text-text-danger hover:text-text-danger/70">
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-
-            {(field.type === 'select' || field.type === 'multiselect') && (
-              <div className="space-y-1">
-                <label className="text-xs text-text-secondary">Options (one per line)</label>
-                <textarea
-                  value={(field.options ?? []).join('\n')}
-                  onChange={(e) => updateField(idx, { options: e.target.value.split('\n').filter(Boolean) })}
-                  rows={3}
-                  placeholder="Option A&#10;Option B&#10;Option C"
-                  className="w-full bg-surface-subtle border-2 border-border-subtle rounded-md px-3 py-2 text-sm focus:outline-none resize-none placeholder:text-text-secondary"
-                />
-              </div>
-            )}
-
-            <label className="flex items-center gap-2 text-sm cursor-pointer text-text-secondary">
-              <input
-                type="checkbox"
-                checked={field.required}
-                onChange={(e) => updateField(idx, { required: e.target.checked })}
-                className="w-4 h-4 accent-surface-brand"
-              />
-              Required
-            </label>
-          </div>
-        ))}
-      </div>
-
-      <div className="flex gap-2">
-        <ButtonType1 size="default" onClick={addField} className="flex items-center gap-1">
-          <Plus className="w-4 h-4" /> Add field
-        </ButtonType1>
-        <ButtonType2 size="default" onClick={handleSave} disabled={saving} className="flex items-center gap-2">
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-          Save form
-        </ButtonType2>
-        {fields.length > 0 && (
-          <ButtonType3 size="default" onClick={() => { setFields([]); }}>
-            Clear form
-          </ButtonType3>
-        )}
-      </div>
-    </div>
-  );
+  return <RegistrationFormBuilder eventId={eventId} />;
 }
 
 // ─── Settings Tab ─────────────────────────────────────────────────────────────

@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import { EVENT_PLACEHOLDER_IMAGE } from "@/services/gql/events";
 import { ImageWithFallback } from "@/components/ui/ImageWithFallback";
@@ -5,6 +8,8 @@ import { ButtonType1, ButtonType2 } from "../../custom/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { EllipsisVertical, Lock, Globe, Users, Shield, MapPin, Video, ExternalLink, Download } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { httpUrlOrNull } from "@/lib/safeUrl";
+import LeavingSiteDialog from "@/components/events/page/LeavingSiteDialog";
 
 interface EventCardProps {
     title: string;
@@ -33,6 +38,8 @@ interface EventCardProps {
 
 export default function EventCard2({ title, date, location, attendees, imageUrl, description, priceLabel, visibility = "public", venueName, addressLines, virtualLink, platform, registrationLink, onBuyClick, onSaveClick, isSaved, isRegistered, isSoldOut, onCancelAttend, onDownloadTicket, onShare }: EventCardProps) {
     const tActions = useTranslations('actions');
+    const [leaving, setLeaving] = useState<string | null>(null);
+    const safeLink = httpUrlOrNull(registrationLink);
 
     const hasVenue = Boolean(venueName) || (addressLines?.length ?? 0) > 0 || Boolean(virtualLink) || Boolean(platform);
 
@@ -171,17 +178,17 @@ export default function EventCard2({ title, date, location, attendees, imageUrl,
                     )}
                 </div>
 
-                {registrationLink && (
+                {safeLink && (
                     <div className="mt-6 border-t pt-4">
-                        <a
-                            href={registrationLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-text-brand font-semibold underline break-all"
+                        <button
+                            type="button"
+                            onClick={() => setLeaving(safeLink)}
+                            className="inline-flex items-center gap-2 text-text-brand font-semibold underline break-all text-left"
                         >
                             <ExternalLink size={18} className="flex-shrink-0" />
                             {tActions('register')}
-                        </a>
+                        </button>
+                        <LeavingSiteDialog url={leaving} onClose={() => setLeaving(null)} />
                     </div>
                 )}
             </div>
