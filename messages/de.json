@@ -149,12 +149,17 @@
       }
     },
     "community": {
-      "title": "Erzählen Sie uns von Ihrer Community",
-      "description": "Teilen Sie die Community, mit der Sie sich identifizieren. Es hilft uns, Sie mit Menschen und Geschichten zu verbinden, die für Sie wichtig sind.",
+      "title": "Was trifft auf Sie zu?",
+      "description": "Leben Sie in Ihrem Heimatland oder im Ausland? Auf DiaspoPlug steht Ihnen in beiden Fällen alles offen.",
       "options": {
         "localCitizen": "Lokaler Bürger",
         "diasporaMember": "Diaspora-Mitglied"
-      }
+      },
+      "descriptions": {
+        "localCitizen": "Sie leben in dem Land, aus dem Sie oder Ihre Familie stammen.",
+        "diasporaMember": "Sie leben außerhalb des Landes, aus dem Sie oder Ihre Familie stammen."
+      },
+      "notSure": "Nicht sicher? Entscheiden Sie danach, wo Sie den größten Teil des Jahres leben."
     },
     "location": {
       "title": "In welchem Land leben Sie?",

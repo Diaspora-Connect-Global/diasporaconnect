@@ -149,12 +149,17 @@
       }
     },
     "community": {
-      "title": "Tell us your community",
-      "description": "Share the community you identify with. It helps us connect you with people and stories that matter to you.",
+      "title": "Which one describes you?",
+      "description": "Do you live in your home country or abroad? Everything on DiaspoPlug is open to you either way.",
       "options": {
         "localCitizen": "Local citizen",
         "diasporaMember": "Diaspora member"
-      }
+      },
+      "descriptions": {
+        "localCitizen": "You live in the country you or your family come from.",
+        "diasporaMember": "You live outside the country you or your family come from."
+      },
+      "notSure": "Not sure? Go by where you live most of the year."
     },
     "location": {
       "title": "What's your country of residence?",

@@ -76,7 +76,7 @@ async function throughNameRoleCountry(page: Page, { clickFinal = true } = {}) {
     await page.locator('#firstName').fill('Ama');
     await page.locator('#lastName').fill('Mensah');
     await page.getByRole('button', { name: 'Continue' }).click();
-    await page.getByRole('button', { name: 'Diaspora member' }).click();
+    await page.locator('label').filter({ hasText: 'Diaspora member' }).click();
     await page.getByRole('button', { name: 'Continue' }).click();
     await page.locator('#country').click();
     await page.getByRole('option', { name: 'Germany' }).click();
@@ -98,7 +98,7 @@ for (const kind of ['password', 'oauth'] as const) {
         await page.getByRole('button', { name: 'Continue' }).click();
 
         await expect(stepLabel(page)).toHaveText('Step 2 of 5');
-        await page.getByRole('button', { name: 'Diaspora member' }).click();
+        await page.locator('label').filter({ hasText: 'Diaspora member' }).click();
         await page.getByRole('button', { name: 'Continue' }).click();
 
         await expect(stepLabel(page)).toHaveText('Step 3 of 5');
@@ -153,6 +153,41 @@ test('a wrong code keeps the user on the code step (no session, no topics)', asy
     await expect(stepLabel(page)).toHaveText('Step 4 of 5');
     await expect(page.locator('p', { hasText: 'Invalid verification code' })).toBeVisible();
     expect(await page.evaluate(() => localStorage.getItem('auth-store') ?? '')).not.toContain('"sessionToken":"tok"');
+    await context.close();
+});
+
+test('step 2 explains both choices, needs one picked, and keeps it on Back', async () => {
+    const { page, context } = await open('password');
+    await page.locator('#firstName').fill('Ama');
+    await page.locator('#lastName').fill('Mensah');
+    await page.getByRole('button', { name: 'Continue' }).click();
+
+    await expect(stepLabel(page)).toHaveText('Step 2 of 5');
+    await expect(page.getByRole('heading', { name: 'Which one describes you?' })).toBeVisible();
+    await expect(page.getByText('You live in the country you or your family come from.')).toBeVisible();
+    await expect(page.getByText('You live outside the country you or your family come from.')).toBeVisible();
+    await expect(page.getByText('Not sure? Go by where you live most of the year.')).toBeVisible();
+
+    const local = page.getByRole('radio', { name: /^Local citizen/ });
+    const diaspora = page.getByRole('radio', { name: /^Diaspora member/ });
+    await expect(local).not.toBeChecked();
+    await expect(diaspora).not.toBeChecked();
+    await expect(page.getByRole('button', { name: 'Continue' })).toBeDisabled();
+
+    // Keyboard: focus the group and switch with the arrow keys.
+    await local.focus();
+    await page.keyboard.press('Space');
+    await expect(local).toBeChecked();
+    await page.keyboard.press('ArrowRight');
+    await expect(diaspora).toBeChecked();
+    await expect(local).not.toBeChecked();
+    await expect(page.getByRole('button', { name: 'Continue' })).toBeEnabled();
+
+    await page.getByRole('button', { name: 'Continue' }).click();
+    await expect(stepLabel(page)).toHaveText('Step 3 of 5');
+    await page.locator('form').locator('..').getByRole('button').first().click(); // back arrow
+    await expect(stepLabel(page)).toHaveText('Step 2 of 5');
+    await expect(diaspora).toBeChecked();
     await context.close();
 });
 

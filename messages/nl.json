@@ -149,12 +149,17 @@
       }
     },
     "community": {
-      "title": "Vertel ons uw gemeenschap",
-      "description": "Deel de gemeenschap waarmee u zich identificeert. Het helpt ons u te verbinden met mensen en verhalen die voor u van belang zijn.",
+      "title": "Wat past bij u?",
+      "description": "Woont u in uw land van herkomst of in het buitenland? Op DiaspoPlug staat in beide gevallen alles voor u open.",
       "options": {
         "localCitizen": "Lokale burger",
         "diasporaMember": "Diaspora-lid"
-      }
+      },
+      "descriptions": {
+        "localCitizen": "U woont in het land waar u of uw familie vandaan komt.",
+        "diasporaMember": "U woont buiten het land waar u of uw familie vandaan komt."
+      },
+      "notSure": "Twijfelt u? Kies op basis van waar u het grootste deel van het jaar woont."
     },
     "location": {
       "title": "Wat is uw land van verblijf?",
