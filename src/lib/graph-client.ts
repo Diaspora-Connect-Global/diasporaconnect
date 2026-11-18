@@ -9,6 +9,7 @@ import {
 } from '@apollo/client';
 import { SetContextLink } from '@apollo/client/link/context';
 import { ErrorLink } from '@apollo/client/link/error';
+import { retryTransientLink } from '@/lib/retryTransientLink';
 import UploadHttpLink from 'apollo-upload-client/UploadHttpLink.mjs';
 import { persistCacheSync, LocalStorageWrapper } from 'apollo3-cache-persist';
 import { toast } from 'sonner';
@@ -155,11 +156,12 @@ const uploadLink = new UploadHttpLink({
 });
 
 /* ------------------------------------------------------------------ */
-/* Combine links (ORDER MATTERS: error → auth → upload) */
+/* Combine links (ORDER MATTERS: error → retry → auth → upload) */
 /* ------------------------------------------------------------------ */
 const link = ApolloLink.from([
-  errorLink,  // First: catch and log errors
-  authLink,   // Second: add auth headers
+  errorLink,          // First: catch and log errors (sees only the FINAL result)
+  retryTransientLink, // Re-sends a query that timed out / hit an unavailable backend (max 2, never mutations)
+  authLink,           // Then: add auth headers (fresh on every retry)
   uploadLink, // Last: make the request
 ]);
 
