@@ -151,8 +151,14 @@ export function CommunityFeed({ scrollRoot, scope = 'community', onOpenMedia, re
 
   return (
     <section aria-label={t('tabs.label')} data-testid="community-feed">
-      <div className="mb-3 flex items-end justify-between gap-3 border-b border-border-subtle">
-      <div role="tablist" aria-label={t('tabs.label')} className="flex gap-6">
+      {/*
+        Phones: the tabs keep their own underlined row and the filter drops to its
+        own line under them — side by side, a longer label (French "Toutes les
+        publications", Dutch "Alle berichten") pushed the row past the screen and
+        the whole column scrolled sideways. From `sm` up they share one row as before.
+      */}
+      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-3 sm:border-b sm:border-border-subtle">
+      <div role="tablist" aria-label={t('tabs.label')} className="flex min-w-0 gap-4 border-b border-border-subtle sm:gap-6 sm:border-b-0">
         {tabs.map((k, i) => (
           <button
             key={k}
@@ -163,20 +169,20 @@ export function CommunityFeed({ scrollRoot, scope = 'community', onOpenMedia, re
             tabIndex={tab === k ? 0 : -1}
             onClick={() => setTab(k)}
             onKeyDown={(e) => onKey(e, i)}
-            className={`-mb-px border-b-2 px-1 pb-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand ${tab === k ? 'border-text-brand text-text-brand' : 'border-transparent text-muted-foreground hover:text-text-primary'}`}
+            className={`-mb-px shrink-0 whitespace-nowrap border-b-2 px-1 pb-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand ${tab === k ? 'border-text-brand text-text-brand' : 'border-transparent text-muted-foreground hover:text-text-primary'}`}
           >
             {t(`tabs.${k}`)}
           </button>
         ))}
       </div>
-        <div className="relative mb-2 shrink-0">
+        <div className="relative min-w-0 max-w-full self-end sm:mb-2 sm:shrink-0">
           <label htmlFor="community-feed-filter" className="sr-only">{t('filter.label')}</label>
           <select
             id="community-feed-filter"
             data-testid="community-feed-filter"
             value={category}
             onChange={(e) => chooseCategory(e.target.value)}
-            className="h-8 cursor-pointer appearance-none rounded-full border border-border-subtle bg-surface-default py-1 pl-3 pr-8 text-base font-medium text-text-primary hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand md:text-xs"
+            className="h-8 max-w-full cursor-pointer appearance-none truncate rounded-full border border-border-subtle bg-surface-default py-1 pl-3 pr-8 text-base font-medium text-text-primary hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand md:text-xs"
           >
             <option value="">{t('filter.all')}</option>
             {categoryOptions.map((o) => (
