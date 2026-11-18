@@ -778,9 +778,17 @@
 }
 
 /* Shell heights use svh (small viewport), not dvh: dvh changes every time the
-   mobile URL bar shows/hides, which resized the whole app mid-scroll. */
+   mobile URL bar shows/hides, which resized the whole app mid-scroll.
+   EXCEPT the content area on phones: the bottom bar is `fixed; bottom: 0`, i.e. it
+   sits at the bottom of the LIVE viewport, which on iOS Safari (floating toolbar) is
+   taller than 100svh. 84svh then ended the content above the bar and left an empty
+   strip with a hard edge across the posts (under the issue-reporter button). Filling
+   "live viewport − header − bar" puts the content's bottom exactly on the bar's top;
+   header and bar keep their svh heights, so only the content's bottom edge (hidden
+   under the bar) moves when the toolbar changes. Browsers without dvh keep 84svh. */
 .h-app-inner {
   height: 84svh;
+  height: calc(100dvh - 16svh);
 }
 .h-app-top-down {
   height: 8svh;

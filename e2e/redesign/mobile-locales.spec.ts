@@ -12,7 +12,19 @@ import { openBrowser } from '../support/browser';
 import { open } from './fixtures';
 
 const LOCALES = ['en', 'fr', 'de', 'nl', 'it'] as const;
-const PAGES = ['/home', '/community', '/discover', '/feed?hashtag=diaspora'] as const;
+/** Checked on every run. */
+const CORE_PAGES = ['/home', '/community', '/discover', '/feed?hashtag=diaspora'];
+/** The rest of the everyday pages — run with MOBILE_LOCALES_FULL=1 (slow on a cold dev server). */
+const MORE_PAGES = [
+    '/events', '/events/create', '/opportunities', '/opportunities/employment-career', '/marketplace',
+    '/people', '/friends', '/groups', '/circles', '/circles/invitations', '/notification', '/chat',
+    '/profile', '/settings', '/saved', '/search?q=ghana', '/wallet', '/more', '/association', '/requests',
+    '/vendors', '/becomeavendor', '/create-post', '/post/00000000-0000-4000-8000-0000000b0001',
+    '/help', '/about', '/privacy', '/terms', '/contact',
+];
+const PAGES = process.env.MOBILE_PAGES
+    ? process.env.MOBILE_PAGES.split(',').map((p) => p.trim()).filter(Boolean) // re-check a subset
+    : process.env.MOBILE_LOCALES_FULL === '1' ? [...CORE_PAGES, ...MORE_PAGES] : CORE_PAGES;
 const PHONE = { width: 375, height: 812 };
 
 let browser: Browser;
@@ -79,8 +91,9 @@ for (const path of PAGES) {
         const { page } = await open(browser, '/home', {}, PHONE);
         const failures: string[] = [];
         for (const locale of LOCALES) {
-            await page.goto(`/${locale}${path}`, { waitUntil: 'load' });
-            await expect(page.locator('header.h-app-top-down')).toBeVisible({ timeout: 90_000 });
+            await page.goto(`/${locale}${path}`, { waitUntil: 'load', timeout: 180_000 });
+            // Pages outside the app shell (about, legal) have no app header; wait for real content instead.
+            await page.locator('main, header.h-app-top-down, h1').first().waitFor({ state: 'visible', timeout: 90_000 });
             await page.waitForTimeout(1500); // let lazy sections and fonts settle
             const r = await overflowReport(page);
             if (r.scrollWidth > r.vw + 1 || r.culprits.length > 0) {

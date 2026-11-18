@@ -223,7 +223,9 @@ export function PeopleView() {
           </form>
         </PageHero>
 
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        {/* grid-cols-1 = minmax(0,1fr): without it the phone column grew to its widest
+            unbreakable content and French/German pushed the page past the screen. */}
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
           <section aria-labelledby="people-list-title" data-testid="people-list" className="min-w-0 rounded-2xl border border-border-subtle bg-surface-default p-5 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0">
@@ -302,7 +304,7 @@ export function PeopleView() {
             )}
           </section>
 
-          <aside aria-labelledby="people-more-title" data-testid="people-more" className="h-fit rounded-2xl border border-border-subtle bg-surface-default p-5 shadow-sm lg:sticky lg:top-0">
+          <aside aria-labelledby="people-more-title" data-testid="people-more" className="h-fit min-w-0 rounded-2xl border border-border-subtle bg-surface-default p-5 shadow-sm lg:sticky lg:top-0">
             <h2 id="people-more-title" className="text-base font-bold text-text-primary">
               {t('links.title')}
             </h2>
