@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Link } from '@/i18n/navigation';
+import { hashtagHref } from '@/lib/hashtagLink';
 
 /** http(s)://… or www.… — trailing punctuation stripped from the link target. */
 const URL_IN_TEXT =
@@ -228,7 +229,7 @@ export function renderRichText(
       parts.push(
         <Link
           key={match.index}
-          href={`/feed?hashtag=${encodeURIComponent(tagSlug)}`}
+          href={hashtagHref(tagSlug)}
           className="font-bold text-text-brand hover:underline no-underline"
         >
           {token}

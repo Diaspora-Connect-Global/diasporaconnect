@@ -6,6 +6,7 @@ import { DrawerRow, DrawerSection, MobileRailMenu } from '@/components/shell/Rai
 import { COMMUNITY_NAV_ITEMS } from '@/components/community/redesign/CommunityLeftNav';
 import { useTrendingTags, useUpcomingPublicEvents } from '@/components/community/redesign/CommunityRail';
 import type { JoinedAssociation, JoinedCommunity, PendingCommunityRequest } from '@/components/community/YourCommunitiesColumn';
+import { hashtagHref } from '@/lib/hashtagLink';
 
 function Lists({ communities, pendingRequests, associations }: { communities: readonly JoinedCommunity[]; pendingRequests: readonly PendingCommunityRequest[]; associations: readonly JoinedAssociation[] }) {
   const t = useTranslations('communityPage');
@@ -43,7 +44,7 @@ function Lists({ communities, pendingRequests, associations }: { communities: re
       {tags.length > 0 && (
         <DrawerSection id="crm-topics" title={tRail('topics')}>
           {tags.map((h) => (
-            <DrawerRow key={h.id ?? h.tag} href={`/search?q=${encodeURIComponent(`#${h.tag}`)}`} icon={Hash} tone="warning" label={`#${h.tag}`} detail={typeof h.usageCount === 'number' && h.usageCount > 0 ? tRail('topicUses', { count: h.usageCount }) : undefined} />
+            <DrawerRow key={h.id ?? h.tag} href={hashtagHref(h.tag)} icon={Hash} tone="warning" label={`#${h.tag}`} detail={typeof h.usageCount === 'number' && h.usageCount > 0 ? tRail('topicUses', { count: h.usageCount }) : undefined} />
           ))}
         </DrawerSection>
       )}

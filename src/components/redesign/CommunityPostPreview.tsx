@@ -7,6 +7,7 @@ import { formatDateProximity } from '@/macros/time';
 import { toCdnUrl } from '@/lib/cdn';
 import { displayName } from '@/lib/displayName';
 import { useImageFallback } from '@/components/ui/ImageWithFallback';
+import { renderRichText, buildMentionMap } from '@/components/custom/richTextRenderer';
 import type { Post } from '@/services/gql/types/postsFeed';
 
 function Avatar({ src, fallback }: { src?: string | null; fallback: string }) {
@@ -43,8 +44,20 @@ export function CommunityPostPreview({ post }: { post: Post }) {
           {when && <p className="truncate text-xs text-muted-foreground">{when}</p>}
         </div>
       </header>
-      <Link href={`/post/${encodeURIComponent(post.id)}`} prefetch={false} className="flex flex-col gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand">
-      <p className="line-clamp-4 whitespace-pre-line break-words text-sm text-text-primary">{post.text}</p>
+      {/*
+        Stretched link: the whole teaser still opens the post, while hashtags,
+        mentions and web links in the text stay their own links (a link inside a
+        link is invalid). The text ignores clicks except on its own links, so a
+        click on plain text falls through to the "Open post" link underneath.
+      */}
+      <div className="relative flex flex-col gap-3">
+      <Link
+        href={`/post/${encodeURIComponent(post.id)}`}
+        prefetch={false}
+        aria-label={t('openPost')}
+        className="absolute inset-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
+      />
+      <p className="pointer-events-none relative line-clamp-4 whitespace-pre-line break-words text-sm text-text-primary [&_a]:pointer-events-auto">{renderRichText(post.text ?? '', buildMentionMap(post.mentions ?? []))}</p>
       {images.length > 0 && (
         <div className={`grid gap-1.5 ${images.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
           {images.map((src) => (
@@ -53,7 +66,7 @@ export function CommunityPostPreview({ post }: { post: Post }) {
           ))}
         </div>
       )}
-      </Link>
+      </div>
       <PostReactionRow
         postId={post.id}
         likes={post.engagementCounts?.likes ?? 0}

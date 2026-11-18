@@ -13,6 +13,7 @@ import { LIST_EVENTS, getEventLocationDisplay, type Event, type ListEventsData }
 import { useImageFallback } from '@/components/ui/ImageWithFallback';
 import { displayName } from '@/lib/displayName';
 import { toCdnUrl } from '@/lib/cdn';
+import { hashtagHref } from '@/lib/hashtagLink';
 
 const SILENT = { context: { silentErrors: true } } as const;
 
@@ -80,7 +81,7 @@ function TrendingTopics() {
       <ul className="space-y-2.5">
         {tags.map((h, i) => (
           <li key={h.id ?? h.tag}>
-            <Link href={`/search?q=${encodeURIComponent(`#${h.tag}`)}`} prefetch={false} className="flex items-center gap-3 rounded-lg p-1 hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand">
+            <Link href={hashtagHref(h.tag)} prefetch={false} className="flex items-center gap-3 rounded-lg p-1 hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand">
               <span className="grid size-8 shrink-0 place-items-center rounded-full bg-surface-warning text-text-warning">{i === 0 ? <Flame className="size-4" aria-hidden /> : <Hash className="size-4" aria-hidden />}</span>
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-semibold text-text-primary">#{h.tag}</span>
