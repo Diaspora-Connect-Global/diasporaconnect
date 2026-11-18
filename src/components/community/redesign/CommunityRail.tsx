@@ -68,7 +68,11 @@ function SuggestedPeople() {
 
 /** Trending hashtags (shared by the rail card and the phone drawer). */
 export function useTrendingTags() {
-  const { data } = useQuery<{ trendingHashtags?: { id: string; tag: string; usageCount?: number | null }[] | null }>(GET_TRENDING_HASHTAGS, { variables: { input: { limit: 5, timeRange: '7d' } }, fetchPolicy: 'cache-first', ...SILENT });
+  // cache-and-network, not cache-first: the Apollo cache is persisted to the
+  // browser, so cache-first showed the counts saved weeks ago forever ("3 posts"
+  // after posts were deleted). 30 days, like the composer's hashtag pool: a quiet
+  // week would otherwise empty the card.
+  const { data } = useQuery<{ trendingHashtags?: { id: string; tag: string; usageCount?: number | null }[] | null }>(GET_TRENDING_HASHTAGS, { variables: { input: { limit: 5, timeRange: '30d' } }, fetchPolicy: 'cache-and-network', ...SILENT });
   return (data?.trendingHashtags ?? []).filter((h) => h && h.tag).slice(0, 5);
 }
 
