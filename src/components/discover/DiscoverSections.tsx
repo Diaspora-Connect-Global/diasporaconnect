@@ -63,7 +63,7 @@ function useOpportunityRow(k: OpportunityKey, location: string, sort: DiscoverSo
  * section is one row, so the 4th card hides while there are only 3 columns
  * (display:none also takes it out of the tab order).
  */
-function Grid({ children, overview, listRows = false }: { children: ReactNode[]; overview: boolean; listRows?: boolean }) {
+export function Grid({ children, overview, listRows = false }: { children: ReactNode[]; overview: boolean; listRows?: boolean }) {
   // Row-shaped cards (jobs) read badly squeezed into two phone columns: one per row until there is room for two.
   const cols = listRows ? 'grid-cols-1 @[26rem]:grid-cols-2' : 'grid-cols-2';
   return (

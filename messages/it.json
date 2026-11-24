@@ -5039,6 +5039,13 @@
       "title": "Hai bisogno di aiuto per fare qualcosa in Africa?",
       "body": "Trova fornitori per questioni legali, immobili, edilizia e altro.",
       "cta": "Sfoglia i servizi"
+    },
+    "feed": {
+      "title": "Tutto su DiaspoPlug",
+      "subtitle": "Opportunità, eventi, servizi e prodotti di persone, comunità, associazioni e della piattaforma. Usa i filtri per restringere l’elenco.",
+      "loadMore": "Carica altri",
+      "loading": "Caricamento…",
+      "end": "Per ora è tutto."
     }
   },
   "eventPage": {

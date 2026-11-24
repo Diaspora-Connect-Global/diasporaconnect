@@ -5039,6 +5039,13 @@
       "title": "Brauchst du Hilfe, um etwas in Afrika zu erledigen?",
       "body": "Finde Anbieter für Rechtliches, Immobilien, Bau und mehr.",
       "cta": "Dienste ansehen"
+    },
+    "feed": {
+      "title": "Alles auf DiaspoPlug",
+      "subtitle": "Chancen, Veranstaltungen, Dienstleistungen und Produkte von Personen, Gemeinschaften, Verbänden und der Plattform. Mit den Filtern grenzt du die Liste ein.",
+      "loadMore": "Mehr laden",
+      "loading": "Wird geladen …",
+      "end": "Das ist vorerst alles."
     }
   },
   "eventPage": {

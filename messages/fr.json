@@ -5039,6 +5039,13 @@
       "title": "Besoin d’aide pour faire avancer les choses en Afrique ?",
       "body": "Trouvez des prestataires pour le juridique, l’immobilier, la construction et plus encore.",
       "cta": "Voir les services"
+    },
+    "feed": {
+      "title": "Tout DiaspoPlug",
+      "subtitle": "Opportunités, événements, services et produits de membres, de communautés, d’associations et de la plateforme. Utilisez les filtres pour affiner la liste.",
+      "loadMore": "Charger plus",
+      "loading": "Chargement…",
+      "end": "C’est tout pour le moment."
     }
   },
   "eventPage": {

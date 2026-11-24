@@ -8,31 +8,17 @@ import { useRouter, usePathname } from '@/i18n/navigation';
 import { REDESIGN_IMAGES } from '@/lib/redesignImages';
 import { PageHero } from '@/components/redesign/PageHero';
 import { CategoryTileRow } from '@/components/redesign/CategoryTileRow';
-import { LazyMount } from '@/components/redesign/LazyMount';
 import { DiscoverHelpCard, RefinePanel } from './RefinePanel';
-import { EventsSection, LatestSection, OpportunitySection, ProductsSection, RecommendedOpportunitiesSection, ServicesSection, useLatestMix, useRecommendedOpportunities, withoutRepeats } from './DiscoverSections';
-import { DISCOVER_CATEGORY_KEYS, DISCOVER_ICONS, DISCOVER_SECTION_ORDER, DISCOVER_TONES, isOpportunityKey, parseCategories, parseSort, type DiscoverCategoryKey, type DiscoverSort, type DiscoverViewKey } from './discoverCategories';
-
-/** One row of 4 per section, for "For you", Latest and rows narrowed only by place or sort. */
-const OVERVIEW_SHOWN = 4;
-/** A row shows 3 of those beside the refine rail, so a 4th listing is only reachable through "View all". */
-const SMALLEST_ROW = 3;
-const EXPANDED_LIMIT = 12;
-/** Latest's "View all". Fetched with room for what "For you" takes out of the row, and the same query for both. */
-const LATEST_FETCH = EXPANDED_LIMIT + OVERVIEW_SHOWN;
-/** Sections mounted (and queried) immediately; the rest wait until they near the viewport. */
-const EAGER_SECTIONS = 2;
+import { DiscoverFeed } from './DiscoverFeed';
+import { DISCOVER_CATEGORY_KEYS, DISCOVER_ICONS, DISCOVER_TONES, parseCategories, parseSort, type DiscoverCategoryKey, type DiscoverSort, type DiscoverViewKey } from './discoverCategories';
 
 /**
- * `/discover`: hero search, category tiles, then only one row of "For you" (the
- * viewer's recommended opportunities of every type, ranked on the server, each
- * with why) and one of "Latest opportunities" (the newest of every kind), each
- * with its own "View all". Choosing a category, place or sort swaps those for
- * real, queryable sections (services, a row per kind of opportunity — together
- * every type — products, events).
+ * `/discover`: hero search, category tiles, then ONE paged list of everything
+ * discoverable (opportunities from every owner, upcoming events, marketplace
+ * products and services). Choosing a category, place or sort narrows it; with
+ * none chosen nothing is left out.
  * The URL carries the filters (`?cat=jobs,events&loc=Accra&sort=closing`), so a
- * view can be shared and the back button works. A section with nothing to show
- * is not rendered.
+ * view can be shared and the back button works.
  */
 export function DiscoverView() {
   const t = useTranslations('discover');
@@ -42,7 +28,6 @@ export function DiscoverView() {
   const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
-  const [scrollEl, setScrollEl] = useState<HTMLDivElement | null>(null);
 
   const categories = useMemo(() => parseCategories(searchParams.get('cat')), [searchParams]);
   const location = (searchParams.get('loc') ?? '').slice(0, 80);
@@ -63,11 +48,7 @@ export function DiscoverView() {
     [categories, location, sort, router, pathname],
   );
 
-  // Choosing a category leaves Latest's "View all".
-  const toggle = (key: DiscoverCategoryKey) => {
-    const rest = categories.filter((k) => k !== 'latest');
-    update({ cat: rest.includes(key) ? rest.filter((k) => k !== key) : [...rest, key] });
-  };
+  const toggle = (key: DiscoverCategoryKey) => update({ cat: categories.includes(key) ? categories.filter((k) => k !== key) : [...categories, key] });
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -79,39 +60,8 @@ export function DiscoverView() {
     router.push(`/search?q=${encodeURIComponent(q)}`);
   };
 
-  // Latest is a view, not a filter. Latest cannot filter by place or sort by deadline, so either one leaves it for the plain sections.
-  const filtered = categories.some((k) => k !== 'latest');
-  const unrefined = !filtered && !location && sort === 'newest';
-  const latestView = categories.includes('latest') && !location && sort === 'newest';
-  const shown = filtered ? EXPANDED_LIMIT : OVERVIEW_SHOWN;
-  // The untouched page is one row of "For you" and one of Latest; any refinement shows the plain sections.
-  const overview = unrefined && !latestView;
-  // "For you" = recommended opportunities. The recommender cannot filter by place or sort by deadline,
-  // so the row shows only on the unfiltered page or on its own "View all".
-  const showForYou = !latestView && !location && sort === 'newest' && (!filtered || categories.includes('forYou'));
-  const forYou = useRecommendedOpportunities(shown, showForYou);
-  const forYouShown = useMemo(() => forYou.slice(0, shown), [forYou, shown]);
-  const forYouIds = useMemo(() => new Set(forYouShown.map((o) => o.id)), [forYouShown]);
-  const mix = useLatestMix(LATEST_FETCH, overview || latestView);
-  const mixShown = useMemo(() => (latestView ? mix.slice(0, EXPANDED_LIMIT) : withoutRepeats(mix, forYouIds, OVERVIEW_SHOWN).slice(0, OVERVIEW_SHOWN)), [latestView, mix, forYouIds]);
-  // Products and services have no place to filter on, so a location filter leaves them out.
-  const visible = unrefined ? [] : DISCOVER_SECTION_ORDER.filter((k) => (!filtered || categories.includes(k)) && !(location && (k === 'services' || k === 'products')));
-
-  const renderSection = (k: DiscoverCategoryKey) => {
-    const common = { limit: shown, shown, expanded: filtered, onViewAll: () => update({ cat: [k] }) };
-    if (isOpportunityKey(k)) return <OpportunitySection {...common} k={k} location={location} sort={sort} />;
-    switch (k) {
-      case 'services':
-        return <ServicesSection {...common} />;
-      case 'products':
-        return <ProductsSection {...common} />;
-      case 'events':
-        return <EventsSection {...common} location={location} />;
-    }
-  };
-
   return (
-    <div ref={setScrollEl} className="h-app-inner overflow-y-auto scrollbar-hide bg-background">
+    <div className="h-app-inner overflow-y-auto scrollbar-hide bg-background">
       <div className="mx-auto w-full space-y-5 px-4 py-4 pb-10 lg:w-[80vw] lg:px-0 lg:py-6">
         <PageHero id="discover-title" eyebrow={t('eyebrow')} title={t('title')} subtitle={t('subtitle')} image={REDESIGN_IMAGES.discoverHero} tagline={t('tagline')} priority>
           <form role="search" onSubmit={onSubmit} className="flex max-w-xl items-center gap-2 rounded-full border border-border-subtle bg-surface-default p-1.5 pl-4 shadow-sm focus-within:border-border-brand">
@@ -158,11 +108,7 @@ export function DiscoverView() {
             </div>
           </div>
           <div className="min-w-0 space-y-5 lg:col-start-1 lg:row-start-1" data-testid="discover-sections" aria-label={tRefine('title')}>
-            {showForYou && <RecommendedOpportunitiesSection items={forYouShown} expanded={filtered} onViewAll={() => update({ cat: ['forYou'] })} />}
-            {(overview || latestView) && <LatestSection entries={mixShown} expanded={latestView} onViewAll={mix.length > SMALLEST_ROW ? () => update({ cat: ['latest'] }) : undefined} />}
-            {visible.map((k, i) => (
-              <div key={`${k}-${shown}-${location}-${sort}`} className="empty:hidden">{i < EAGER_SECTIONS ? renderSection(k) : <LazyMount root={scrollEl} minHeight={120}>{renderSection(k)}</LazyMount>}</div>
-            ))}
+            <DiscoverFeed categories={categories} location={location} sort={sort} />
           </div>
         </div>
       </div>

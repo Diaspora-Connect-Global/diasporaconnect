@@ -5039,6 +5039,13 @@
       "title": "Need help getting something done in Africa?",
       "body": "Find service providers for legal work, property, construction and more.",
       "cta": "Browse services"
+    },
+    "feed": {
+      "title": "Everything on DiaspoPlug",
+      "subtitle": "Opportunities, events, services and products from people, communities, associations and the platform. Use the filters to narrow the list.",
+      "loadMore": "Load more",
+      "loading": "Loading…",
+      "end": "That is everything for now."
     }
   },
   "eventPage": {

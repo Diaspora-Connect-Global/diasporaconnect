@@ -5039,6 +5039,13 @@
       "title": "Hulp nodig om iets geregeld te krijgen in Afrika?",
       "body": "Vind aanbieders voor juridische zaken, vastgoed, bouw en meer.",
       "cta": "Bekijk diensten"
+    },
+    "feed": {
+      "title": "Alles op DiaspoPlug",
+      "subtitle": "Kansen, evenementen, diensten en producten van mensen, gemeenschappen, verenigingen en het platform. Gebruik de filters om de lijst te verkleinen.",
+      "loadMore": "Meer laden",
+      "loading": "Laden…",
+      "end": "Dat is alles voor nu."
     }
   },
   "eventPage": {
