@@ -42,3 +42,13 @@ test('appendUnique keeps order and skips ids already shown', () => {
   const out = appendUnique([{ id: 'a' }, { id: 'b' }], [{ id: 'b' }, null, { id: 'c' }, { id: 'c' }]);
   expect(out.map((e) => e.id)).toEqual(['a', 'b', 'c']);
 });
+
+// The RSVP handler and the "Cancel registration" buttons all gate on isEventOpen.
+test('isEventOpen gates attendance changes: ended, completed and cancelled events are closed', () => {
+  expect(isEventOpen({ status: 'PUBLISHED', startAt: h(-5), endAt: h(-1) }, now)).toBe(false);
+  expect(isEventOpen({ status: 'COMPLETED', startAt: h(1), endAt: h(3) }, now)).toBe(false);
+  expect(isEventOpen({ status: 'cancelled', startAt: h(1), endAt: h(3) }, now)).toBe(false);
+  expect(isEventOpen({ status: 'PUBLISHED', startAt: h(-1), endAt: h(2) }, now)).toBe(true);
+  expect(isEventOpen({ status: 'PUBLISHED', startAt: h(24), endAt: h(26) }, now)).toBe(true);
+  expect(isEventOpen(null, now)).toBe(false);
+});

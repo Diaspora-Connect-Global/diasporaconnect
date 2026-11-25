@@ -8,6 +8,7 @@ import { CalendarPlus, Download, Ticket } from 'lucide-react';
 import { Link } from '@/i18n/navigation';
 import { ButtonType1, ButtonType3 } from '@/components/custom/button';
 import { ConfirmationModal } from '@/components/custom/confirmationModal';
+import { isEventCancelled, isEventOver } from '@/lib/eventTiming';
 import { CANCEL_REGISTRATION, type CancelRegistrationData } from '@/services/gql/events';
 import type { EventPageEvent } from '@/services/gql/eventsM2';
 import { buildGoogleCalendarUrl, downloadIcs, formatInZone, timezoneLabel, type CalendarEvent } from '@/lib/eventCalendar';
@@ -44,8 +45,12 @@ export default function MyEventTab({
   const registrationId = event.myRegistrationId;
   const zone = timezoneLabel(event.startAt, locale, event.timezone);
 
+  const cancelledEvent = isEventCancelled(event);
+  const endedEvent = !cancelledEvent && isEventOver(event);
+  const eventClosed = cancelledEvent || endedEvent;
+
   const doCancel = async () => {
-    if (!registrationId) return;
+    if (!registrationId || eventClosed) return;
     try {
       const res = await cancel({ variables: { registrationId } });
       if (!res.data?.cancelRegistration || hasErrors(res)) {
@@ -116,10 +121,15 @@ export default function MyEventTab({
               </button>
             </>
           )}
-          {registrationId && (state === 'confirmed' || state === 'pendingApproval' || state === 'waitlisted' || state === 'awaitingPayment') && (
+          {registrationId && !eventClosed && (state === 'confirmed' || state === 'pendingApproval' || state === 'waitlisted' || state === 'awaitingPayment') && (
             <ButtonType3 onClick={() => setConfirmOpen(true)} className="text-text-danger">{t('cancel')}</ButtonType3>
           )}
         </div>
+        {eventClosed && (
+          <p role="status" data-testid="my-event-closed" className="text-sm text-text-secondary">
+            {cancelledEvent ? t('cancelledRegistered') : t('endedRegistered')}
+          </p>
+        )}
       </section>
 
       <ConfirmationModal

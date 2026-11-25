@@ -1028,7 +1028,9 @@
           "ended": "Ended",
           "cancelled": "Cancelled",
           "endedNote": "This event has ended. Registration is closed.",
-          "cancelledNote": "This event was cancelled. Registration is closed."
+          "cancelledNote": "This event was cancelled. Registration is closed.",
+          "endedRegistered": "This event has ended. You were registered.",
+          "cancelledRegistered": "This event was cancelled. You were registered."
         },
         "calendar": {
           "title": "Events Calendar",
@@ -1091,7 +1093,9 @@
           "toastGoing": "You're going to this event.",
           "toastInterested": "Marked as interested.",
           "toastNotGoing": "Marked as not going.",
-          "back": "Back to Events"
+          "back": "Back to Events",
+          "statusEnded": "Ended",
+          "statusCancelled": "Cancelled"
         },
         "errors": {
           "unknown_error": "An error occurred. Please try again.",
@@ -5305,7 +5309,9 @@
       "cancelBody": "You'll give up your place. You can register again later if the event still has room.",
       "cancelConfirm": "Cancel registration",
       "keep": "Keep my place",
-      "cancelled": "Your registration was cancelled."
+      "cancelled": "Your registration was cancelled.",
+      "endedRegistered": "This event has ended. You were registered.",
+      "cancelledRegistered": "This event was cancelled. You were registered."
     },
     "errors": {
       "featureUnavailable": "This isn't available yet.",

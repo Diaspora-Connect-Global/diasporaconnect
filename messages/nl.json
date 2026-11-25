@@ -1028,7 +1028,9 @@
           "ended": "Afgelopen",
           "cancelled": "Geannuleerd",
           "endedNote": "Dit evenement is afgelopen. Aanmelden is gesloten.",
-          "cancelledNote": "Dit evenement is geannuleerd. Aanmelden is gesloten."
+          "cancelledNote": "Dit evenement is geannuleerd. Aanmelden is gesloten.",
+          "endedRegistered": "Dit evenement is afgelopen. Je was aangemeld.",
+          "cancelledRegistered": "Dit evenement is geannuleerd. Je was aangemeld."
         },
         "calendar": {
           "title": "Events Calendar",
@@ -1091,7 +1093,9 @@
           "toastGoing": "You're going to this event.",
           "toastInterested": "Marked as interested.",
           "toastNotGoing": "Marked as not going.",
-          "back": "Back to Events"
+          "back": "Back to Events",
+          "statusEnded": "Afgelopen",
+          "statusCancelled": "Geannuleerd"
         },
         "errors": {
           "unknown_error": "Er is een fout opgetreden. Probeer het later opnieuw.",
@@ -5305,7 +5309,9 @@
       "cancelBody": "U geeft uw plaats op. U kunt zich later opnieuw inschrijven als er nog plaats is.",
       "cancelConfirm": "Inschrijving annuleren",
       "keep": "Mijn plaats behouden",
-      "cancelled": "Uw inschrijving is geannuleerd."
+      "cancelled": "Uw inschrijving is geannuleerd.",
+      "endedRegistered": "Dit evenement is afgelopen. Je was aangemeld.",
+      "cancelledRegistered": "Dit evenement is geannuleerd. Je was aangemeld."
     },
     "errors": {
       "featureUnavailable": "Dit is nog niet beschikbaar.",

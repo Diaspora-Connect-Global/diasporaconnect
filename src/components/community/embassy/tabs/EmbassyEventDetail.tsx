@@ -381,6 +381,8 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
 
   async function handleCancel() {
     if (!event?.myRegistrationId) return;
+    // Nothing to give up once the event is over or cancelled.
+    if (isEventOver(event) || isEventCancelled(event)) return;
     try {
       const res = await cancelMutation({ variables: { registrationId: event.myRegistrationId } });
 
@@ -691,7 +693,11 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
               {/* Action buttons */}
               <div className="mt-5 flex flex-wrap items-center gap-2">
                 {/* 1 — Register (free inline / paid link / waitlist / full) */}
-                {registered ? (
+                {registered && (ended || cancelled) ? (
+                  <p role="status" data-testid="registered-event-closed" className="label-medium inline-flex items-center gap-1.5 rounded-lg bg-surface-subtle px-4 py-2.5 text-text-secondary">
+                    {cancelled ? t('cancelledRegistered') : t('endedRegistered')}
+                  </p>
+                ) : registered ? (
                   <>
                     <span className="label-medium inline-flex items-center gap-1.5 rounded-lg bg-green-50 px-4 py-2.5 text-green-600">
                       <CheckCircle className="size-4" aria-hidden />

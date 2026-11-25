@@ -10,6 +10,7 @@ import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import LeavingSiteDialog from '@/components/events/page/LeavingSiteDialog';
 import { registrationRoute } from '@/lib/eventRegistrationForm';
 import { httpUrlOrNull } from '@/lib/safeUrl';
+import { isEventCancelled, isEventOpen } from '@/lib/eventTiming';
 import { readMutationOutcome, refusalMessageKey } from '@/lib/mutationOutcome';
 import {
   Search,
@@ -435,6 +436,8 @@ export function EmbassyEventsCalendar({ community, profile }: Props) {
   // ── My status (RSVP) ───────────────────────────────────────────────────────
 
   async function handleStatus(evt: OwnerEvent, status: RsvpStatus) {
+    // An event that has ended or been cancelled takes no attendance changes, whatever calls this.
+    if (!isEventOpen(evt)) return;
     // An event with its own questions, or one that registers on another website, is never
     // registered from here: send the person where the form (or the leaving notice) is.
     if (status === 'going') {
@@ -1151,7 +1154,12 @@ function SelectedEventCard({
           </Link>
         )}
 
-        {/* My status */}
+        {/* My status: an event that is over or cancelled has none to set. */}
+        {!isEventOpen(event) ? (
+          <p role="status" data-testid="calendar-event-closed" className="label-medium rounded-lg bg-surface-subtle px-4 py-2 text-center text-text-secondary">
+            {isEventCancelled(event) ? t('statusCancelled') : t('statusEnded')}
+          </p>
+        ) : (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
@@ -1173,6 +1181,7 @@ function SelectedEventCard({
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+        )}
 
         {/* Add to calendar */}
         <div>
