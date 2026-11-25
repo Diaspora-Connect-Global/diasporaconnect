@@ -8,6 +8,7 @@ import { CATEGORY_PHOTOS } from '@/lib/redesignImages';
 import { formatMoney } from '@/types/money';
 import { getEventCoverImage, getEventLocationDisplay, isEventSoldOut, type Event } from '@/services/gql/events';
 import { eventFormat } from '@/lib/eventFormat';
+import { isEventCancelled, isEventOver } from '@/lib/eventTiming';
 
 /** "Free", one ticket price, or "From <lowest>" when tickets differ. Prices are integer minor units. */
 export function useEventPrice() {
@@ -73,11 +74,14 @@ export function EventListingCard({
   const soldOut = isEventSoldOut(event);
   const going = event.registrationCount ?? 0;
   const restricted = event.visibility && String(event.visibility).toLowerCase() !== 'public';
+  const cancelled = isEventCancelled(event);
+  const ended = !cancelled && isEventOver(event);
+  const closed = cancelled || ended;
   const href = `/events/${encodeURIComponent(event.id)}`;
   const btn = 'inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60';
 
   return (
-    <article data-testid="event-card" className="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border-subtle bg-surface-default shadow-sm transition-[border-color,box-shadow] hover:border-border-brand hover:shadow-md">
+    <article data-testid="event-card" data-ended={closed ? 'true' : undefined} className={`flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border-subtle bg-surface-default shadow-sm transition-[border-color,box-shadow] hover:border-border-brand hover:shadow-md ${closed ? 'bg-surface-subtle' : ''}`}>
       <Link href={href} prefetch={false} className="group flex min-w-0 flex-1 flex-col focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-text-brand">
         <div className="relative aspect-[16/9] w-full overflow-hidden bg-surface-subtle">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -85,7 +89,7 @@ export function EventListingCard({
           <span className="absolute left-3 top-3">
             <DateTile iso={event.startAt} />
           </span>
-          <span className="absolute right-3 top-3 rounded-full bg-surface-default/95 px-2.5 py-1 text-xs font-semibold text-text-primary shadow-sm">{priceOf(event)}</span>
+          <span className="absolute right-3 top-3 rounded-full bg-surface-default/95 px-2.5 py-1 text-xs font-semibold text-text-primary shadow-sm">{closed ? t(cancelled ? 'cancelled' : 'ended') : priceOf(event)}</span>
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-1 p-4 pb-3">
           <h3 className="line-clamp-2 text-base font-semibold leading-snug text-text-primary">{event.title}</h3>
@@ -110,6 +114,9 @@ export function EventListingCard({
           </p>
         </div>
       </Link>
+      {closed ? (
+        <p className="px-4 pb-4 text-xs font-medium text-text-secondary">{t(cancelled ? 'cancelledNote' : 'endedNote')}</p>
+      ) : (
       <div className="flex items-center gap-2 px-4 pb-4">
         <button
           type="button"
@@ -143,6 +150,7 @@ export function EventListingCard({
           </button>
         )}
       </div>
+      )}
     </article>
   );
 }

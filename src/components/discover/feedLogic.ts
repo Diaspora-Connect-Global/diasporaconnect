@@ -1,3 +1,4 @@
+import { isEventOver } from '@/lib/eventTiming';
 import { DISCOVER_CATEGORY_KEYS, OPPORTUNITY_SOURCES, isOpportunityKey, type DiscoverCategoryKey } from './discoverCategories';
 
 /** The four kinds of content Discover lists. */
@@ -87,7 +88,7 @@ export function upcomingEvents<E extends { id: string; status?: string | null; s
   return events
     .filter((e): e is E => !!e && !!e.id && !!e.startAt)
     .filter((e) => !['cancelled', 'draft'].includes(String(e.status).toLowerCase()))
-    .filter((e) => (when(e.endAt || e.startAt) ?? 0) > now)
+    .filter((e) => !isEventOver(e, now))
     .filter((e) => !needle || placeOf(e).toLowerCase().includes(needle))
     .sort((a, b) => (when(a.startAt) ?? 0) - (when(b.startAt) ?? 0));
 }

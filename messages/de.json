@@ -1021,7 +1021,11 @@
           "inviteCopy": "Copy invite message",
           "toastInviteCopied": "Invite message copied",
           "registrationClosed": "Registration not open",
-          "toastNotAccepting": "This event isn't open for registration yet."
+          "toastNotAccepting": "This event isn't open for registration yet.",
+          "ended": "Beendet",
+          "cancelled": "Abgesagt",
+          "endedNote": "Diese Veranstaltung ist beendet. Die Anmeldung ist geschlossen.",
+          "cancelledNote": "Diese Veranstaltung wurde abgesagt. Die Anmeldung ist geschlossen."
         },
         "calendar": {
           "title": "Events Calendar",
@@ -5599,7 +5603,9 @@
       "FLEXIBLE": "Flexibel",
       "PROJECT_BASED": "Projektbasiert",
       "ONGOING": "Fortlaufend"
-    }
+    },
+    "eventEnded": "Beendet",
+    "eventCancelled": "Abgesagt"
   },
   "homePage": {
     "greeting": {
@@ -6729,7 +6735,18 @@
     "membersOnly": "Nur für Mitglieder",
     "moreActions": "Weitere Aktionen",
     "showPast": "Vergangene Events ({count})",
-    "hidePast": "Vergangene Events ausblenden"
+    "hidePast": "Vergangene Events ausblenden",
+    "ended": "Beendet",
+    "cancelled": "Abgesagt",
+    "endedNote": "Diese Veranstaltung ist beendet.",
+    "cancelledNote": "Diese Veranstaltung wurde abgesagt.",
+    "past": "Vergangene Veranstaltungen",
+    "pastHint": "Veranstaltungen, die bereits stattgefunden haben. Die Anmeldung ist geschlossen.",
+    "noPast": "Noch keine vergangenen Veranstaltungen.",
+    "pastLoading": "Vergangene Veranstaltungen werden geladen …",
+    "pastError": "Vergangene Veranstaltungen konnten nicht geladen werden.",
+    "pastRetry": "Erneut versuchen",
+    "pastMore": "Mehr anzeigen"
   },
   "peoplePage": {
     "metaTitle": "Personen",

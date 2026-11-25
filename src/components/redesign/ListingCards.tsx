@@ -12,6 +12,7 @@ import { toCdnUrl } from '@/lib/cdn';
 import { formatMoney } from '@/types/money';
 import { getEventCoverImage, getEventLocationDisplay, type Event } from '@/services/gql/events';
 import type { OpportunityItem, ProductItem, ServiceItem } from '@/hooks/redesign/useFreshListings';
+import { isEventCancelled, isEventOver } from '@/lib/eventTiming';
 import { compensationParts } from '@/lib/compensation';
 import type { MoreTone } from '@/components/more/moreLinks';
 
@@ -163,6 +164,8 @@ export function EventTile({ event, testId }: { event: Event; testId?: string }) 
   const format = useFormatter();
   const cover = event.coverImageUrl?.trim() ? getEventCoverImage(event) : null;
   const start = new Date(event.startAt);
+  const cancelled = isEventCancelled(event);
+  const ended = !cancelled && isEventOver(event);
   return (
     <MediaCard
       testId={testId}
@@ -171,7 +174,7 @@ export function EventTile({ event, testId }: { event: Event; testId?: string }) 
       fallbackPhoto={CATEGORY_PHOTOS.event.src}
       fallbackIcon={CalendarDays}
       tone="danger"
-      tag={t('kinds.event')}
+      tag={cancelled ? t('eventCancelled') : ended ? t('eventEnded') : t('kinds.event')}
       title={event.title}
       meta={
         <>

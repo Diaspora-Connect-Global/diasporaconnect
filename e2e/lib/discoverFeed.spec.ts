@@ -50,6 +50,7 @@ test('events: past, cancelled and draft ones are dropped, the place text filters
     ev('running', '2026-11-24T09:00:00Z', 'published', 'Accra', '2026-11-24T18:00:00Z'),
     ev('cancelled', '2026-12-01T10:00:00Z', 'CANCELLED'),
     ev('draft', '2026-12-02T10:00:00Z', 'draft'),
+    ev('completed', '2026-12-04T10:00:00Z', 'completed'),
     ev('berlin', '2026-12-03T10:00:00Z', 'published', 'Berlin'),
   ];
   const place = (e: { city: string }) => e.city;

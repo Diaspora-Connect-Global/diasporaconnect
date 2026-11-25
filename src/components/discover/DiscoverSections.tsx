@@ -7,6 +7,7 @@ import { Section } from '@/components/redesign/Section';
 import { SectionHeader } from '@/components/redesign/SectionHeader';
 import { EventTile, JobCard, OpportunityCard, ProductCard, ServiceCard } from '@/components/redesign/ListingCards';
 import { useFeaturedProducts, useFeaturedServices, useOpportunities, type OpportunityItem, type OpportunitySortBy } from '@/hooks/redesign/useFreshListings';
+import { isEventOpen } from '@/lib/eventTiming';
 import { LIST_EVENTS, getEventLocationDisplay, type Event, type ListEventsData } from '@/services/gql/events';
 import {
   RECOMMENDED_EVENTS,
@@ -170,8 +171,8 @@ export function EventsSection({ shown, expanded, onViewAll, location }: Common &
     const needle = location.trim().toLowerCase();
     return (data?.listEvents?.events ?? [])
       .filter((e): e is Event => !!e && !!e.id && !!e.startAt)
-      .filter((e) => !['cancelled', 'draft'].includes(String(e.status).toLowerCase()))
-      .filter((e) => new Date(e.endAt || e.startAt).getTime() > now)
+      .filter((e) => String(e.status).toLowerCase() !== 'draft')
+      .filter((e) => isEventOpen(e, now))
       .filter((e) => !needle || getEventLocationDisplay(e).toLowerCase().includes(needle))
       .sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime())
       .slice(0, shown);
@@ -213,7 +214,7 @@ export function useForYou(perKind: number, enabled: boolean, kinds: readonly For
     );
     const kinds: MixEntry[][] = [
       (events.data?.recommendedEvents ?? [])
-        .filter((r): r is { event: Event; reasons?: string[] | null } => !!r?.event?.id && !!r.event.startAt)
+        .filter((r): r is { event: Event; reasons?: string[] | null } => !!r?.event?.id && !!r.event.startAt && isEventOpen(r.event))
         .map((r) => ({ id: r.event.id, node: withReasons(<EventTile event={r.event} testId="discover-foryou-events" />, r.reasons) })),
       (opps.data?.recommendedOpportunities?.opportunities ?? [])
         .filter((o): o is OpportunityItem & { reasons?: string[] | null } => !!o?.id && !!o.title)

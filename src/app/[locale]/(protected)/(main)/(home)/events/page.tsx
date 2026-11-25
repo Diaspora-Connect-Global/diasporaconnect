@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
-import { CalendarDays, Plus, Search } from "lucide-react";
+import { CalendarDays, ChevronDown, Plus, Search } from "lucide-react";
 import PaidEventsModal, { PaidEventsModalRef } from "@/components/events/modals/paidEventsModal";
 import { useLazyQuery, useMutation, useQuery } from '@apollo/client/react';
 import {
@@ -43,10 +43,13 @@ import { EmptyState } from '@/components/feedback';
 import { CATEGORY_PHOTOS } from '@/lib/redesignImages';
 import { DateTile, EventListingCard } from '@/components/events/redesign/EventListingCard';
 import { eventFormat } from '@/lib/eventFormat';
+import { appendUnique, isEventOver, openEventsSoonestFirst } from '@/lib/eventTiming';
 import { ForYouRail } from '@/components/discover/DiscoverSections';
 
 type Filter = 'all' | 'free' | 'paid' | 'inPerson' | 'online';
 const FILTERS: Filter[] = ['all', 'free', 'paid', 'inPerson', 'online'];
+const PAGE_SIZE = 20;
+const noop = () => {};
 
 function matchesFilter(e: Event, f: Filter) {
     const where = eventFormat(e.locationType);
@@ -112,8 +115,37 @@ export default function Events() {
 
     // Discovery feed — listEvents replaces searchEvents
     const { data: eventsData, loading: eventsLoading } = useQuery<ListEventsData>(LIST_EVENTS, {
-        variables: { input: { limit: 20, offset: 0 } },
+        variables: { input: { limit: PAGE_SIZE, offset: 0, timeframe: "UPCOMING" } },
     });
+
+    // Past-events archive: nothing is fetched until it is opened.
+    const [archiveOpen, setArchiveOpen] = useState(false);
+    const [pastEvents, setPastEvents] = useState<Event[]>([]);
+    const [pastHasMore, setPastHasMore] = useState(false);
+    const [pastLoading, setPastLoading] = useState(false);
+    const [pastFailed, setPastFailed] = useState(false);
+    const [pastLoaded, setPastLoaded] = useState(false);
+    const [fetchPast] = useLazyQuery<ListEventsData>(LIST_EVENTS, { fetchPolicy: "network-only" });
+    const loadPast = async (offset: number) => {
+        setPastLoading(true);
+        setPastFailed(false);
+        try {
+            const { data } = await fetchPast({ variables: { input: { limit: PAGE_SIZE, offset, timeframe: "PAST" } } });
+            const page = data?.listEvents?.events ?? [];
+            setPastEvents((prev) => appendUnique(offset === 0 ? [] : prev, page));
+            setPastHasMore(Boolean(data?.listEvents?.hasMore));
+            setPastLoaded(true);
+        } catch {
+            setPastFailed(true);
+        } finally {
+            setPastLoading(false);
+        }
+    };
+    const toggleArchive = () => {
+        const next = !archiveOpen;
+        setArchiveOpen(next);
+        if (next && !pastLoaded && !pastLoading) void loadPast(0);
+    };
 
     const [registerForEvent] = useMutation<RegisterEventData>(REGISTER_EVENT, {
         refetchQueries: [{ query: USER_EVENTS }],
@@ -324,9 +356,7 @@ export default function Events() {
     const attendingEvents = userEventsData?.userEvents?.attending ?? [];
     const savedEvents = userEventsData?.userEvents?.saved ?? [];
     const allEvents = useMemo(
-        () => (eventsData?.listEvents?.events ?? []).filter(
-            (e) => e.status !== 'completed' && new Date(e.endAt) >= new Date()
-        ),
+        () => openEventsSoonestFirst(eventsData?.listEvents?.events ?? []),
         [eventsData]
     );
     const attendingEventIds = useMemo(() => {
@@ -369,19 +399,16 @@ export default function Events() {
     }, [attendingEvents, allEvents, attendingEventIds]);
 
     const upcomingAttending = useMemo(
-        () => attendingEventsToRender.filter((e) => e.status !== 'completed' && new Date(e.endAt) >= new Date()),
+        () => attendingEventsToRender.filter((e) => !isEventOver(e)),
         [attendingEventsToRender]
     );
     const pastAttending = useMemo(
-        () => attendingEventsToRender.filter((e) => e.status === 'completed' || new Date(e.endAt) < new Date()),
+        () => attendingEventsToRender.filter((e) => isEventOver(e)),
         [attendingEventsToRender]
     );
 
     // Everything still to come, soonest first. Events you are going to stay in the grid, marked "Attending".
-    const upcoming = useMemo(
-        () => [...allEvents].sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime()),
-        [allEvents]
-    );
+    const upcoming = allEvents;
     const needle = search.trim().toLowerCase();
     const shown = useMemo(
         () => upcoming.filter((e) => matchesFilter(e, filter) && (!needle || `${e.title} ${getEventLocationDisplay(e)}`.toLowerCase().includes(needle))),
@@ -523,6 +550,53 @@ export default function Events() {
                                 </ul>
                             </div>
                         )}
+                    </section>
+
+                    <section aria-labelledby="past-events-title" data-testid="past-events" className="min-w-0 rounded-2xl border border-border-subtle bg-surface-default p-5 shadow-sm lg:col-start-1">
+                        <h2 id="past-events-title" className="text-base font-bold text-text-secondary">
+                            <button
+                                type="button"
+                                onClick={toggleArchive}
+                                aria-expanded={archiveOpen}
+                                aria-controls="past-events-panel"
+                                className="flex w-full items-center justify-between gap-3 rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
+                            >
+                                <span>{tPage("past")}</span>
+                                <ChevronDown className={`size-4 shrink-0 transition-transform ${archiveOpen ? "rotate-180" : ""}`} aria-hidden />
+                            </button>
+                        </h2>
+                        <div id="past-events-panel" hidden={!archiveOpen}>
+                            {archiveOpen && (
+                                <div className="mt-3">
+                                    <p className="text-sm text-text-secondary">{tPage("pastHint")}</p>
+                                    {pastFailed && <p role="alert" className="mt-3 text-sm text-text-danger">{tPage("pastError")}</p>}
+                                    {pastLoaded && pastEvents.length === 0 && !pastFailed && (
+                                        <div className="py-6"><EmptyState size="sm" icon={CalendarDays} title={tPage("noPast")} /></div>
+                                    )}
+                                    {pastEvents.length > 0 && (
+                                        <div className="@container mt-4">
+                                            <ul className="grid grid-cols-1 gap-4 @[34rem]:grid-cols-2 @[54rem]:grid-cols-3">
+                                                {pastEvents.map((event) => (
+                                                    <li key={event.id} className="min-w-0">
+                                                        <EventListingCard event={event} isSaved={false} isRegistered={false} onAttend={noop} onSave={noop} onCancelAttend={noop} />
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                    {pastLoading && <p role="status" className="mt-3 text-sm text-text-secondary">{tPage("pastLoading")}</p>}
+                                    {!pastLoading && (pastHasMore || pastFailed) && (
+                                        <button
+                                            type="button"
+                                            onClick={() => void loadPast(pastEvents.length)}
+                                            className="mt-4 min-h-9 rounded-full border border-border-subtle px-4 text-sm font-semibold text-text-primary hover:bg-surface-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-brand"
+                                        >
+                                            {pastFailed ? tPage("pastRetry") : tPage("pastMore")}
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </section>
                 </div>
             </div>

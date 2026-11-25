@@ -8,6 +8,7 @@ import { useSearchParams } from 'next/navigation';
 import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import LeavingSiteDialog from '@/components/events/page/LeavingSiteDialog';
 import { registrationRoute } from '@/lib/eventRegistrationForm';
+import { isEventCancelled, isEventOver } from '@/lib/eventTiming';
 import { httpUrlOrNull } from '@/lib/safeUrl';
 import { readMutationOutcome, refusalMessageKey } from '@/lib/mutationOutcome';
 import Image from 'next/image';
@@ -344,7 +345,7 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
     // Defence in depth: never fire the mutation unless the event is open (or the
     // user is joining the waitlist). The disabled button states normally prevent
     // reaching here, but guard regardless of how this is invoked.
-    if (String(event.status).toUpperCase() !== 'PUBLISHED') {
+    if (String(event.status).toUpperCase() !== 'PUBLISHED' || isEventOver(event)) {
       toast.error(t('toastNotAccepting'));
       return;
     }
@@ -544,7 +545,10 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
   const isFull = hasCapacity && event.availableSpots != null && event.availableSpots <= 0;
   // The backend `status` is uppercase (DRAFT | PUBLISHED | CANCELLED | COMPLETED);
   // compare case-insensitively since the local TS type is lowercase.
-  const isPublished = String(event.status).toUpperCase() === 'PUBLISHED';
+  // An event that has ended is never open, whatever its status still says.
+  const cancelled = isEventCancelled(event);
+  const ended = !cancelled && isEventOver(event);
+  const isPublished = String(event.status).toUpperCase() === 'PUBLISHED' && !ended;
   // Only open for registration when published, the backend hasn't explicitly
   // refused, and there's room. `canRegister` alone is unreliable (it has
   // returned true for DRAFT events), so the published gate is authoritative.
@@ -616,6 +620,12 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
               <h1 className="heading-xsmall text-text-primary">{event.title}</h1>
               {/* Category + price chips */}
               <div className="mt-2 flex flex-wrap items-center gap-2">
+                {(ended || cancelled) && (
+                  <span className="caption-small inline-flex items-center gap-1 rounded-full bg-surface-subtle px-2 py-0.5 font-semibold text-text-secondary">
+                    <Info className="size-3" aria-hidden />
+                    {ended ? t('ended') : t('cancelled')}
+                  </span>
+                )}
                 {event.eventCategory && (
                   <span className={`caption-small inline-flex items-center gap-1 rounded-full px-2 py-0.5 ${catRing} ${catFg}`}>
                     {event.eventCategory}
@@ -672,6 +682,12 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
                 />
               </div>
 
+              {(ended || cancelled) && (
+                <p role="status" className="body-small mt-4 rounded-lg bg-surface-subtle px-3 py-2 text-text-secondary">
+                  {ended ? t('endedNote') : t('cancelledNote')}
+                </p>
+              )}
+
               {/* Action buttons */}
               <div className="mt-5 flex flex-wrap items-center gap-2">
                 {/* 1 — Register (free inline / paid link / waitlist / full) */}
@@ -698,7 +714,7 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
                     className="label-medium inline-flex cursor-not-allowed items-center gap-1.5 rounded-lg bg-surface-subtle px-4 py-2.5 text-text-secondary opacity-80"
                   >
                     <Info className="size-4" aria-hidden />
-                    {t('registrationClosed')}
+                    {ended ? t('ended') : cancelled ? t('cancelled') : t('registrationClosed')}
                   </button>
                 ) : showEventFull ? (
                   <button

@@ -1024,7 +1024,11 @@
           "inviteCopy": "Copy invite message",
           "toastInviteCopied": "Invite message copied",
           "registrationClosed": "Registration not open",
-          "toastNotAccepting": "This event isn't open for registration yet."
+          "toastNotAccepting": "This event isn't open for registration yet.",
+          "ended": "Afgelopen",
+          "cancelled": "Geannuleerd",
+          "endedNote": "Dit evenement is afgelopen. Aanmelden is gesloten.",
+          "cancelledNote": "Dit evenement is geannuleerd. Aanmelden is gesloten."
         },
         "calendar": {
           "title": "Events Calendar",
@@ -5599,7 +5603,9 @@
       "FLEXIBLE": "Flexibel",
       "PROJECT_BASED": "Projectmatig",
       "ONGOING": "Doorlopend"
-    }
+    },
+    "eventEnded": "Afgelopen",
+    "eventCancelled": "Geannuleerd"
   },
   "homePage": {
     "greeting": {
@@ -6729,7 +6735,18 @@
     "membersOnly": "Alleen voor leden",
     "moreActions": "Meer acties",
     "showPast": "Eerdere evenementen ({count})",
-    "hidePast": "Eerdere evenementen verbergen"
+    "hidePast": "Eerdere evenementen verbergen",
+    "ended": "Afgelopen",
+    "cancelled": "Geannuleerd",
+    "endedNote": "Dit evenement is afgelopen.",
+    "cancelledNote": "Dit evenement is geannuleerd.",
+    "past": "Afgelopen evenementen",
+    "pastHint": "Evenementen die al hebben plaatsgevonden. Aanmelden is gesloten.",
+    "noPast": "Nog geen afgelopen evenementen.",
+    "pastLoading": "Afgelopen evenementen laden…",
+    "pastError": "Afgelopen evenementen konden niet worden geladen.",
+    "pastRetry": "Opnieuw proberen",
+    "pastMore": "Meer tonen"
   },
   "peoplePage": {
     "metaTitle": "Mensen",

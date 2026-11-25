@@ -1021,7 +1021,11 @@
           "inviteCopy": "Copy invite message",
           "toastInviteCopied": "Invite message copied",
           "registrationClosed": "Registration not open",
-          "toastNotAccepting": "This event isn't open for registration yet."
+          "toastNotAccepting": "This event isn't open for registration yet.",
+          "ended": "Concluso",
+          "cancelled": "Annullato",
+          "endedNote": "Questo evento è concluso. Le iscrizioni sono chiuse.",
+          "cancelledNote": "Questo evento è stato annullato. Le iscrizioni sono chiuse."
         },
         "calendar": {
           "title": "Events Calendar",
@@ -5599,7 +5603,9 @@
       "FLEXIBLE": "Flessibile",
       "PROJECT_BASED": "A progetto",
       "ONGOING": "Continuativo"
-    }
+    },
+    "eventEnded": "Concluso",
+    "eventCancelled": "Annullato"
   },
   "homePage": {
     "greeting": {
@@ -6729,7 +6735,18 @@
     "membersOnly": "Solo membri",
     "moreActions": "Altre azioni",
     "showPast": "Eventi passati ({count})",
-    "hidePast": "Nascondi eventi passati"
+    "hidePast": "Nascondi eventi passati",
+    "ended": "Concluso",
+    "cancelled": "Annullato",
+    "endedNote": "Questo evento è concluso.",
+    "cancelledNote": "Questo evento è stato annullato.",
+    "past": "Eventi passati",
+    "pastHint": "Eventi che si sono già svolti. Le iscrizioni sono chiuse.",
+    "noPast": "Ancora nessun evento passato.",
+    "pastLoading": "Caricamento degli eventi passati…",
+    "pastError": "Impossibile caricare gli eventi passati.",
+    "pastRetry": "Riprova",
+    "pastMore": "Mostra altro"
   },
   "peoplePage": {
     "metaTitle": "Persone",
