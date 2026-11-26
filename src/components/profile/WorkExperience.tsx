@@ -310,7 +310,7 @@ export default function WorkExperiencePage({ userId, isOwnProfile  }: WorkExperi
                             {skills.map((skill) => (
                                 <span
                                     key={skill.id}
-                                    className={`px-2 py-1 text-text-brand text-center border rounded-xl text-sm font-medium ${
+                                    className={`px-2 py-1 max-w-full break-words text-text-brand text-center border rounded-xl text-sm font-medium ${
                                         isOwnProfile ? 'cursor-pointer hover:bg-gray-50' : ''
                                     }`}
                                     onClick={isOwnProfile ? () => handleRemoveSkillClick(skill.id) : undefined}
@@ -362,11 +362,11 @@ export default function WorkExperiencePage({ userId, isOwnProfile  }: WorkExperi
                             {experiences.map((exp, idx) => (
                                 <Fragment key={idx}>
                                     <AccordionItem className='border-b-0' key={exp.id} value={exp.id}>
-                                        <h3 className="text-lg font-semibold text-text-primary">{exp.company}</h3>
+                                        <h3 className="text-lg font-semibold text-text-primary break-words">{exp.company}</h3>
                                         <AccordionTrigger className="hover:no-underline">
-                                            <div className="flex justify-between items-start text-left">
-                                                <div>
-                                                    <p className='space-x-2'>
+                                            <div className="flex min-w-0 justify-between items-start text-left">
+                                                <div className="min-w-0">
+                                                    <p className='space-x-2 break-words'>
                                                         <span className="text-text-primary">
                                                             {exp.role} 
                                                         </span> 
@@ -378,7 +378,7 @@ export default function WorkExperiencePage({ userId, isOwnProfile  }: WorkExperi
                                             </div>
                                         </AccordionTrigger>
                                         <AccordionContent>
-                                            <p>{exp.description}</p>
+                                            <p className="break-words whitespace-pre-line">{exp.description}</p>
                                         </AccordionContent>
                                     </AccordionItem>
                                     {exp.contract && (

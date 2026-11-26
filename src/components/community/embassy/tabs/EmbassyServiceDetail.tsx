@@ -296,7 +296,7 @@ export function EmbassyServiceDetail({ serviceId, community, profile }: EmbassyS
   return (
     <div className="mx-auto max-w-6xl px-3 py-6 lg:px-6">
       {/* Breadcrumb / back */}
-      <div className="mb-4 flex items-center gap-1 caption-medium text-text-secondary">
+      <div className="mb-4 flex flex-wrap items-center gap-1 caption-medium text-text-secondary">
         <Link
           href={backHref}
           scroll={false}
@@ -322,7 +322,7 @@ export function EmbassyServiceDetail({ serviceId, community, profile }: EmbassyS
                 </span>
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h1 className="heading-xsmall text-text-primary">{service.displayName}</h1>
+                    <h1 className="heading-xsmall break-words text-text-primary">{service.displayName}</h1>
                     {isActive ? (
                       <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 caption-small font-medium text-green-600">
                         <CheckCircle2 className="size-3" aria-hidden />
@@ -335,7 +335,7 @@ export function EmbassyServiceDetail({ serviceId, community, profile }: EmbassyS
                     )}
                   </div>
                   {service.description && (
-                    <p className="body-small mt-1 text-text-secondary">{service.description}</p>
+                    <p className="body-small mt-1 break-words text-text-secondary">{service.description}</p>
                   )}
                 </div>
               </div>
@@ -493,8 +493,8 @@ export function EmbassyServiceDetail({ serviceId, community, profile }: EmbassyS
                             {i + 1}
                           </span>
                           <div className="min-w-0">
-                            <p className="caption-large text-text-primary">{step.title}</p>
-                            <p className="caption-medium text-text-secondary">{step.body}</p>
+                            <p className="caption-large break-words text-text-primary">{step.title}</p>
+                            <p className="caption-medium break-words text-text-secondary">{step.body}</p>
                           </div>
                         </li>
                       ))}

@@ -44,7 +44,7 @@ export default function AboutAssociation({
 
         {/* Description Section */}
         <div>
-          <p className="text-sm text-text-primary">
+          <p className="text-sm text-text-primary break-words">
             {description}
           </p>
         </div>

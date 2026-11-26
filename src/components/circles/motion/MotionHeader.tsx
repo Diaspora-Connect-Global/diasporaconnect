@@ -49,7 +49,7 @@ export function MotionHeader({ motion }: MotionHeaderProps) {
       </div>
 
       {motion.title && (
-        <h1 className="heading-xsmall sm:heading-small text-balance text-text-primary">
+        <h1 className="heading-xsmall sm:heading-small text-balance break-words text-text-primary">
           {motion.title}
         </h1>
       )}

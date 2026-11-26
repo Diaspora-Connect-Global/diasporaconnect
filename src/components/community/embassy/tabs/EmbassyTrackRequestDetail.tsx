@@ -197,7 +197,7 @@ export function EmbassyTrackRequestDetail({
   return (
     <div className="mx-auto max-w-6xl px-3 py-6 lg:px-6">
       {/* Breadcrumb / back */}
-      <div className="mb-4 flex items-center gap-1 caption-medium text-text-secondary">
+      <div className="mb-4 flex flex-wrap items-center gap-1 caption-medium text-text-secondary">
         <Link
           href={backHref}
           scroll={false}
@@ -429,7 +429,7 @@ function StatusTimeline({ request }: { request: ServiceRequestDetail }) {
             <div className="min-w-0 flex-1 pt-0.5">
               <div className="flex flex-wrap items-center gap-2">
                 <p
-                  className={`label-medium ${node.current ? 'text-text-primary' : 'text-text-secondary'}`}
+                  className={`label-medium break-words ${node.current ? 'text-text-primary' : 'text-text-secondary'}`}
                 >
                   {node.label}
                 </p>
@@ -505,7 +505,7 @@ function SubmittedInfo({ formResponsesJson, formFields }: SubmittedInfoProps) {
       {rows.map((row) => (
         <div key={row.label} className="flex items-start justify-between gap-4 py-2.5 first:pt-0 last:pb-0">
           <dt className="caption-medium text-text-secondary">{row.label}</dt>
-          <dd className="caption-large min-w-0 max-w-[60%] text-right text-text-primary">{row.value}</dd>
+          <dd className="caption-large min-w-0 max-w-[60%] break-words text-right text-text-primary">{row.value}</dd>
         </div>
       ))}
     </dl>
@@ -777,8 +777,8 @@ function SupplyInfoSection({ request, formFields, onSupplied }: SupplyInfoSectio
             <div className="min-w-0">
               <p className="caption-large text-text-primary">{t('supply.documentLabel')}</p>
               {file ? (
-                <p className="caption-small mt-0.5 inline-flex items-center gap-1 text-green-600">
-                  <CheckCircle2 className="size-3.5" aria-hidden />
+                <p className="caption-small mt-0.5 inline-flex max-w-full items-center gap-1 break-all text-green-600">
+                  <CheckCircle2 className="size-3.5 shrink-0" aria-hidden />
                   {file.name}
                 </p>
               ) : (

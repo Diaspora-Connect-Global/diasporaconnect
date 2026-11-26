@@ -120,7 +120,7 @@ export function CurrentPlanCard({
       </div>
 
       {plan?.description && (
-        <p className="body-small mt-2 text-text-secondary">{plan.description}</p>
+        <p className="body-small mt-2 break-words text-text-secondary">{plan.description}</p>
       )}
 
       <dl className="mt-4 flex flex-col gap-2">

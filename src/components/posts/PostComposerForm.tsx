@@ -923,7 +923,7 @@ export function PostComposerForm({ variant = 'page', onPosted, onDraftSaved, onD
                           <div className={`p-3 rounded-xl ${bg} mb-2`}>
                             <Icon className={`w-8 h-8 ${color}`} />
                           </div>
-                          <p className="caption-small text-center text-text-secondary line-clamp-2">
+                          <p className="caption-small max-w-full break-all text-center text-text-secondary line-clamp-2">
                             {attachment.name}
                           </p>
                         </div>

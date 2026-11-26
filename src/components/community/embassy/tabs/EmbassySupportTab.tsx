@@ -257,7 +257,7 @@ export function EmbassySupportTab({ community, communityId }: EmbassySupportTabP
                           <Icon className="size-4" aria-hidden />
                         </span>
                         <span className="min-w-0 flex-1">
-                          <span className="label-medium block text-text-primary">
+                          <span className="label-medium block break-words text-text-primary">
                             {topic.displayName}
                           </span>
                           {topic.description && (
@@ -387,7 +387,7 @@ function CaseCard({ kase, detailHref, t }: CaseCardProps) {
               <Icon className="size-5 text-text-brand" aria-hidden />
             </span>
             <div className="min-w-0">
-              <p className="label-medium text-text-primary">{kase.title}</p>
+              <p className="label-medium break-words text-text-primary">{kase.title}</p>
               <p className="caption-small text-text-secondary">
                 {t('cases.caseId')}: {kase.caseNumber}
               </p>
@@ -651,8 +651,8 @@ function SubmitCaseDialog({
             <div className="min-w-0">
               <p className="caption-large text-text-primary">{t('evidenceLabel')}</p>
               {file ? (
-                <p className="caption-small mt-0.5 inline-flex items-center gap-1 text-green-600">
-                  <CheckCircle2 className="size-3.5" aria-hidden />
+                <p className="caption-small mt-0.5 inline-flex max-w-full items-center gap-1 break-all text-green-600">
+                  <CheckCircle2 className="size-3.5 shrink-0" aria-hidden />
                   {file.name}
                 </p>
               ) : (

@@ -212,9 +212,9 @@ export function EmbassyServicesTab({ community, profile }: EmbassyServicesTabPro
                       >
                         <Icon className={`size-6 ${c.fg}`} aria-hidden />
                       </span>
-                      <p className="label-medium text-text-primary">{svc.displayName}</p>
+                      <p className="label-medium max-w-full break-words text-text-primary">{svc.displayName}</p>
                       {svc.description && (
-                        <p className="caption-small mt-1 line-clamp-2 flex-1 text-text-secondary">
+                        <p className="caption-small mt-1 line-clamp-2 max-w-full flex-1 break-words text-text-secondary">
                           {svc.description}
                         </p>
                       )}

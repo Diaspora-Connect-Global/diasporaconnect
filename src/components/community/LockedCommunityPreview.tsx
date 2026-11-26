@@ -121,7 +121,7 @@ export function LockedCommunityPreview(props: LockedCommunityPreviewProps) {
           </div>
 
           {!minimal && description && (
-            <p className="text-sm text-text-secondary whitespace-pre-line">{description}</p>
+            <p className="text-sm text-text-secondary whitespace-pre-line break-words">{description}</p>
           )}
 
           <p className="flex items-center gap-2 text-sm text-text-secondary">

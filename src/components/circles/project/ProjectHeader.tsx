@@ -82,7 +82,7 @@ export function ProjectHeader({ project, proposerName }: ProjectHeaderProps) {
       <h1 className="mt-3 break-words text-2xl font-bold leading-tight text-text-primary sm:text-3xl">{project.title}</h1>
 
       {project.description && (
-        <p className="body-small mt-2 whitespace-pre-line text-text-secondary">
+        <p className="body-small mt-2 whitespace-pre-line break-words text-text-secondary">
           {project.description}
         </p>
       )}

@@ -97,8 +97,8 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
                 />
               </div>
               <div className="min-w-0 pt-1">
-                <div className="flex items-center gap-1.5">
-                  <h1 className="heading-xsmall line-clamp-2 text-gray-900">{community.name}</h1>
+                <div className="flex min-w-0 items-center gap-1.5">
+                  <h1 className="heading-xsmall line-clamp-2 min-w-0 break-words text-gray-900">{community.name}</h1>
                   {profile.isOfficial && (
                     <BadgeCheck
                       className="size-5 flex-shrink-0 fill-blue-600 text-white"
@@ -118,8 +118,8 @@ export function EmbassyHeader({ community, profile, membership }: EmbassyHeaderP
 
                 {/* Contact meta row */}
                 <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 caption-medium text-gray-500">
-                  <span className="inline-flex items-center gap-1">
-                    <MapPin className="size-4" aria-hidden />
+                  <span className="inline-flex min-w-0 max-w-full items-center gap-1 break-words">
+                    <MapPin className="size-4 shrink-0" aria-hidden />
                     {location}
                   </span>
                   {phone && (

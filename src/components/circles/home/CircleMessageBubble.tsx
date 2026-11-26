@@ -82,7 +82,7 @@ export function CircleMessageBubble({
           message.sendingPreviews?.length ? (
             <>
               <SendingFilesBubble sendingPreviews={message.sendingPreviews} />
-              {message.content && <div className={cn(bubbleClass, 'mt-2')}>{message.content}</div>}
+              {message.content && <div className={cn(bubbleClass, 'mt-2 break-words')}>{message.content}</div>}
             </>
           ) : (
             <div

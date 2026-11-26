@@ -160,7 +160,7 @@ export function EmbassySupportCaseDetail({ caseId }: EmbassySupportCaseDetailPro
   return (
     <div className="mx-auto max-w-7xl px-3 py-6 lg:px-6">
       {/* Breadcrumb / back */}
-      <div className="mb-4 flex items-center gap-1 caption-medium text-text-secondary">
+      <div className="mb-4 flex flex-wrap items-center gap-1 caption-medium text-text-secondary">
         <Link
           href={backHref}
           scroll={false}
@@ -179,7 +179,7 @@ export function EmbassySupportCaseDetail({ caseId }: EmbassySupportCaseDetailPro
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="heading-xsmall text-text-primary">{supportCase.title}</h1>
+                <h1 className="heading-xsmall break-words text-text-primary">{supportCase.title}</h1>
                 <span
                   className={`caption-medium inline-block rounded-full px-2.5 py-0.5 font-medium ${SUPPORT_PILL[bucket]}`}
                 >
@@ -228,7 +228,7 @@ export function EmbassySupportCaseDetail({ caseId }: EmbassySupportCaseDetailPro
             <CardContent className="p-5">
               <h2 className="label-large mb-3 text-text-primary">{t('description.title')}</h2>
               {supportCase.description ? (
-                <p className="body-small whitespace-pre-wrap text-text-secondary">
+                <p className="body-small whitespace-pre-wrap break-words text-text-secondary">
                   {supportCase.description}
                 </p>
               ) : (
@@ -358,7 +358,7 @@ function StatusTimeline({ history }: { history: CaseStatusHistoryEntry[] }) {
             </span>
             <div className="min-w-0 flex-1 pt-0.5">
               <p
-                className={`label-medium ${node.current ? 'text-text-primary' : 'text-text-secondary'}`}
+                className={`label-medium break-words ${node.current ? 'text-text-primary' : 'text-text-secondary'}`}
               >
                 {node.label}
               </p>
@@ -368,7 +368,7 @@ function StatusTimeline({ history }: { history: CaseStatusHistoryEntry[] }) {
                 </p>
               )}
               {node.reason && (
-                <p className="caption-medium mt-1.5 rounded-lg border border-border-subtle bg-surface-subtle px-3 py-2 text-text-secondary">
+                <p className="caption-medium mt-1.5 break-words rounded-lg border border-border-subtle bg-surface-subtle px-3 py-2 text-text-secondary">
                   {node.reason}
                 </p>
               )}

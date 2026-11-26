@@ -109,8 +109,8 @@ export function ManageMemberModal({
                   {member?.profile?.lastName[0]}
                 </AvatarFallback>
               </Avatar>
-              <div>
-                <p className="text-sm font-medium text-text-primary">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-text-primary break-words">
                   {member?.profile?.firstName} {member?.profile?.lastName}
                 </p>
                 <p className="text-xs text-text-secondary capitalize">

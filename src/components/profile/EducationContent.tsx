@@ -203,7 +203,7 @@ export default function EducationContent({ userId, isOwnProfile }: EducationCont
           educationList.map((edu) => (
             <div key={edu.id} className="pb-6 border-b border-border-subtle last:border-0">
               <div className="flex justify-between items-start">
-                <div className="flex-1">
+                <div className="flex-1 min-w-0 break-words">
                   <CaptionLarge className="text-text-primary">{edu.institution}</CaptionLarge>
                   <div className="flex flex-wrap gap-x-2 text-sm mt-1">
                     <BodySmall className="text-text-primary">
@@ -214,7 +214,7 @@ export default function EducationContent({ userId, isOwnProfile }: EducationCont
                     </BodySmall>
                   </div>
                   {edu.activities && (
-                    <BodySmall className="mt-2 text-text-primary whitespace-pre-line">
+                    <BodySmall className="mt-2 text-text-primary whitespace-pre-line break-words">
                       {edu.activities}
                     </BodySmall>
                   )}

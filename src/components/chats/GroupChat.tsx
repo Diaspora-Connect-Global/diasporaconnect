@@ -948,8 +948,8 @@ export default function GroupChat() {
                 {/* Main Chat Area */}
                 <div className={`flex-1 min-w-0 bg-surface-default rounded-none md:rounded-lg border-0 md:border md:border-border-subtle flex flex-col h-full min-h-0 overflow-hidden ${isMobile && (sidebarOpen || repliesSidebarOpen || privateTarget) ? 'hidden' : 'flex'}`}>
                     {/* Group Header */}
-                    <div className="md:flex flex-shrink-0 border-b border-border-subtle p-4 justify-between">
-                        <div className="flex items-center space-x-3">
+                    <div className="md:flex flex-shrink-0 border-b border-border-subtle p-4 justify-between gap-2">
+                        <div className="flex min-w-0 items-center space-x-3">
                             <ButtonType3
                                 onClick={handleMBack}
                                 className="p-2 hover:bg-surface-hover rounded-lg md:hidden border-0 bg-transparent min-w-0"
@@ -963,8 +963,8 @@ export default function GroupChat() {
                                     <AvatarFallback>{group.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                                 </Avatar>
                             </div>
-                            <div>
-                                <h2 className="font-semibold text-text-primary">{group.name}</h2>
+                            <div className="min-w-0">
+                                <h2 className="font-semibold text-text-primary break-words line-clamp-2">{group.name}</h2>
                                 <div className="flex items-center space-x-2">
                                     <p className="text-sm text-text-secondary">{t('memberCount', { count: group.memberCount })}</p>
                                     {privateRepliesAvailable && privateReplySettings && (
@@ -1118,7 +1118,7 @@ export default function GroupChat() {
                                                     <>
                                                         <SendingFilesBubble sendingPreviews={message.sendingPreviews} />
                                                         {message.content && (
-                                                            <div className={`mt-2 px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${isMe ? 'bg-chat-bubble-me-bg text-chat-bubble-me-text' : 'bg-chat-bubble-them-bg text-chat-bubble-them-text'}`}>
+                                                            <div className={`mt-2 px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base break-words ${isMe ? 'bg-chat-bubble-me-bg text-chat-bubble-me-text' : 'bg-chat-bubble-them-bg text-chat-bubble-them-text'}`}>
                                                                 {message.content}
                                                             </div>
                                                         )}
@@ -1151,7 +1151,7 @@ export default function GroupChat() {
                                                             )}
                                                             {message.content && !isLinkOnlyContent(message.content) && (
                                                                 <>
-                                                                    <div className={`mt-2 px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${isMe ? 'bg-chat-bubble-me-bg text-chat-bubble-me-text' : 'bg-chat-bubble-them-bg text-chat-bubble-them-text'}`}>
+                                                                    <div className={`mt-2 px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base break-words ${isMe ? 'bg-chat-bubble-me-bg text-chat-bubble-me-text' : 'bg-chat-bubble-them-bg text-chat-bubble-them-text'}`}>
                                                                         {message.content}
                                                                     </div>
                                                                     {firstUrl && !firstUrlIsAttachmentUrl && (
@@ -1178,7 +1178,7 @@ export default function GroupChat() {
                                             ) : (
                                                 <>
                                                     <div
-                                                        className={`px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base ${isMe
+                                                        className={`px-3 py-2 sm:px-4 sm:py-3 rounded-2xl sm:rounded-4xl text-sm sm:text-base break-words ${isMe
                                                             ? 'bg-chat-bubble-me-bg text-chat-bubble-me-text'
                                                             : 'bg-chat-bubble-them-bg text-chat-bubble-them-text'
                                                             }`}
@@ -1355,9 +1355,9 @@ export default function GroupChat() {
                                             </>
                                         )}
                                     </div>
-                                    <h4 className="font-semibold text-text-primary text-base sm:text-lg mt-3">{group.name}</h4>
+                                    <h4 className="font-semibold text-text-primary text-base sm:text-lg mt-3 max-w-full break-words text-center">{group.name}</h4>
                                     {group.description && (
-                                        <p className="text-sm text-text-secondary mt-1 text-center">{group.description}</p>
+                                        <p className="text-sm text-text-secondary mt-1 text-center max-w-full break-words whitespace-pre-wrap">{group.description}</p>
                                     )}
                                 </div>
 
@@ -1510,7 +1510,7 @@ export default function GroupChat() {
                                         <span className="text-xs sm:text-sm font-medium text-chat-parent-text">
                                             {getSenderName(selectedMessage.senderId)}
                                         </span>
-                                        <p className="text-xs sm:text-sm text-chat-parent-text">{selectedMessage.content}</p>
+                                        <p className="text-sm text-chat-parent-text break-words whitespace-pre-wrap">{selectedMessage.content}</p>
                                     </div>
                                     <p className="text-[10px] sm:text-xs text-text-tertiary flex items-center space-x-2">
                                         <Avatar className="w-4 h-4 sm:w-6 sm:h-6">
@@ -1533,10 +1533,10 @@ export default function GroupChat() {
                                                 {reply.attachments?.length ? (
                                                     <>
                                                         <MessageAttachments attachments={reply.attachments} />
-                                                        {reply.content && <p className="text-xs sm:text-sm text-chat-bubble-them-text mt-1">{reply.content}</p>}
+                                                        {reply.content && <p className="text-sm text-chat-bubble-them-text mt-1 break-words whitespace-pre-wrap">{reply.content}</p>}
                                                     </>
                                                 ) : (
-                                                    <p className="text-xs sm:text-sm text-chat-bubble-them-text">{reply.content}</p>
+                                                    <p className="text-sm text-chat-bubble-them-text break-words whitespace-pre-wrap">{reply.content}</p>
                                                 )}
                                             </div>
                                             <div className="flex space-x-2 items-center mt-1">

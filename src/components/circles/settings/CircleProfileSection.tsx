@@ -288,7 +288,7 @@ export function CircleProfileSection({ circle, canEdit }: CircleProfileSectionPr
         <dl className="space-y-3">
           <div>
             <dt className="label-medium text-text-primary">{t('profile.nameLabel')}</dt>
-            <dd className="body-small mt-0.5 text-text-secondary">{circle.name}</dd>
+            <dd className="body-small mt-0.5 break-words text-text-secondary">{circle.name}</dd>
           </div>
           {circle.handle && (
             <div>
@@ -311,7 +311,7 @@ export function CircleProfileSection({ circle, canEdit }: CircleProfileSectionPr
               <dt className="label-medium text-text-primary">
                 {t('profile.descriptionLabel')}
               </dt>
-              <dd className="body-small mt-0.5 whitespace-pre-wrap text-text-secondary">
+              <dd className="body-small mt-0.5 whitespace-pre-wrap break-words text-text-secondary">
                 {circle.description}
               </dd>
             </div>

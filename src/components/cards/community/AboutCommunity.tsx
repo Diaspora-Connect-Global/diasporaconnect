@@ -38,7 +38,7 @@ export default function AboutCommunity({
           <span className="text-text-secondary">{visibility}</span>
         </div>
         <div>
-          <p className="text-sm text-text-primary">{description}</p>
+          <p className="text-sm text-text-primary break-words">{description}</p>
         </div>
       </div>
     </div>

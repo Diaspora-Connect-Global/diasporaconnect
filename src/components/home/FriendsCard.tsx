@@ -142,9 +142,9 @@ const FriendsCard: FC<FriendsCardProps> = ({
     };
 
     return (
-        <div className="flex items-center justify-between lg:border border-t border-border-subtle px-3 py-6 lg:rounded-2xl">
+        <div className="flex items-center justify-between gap-2 lg:border border-t border-border-subtle px-3 py-6 lg:rounded-2xl">
             {/* ---- Avatar + Info ---- */}
-            <div className="flex items-center space-x-3">
+            <div className="flex min-w-0 items-center space-x-3">
                 {!imageError && imageSrc && imageSrc.trim() !== '' && imageSrc !== 'null' && imageSrc !== 'undefined' ? (
                     <Image
                         src={imageSrc.trim()}
@@ -159,14 +159,14 @@ const FriendsCard: FC<FriendsCardProps> = ({
                         {getInitials(name)}
                     </div>
                 )}
-                <div>
+                <div className="min-w-0">
                     <div className="flex items-center flex-wrap">
                         <div
                             onClick={handleNameClick}
                             className="body-large text-text-primary text-sm cursor-pointer hover:text-text-brand transition-colors inline-flex items-center gap-1"
                         >
                             <span className="flex items-center space-x-2 flex-wrap">
-                                <p className="whitespace-nowrap">
+                                <p className="min-w-0 break-words">
                                     {name?.trim()}
                                 </p>
                                 {tier ? <UserBadge tier={tier} size="sm" /> : null}
@@ -175,7 +175,7 @@ const FriendsCard: FC<FriendsCardProps> = ({
                     </div>
 
                     {matchReasonCopy ? (
-                        <span className="text-sm text-text-secondary">
+                        <span className="text-sm text-text-secondary break-words">
                             {matchReasonCopy}
                         </span>
                     ) : mutualConnections !== undefined ? (

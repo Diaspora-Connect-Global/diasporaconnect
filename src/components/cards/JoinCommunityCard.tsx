@@ -90,7 +90,7 @@ export default function JoinCommunityCard({
               </TooltipContent>
             </Tooltip>
           ) : (
-            <h2 className="caption-large line-clamp-2 min-h-[2.5rem]">
+            <h2 className="caption-large line-clamp-2 min-h-[2.5rem] break-words">
               {title}
             </h2>
           )}
@@ -109,7 +109,7 @@ export default function JoinCommunityCard({
                 </TooltipContent>
               </Tooltip>
             ) : (
-              <p className="body-small text-text-primary line-clamp-3 min-h-[3.5rem]">
+              <p className="body-small text-text-primary line-clamp-3 min-h-[3.5rem] break-words">
                 {description}
               </p>
             )

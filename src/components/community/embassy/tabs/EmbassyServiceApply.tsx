@@ -304,7 +304,7 @@ export function EmbassyServiceApply({ serviceId, community, profile }: EmbassySe
   return (
     <div className="mx-auto max-w-6xl px-3 py-6 lg:px-6">
       {/* Breadcrumb / back */}
-      <div className="mb-4 flex items-center gap-1 caption-medium text-text-secondary">
+      <div className="mb-4 flex flex-wrap items-center gap-1 caption-medium text-text-secondary">
         <Link
           href={backHref}
           scroll={false}
@@ -319,7 +319,7 @@ export function EmbassyServiceApply({ serviceId, community, profile }: EmbassySe
 
       {/* Header */}
       <div className="mb-5">
-        <h1 className="heading-xsmall text-text-primary">
+        <h1 className="heading-xsmall break-words text-text-primary">
           {t('title', { name: service.displayName })}
         </h1>
         <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 caption-medium text-text-secondary">
@@ -833,8 +833,8 @@ function StepDocuments({
                   <div className="min-w-0">
                     <p className="caption-large text-text-primary">{slot.label}</p>
                     {chosen ? (
-                      <p className="caption-small mt-0.5 inline-flex items-center gap-1 text-green-600">
-                        <CheckCircle2 className="size-3.5" aria-hidden />
+                      <p className="caption-small mt-0.5 inline-flex max-w-full items-center gap-1 break-all text-green-600">
+                        <CheckCircle2 className="size-3.5 shrink-0" aria-hidden />
                         {chosen.name}
                       </p>
                     ) : (
@@ -1303,7 +1303,7 @@ function ReviewRow({ label, value }: ReviewRowProps) {
   return (
     <div className="flex items-start justify-between gap-3">
       <dt className="caption-medium text-text-secondary">{label}</dt>
-      <dd className="caption-large min-w-0 max-w-[60%] truncate text-right text-text-primary">
+      <dd className="caption-large min-w-0 max-w-[60%] break-words text-right text-text-primary">
         {value}
       </dd>
     </div>
@@ -1603,7 +1603,7 @@ function SummaryRow({ label, value }: SummaryRowProps) {
   return (
     <div className="flex items-start justify-between gap-3">
       <dt className="caption-medium text-text-secondary">{label}</dt>
-      <dd className="caption-large min-w-0 max-w-[60%] text-right font-medium text-text-primary">
+      <dd className="caption-large min-w-0 max-w-[60%] break-words text-right font-medium text-text-primary">
         {value}
       </dd>
     </div>

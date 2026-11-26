@@ -235,7 +235,7 @@ export function NotificationCard({
                                 </h2>
                             )}
                             {description && (
-                                <p className="text-text-primary body-small text-xs sm:text-sm text-wrap line-clamp-2">
+                                <p className="text-text-primary body-small text-sm text-wrap break-words line-clamp-2">
                                     {description}
                                 </p>
                             )}

@@ -371,7 +371,7 @@ export default function SharePostModal({
                   <div className={`w-12 h-12 rounded-full ${p.bg} flex items-center justify-center shadow-sm`}>
                     {p.icon}
                   </div>
-                  <span className="text-xs text-text-secondary">{p.name}</span>
+                  <span className="text-xs text-text-secondary max-w-full truncate">{p.name}</span>
                 </button>
               ))}
             </div>

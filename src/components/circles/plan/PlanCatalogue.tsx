@@ -107,9 +107,9 @@ function PlanCard({ plan, isCurrent, canManage, onChoose }: PlanCardProps) {
     <article className="flex w-full flex-col rounded-2xl border border-border-subtle bg-surface-default p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 flex-col gap-1">
-          <h3 className="label-large text-text-primary">{plan.name}</h3>
+          <h3 className="label-large break-words text-text-primary">{plan.name}</h3>
           {plan.description && (
-            <p className="caption-small text-text-secondary">{plan.description}</p>
+            <p className="caption-small break-words text-text-secondary">{plan.description}</p>
           )}
         </div>
 

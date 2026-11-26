@@ -92,7 +92,7 @@ export function ChallengeHeader({ challenge, starter }: ChallengeHeaderProps) {
       </h1>
 
       {challenge.description && (
-        <p className="body-medium mt-2 whitespace-pre-line text-text-secondary">
+        <p className="body-medium mt-2 whitespace-pre-line break-words text-text-secondary">
           {challenge.description}
         </p>
       )}
