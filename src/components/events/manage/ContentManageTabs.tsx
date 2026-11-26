@@ -120,7 +120,7 @@ export function ProgrammeManageTab({ eventId, timezone }: Props) {
       {form && (
         <form className="space-y-3 rounded-2xl border border-border-subtle p-4" onSubmit={(e) => { e.preventDefault(); void save(); }}>
           <Field id="ps-title" label={t('title')}><input id="ps-title" className={inputClass} maxLength={200} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></Field>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Field id="ps-start" label={t('start')}><input id="ps-start" type="datetime-local" className={inputClass} value={form.start} onChange={(e) => setForm({ ...form, start: e.target.value })} /></Field>
             <Field id="ps-end" label={t('end')}><input id="ps-end" type="datetime-local" className={inputClass} value={form.end} onChange={(e) => setForm({ ...form, end: e.target.value })} /></Field>
             <Field id="ps-room" label={t('room')}><input id="ps-room" className={inputClass} maxLength={120} value={form.room} onChange={(e) => setForm({ ...form, room: e.target.value })} /></Field>
@@ -246,7 +246,7 @@ export function SpeakersManageTab({ eventId }: Props) {
       </div>
       {form && (
         <form className="space-y-3 rounded-2xl border border-border-subtle p-4" onSubmit={(e) => { e.preventDefault(); void save(); }}>
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Field id="sp-name" label={t('name')}><input id="sp-name" className={inputClass} maxLength={200} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
             <Field id="sp-role" label={t('role')}>
               <select id="sp-role" className={inputClass} value={form.roleLabel} onChange={(e) => setForm({ ...form, roleLabel: e.target.value as SpeakerRole })}>

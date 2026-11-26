@@ -415,6 +415,12 @@
     @apply bg-background text-foreground;
   }
 
+  /* Safety net: a long unbroken word (URL, token) in user text wraps instead of widening its box.
+     `break-word` (not `anywhere`) leaves min-content sizing alone, so desktop layout is unchanged. */
+  p, h1, h2, h3, h4, h5, h6, li, dd, dt, blockquote, figcaption {
+    overflow-wrap: break-word;
+  }
+
 
   /* Custom Scrollbar Styles */
   *::-webkit-scrollbar {

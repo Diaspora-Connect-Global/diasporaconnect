@@ -469,7 +469,7 @@ export default function Events() {
 
                 <ForYouRail kinds={['events']} />
 
-                <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
+                <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
                     {/* Your events: first on phones, the right rail on desktop. */}
                     <aside aria-labelledby="your-events-title" data-testid="your-events" className="h-fit rounded-2xl border border-border-subtle bg-surface-default p-5 shadow-sm lg:sticky lg:top-0 lg:col-start-2 lg:row-start-1">
                         <h2 id="your-events-title" className="text-base font-bold text-text-primary">{t("yourevents")}</h2>

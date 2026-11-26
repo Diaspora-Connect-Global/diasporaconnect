@@ -69,7 +69,7 @@ export function OverviewTab({
 
   return (
     <div className="space-y-4" data-testid="overview-tab">
-      <div className={`grid gap-4 ${organiser || hasContact ? 'lg:grid-cols-[minmax(0,1fr)_16rem]' : ''}`}>
+      <div className={`grid grid-cols-1 gap-4 ${organiser || hasContact ? 'lg:grid-cols-[minmax(0,1fr)_16rem]' : ''}`}>
         <section aria-labelledby="ov-about" className={CARD}>
           <h2 id="ov-about" className="text-lg font-bold text-text-primary">{t('about')}</h2>
           {event.description ? (
@@ -192,7 +192,7 @@ export function OverviewTab({
           </div>
           <ol className="mt-3 space-y-2.5 border-l border-border-subtle pl-4">
             {sortedSessions.slice(0, PREVIEW_SESSIONS).map((s) => (
-              <li key={s.id} className="relative grid gap-0.5 text-sm sm:grid-cols-[6rem_1fr] sm:gap-3">
+              <li key={s.id} className="relative grid grid-cols-1 gap-0.5 text-sm sm:grid-cols-[6rem_minmax(0,1fr)] sm:gap-3">
                 <span aria-hidden className="absolute -left-[1.3rem] top-1.5 size-2 rounded-full bg-surface-brand" />
                 <span className="font-medium text-text-secondary">{formatTimeInZone(s.startAt, locale, s.timezone || event.timezone)}</span>
                 <span className="break-words text-text-primary">{s.title}</span>

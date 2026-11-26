@@ -398,7 +398,7 @@ export default function RegisterTab({
             <h3 id="reg-type" className="text-base font-bold text-text-primary">{next()}. {t('type.title')}</h3>
             <p className="text-sm text-text-secondary">{t('type.sub')}</p>
           </div>
-          <fieldset className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <fieldset className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <legend className="sr-only">{t('ticketTypes')}</legend>
             {(tickets.length > 0 ? tickets : [null]).map((x, i) => {
               const Icon = ticketIcons[i % ticketIcons.length];
@@ -471,7 +471,7 @@ export default function RegisterTab({
               <h3 id="reg-format" className="text-base font-bold text-text-primary">{next()}. {t('format.label')}</h3>
               <p className="text-sm text-text-secondary">{t('format.sub')}</p>
             </div>
-            <fieldset className="grid gap-3 sm:grid-cols-2">
+            <fieldset className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <legend className="sr-only">{t('format.label')}</legend>
               {(['IN_PERSON', 'ONLINE'] as const).map((f) => (
                 <label key={f} className={cardClass(format === f, false)}>

@@ -30,7 +30,7 @@ export default function RegistrationModePicker({
   return (
     <fieldset className="space-y-3 rounded-lg border border-border-subtle p-4" data-testid="where-register">
       <legend className="px-1 text-sm font-semibold text-text-primary">{tw('title')}</legend>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {(['IN_APP', 'EXTERNAL'] as const).map((m) => (
           <label
             key={m}

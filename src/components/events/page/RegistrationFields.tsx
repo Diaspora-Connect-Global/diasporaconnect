@@ -33,7 +33,7 @@ export default function RegistrationFields({
   const td = useTranslations('eventForm.defaults');
   if (fields.length === 0) return null;
   return (
-    <div className="grid gap-4 sm:grid-cols-2" data-testid="registration-fields">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2" data-testid="registration-fields">
       {fields.map((f) => {
         const id = `regfield-${f.id}`;
         const errId = `${id}-error`;

@@ -60,7 +60,7 @@ export default function EventHero({
         )}
         <h1 className="max-w-3xl break-words pr-24 text-2xl font-bold leading-tight sm:text-4xl">{event.title}</h1>
 
-        <dl className="mt-1 grid gap-3 text-sm sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-white/25">
+        <dl className="mt-1 grid grid-cols-1 gap-3 text-sm sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-white/25">
           <div className="flex items-start gap-3 sm:pr-5">
             <CalendarDays className="mt-0.5 size-5 shrink-0" aria-hidden />
             <div className="min-w-0">

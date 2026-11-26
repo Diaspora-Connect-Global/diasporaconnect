@@ -583,7 +583,7 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
     <div className="mx-auto max-w-6xl px-3 py-6 lg:px-6">
       <LeavingSiteDialog url={leavingUrl} onClose={() => setLeavingUrl(null)} />
       {/* Breadcrumb */}
-      <div className="mb-4 flex items-center gap-1 caption-medium text-text-secondary">
+      <div className="mb-4 flex flex-wrap items-center gap-1 caption-medium text-text-secondary">
         <Link
           href={backHref}
           scroll={false}
@@ -619,7 +619,7 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
             </div>
 
             <div className="min-w-0 flex-1">
-              <h1 className="heading-xsmall text-text-primary">{event.title}</h1>
+              <h1 className="heading-xsmall break-words text-text-primary">{event.title}</h1>
               {/* Category + price chips */}
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 {(ended || cancelled) && (
@@ -644,7 +644,7 @@ export function EmbassyEventDetail({ eventId, community, profile }: EmbassyEvent
               </div>
 
               {event.description && (
-                <p className="body-small mt-3 text-text-secondary">{event.description}</p>
+                <p className="body-small mt-3 whitespace-pre-line break-words text-text-secondary">{event.description}</p>
               )}
 
               {/* 4-up meta row */}
@@ -1269,7 +1269,7 @@ function AboutSection({
           {paragraphs.length > 0 ? (
             <div className="mt-2 space-y-2">
               {paragraphs.map((p, i) => (
-                <p key={i} className="body-small text-text-secondary">
+                <p key={i} className="body-small break-words text-text-secondary">
                   {p}
                 </p>
               ))}
@@ -1405,7 +1405,7 @@ function VenueRow({ label, value }: { label: string; value: string }) {
   return (
     <li className="flex items-start gap-3">
       <span className="caption-small w-20 flex-shrink-0 text-text-secondary">{label}</span>
-      <span className="caption-large text-text-primary">{value}</span>
+      <span className="caption-large min-w-0 break-words text-text-primary">{value}</span>
     </li>
   );
 }

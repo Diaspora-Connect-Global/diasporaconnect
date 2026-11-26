@@ -80,7 +80,7 @@ export function ProgrammeTab({
             {day.map((s) => {
               const who = s.speakerIds.map((id) => names.get(id)).filter(Boolean) as string[];
               return (
-                <li key={s.id} className="grid gap-1 py-3 sm:grid-cols-[9rem_1fr] sm:gap-4">
+                <li key={s.id} className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4">
                   <p className="text-sm font-medium text-text-secondary">
                     {formatTimeInZone(s.startAt, locale, zoneFor(s))} – {formatTimeInZone(s.endAt, locale, zoneFor(s))}
                   </p>
@@ -109,7 +109,7 @@ export function SpeakersTab({ speakers }: { speakers: EventSpeaker[] }) {
   const t = useTranslations('eventPage.speakers');
   const sorted = [...speakers].sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name));
   return (
-    <ul className="grid gap-4 sm:grid-cols-2" data-testid="speakers-tab">
+    <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2" data-testid="speakers-tab">
       {sorted.map((s) => (
         <li key={s.id} className="flex gap-3 rounded-2xl border border-border-subtle bg-surface-default p-4">
           <ImageWithFallback src={s.photoUrl} alt={t('photoAlt', { name: s.name })} className="size-16 shrink-0 rounded-full bg-surface-subtle object-cover" />

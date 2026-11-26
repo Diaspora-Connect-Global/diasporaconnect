@@ -145,7 +145,7 @@ export default function NetworkingDraftSection({
         </h3>
         <p className="text-sm text-text-secondary">{t('helper')}</p>
       </div>
-      <div className="grid gap-4 rounded-xl bg-surface-subtle/50 p-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 rounded-xl bg-surface-subtle/50 p-4 sm:grid-cols-2">
         {fields.map((f) => (
           <MultiPick
             key={f.key}

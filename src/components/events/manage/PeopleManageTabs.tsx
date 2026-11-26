@@ -224,7 +224,7 @@ export function StaffManageTab({ eventId }: { eventId: string }) {
 
       <section className="space-y-3 rounded-2xl border border-border-subtle p-4" aria-labelledby="staff-add">
         <h2 id="staff-add" className="font-semibold text-text-primary">{t('addTitle')}</h2>
-        <div className="grid gap-3 sm:grid-cols-[1fr_12rem]">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_12rem]">
           <Field id="staff-search" label={t('search')}>
             <input id="staff-search" type="search" className={inputClass} placeholder={t('searchPlaceholder')} value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" />
           </Field>

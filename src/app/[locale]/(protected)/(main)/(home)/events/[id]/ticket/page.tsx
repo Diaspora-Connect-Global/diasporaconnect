@@ -228,13 +228,13 @@ export default function EventTicketPage() {
               )}
               <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-wider text-white/80">{tTicket("kicker")}</p>
-                <h1 id="ticket-title" className="line-clamp-2 text-xl font-bold leading-tight sm:text-2xl">{event.title}</h1>
+                <h1 id="ticket-title" className="line-clamp-2 break-words text-xl font-bold leading-tight sm:text-2xl">{event.title}</h1>
               </div>
             </div>
           </div>
 
-          <div className="grid md:grid-cols-[minmax(0,1fr)_15rem]">
-            <dl className="grid gap-x-6 gap-y-5 p-5 sm:grid-cols-2 sm:p-6">
+          <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_15rem]">
+            <dl className="grid grid-cols-1 gap-x-6 gap-y-5 p-5 sm:grid-cols-2 sm:p-6">
               <div className="min-w-0">
                 <dt className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-text-secondary"><User className="size-3.5" aria-hidden />{tTicket("holder")}</dt>
                 <dd className="mt-1 break-words text-sm font-semibold text-text-primary">{holderName}</dd>
