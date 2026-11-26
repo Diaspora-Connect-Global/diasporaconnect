@@ -89,17 +89,17 @@ export default function VendorSidebar({ children }: { children: React.ReactNode 
 
     return (
         <div className="overflow-hidden ">
-            <div className="h-[10vh]  flex justify-between text-center items-center bg-surface-default px-6">
+            <div className="min-h-14 md:h-[10vh]  flex justify-between text-center items-center gap-3 bg-surface-default px-4 md:px-6">
                 <div className="text-primary flex items-center gap-2">
                     <p className="heading-small text-brand">d</p>
                     <h1 className="heading-xsmall">{t('dashboard')}</h1>
                 </div>
                 <MyAvatar />
             </div>
-            <div className="flex h-[90vh]    ">
-                <aside className="w-[22vw] overflow-y-auto px-6 bg-surface-default   flex flex-col">
+            <div className="flex flex-col md:flex-row md:h-[90vh]">
+                <aside className="w-full md:w-[22vw] md:shrink-0 md:overflow-y-auto px-4 md:px-6 bg-surface-default flex flex-col border-b border-border-subtle md:border-b-0">
                     {/* Header */}
-                    <div className="mt-5">
+                    <div className="mt-2 md:mt-5">
                         <button 
                             onClick={() => router.push(`/${currentLang}/vendors/services/add`)}
                             className="w-full px-4 py-2.5 rounded-lg transition-colors flex gap-2 text-text-brand"
@@ -110,18 +110,18 @@ export default function VendorSidebar({ children }: { children: React.ReactNode 
                     </div>
 
                     {/* Navigation */}
-                    <nav className="flex-1  space-y-1 overflow-y-auto">
+                    <nav className="flex-1 flex md:block gap-1 md:gap-0 md:space-y-1 overflow-x-auto md:overflow-x-visible md:overflow-y-auto pb-2 md:pb-0">
                         {menuItems.map((item) => (
                             <button
                                 key={item.id}
                                 onClick={() => handleNavigation(item.href)}
-                                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg label-large cursor-pointer transition-colors ${
+                                className={`md:w-full shrink-0 min-h-10 whitespace-nowrap md:whitespace-normal flex items-center gap-3 px-3 py-2.5 rounded-lg label-large cursor-pointer transition-colors ${
                                     activeTab === item.id
                                         ? 'bg-surface-brand-light text-text-brand'
                                         : 'text-text-secondary hover:bg-surface-subtle'
                                 }`}
                             >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     {item.icon}
                                 </svg>
                                 {item.label}
@@ -130,7 +130,7 @@ export default function VendorSidebar({ children }: { children: React.ReactNode 
                     </nav>
                 </aside>
 
-                <div className="h-full flex-1 overflow-y-auto  py-6 px-10 scrollbar-hide">
+                <div className="min-w-0 md:h-full flex-1 md:overflow-y-auto py-4 px-4 md:py-6 md:px-10 scrollbar-hide">
                     {children}
                 </div>
             </div>

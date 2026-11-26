@@ -149,7 +149,7 @@ const DynamicField = ({ field, value, onChange, onFileChange }: DynamicFieldProp
                 </Label>
                 <div className="mt-2 space-y-2">
                     {options.map((option, index) => (
-                        <label key={`${field.key}-${option}-${index}`} className="flex items-center gap-2 text-sm text-text-primary">
+                        <label key={`${field.key}-${option}-${index}`} className="flex items-center gap-2 text-sm text-text-primary [overflow-wrap:anywhere]">
                             <input
                                 type="radio"
                                 name={field.key}
@@ -224,7 +224,7 @@ const DynamicField = ({ field, value, onChange, onFileChange }: DynamicFieldProp
                     </Label>
                     <div className="mt-2 space-y-2">
                         {options.map((option, index) => (
-                            <label key={`${field.key}-checkbox-${option}-${index}`} className="flex items-center gap-2 text-sm text-text-primary">
+                            <label key={`${field.key}-checkbox-${option}-${index}`} className="flex items-center gap-2 text-sm text-text-primary [overflow-wrap:anywhere]">
                                 <input
                                     type="checkbox"
                                     checked={selectedValues.includes(option)}

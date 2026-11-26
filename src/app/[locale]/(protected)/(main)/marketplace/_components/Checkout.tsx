@@ -192,7 +192,7 @@ export function Checkout({
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-text-primary">{item.name}</p>
+                      <p className="font-medium text-text-primary break-words">{item.name}</p>
                       {readableSeller(item.seller) && (
                         <p className="text-sm text-text-secondary">{readableSeller(item.seller)}</p>
                       )}
@@ -284,7 +284,7 @@ export function Checkout({
                   className="w-full px-4 py-2 text-base md:text-sm border border-border-subtle rounded-lg bg-surface-default text-text-primary placeholder:text-text-tertiary focus:outline-none focus:ring-2 focus:ring-border-brand"
                   required
                 />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <input
                     type="text"
                     placeholder={t("cityPlaceholder")}

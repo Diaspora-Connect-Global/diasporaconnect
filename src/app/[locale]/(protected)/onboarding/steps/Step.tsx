@@ -53,9 +53,9 @@ export const Step: React.FC<StepProps> = ({
     };
 
     return (
-        <div className="w-[80%] mx-auto min-h-screen flex flex-col justify-start">
+        <div className="w-[92%] sm:w-[80%] mx-auto min-h-screen flex flex-col justify-start">
             {/* Top Navigation */}
-            <div className="space-y-8 flex justify-between items-center px-8 py-6">
+            <div className="space-y-8 flex justify-between items-center px-2 sm:px-8 py-6">
                 <button
                     type="button"
                     onClick={prevStep}
@@ -71,9 +71,9 @@ export const Step: React.FC<StepProps> = ({
             {/* Main Form */}
             <form
                 onSubmit={handleSubmit}
-                className="flex flex-col items-start px-8 space-y-8 max-w-3xl"
+                className="flex flex-col items-start px-2 sm:px-8 space-y-8 max-w-3xl"
             >
-                <HeadingMedium className="space-y-5">{title}</HeadingMedium>
+                <HeadingMedium className="space-y-5 break-words">{title}</HeadingMedium>
 
                 {children}
 

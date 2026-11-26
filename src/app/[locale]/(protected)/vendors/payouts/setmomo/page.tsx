@@ -66,7 +66,7 @@ const AddMobileAccount = () => {
   };
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-0 md:p-6">
       <div className="max-w-3xl mx-auto">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-text-secondary mb-6">
@@ -76,17 +76,17 @@ const AddMobileAccount = () => {
         </div>
 
         {/* Title */}
-        <h1 className="text-3xl font-bold text-text-primary mb-8">{t('payoutSetup')}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-6 sm:mb-8 break-words">{t('payoutSetup')}</h1>
 
         {/* Mobile Money Form */}
-        <div className="bg-surface-default rounded-2xl p-8 shadow-sm border border-border-subtle">
+        <div className="bg-surface-default rounded-2xl p-4 sm:p-8 shadow-sm border border-border-subtle">
           <h2 className="text-lg font-semibold text-text-primary mb-6">
             {t('mobileMoneyDetails')}
           </h2>
 
           {/* Provider Selection */}
           <div className="mb-8">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {providers.map((provider) => (
                 <button
                   key={provider.id}
@@ -141,7 +141,7 @@ const AddMobileAccount = () => {
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder={t('phonePlaceholder')}
-                className="flex-1 px-4 py-3 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-border-brand bg-surface-default"
+                className="flex-1 min-w-0 px-4 py-3 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-border-brand bg-surface-default"
               />
             </div>
           </div>

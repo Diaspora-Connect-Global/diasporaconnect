@@ -229,7 +229,7 @@ const ApplicationCard = ({
     <div className="bg-surface-default rounded-xl border border-border-subtle p-4 flex flex-col gap-3 hover:shadow-md transition-shadow duration-200">
       {/* Title + Status Badge */}
       <div className="flex items-start justify-between gap-2">
-        <h3 className="font-semibold text-text-primary text-[15px] leading-tight line-clamp-2 flex-1">
+        <h3 className="font-semibold text-text-primary text-[15px] leading-tight line-clamp-2 flex-1 min-w-0 break-words">
           {opp?.title ?? t("labels.application")}
         </h3>
         <span className={`${badge.bg} ${badge.text} text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap shrink-0`}>
@@ -250,7 +250,7 @@ const ApplicationCard = ({
             {formatEnumLabel(opp.category)}
           </p>
         )}
-        <p className="text-xs text-text-secondary pl-5">{t("labels.postedBy")} {getPosterName()}</p>
+        <p className="text-xs text-text-secondary pl-5 break-words">{t("labels.postedBy")} {getPosterName()}</p>
       </div>
 
       {/* Progress Stepper — only for in-platform applications with trackable status */}
@@ -278,7 +278,7 @@ const ApplicationCard = ({
       )}
 
       {/* Dates */}
-      <div className="flex items-center justify-between text-xs text-text-secondary mt-1">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-text-secondary mt-1">
         <span className="flex items-center gap-1">
           <Calendar className="w-3 h-3" />
           {t("labels.appliedDate")}: {formatDate(app.createdAt)}

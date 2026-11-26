@@ -37,7 +37,7 @@ function ReviewRow({
       </div>
 
       {review.text && (
-        <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-text-primary">
+        <p className="mt-2 whitespace-pre-line break-words text-sm leading-relaxed text-text-primary">
           {review.text}
         </p>
       )}
@@ -45,7 +45,7 @@ function ReviewRow({
       {review.reply && (
         <div className="mt-3 rounded-lg bg-surface-subtle px-3 py-2">
           <p className="text-xs font-medium text-text-secondary">{vendorRepliedLabel}</p>
-          <p className="mt-1 whitespace-pre-line text-sm text-text-primary">{review.reply}</p>
+          <p className="mt-1 whitespace-pre-line break-words text-sm text-text-primary">{review.reply}</p>
         </div>
       )}
     </li>

@@ -120,7 +120,7 @@ export default function WelcomePage() {
             <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-text-brand">
               The diaspora platform
             </p>
-            <h1 className="max-w-3xl text-4xl font-black tracking-tight text-text-primary sm:text-5xl lg:text-6xl">
+            <h1 className="max-w-3xl break-words text-4xl font-black tracking-tight text-text-primary sm:text-5xl lg:text-6xl">
               Connecting diaspora communities{' '}
               <span className="text-text-brand">worldwide.</span>
             </h1>
@@ -236,7 +236,7 @@ export default function WelcomePage() {
             </div>
             <Link
               href="/signup"
-              className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-text-brand px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              className="inline-flex items-center gap-2 sm:whitespace-nowrap rounded-full bg-text-brand px-6 py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
             >
               Join DiaspoPlug <ArrowRight className="h-4 w-4" />
             </Link>

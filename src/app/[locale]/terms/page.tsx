@@ -106,7 +106,7 @@ export default function TermsPage() {
               </div>
               <p className="text-xs font-semibold uppercase tracking-widest text-text-brand">Legal</p>
             </div>
-            <h1 className="text-4xl font-black tracking-tight text-text-primary sm:text-5xl">
+            <h1 className="break-words text-4xl font-black tracking-tight text-text-primary sm:text-5xl">
               Terms of Service
             </h1>
             <p className="mt-3 text-sm text-text-secondary">

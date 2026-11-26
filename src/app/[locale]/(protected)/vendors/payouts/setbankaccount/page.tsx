@@ -60,7 +60,7 @@ const AddBankAccount = () => {
   };
 
   return (
-    <div className="min-h-screen bg-surface-brand-subtle dark:bg-background p-6">
+    <div className="min-h-screen bg-surface-brand-subtle dark:bg-background p-0 md:p-6">
       <div className="max-w-3xl mx-auto">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-text-secondary mb-6">
@@ -70,10 +70,10 @@ const AddBankAccount = () => {
         </div>
 
         {/* Title */}
-        <h1 className="text-3xl font-bold text-text-primary mb-8">Payout setup</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-6 sm:mb-8 break-words">Payout setup</h1>
 
         {/* Bank Account Form */}
-        <div className="bg-surface-default rounded-2xl p-8 shadow-sm border border-border-subtle">
+        <div className="bg-surface-default rounded-2xl p-4 sm:p-8 shadow-sm border border-border-subtle">
           <h2 className="text-lg font-semibold text-text-primary mb-6">Bank account details</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

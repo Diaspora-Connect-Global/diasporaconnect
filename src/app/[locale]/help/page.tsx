@@ -65,7 +65,7 @@ const HelpSupportPage: React.FC = () => {
 
           {/* Title */}
           <h1 
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-primary animate-[fadeIn_0.6s_ease-out]"
+            className="break-words text-4xl sm:text-5xl lg:text-6xl font-bold text-primary animate-[fadeIn_0.6s_ease-out]"
             style={{ animationDelay: '0.2s', animationFillMode: 'backwards' }}
           >
             Help & <span className="bg-gradient-to-r from-text-brand to-text-brand bg-clip-text text-transparent">Support</span>

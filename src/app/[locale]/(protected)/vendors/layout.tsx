@@ -44,7 +44,7 @@ export default function VendorLayout({
   }
 
   return (
-    <div className="overflow-hidden">
+    <div className="md:overflow-hidden">
       <VendorSidebar>{children}</VendorSidebar>
     </div>
   );

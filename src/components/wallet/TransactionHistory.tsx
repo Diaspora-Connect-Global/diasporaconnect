@@ -135,7 +135,7 @@ export default function TransactionHistory() {
       </div>
 
       {totalPages > 1 && (
-        <nav aria-label={t('pagination')} className="mt-4 flex items-center justify-end gap-3">
+        <nav aria-label={t('pagination')} className="mt-4 flex flex-wrap items-center justify-end gap-3">
           <button
             type="button"
             disabled={page <= 1}

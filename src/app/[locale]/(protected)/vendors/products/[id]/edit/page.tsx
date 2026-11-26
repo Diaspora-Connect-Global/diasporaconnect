@@ -102,7 +102,7 @@ export default function EditProductPage() {
   }
 
   return (
-    <div className="p-8 max-w-3xl">
+    <div className="p-0 md:p-8 max-w-3xl">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-text-secondary mb-6">
         <button onClick={() => router.push(`/${locale}/vendors/products`)} className="hover:text-text-primary">
@@ -112,9 +112,9 @@ export default function EditProductPage() {
         <span className="text-text-primary">{t("editProduct") || "Edit product"}</span>
       </div>
 
-      <h1 className="text-2xl font-semibold text-text-primary mb-8">{t("editProduct") || "Edit product"}</h1>
+      <h1 className="text-xl sm:text-2xl font-semibold text-text-primary mb-8 break-words">{t("editProduct") || "Edit product"}</h1>
 
-      <div className="bg-surface-default rounded-xl border border-border-subtle p-6 space-y-6">
+      <div className="bg-surface-default rounded-xl border border-border-subtle p-4 sm:p-6 space-y-6">
         {/* Title */}
         <div>
           <label className="block text-sm font-medium text-text-primary mb-2">
@@ -142,7 +142,7 @@ export default function EditProductPage() {
         </div>
 
         {/* Price and Inventory */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-text-primary mb-2">
               {tForm("price") || "Price (GHS)"} <span className="text-text-danger">*</span>

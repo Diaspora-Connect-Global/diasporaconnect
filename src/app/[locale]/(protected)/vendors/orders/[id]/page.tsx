@@ -152,7 +152,7 @@ export default function OrderDetailsPage() {
   const canConfirmDelivery = order.status === "IN_PROGRESS";
 
   return (
-    <div className="p-8 max-w-7xl">
+    <div className="p-0 md:p-8 max-w-7xl">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-text-secondary mb-4">
         <button
@@ -168,14 +168,14 @@ export default function OrderDetailsPage() {
       </div>
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-text-primary">{t("orderDetails") || "Order details"}</h1>
-        <div className="flex gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <h1 className="text-xl sm:text-2xl font-semibold text-text-primary break-words">{t("orderDetails") || "Order details"}</h1>
+        <div className="flex flex-wrap gap-3">
           {canDecline && (
             <button
               onClick={() => setDeclineModalOpen(true)}
               disabled={cancelling}
-              className="px-6 py-2.5 border-2 border-border-danger text-text-danger rounded-lg font-medium hover:bg-surface-danger transition-colors disabled:opacity-50"
+              className="px-4 sm:px-6 py-2.5 min-h-10 border-2 border-border-danger text-text-danger rounded-lg font-medium hover:bg-surface-danger transition-colors disabled:opacity-50"
             >
               Decline order
             </button>
@@ -184,7 +184,7 @@ export default function OrderDetailsPage() {
             <button
               onClick={handleProcessOrder}
               disabled={confirming}
-              className="px-6 py-2.5 bg-surface-brand text-text-white rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+              className="px-4 sm:px-6 py-2.5 min-h-10 bg-surface-brand text-text-white rounded-lg font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
             >
               {confirming ? "Confirming…" : "Confirm delivery"}
             </button>
@@ -192,12 +192,12 @@ export default function OrderDetailsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Left Column */}
-        <div className="col-span-2 space-y-6">
+        <div className="min-w-0 lg:col-span-2 space-y-6">
           {/* Order Details Card */}
-          <div className="bg-surface-default rounded-xl border border-border-subtle p-6">
-            <div className="grid grid-cols-3 gap-6 mb-6">
+          <div className="bg-surface-default rounded-xl border border-border-subtle p-4 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-6">
               <div>
                 <p className="text-sm text-text-secondary mb-1">Order number</p>
                 <p className="text-base font-medium text-text-primary font-mono">{orderId.slice(0, 8)}</p>
@@ -238,19 +238,19 @@ export default function OrderDetailsPage() {
           <div className="bg-surface-default rounded-xl border border-border-subtle overflow-hidden">
             <div className="divide-y divide-border-subtle">
               {(order.items ?? []).map((item, idx) => (
-                <div key={`${item.product_id}-${idx}`} className="p-6 flex gap-4">
+                <div key={`${item.product_id}-${idx}`} className="p-4 sm:p-6 flex gap-4">
                   <div className="w-16 h-16 rounded-lg bg-surface-subtle flex items-center justify-center text-text-tertiary flex-shrink-0">
                     <Package className="w-6 h-6" />
                   </div>
-                  <div className="flex-1">
-                    <p className="text-base font-medium text-text-primary mb-1">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-base font-medium text-text-primary mb-1 break-words">
                       {productNames[item.product_id] ?? (
                         <span className="font-mono text-sm text-text-tertiary">{item.product_id.slice(0, 12)}…</span>
                       )}
                     </p>
                     <p className="text-sm text-text-secondary">Qty: {item.quantity}</p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right shrink-0">
                     <p className="text-base font-medium text-text-primary">
                       {item.currency} {((item.price ?? 0) / 100).toFixed(2)}
                     </p>
@@ -260,7 +260,7 @@ export default function OrderDetailsPage() {
             </div>
 
             {/* Totals */}
-            <div className="border-t border-border-subtle p-6 space-y-3">
+            <div className="border-t border-border-subtle p-4 sm:p-6 space-y-3">
               <div className="flex justify-between text-base font-semibold">
                 <span className="text-text-primary">Total</span>
                 <span className="text-text-primary">
@@ -272,9 +272,9 @@ export default function OrderDetailsPage() {
         </div>
 
         {/* Right Column */}
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           {/* Buyer Info */}
-          <div className="bg-surface-default rounded-xl border border-border-subtle p-6">
+          <div className="bg-surface-default rounded-xl border border-border-subtle p-4 sm:p-6">
             <h3 className="text-sm font-medium text-text-secondary mb-4">{tIdentity("customer")}</h3>
             <p className="text-sm text-text-primary break-all">
               {circleUserDisplayName(buyer, tIdentity("unknownUser"))}
@@ -283,17 +283,17 @@ export default function OrderDetailsPage() {
 
           {/* Shipping Address */}
           {order.shipping_address && (
-            <div className="bg-surface-default rounded-xl border border-border-subtle p-6">
+            <div className="bg-surface-default rounded-xl border border-border-subtle p-4 sm:p-6">
               <h3 className="text-sm font-medium text-text-secondary mb-4">Shipping Address</h3>
-              <p className="text-sm text-text-primary whitespace-pre-wrap">{order.shipping_address}</p>
+              <p className="text-sm text-text-primary whitespace-pre-wrap break-words">{order.shipping_address}</p>
             </div>
           )}
 
           {/* Notes */}
           {order.notes && (
-            <div className="bg-surface-default rounded-xl border border-border-subtle p-6">
+            <div className="bg-surface-default rounded-xl border border-border-subtle p-4 sm:p-6">
               <h3 className="text-sm font-medium text-text-secondary mb-2">Notes</h3>
-              <p className="text-sm text-text-primary">{order.notes}</p>
+              <p className="text-sm text-text-primary whitespace-pre-wrap break-words">{order.notes}</p>
             </div>
           )}
         </div>
@@ -316,7 +316,7 @@ export default function OrderDetailsPage() {
             value={declineReason}
             onChange={(e) => setDeclineReason(e.target.value)}
             placeholder="e.g. Out of stock"
-            className="w-full px-3 py-2 border border-border-subtle rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-border-brand"
+            className="w-full px-3 py-2 border border-border-subtle rounded-lg text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-border-brand"
           />
         </div>
       </ConfirmationModal>

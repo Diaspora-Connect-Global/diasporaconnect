@@ -85,12 +85,12 @@ export default function OverviewPage() {
 
   return (
     <div className="">
-      <h1 className="text-text-primary heading-xsmall mb-6">Overview</h1>
+      <h1 className="text-text-primary heading-xsmall mb-6 break-words">Overview</h1>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-8">
         {statsCards.map((card) => (
-          <div key={card.id} className="bg-surface-default rounded-xl border border-border-default p-6">
+          <div key={card.id} className="bg-surface-default rounded-xl border border-border-default p-4 sm:p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-text-primary label-large">{card.title}</h3>
             </div>

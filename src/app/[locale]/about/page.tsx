@@ -143,7 +143,7 @@ export default function AboutPage() {
             <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-text-brand">
               About DiaspoPlug
             </p>
-            <h1 className="max-w-2xl text-4xl font-black tracking-tight text-text-primary sm:text-5xl lg:text-6xl speakable">
+            <h1 className="max-w-2xl break-words text-4xl font-black tracking-tight text-text-primary sm:text-5xl lg:text-6xl speakable">
               Built for the diaspora,<br />
               <span className="text-text-brand">by the diaspora.</span>
             </h1>
@@ -234,7 +234,7 @@ export default function AboutPage() {
             </div>
             <Link
               href="/signup"
-              className="inline-flex items-center gap-2 rounded-full bg-text-brand px-6 py-3 text-sm font-semibold text-white hover:opacity-90 transition-opacity whitespace-nowrap"
+              className="inline-flex items-center gap-2 rounded-full bg-text-brand px-6 py-3 text-sm font-semibold text-white hover:opacity-90 transition-opacity sm:whitespace-nowrap"
             >
               Join DiaspoPlug <ArrowRight className="w-4 h-4" />
             </Link>

@@ -240,7 +240,7 @@ export default function AddProductForm() {
   };
 
   return (
-    <div className="p-8 max-w-4xl">
+    <div className="p-0 md:p-8 max-w-4xl">
       {/* Header */}
       <div className="mb-6">
         <button className="text-sm text-text-secondary hover:text-text-primary mb-2 flex items-center gap-1">
@@ -250,7 +250,7 @@ export default function AddProductForm() {
           {t('addNewProduct')}
         </button>
 
-        <h1 className="text-2xl font-semibold text-text-primary">{t('addNewProduct')}</h1>
+        <h1 className="text-xl sm:text-2xl font-semibold text-text-primary break-words">{t('addNewProduct')}</h1>
       </div>
 
       <div className="space-y-6">
@@ -300,7 +300,7 @@ export default function AddProductForm() {
             {tForm('addImageOfProduct')}
           </label>
 
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             {images.map((img, index) => (
               <div
                 key={index}
@@ -355,7 +355,7 @@ export default function AddProductForm() {
         </div>
 
         {/* Price / Currency / Discount */}
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           <div>
             <label className="block text-sm font-medium mb-2">{t('price')}</label>
             <input
@@ -469,7 +469,7 @@ export default function AddProductForm() {
         </div>
 
         {/* Buttons */}
-        <div className="flex justify-between pt-6 border-t">
+        <div className="flex flex-wrap gap-3 justify-between pt-6 border-t">
           <button
             onClick={handleSaveDraft}
             disabled={vendorLoading || creatingProduct || publishingProduct}
@@ -478,7 +478,7 @@ export default function AddProductForm() {
             {(creatingProduct || publishingProduct) ? "Saving..." : tForm('saveToDraft')}
           </button>
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <button
               onClick={handleSaveAndAddAnother}
               disabled={vendorLoading || creatingProduct || publishingProduct}

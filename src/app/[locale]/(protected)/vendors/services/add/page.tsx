@@ -176,7 +176,7 @@ const AddServiceFlow = () => {
   };
 
   return (
-    <div className="min-h-screen  p-6">
+    <div className="min-h-screen p-0 md:p-6">
       <div className="max-w-5xl mx-auto">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-text-secondary mb-6">
@@ -186,12 +186,12 @@ const AddServiceFlow = () => {
         </div>
 
         {/* Title */}
-        <h1 className="text-3xl font-bold text-text-primary mb-8">{t('addNewService')}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-6 sm:mb-8 break-words">{t('addNewService')}</h1>
 
         {/* Step 1: Service Details */}
         {currentStep === 1 && (
-          <div className="bg-surface-default rounded-2xl p-8 shadow-sm border border-border-subtle">
-            <div className="flex justify-between items-start mb-6">
+          <div className="bg-surface-default rounded-2xl p-4 sm:p-8 shadow-sm border border-border-subtle">
+            <div className="flex justify-between items-start gap-3 mb-6">
               <div>
                 <h2 className="text-lg font-semibold text-text-primary mb-1">{tForm('serviceDetails')}</h2>
                 <p className="text-sm text-text-secondary">{tForm('serviceDetailsDescription')}</p>
@@ -275,7 +275,7 @@ const AddServiceFlow = () => {
             </div>
 
             {/* Buttons */}
-            <div className="flex justify-between">
+            <div className="flex flex-wrap gap-3 justify-between">
               <button
                 onClick={async () => {
                   try {
@@ -308,8 +308,8 @@ const AddServiceFlow = () => {
 
         {/* Step 2: Pricing */}
         {currentStep === 2 && (
-          <div className="bg-surface-default rounded-2xl p-8 shadow-sm border border-border-subtle">
-            <div className="flex justify-between items-start mb-6">
+          <div className="bg-surface-default rounded-2xl p-4 sm:p-8 shadow-sm border border-border-subtle">
+            <div className="flex justify-between items-start gap-3 mb-6">
               <div>
                 <h2 className="text-lg font-semibold text-text-primary mb-1">{tForm('pricing')}</h2>
                 <p className="text-sm text-text-secondary">{tForm('pricingDescription')}</p>
@@ -343,7 +343,7 @@ const AddServiceFlow = () => {
                 pricingMode === 'single' ? 'border-border-brand bg-surface-brand-subtle' : 'border-border-subtle hover:border-border-subtle'
               }`}
             >
-              <div className="flex justify-between items-start">
+              <div className="flex justify-between items-start gap-3">
                 <div className="flex-1">
                   <h3 className="font-semibold text-text-primary mb-2">{tForm('singlePricing')}</h3>
                   <p className="text-xs text-text-secondary leading-relaxed">
@@ -409,7 +409,7 @@ const AddServiceFlow = () => {
                 pricingMode === 'multiple' ? 'border-border-brand bg-surface-brand-subtle' : 'border-border-subtle hover:border-border-subtle'
               }`}
             >
-              <div className="flex justify-between items-start">
+              <div className="flex justify-between items-start gap-3">
                 <div className="flex-1">
                   <h3 className="font-semibold text-text-primary mb-2">{tForm('multiplePackagePricing')}</h3>
                   <p className="text-xs text-text-secondary leading-relaxed">
@@ -421,7 +421,7 @@ const AddServiceFlow = () => {
 
               {pricingMode === 'multiple' && (
                 <div className="mt-6 pt-6 border-t border-border-subtle">
-                  <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                     {packages.map((pkg) => (
                       <div key={pkg.id} className="border border-border-subtle rounded-lg p-4">
                         <div className="flex items-center gap-2 mb-3">
@@ -505,7 +505,7 @@ const AddServiceFlow = () => {
             </div>
 
             {/* Buttons */}
-            <div className="flex justify-between mt-8">
+            <div className="flex flex-wrap gap-3 justify-between mt-8">
               <button
                 onClick={async () => {
                   try {
@@ -527,7 +527,7 @@ const AddServiceFlow = () => {
               >
                 {tForm('saveToDraft')}
               </button>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 <button
                   onClick={async () => {
                     try {

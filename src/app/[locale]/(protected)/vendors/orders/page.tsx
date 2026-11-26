@@ -175,12 +175,12 @@ export default function OrdersPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-0 md:p-8">
       <h1 className="text-2xl font-semibold text-text-primary mb-6">{t('title')}</h1>
 
       {/* Search and Filters */}
-      <div className="flex items-center gap-4 mb-6">
-        <div className="flex-1 relative">
+      <div className="flex flex-wrap items-center gap-3 md:gap-4 mb-6">
+        <div className="flex-1 min-w-[12rem] relative">
           <svg
             className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-tertiary"
             fill="none"
@@ -203,7 +203,7 @@ export default function OrdersPage() {
               setSearchQuery(e.target.value)
             }
             placeholder={t('searchPlaceholder')}
-            className="w-full pl-10 pr-4 py-2 border border-border-subtle rounded-lg text-sm bg-surface-default text-text-primary focus:outline-none focus:ring-2 focus:ring-border-brand focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 min-h-10 border border-border-subtle rounded-lg text-base sm:text-sm bg-surface-default text-text-primary focus:outline-none focus:ring-2 focus:ring-border-brand focus:border-transparent"
           />
         </div>
 
@@ -213,7 +213,7 @@ export default function OrdersPage() {
             setDeliveryFilter(e.target.value);
             setCurrentPage(1);
           }}
-          className="px-4 py-2 border border-border-subtle rounded-lg text-sm bg-surface-default text-text-primary focus:outline-none focus:ring-2 focus:ring-border-brand"
+          className="px-4 py-2 min-h-10 border border-border-subtle rounded-lg text-base sm:text-sm bg-surface-default text-text-primary focus:outline-none focus:ring-2 focus:ring-border-brand"
           aria-label={t('deliveryStatus')}
         >
           <option value="all">{t('deliveryStatus')}</option>
@@ -230,7 +230,8 @@ export default function OrdersPage() {
 
       {/* Table */}
       <div className="bg-surface-default rounded-xl border border-border-subtle overflow-hidden">
-        <table className="w-full">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[40rem]">
           <thead className="bg-surface-subtle">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase">
@@ -258,10 +259,10 @@ export default function OrdersPage() {
             {filteredOrders.length > 0 ? (
               filteredOrders.map((order) => (
                 <tr key={order.id} className="border-t border-border-subtle hover:bg-surface-subtle">
-                  <td className="px-6 py-4">{order.id}</td>
-                  <td className="px-6 py-4">{order.date}</td>
-                  <td className="px-6 py-4">{order.customer}</td>
-                  <td className="px-6 py-4">{order.amount}</td>
+                  <td className="px-4 md:px-6 py-4 break-words">{order.id}</td>
+                  <td className="px-4 md:px-6 py-4 break-words">{order.date}</td>
+                  <td className="px-4 md:px-6 py-4 break-words">{order.customer}</td>
+                  <td className="px-4 md:px-6 py-4 break-words">{order.amount}</td>
                   <td className="px-6 py-4">
                     <span
                       className={`text-sm font-medium ${getDeliveryStatusColor(
@@ -297,9 +298,10 @@ export default function OrdersPage() {
             )}
           </tbody>
         </table>
+        </div>
 
         {/* Pagination */}
-        <div className="flex justify-between items-center px-6 py-4 border-t">
+        <div className="flex flex-wrap gap-3 justify-between items-center px-4 md:px-6 py-4 border-t">
           <div className="flex gap-2 items-center">
             <span>{t('rowsPerPage')}</span>
             <select

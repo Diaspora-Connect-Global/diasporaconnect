@@ -75,10 +75,10 @@ export function ShoppingCartModal({
                     <span className="absolute inset-0 flex items-center justify-center text-text-tertiary"><ShoppingBag className="w-7 h-7" /></span>
                   )}
                 </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold mb-1">{item.name}</h4>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold mb-1 break-words">{item.name}</h4>
                   {readableSeller(item.seller) && (
-                    <p className="text-sm text-text-secondary mb-2">{readableSeller(item.seller)}</p>
+                    <p className="text-sm text-text-secondary mb-2 break-words">{readableSeller(item.seller)}</p>
                   )}
                   {item.extras && item.extras.length > 0 && (
                     <ul className="text-xs text-text-tertiary space-y-0.5 mb-1">

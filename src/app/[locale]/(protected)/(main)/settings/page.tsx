@@ -97,7 +97,7 @@ export default function SettingsPage() {
           <NotificationPreferencesSection />
 
           {/* Security Section */}
-          <div className="bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">
+          <div className="bg-surface-default border border-border-subtle rounded-lg p-4 sm:p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-text-primary" />
               <h2 className="text-lg font-semibold text-foreground">
@@ -111,7 +111,7 @@ export default function SettingsPage() {
                   user saw 2FA "on" while nothing protected them. */}
               <TwoFactorSection />
 
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="font-medium text-foreground">
                     {t("security.changePassword.title")}
@@ -128,7 +128,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Privacy Section */}
-          <div id="privacy" className="scroll-mt-24 bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">
+          <div id="privacy" className="scroll-mt-24 bg-surface-default border border-border-subtle rounded-lg p-4 sm:p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2">
               <Eye className="h-5 w-5 text-text-primary" />
               <h2 className="text-lg font-semibold text-foreground">
@@ -140,7 +140,7 @@ export default function SettingsPage() {
               {/* Real server state (user-service) — see SearchVisibilitySection. */}
               <SearchVisibilitySection />
 
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="font-medium text-foreground">
                     {t("privacy.dataSharing.title")}
@@ -157,7 +157,7 @@ export default function SettingsPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="font-medium text-foreground">
                     {t("privacy.adPersonalization.title")}
@@ -181,7 +181,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Language Section */}
-          <div className="bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">
+          <div className="bg-surface-default border border-border-subtle rounded-lg p-4 sm:p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2">
               <Globe className="h-5 w-5 text-text-primary" />
               <h2 className="text-lg font-semibold text-foreground">
@@ -189,7 +189,7 @@ export default function SettingsPage() {
               </h2>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="font-medium text-foreground">
                   {t("language.appLanguage.title")}
@@ -206,7 +206,7 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="font-medium text-foreground">Display Currency</p>
                 <p className="text-sm text-muted-foreground">
@@ -230,7 +230,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Theme Section */}
-          <div className="bg-surface-default border border-border-subtle rounded-lg p-6 space-y-4 shadow-sm">
+          <div className="bg-surface-default border border-border-subtle rounded-lg p-4 sm:p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2">
               <Palette className="h-5 w-5 text-text-primary" />
               <h2 className="text-lg font-semibold text-foreground">
@@ -240,7 +240,7 @@ export default function SettingsPage() {
 
             {mounted && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="font-medium text-foreground">
                       {t("theme.dark.title")}
@@ -255,7 +255,7 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="font-medium text-foreground">
                       {t("theme.light.title")}
@@ -270,7 +270,7 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="font-medium text-foreground">
                       {t("theme.system.title")}

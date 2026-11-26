@@ -50,7 +50,7 @@ export function MarketplaceHeader({
         </ButtonType3>
       </div>
 
-      <div className="flex justify-between items-center border-b">
+      <div className="flex flex-wrap justify-between items-center gap-y-2 border-b">
         <div>
           <ButtonType3
             onClick={() => setActiveTab("products")}
@@ -73,7 +73,7 @@ export function MarketplaceHeader({
             {t("services")}
           </ButtonType3>
         </div>
-        <div className="h-12 min-w-[220px] sm:min-w-[280px] w-full max-w-[320px] flex">
+        <div className="h-12 min-w-0 sm:min-w-[280px] w-full max-w-[320px] flex">
           <SearchInput
             placeholder={t("searchPlaceholder")}
             value={searchValue}

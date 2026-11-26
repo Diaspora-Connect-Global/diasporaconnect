@@ -65,31 +65,31 @@ const SalesDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-0 md:p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-text-primary">{t('title')}</h1>
+        <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary break-words">{t('title')}</h1>
           <button className="bg-surface-brand text-text-white hover:opacity-90 px-6 py-2.5 rounded-full font-medium transition-colors">
             {t('exportSales')}
           </button>
         </div>
 
-        <div className="flex gap-4 mb-6">
-          <div className="flex-1 relative">
+        <div className="flex flex-wrap gap-3 md:gap-4 mb-6">
+          <div className="flex-1 min-w-[12rem] relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-tertiary w-5 h-5" aria-hidden="true" />
             <input
               type="text"
               placeholder={t('searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-              className="w-full pl-10 pr-4 py-2.5 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-border-brand bg-surface-default"
+              className="w-full pl-10 pr-4 py-2.5 text-base sm:text-sm border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-border-brand bg-surface-default"
             />
           </div>
 
           <select
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
-            className="px-4 py-2.5 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-border-brand bg-surface-default cursor-pointer"
+            className="px-4 py-2.5 text-base sm:text-sm border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-border-brand bg-surface-default cursor-pointer"
             aria-label={t('payoutStatus')}
           >
             <option value="all-status">{t('payoutStatus')}</option>
@@ -98,8 +98,8 @@ const SalesDashboard = () => {
           </select>
         </div>
 
-        <div className="bg-surface-default rounded-lg shadow-sm overflow-hidden">
-          <table className="w-full">
+        <div className="bg-surface-default rounded-lg shadow-sm overflow-x-auto">
+          <table className="w-full min-w-[40rem]">
             <thead className="bg-surface-subtle border-b border-border-subtle">
               <tr>
                 <th className="text-left px-6 py-4 text-sm font-semibold text-text-primary">{t('orderNumber')}</th>
@@ -126,7 +126,7 @@ const SalesDashboard = () => {
                       <td className="px-6 py-4 text-sm text-text-secondary">
                         {new Date(order.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </td>
-                      <td className="px-6 py-4 text-sm text-text-primary">{buyerName(order.buyerId)}</td>
+                      <td className="px-6 py-4 text-sm text-text-primary break-words">{buyerName(order.buyerId)}</td>
                       <td className="px-6 py-4 text-sm text-text-primary font-medium">
                         {formatAmount(order.totalAmount, order.currency)}
                       </td>
@@ -163,7 +163,7 @@ const SalesDashboard = () => {
           </table>
         </div>
 
-        <div className="flex justify-between items-center mt-4">
+        <div className="flex flex-wrap gap-3 justify-between items-center mt-4">
           <div className="flex items-center gap-2">
             <span className="text-sm text-text-secondary">{t('rowsPerPage')}</span>
             <select

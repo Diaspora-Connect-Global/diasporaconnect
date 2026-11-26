@@ -28,7 +28,7 @@ function Chips({ items, prefix = '' }: { items: string[]; prefix?: string }) {
   return (
     <ul className="flex flex-wrap gap-2">
       {items.map((v) => (
-        <li key={v} className="rounded-full border border-border-subtle bg-surface-subtle px-3 py-1 text-sm text-text-primary">
+        <li key={v} className="max-w-full break-words rounded-full border border-border-subtle bg-surface-subtle px-3 py-1 text-sm text-text-primary">
           {prefix}
           {v}
         </li>

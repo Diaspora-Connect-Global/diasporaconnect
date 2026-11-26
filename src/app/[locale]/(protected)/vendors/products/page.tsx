@@ -102,10 +102,10 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-0 md:p-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-text-primary">{t('title')}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <h1 className="text-xl sm:text-2xl font-semibold text-text-primary break-words">{t('title')}</h1>
         <button
           onClick={() => router.push(`/${locale}/vendors/products/add-product`)}
           className="bg-surface-brand text-text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-2"
@@ -116,8 +116,8 @@ export default function ProductsPage() {
       </div>
 
       {/* Search and Filters */}
-      <div className="flex items-center gap-4 mb-6">
-        <div className="flex-1 relative">
+      <div className="flex flex-wrap items-center gap-3 md:gap-4 mb-6">
+        <div className="flex-1 min-w-[12rem] relative">
           <svg 
             className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-tertiary"
             fill="none" 
@@ -130,7 +130,7 @@ export default function ProductsPage() {
           <input
             type="text"
             placeholder={t('searchPlaceholder')}
-            className="w-full pl-10 pr-4 py-2 border border-border-subtle rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-border-brand focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 min-h-10 border border-border-subtle rounded-lg text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-border-brand focus:border-transparent"
           />
         </div>
 
@@ -155,7 +155,7 @@ export default function ProductsPage() {
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="px-4 py-2 border border-border-subtle rounded-lg text-sm bg-surface-default focus:outline-none focus:ring-2 focus:ring-border-brand"
+          className="px-4 py-2 min-h-10 border border-border-subtle rounded-lg text-base sm:text-sm bg-surface-default focus:outline-none focus:ring-2 focus:ring-border-brand"
           aria-label={t('allCategories')}
         >
           <option value="all">{t('allCategories')}</option>
@@ -167,7 +167,7 @@ export default function ProductsPage() {
       {/* Products Table */}
       <div className="bg-surface-default rounded-xl border border-border-subtle overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[44rem]">
             <thead>
               <tr className="bg-surface-subtle border-b border-border-subtle">
                 <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
@@ -195,14 +195,14 @@ export default function ProductsPage() {
                 <tr key={product.id} className="hover:bg-surface-subtle transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-surface-subtle rounded-lg flex items-center justify-center text-text-tertiary">
+                      <div className="w-10 h-10 shrink-0 bg-surface-subtle rounded-lg flex items-center justify-center text-text-tertiary">
                         {product.images?.[0] ? (
                           <img src={product.images[0]} alt={product.title} className="w-10 h-10 rounded-lg object-cover" />
                         ) : (
                           <Package className="w-5 h-5" />
                         )}
                       </div>
-                      <span className="text-sm text-text-primary">{product.title}</span>
+                      <span className="text-sm text-text-primary break-words min-w-0">{product.title}</span>
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-text-secondary">{product.inventoryCount}</td>
@@ -265,7 +265,7 @@ export default function ProductsPage() {
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-border-subtle">
+        <div className="flex flex-wrap gap-3 items-center justify-between px-4 md:px-6 py-4 border-t border-border-subtle">
           <div className="flex items-center gap-2">
             <span className="text-sm text-text-secondary">{t('rowsPerPage')}</span>
             <select

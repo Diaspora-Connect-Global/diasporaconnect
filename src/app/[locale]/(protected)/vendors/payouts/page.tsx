@@ -229,17 +229,17 @@ const PayoutsDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen  p-6">
+    <div className="min-h-screen p-0 md:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <h1 className="text-3xl font-bold text-text-primary mb-6">{t('title')}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-text-primary mb-6 break-words">{t('title')}</h1>
 
         {/* Balance Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {/* Wallet Balance Card */}
-          <div className="bg-surface-default rounded-2xl p-6 shadow-sm border border-border-subtle">
+          <div className="bg-surface-default rounded-2xl p-4 sm:p-6 shadow-sm border border-border-subtle">
             <p className="text-sm text-text-secondary mb-2">{t('walletBalance')}</p>
-            <p className="text-4xl font-bold text-text-primary mb-4">
+            <p className="text-3xl sm:text-4xl font-bold text-text-primary mb-4 break-words">
               {dashboardData?.getVendorDashboard
                 ? `${currency} ${(dashboardData.getVendorDashboard.totalEarnings / 100).toFixed(2)}`
                 : '—'}
@@ -278,9 +278,9 @@ const PayoutsDashboard = () => {
           </div>
 
           {/* Escrow Account Card */}
-          <div className="bg-surface-default rounded-2xl p-6 shadow-sm border border-border-subtle">
+          <div className="bg-surface-default rounded-2xl p-4 sm:p-6 shadow-sm border border-border-subtle">
             <p className="text-sm text-text-secondary mb-2">{t('escrowAccount')}</p>
-            <p className="text-4xl font-bold text-text-tertiary mb-2">
+            <p className="text-3xl sm:text-4xl font-bold text-text-tertiary mb-2 break-words">
               {currency}{' '}
               {(
                 (escrowOrdersData?.listVendorOrders.items ?? []).reduce(
@@ -296,7 +296,7 @@ const PayoutsDashboard = () => {
         </div>
 
         {/* Payout Method Card */}
-        <div className="bg-surface-default rounded-2xl p-6 shadow-sm border border-border-subtle mb-8">
+        <div className="bg-surface-default rounded-2xl p-4 sm:p-6 shadow-sm border border-border-subtle mb-8">
           <p className="text-base font-semibold text-text-primary mb-2">{t('payoutMethod')}</p>
           <p className="text-sm text-text-secondary mb-4">{t('payoutMethodDescription')}</p>
           <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -324,9 +324,9 @@ const PayoutsDashboard = () => {
               {payoutAccounts.map((account) => (
                 <div
                   key={account.id}
-                  className="flex items-center justify-between border border-border-subtle rounded-lg p-3"
+                  className="flex items-center justify-between gap-3 border border-border-subtle rounded-lg p-3"
                 >
-                  <div>
+                    <div className="min-w-0 break-words">
                     <p className="text-sm font-medium text-text-primary">
                       {account.provider} · {account.currency}
                     </p>
@@ -354,11 +354,11 @@ const PayoutsDashboard = () => {
 
         {/* History Section */}
         <div className="bg-surface-default rounded-2xl shadow-sm border border-border-subtle overflow-hidden">
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <h2 className="text-xl font-bold text-text-primary mb-4">{t('history')}</h2>
 
             {/* Search and Filter */}
-            <div className="flex gap-4 mb-6">
+            <div className="flex flex-wrap gap-3 md:gap-4 mb-6">
               <div className="flex-1" />
 
               <button className="flex items-center gap-2 px-4 py-2.5 border border-border-subtle rounded-lg hover:bg-surface-subtle transition-colors bg-surface-default" aria-label={t('allTime')}>
@@ -369,7 +369,7 @@ const PayoutsDashboard = () => {
 
             {/* Table */}
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full min-w-[28rem]">
                 <thead className="bg-surface-subtle border-b border-border-subtle">
                   <tr>
                     <th className="text-left px-6 py-4 text-sm font-semibold text-text-primary">{t('date')}</th>
@@ -390,7 +390,7 @@ const PayoutsDashboard = () => {
             </div>
 
             {/* Pagination */}
-            <div className="flex justify-between items-center mt-6 pt-4 border-t border-border-subtle">
+            <div className="flex flex-wrap gap-3 justify-between items-center mt-6 pt-4 border-t border-border-subtle">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-text-secondary">{t('rowsPerPage')}</span>
                 <select

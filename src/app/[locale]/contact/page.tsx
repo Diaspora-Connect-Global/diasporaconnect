@@ -128,7 +128,7 @@ export default function ContactPage() {
           <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-text-brand">
             Contact
           </p>
-          <h1 className="text-4xl font-black tracking-tight text-text-primary sm:text-5xl">
+          <h1 className="break-words text-4xl font-black tracking-tight text-text-primary sm:text-5xl">
             We&apos;re here to help.
           </h1>
           <p className="mt-4 max-w-lg text-base font-light leading-relaxed text-text-secondary">
@@ -199,7 +199,7 @@ export default function ContactPage() {
             </div>
             <Link
               href="/help"
-              className="inline-flex items-center gap-2 rounded-full bg-text-brand px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-opacity whitespace-nowrap"
+              className="inline-flex items-center gap-2 rounded-full bg-text-brand px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-opacity sm:whitespace-nowrap"
             >
               Help centre <ArrowRight className="h-4 w-4" />
             </Link>
